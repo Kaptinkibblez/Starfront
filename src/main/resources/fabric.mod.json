@@ -1,0 +1,25 @@
+{
+	"schemaVersion": 1,
+	"id": "starwake",
+	"version": "${version}",
+	"name": "Starwake",
+	"description": "Fly between procedurally generated planets in a starship you build and walk around in. Trade with faction NPCs and climb a fuel, upgrade and crafting progression.",
+	"authors": ["kaptinkibblez"],
+	"contact": {
+		"sources": "https://github.com/kaptinkibblez/starfront"
+	},
+	"license": "All-Rights-Reserved",
+	"icon": "assets/starwake/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["com.starwake.StarwakeMod"],
+		"client": ["com.starwake.client.StarwakeClient"],
+		"fabric-datagen": ["com.starwake.client.datagen.StarwakeDataGenerator"]
+	},
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

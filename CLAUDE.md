@@ -1,12 +1,12 @@
-# Starbound Frontier (working title)
+# Starwake
 
 A Fabric overhaul mod for Minecraft, inspired by No Man's Sky: fly between procedurally
 generated planets, live in a walkable starship, trade with faction NPCs, and climb a
 fuel/upgrade/crafting progression.
 
-> Working title. "Starbound" is also the name of an existing game, so pick a final name
-> before any public release. The **mod id is `starfront`** and must not change once
-> worlds exist: changing it breaks every saved block and item.
+> Named **Starwake** (2026-11-10), replacing the working title "Starbound Frontier",
+> which clashed with an existing game. The **mod id is `starwake`** and must never change:
+> changing it would orphan every saved block and item. The GitHub repo keeps the name `starfront`.
 
 ---
 
@@ -43,8 +43,8 @@ client classes. This is our main guard for keeping multiplayer possible.
 ### Package layout (organised by system)
 
 ```
-com.starfront
-├── StarfrontMod            common entrypoint, wires every system's init()
+com.starwake
+├── StarwakeMod             common entrypoint, wires every system's init()
 ├── registry/               ModBlocks, ModItems, ModItemGroups, ModEntities, ...
 ├── planet/                 planet definitions, dimensions, gravity, atmosphere
 ├── worldgen/               procedural terrain, biomes, and ore features
@@ -53,10 +53,10 @@ com.starfront
 ├── trade/                  factions, NPCs, price model, trade menus
 ├── progression/            fuel, upgrades, crafting chains
 ├── network/                custom payloads (C2S/S2C), one record per packet
-├── config/                 server/client config (Milestone 9)
-└── datagen/                data generators (run via `runDatagen`)
-com.starfront.client        (client source set)
-├── StarfrontClient         client entrypoint
+└── config/                 server/client config (Milestone 9)
+com.starwake.client         (client source set)
+├── StarwakeClient          client entrypoint
+├── datagen/                data generators (need client classes for models)
 ├── render/  screen/  sky/  hud/
 ```
 
@@ -89,24 +89,31 @@ only learn from them, not depend on them.
 
 | System | Reference mod | Status | Decision |
 |---|---|---|---|
-| Walkable moving ship | Valkyrien Skies 2 | Official: 1.20.1 only (unofficial port: 1.21.11). Kotlin plus a custom physics engine. | **Build.** Learn from its "shipyard" idea (ship blocks live in a reserved region and are rendered elsewhere), but don't copy the physics model. See open decision A. |
+| Walkable moving ship | Valkyrien Skies 2; Create Aeronautics (built on the Sable physics library) | VS: official 1.20.1 only (unofficial port: 1.21.11). Aeronautics/Sable: NeoForge 1.21.1, custom license. | **Build.** Neither can run on Fabric 26.3. Learn from the "shipyard/sub-level" idea: ship blocks live in a reserved region of the world and are rendered and collided at the ship's transform. See decision A. |
 | Planets, rockets, gravity, oxygen | Ad Astra | Latest Fabric build is 1.21.1 | **Build.** Learn from its data-driven planet JSON (gravity, temperature, oxygen, tier) and its rocket flow (fly up, threshold altitude, destination screen). |
 | Space progression | Galacticraft 5 | Pre-alpha, no release | **Build.** Use only as a reference for Fabric transfer/energy patterns. |
-| Runtime dimensions (one per procedural planet) | NucleoidMC **Fantasy** | Supports 26.3 (v0.8.4, LGPL-3.0) | **Depend (proposed).** Creating and unloading dimensions at runtime is fiddly mixin work that Fantasy already maintains. Bundle it with jar-in-jar. Needs the `maven.nucleoid.xyz` host allowed. See open decision B. |
+| Runtime dimensions (one per procedural planet) | NucleoidMC **Fantasy** | Supports 26.3 (v0.8.4, LGPL-3.0) | **Depend (decided).** Creating and unloading dimensions at runtime is fiddly mixin work that Fantasy already maintains. Bundle it with jar-in-jar. Needs the `maven.nucleoid.xyz` host allowed in the environment. See decision B. |
 | Items, blocks, networking, menus, datagen, game tests | Fabric API | 26.3 | **Depend.** |
 
 ---
 
-## Open decisions (ask before implementing)
+## Decisions
 
-- **A. Ship interior model.** The recommendation is a **pocket dimension**: each ship
-  gets a plot in a shared `starfront:ship_interiors` dimension, and the exterior is an
-  entity model that flies. A real moving block structure (Valkyrien Skies style) would
-  be months of physics, collision and sync work. Decide before Milestone 4.
-- **B. Planet dimensions.** The recommendation is **runtime dimensions via Fantasy**
-  (unlimited seeded planets). The alternative is a fixed pool of datapack dimensions
-  that get re-skinned per planet (simpler, but limited). Decide before Milestone 5.
-  Milestone 2 uses a static datapack dimension either way.
+- **A. Ship = a real moving block structure (decided 2026-11-10).** The user wants it to
+  work like Create Aeronautics: the ship you build is real blocks, persistent with the rest
+  of the world, and you walk around inside it while it flies. There's **no pocket
+  dimension**. The planned approach (to be researched in detail before Milestone 4) is a
+  "sub-level": the ship's blocks are stored in a reserved far-away region of the same
+  dimension as normal saved chunks. A ship entity holds the transform (position/rotation).
+  The client renders that region at the transform, and the server handles collision so
+  players standing on board move with the ship. Highest-risk system: prototype it early.
+- **B. Planets = runtime dimensions via Fantasy (decided 2026-11-10)**, with **curated
+  randomness** ("less random to make it more random"). Don't use raw noise soup. Each
+  planet is a hand-authored *archetype* (lush, frozen, toxic, barren, ocean...) defined in
+  JSON with palettes, terrain shapes, biome sets, ore tables and sky styles. The seed picks
+  an archetype and varies parameters *within* designed ranges. Variety comes from
+  structured combinations, so every planet feels deliberate and distinct.
+  Milestone 2 uses one static datapack dimension; Milestone 5 swaps in Fantasy.
 
 ---
 
@@ -115,14 +122,16 @@ only learn from them, not depend on them.
 Work on one milestone at a time. After each: build, run, fix, summarize how to test,
 commit. **Don't start the next milestone until the user confirms the current one works.**
 
-- [ ] **1. Scaffold.** The mod loads, with one test block (Hull Plating) and one test
-      item (Raw Ferrite), a creative tab, datagen for models/lang/loot, and a
-      dedicated server that boots cleanly.
+- [x] **1. Scaffold.** The mod loads, with one test block (Hull Plating) and one test
+      item (Raw Ferrite), a creative tab, datagen for models/lang/loot/tags, and a
+      dedicated server that boots cleanly. *(Verified on server + client 2026-11-10;
+      awaiting user playtest confirmation.)*
 - [ ] **2. First planet.** A static custom dimension with its own sky, gravity and
-      terrain, reachable by command (`/starfront planet tp <id>`).
+      terrain, reachable by command (`/starwake planet tp <id>`).
 - [ ] **3. Rocket.** A rocket entity with a launch sequence that travels to the
       planet and back.
-- [ ] **4. Ship interior.** A walkable interior linked to the ship (decision A).
+- [ ] **4. Walkable ship.** A built block structure that moves as a ship, persistent
+      in the world (decision A).
 - [ ] **5. Procedural planets.** Terrain, biomes and ores seeded by galaxy
       coordinates (decision B).
 - [ ] **6. Star map.** A galaxy/star map UI for choosing seeded destinations.
@@ -143,16 +152,33 @@ export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64   # cloud container; locally
 ./gradlew genSources     # decompiled MC sources, for checking real API names
 ```
 
+### Testing in the cloud container (no GPU)
+
+- **Server:** create `run/eula.txt` (`eula=true`) and `run/server.properties`
+  (`online-mode=false`), then `./gradlew runServer --args=--nogui`. Feed console commands
+  through a FIFO (`setblock`, `execute if block`, `loot spawn ... mine ...`) and stop with `stop`.
+- **Client:** OpenGL fails on Xvfb ("Couldn't find matching GLX visual"), but Minecraft
+  26.x falls back to **Vulkan on Mesa lavapipe** (`mesa-vulkan-drivers`), which works.
+  Run `xvfb-run -n 99 -f <auth> -s "-screen 0 1280x720x24 +extension GLX" ./gradlew runClient`
+  with `XDG_RUNTIME_DIR` set. Drive the client with `xdotool` (`t` opens chat, then type
+  commands) and capture with `import -window root shot.png`.
+- Authlib "Services are unavailable" stack traces are expected offline and harmless.
+- **Never `unset JAVA_TOOL_OPTIONS`.** It carries the proxy settings Gradle needs.
+
 ### Cloud environment
 
 The `starfront` environment allows `maven.fabricmc.net`, `meta.fabricmc.net`, the Fabric
-docs, and Mojang's download hosts. Its setup script installs `openjdk-25-jdk-headless`.
+docs, and Mojang's download hosts. Its setup script installs `openjdk-25-jdk-headless`
+(and the client-testing tools: `mesa-vulkan-drivers`, `xdotool`).
 New dependency hosts, such as `maven.nucleoid.xyz` for Fantasy, must be added to the
 environment before they work.
 
 ## Conventions
 
 - Java 25 language features are fine: records, sealed types, pattern matching.
-- Mod id `starfront`. Every registry id is lowercase_snake (`starfront:hull_plating`).
+- Mod id `starwake`. Every registry id is lowercase_snake (`starwake:hull_plating`).
+- Register through the helpers in `registry/` (they apply `setId`, which 26.x requires).
+- Lang, models, loot and tags come from datagen (`src/client/java/.../datagen`). Don't
+  hand-edit `src/main/generated`. Textures in `src/main/resources/assets` are hand-made.
 - Every class gets a short header comment explaining its role in its system.
 - Commit after every working milestone. Message format: `M<n>: <summary>`.

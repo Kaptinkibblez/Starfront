@@ -18,3 +18,4 @@ bin/
 # OS
 .DS_Store
 Thumbs.db
+src/main/generated/.cache/
