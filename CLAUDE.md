@@ -126,8 +126,11 @@ commit. **Don't start the next milestone until the user confirms the current one
       item (Raw Ferrite), a creative tab, datagen for models/lang/loot/tags, and a
       dedicated server that boots cleanly. *(Verified on server + client 2026-11-10;
       awaiting user playtest confirmation.)*
-- [ ] **2. First planet.** A static custom dimension with its own sky, gravity and
-      terrain, reachable by command (`/starwake planet tp <id>`).
+- [x] **2. First planet.** Veyra: a static datapack dimension with its own sky (teal sky,
+      dusty fog, daytime stars, ash particles, 40-minute day), 0.45g gravity, and dry
+      rust-world terrain with Ferrite Ore. Reachable with `/starwake planet tp starwake:veyra`
+      and `/starwake planet leave`. *(Verified on server + client 2026-11-10; awaiting user
+      playtest.)*
 - [ ] **3. Rocket.** A rocket entity with a launch sequence that travels to the
       planet and back.
 - [ ] **4. Walkable ship.** A built block structure that moves as a ship, persistent
@@ -140,6 +143,46 @@ commit. **Don't start the next milestone until the user confirms the current one
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
 
 ---
+
+## How planets work (Milestone 2)
+
+A planet is a set of JSON files. Copy Veyra's and rename them to add one:
+
+| File | Controls |
+|---|---|
+| `data/starwake/starwake/planet/<id>.json` | Starwake's planet registry: display name, dimension, `gravity` (multiplier) |
+| `data/starwake/dimension/<id>.json` | Chunk generator, noise settings and biome source |
+| `data/starwake/dimension_type/<id>.json` | Sky/fog/cloud colours, ambient particles, music, bed rules, height (vanilla *environment attributes*) |
+| `data/starwake/world_clock/<id>.json` + `timeline/<id>_day.json` | Day length and the sky's day/night curve (sun angle, star brightness, sunset colour) |
+| `data/starwake/worldgen/noise_settings/<id>.json` | Terrain shape (Veyra reuses Overworld density functions with no water, so oceans become dry basins) |
+| `data/starwake/worldgen/material_rule/<id>.json` | Surface blocks |
+| `data/starwake/worldgen/biome/*.json`, `feature/`, `placed_feature/` | Biomes, ores, decorations |
+
+Code: `planet/Planets` (registry plus O(1) dimension index), `planet/PlanetGravity`
+(transient attribute modifiers on entity load or level change, no per-tick work),
+`planet/PlanetTravel` (teleport plus persistent return point, reused by the rocket in
+Milestone 3) and `planet/PlanetCommands`.
+
+**Not yet:** custom sky objects (other planets or moons hanging in the sky) need a client
+renderer, planned for Milestone 5 or 6. Non-living entities (items, arrows) still fall at
+normal gravity.
+
+## 26.3 gotchas (learned the hard way)
+
+- **Every solid block must be in `#minecraft:blocks_motion_no_leaves`.** In 26.3,
+  heightmaps, ore placement, suffocation, fluid flow and teleport targets use this tag,
+  not the block's shape. Without it, worldgen treats the block as hollow (our ores
+  silently never generated). `ModBlockTagProvider` adds every `ModBlocks` entry.
+- **The day/night cycle is data.** `world_clock` + `timeline` registries replace hardcoded
+  time. Query a planet's time with `/time query starwake:veyra_day`; set it with
+  `/time of starwake:veyra set <ticks>`.
+- **Biome environment attributes take a plain value**, e.g.
+  `"minecraft:gameplay/natural_mob_spawns": {"spawn_costs": {}, "spawns_by_category": {}}`.
+  The `{"argument", "modifier"}` form also requires `modifier`.
+- **Worldgen registries were renamed:** `worldgen/feature` (not `configured_feature`), and
+  surface rules live in the `worldgen/material_rule` registry.
+- `/place feature <ore>` fails on already-generated chunks (it needs worldgen heightmaps).
+  Test ores by generating fresh chunks and counting with `/fill ... replace`.
 
 ## Dev workflow
 
@@ -182,3 +225,8 @@ environment before they work.
   hand-edit `src/main/generated`. Textures in `src/main/resources/assets` are hand-made.
 - Every class gets a short header comment explaining its role in its system.
 - Commit after every working milestone. Message format: `M<n>: <summary>`.
+- **Deliver a jar every milestone:** `./gradlew build`, then send `build/libs/starwake-<ver>.jar`
+  to the user. CI (`.github/workflows/build.yml`) also uploads the jar as an artifact on every push.
+- Bump `mod_version` in `gradle.properties` per milestone (0.<milestone>.0).
+- In the cloud container, don't block on long waits: start servers and clients in the
+  background and poll with short, bounded loops.

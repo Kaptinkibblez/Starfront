@@ -1,5 +1,9 @@
 package com.starwake;
 
+import com.starwake.planet.PlanetCommands;
+import com.starwake.planet.PlanetGravity;
+import com.starwake.planet.PlanetTravel;
+import com.starwake.planet.Planets;
 import com.starwake.registry.ModBlocks;
 import com.starwake.registry.ModCreativeTabs;
 import com.starwake.registry.ModItems;
@@ -25,6 +29,12 @@ public final class StarwakeMod implements ModInitializer {
 		ModBlocks.init();
 		ModItems.init();
 		ModCreativeTabs.init();
+
+		// Planets: data-driven registry, gravity, travel, and commands.
+		Planets.init();
+		PlanetGravity.init();
+		PlanetTravel.init();
+		PlanetCommands.init();
 
 		LOGGER.info("Starwake initialized: {} blocks, {} items registered",
 				ModBlocks.count(), ModItems.count());

@@ -36,6 +36,29 @@ public final class ModBlocks {
 					.sound(SoundType.METAL)
 					.requiresCorrectToolForDrops());
 
+	/** Regolith: the bedrock-to-surface stone of rocky planets (Veyra's "stone"). */
+	public static final Block REGOLITH = register("regolith", Block::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.TERRACOTTA_PURPLE)
+					.strength(1.5f, 6.0f)
+					.sound(SoundType.TUFF)
+					.requiresCorrectToolForDrops());
+
+	/** Rust Sand: oxidised dust covering Veyra's surface. Shovel-mineable. */
+	public static final Block RUST_SAND = register("rust_sand", Block::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.COLOR_ORANGE)
+					.strength(0.5f)
+					.sound(SoundType.SAND));
+
+	/** Ferrite Ore: regolith veined with ferrite. Drops Raw Ferrite. */
+	public static final Block FERRITE_ORE = register("ferrite_ore", Block::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.TERRACOTTA_PURPLE)
+					.strength(3.0f, 3.0f)
+					.sound(SoundType.TUFF)
+					.requiresCorrectToolForDrops());
+
 	private ModBlocks() {}
 
 	/** Registers a block and its block item under {@code starwake:<name>}. */

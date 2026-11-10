@@ -1,0 +1,11 @@
+{
+  "type": "starwake:veyra",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "starwake:veyra",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "starwake:veyra_rustlands"
+    }
+  }
+}

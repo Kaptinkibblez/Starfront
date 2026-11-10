@@ -1,6 +1,7 @@
 package com.starwake.client.datagen;
 
 import com.starwake.registry.ModBlocks;
+import com.starwake.registry.ModItems;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootSubProvider;
@@ -15,5 +16,9 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 	@Override
 	public void generate() {
 		dropSelf(ModBlocks.HULL_PLATING);
+		dropSelf(ModBlocks.REGOLITH);
+		dropSelf(ModBlocks.RUST_SAND);
+		// Vanilla ore behaviour: drops raw ore, affected by Fortune; Silk Touch drops the block.
+		add(ModBlocks.FERRITE_ORE, createOreDrop(ModBlocks.FERRITE_ORE, ModItems.RAW_FERRITE));
 	}
 }

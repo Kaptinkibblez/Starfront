@@ -1,5 +1,15 @@
 {
+  "block.starwake.ferrite_ore": "Ferrite Ore",
   "block.starwake.hull_plating": "Hull Plating",
+  "block.starwake.regolith": "Regolith",
+  "block.starwake.rust_sand": "Rust Sand",
+  "commands.starwake.planet.leave.success": "Returned %s player(s) home",
+  "commands.starwake.planet.list.entry": " - %s (%s), gravity %sg",
+  "commands.starwake.planet.list.header": "%s planet(s) charted:",
+  "commands.starwake.planet.missing_dimension": "Planet %s has no loaded dimension",
+  "commands.starwake.planet.tp.success": "Sent %s player(s) to %s",
+  "commands.starwake.planet.unknown": "Unknown planet: %s",
   "item.starwake.raw_ferrite": "Raw Ferrite",
-  "itemGroup.starwake.main": "Starwake"
+  "itemGroup.starwake.main": "Starwake",
+  "planet.starwake.veyra": "Veyra"
 }

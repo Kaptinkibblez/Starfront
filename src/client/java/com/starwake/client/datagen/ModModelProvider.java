@@ -18,6 +18,9 @@ public final class ModModelProvider extends FabricModelProvider {
 	public void generateBlockStateModels(BlockModelGenerators generators) {
 		// Plain full cube: textures/block/<name>.png on all six faces.
 		generators.createTrivialCube(ModBlocks.HULL_PLATING);
+		generators.createTrivialCube(ModBlocks.REGOLITH);
+		generators.createTrivialCube(ModBlocks.RUST_SAND);
+		generators.createTrivialCube(ModBlocks.FERRITE_ORE);
 	}
 
 	@Override

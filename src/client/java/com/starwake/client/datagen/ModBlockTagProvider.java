@@ -5,7 +5,9 @@ import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Block;
 
 /**
  * Generates block tags. Mining rules are tag-driven: a block that
@@ -18,9 +20,25 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 
 	@Override
 	protected void addTags(HolderLookup.Provider registries) {
-		// 26.3 tag appenders take registry keys rather than block instances.
-		var hullPlating = ModBlocks.HULL_PLATING.builtInRegistryHolder().key();
-		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(hullPlating);
-		builder(BlockTags.NEEDS_STONE_TOOL).add(hullPlating);
+		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(
+				key(ModBlocks.HULL_PLATING), key(ModBlocks.REGOLITH), key(ModBlocks.FERRITE_ORE));
+		builder(BlockTags.NEEDS_STONE_TOOL).add(key(ModBlocks.HULL_PLATING), key(ModBlocks.FERRITE_ORE));
+		builder(BlockTags.MINEABLE_WITH_SHOVEL).add(key(ModBlocks.RUST_SAND));
+
+		// 26.3 gotcha: "solid" behaviour (heightmaps, ore placement, suffocation, fluid flow,
+		// teleport targets) comes from this tag, not from the block's shape. Without it, worldgen
+		// treats our terrain as hollow and ores never generate. Every Starwake block is currently
+		// a full solid cube; non-solid blocks added later must opt out here.
+		var motion = builder(BlockTags.BLOCKS_MOTION_NO_LEAVES);
+		ModBlocks.all().forEach(block -> motion.add(key(block)));
+
+		// Vanilla category tags, so vanilla mechanics treat our blocks like their counterparts.
+		builder(BlockTags.SAND).add(key(ModBlocks.RUST_SAND));     // e.g. cactus/dead bush placement
+		builder(BlockTags.ORES).add(key(ModBlocks.FERRITE_ORE));
+	}
+
+	/** 26.3 tag appenders take registry keys rather than block instances. */
+	private static ResourceKey<Block> key(Block block) {
+		return block.builtInRegistryHolder().key();
 	}
 }

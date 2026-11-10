@@ -1,5 +1,7 @@
 {
   "values": [
-    "starwake:hull_plating"
+    "starwake:hull_plating",
+    "starwake:regolith",
+    "starwake:ferrite_ore"
   ]
 }
