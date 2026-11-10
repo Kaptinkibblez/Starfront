@@ -2,6 +2,9 @@
   "values": [
     "starwake:hull_plating",
     "starwake:regolith",
-    "starwake:ferrite_ore"
+    "starwake:ferrite_ore",
+    "starwake:helm",
+    "starwake:thruster",
+    "starwake:fuel_tank"
   ]
 }

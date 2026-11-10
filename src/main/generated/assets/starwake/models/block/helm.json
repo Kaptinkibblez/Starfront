@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/helm_front",
+    "side": "starwake:block/helm_side",
+    "top": "starwake:block/helm_top"
+  }
+}

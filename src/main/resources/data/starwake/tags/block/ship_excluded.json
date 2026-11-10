@@ -1,0 +1,18 @@
+{
+  "values": [
+    "#minecraft:base_stone_overworld",
+    "#minecraft:base_stone_nether",
+    "#minecraft:dirt",
+    "#minecraft:sand",
+    "#minecraft:ores",
+    "#minecraft:leaves",
+    "#minecraft:snow",
+    "minecraft:bedrock",
+    "minecraft:gravel",
+    "minecraft:clay",
+    "minecraft:ice",
+    "minecraft:end_stone",
+    "minecraft:mud",
+    "starwake:regolith"
+  ]
+}

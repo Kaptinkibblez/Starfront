@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "starwake:block/helm",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "starwake:block/helm"
+    },
+    "facing=south": {
+      "model": "starwake:block/helm",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "starwake:block/helm",
+      "y": 270
+    }
+  }
+}

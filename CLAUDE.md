@@ -99,14 +99,26 @@ only learn from them, not depend on them.
 
 ## Decisions
 
-- **A. Ship = a real moving block structure (decided 2026-11-10).** The user wants it to
-  work like Create Aeronautics: the ship you build is real blocks, persistent with the rest
-  of the world, and you walk around inside it while it flies. There's **no pocket
-  dimension**. The planned approach (to be researched in detail before Milestone 4) is a
-  "sub-level": the ship's blocks are stored in a reserved far-away region of the same
-  dimension as normal saved chunks. A ship entity holds the transform (position/rotation).
-  The client renders that region at the transform, and the server handles collision so
-  players standing on board move with the ship. Highest-risk system: prototype it early.
+- **A. Ships = player-built moving block structures (decided 2026-11-10, refined for M3).**
+  - *Any shape.* A ship is the connected structure around a **Helm**, found by flood fill
+    that stops at terrain blocks (tag `starwake:ship_excluded`). There are no shape rules.
+  - *Functional conditions, not rigid rules.* A pre-flight check at the Helm reports
+    pass/fail and stats. Lift: down-facing thrust must exceed mass x planet gravity.
+    Per-direction thrust decides which ways the ship can accelerate. Thruster exhaust must
+    be clear. Fuel is required. A sealed cabin around the Helm is required to leave the
+    atmosphere. Mass, thrust, fuel and physics numbers live in JSON.
+  - *Always a moving structure* (the user chose this over "lands back into blocks"). Once
+    assembled, the ship is a persistent `ShipEntity` holding its blocks, even while parked.
+    It's walkable via custom collision shapes, and players standing on it are carried along.
+    Editing blocks on an assembled ship needs ship-space raycasts and placement, so it's
+    Milestone 4. Until then, an explicit "Disassemble" (when landed) turns it back into
+    blocks for editing.
+  - *No turning yet* (user's choice). Ships translate in all directions but keep their
+    built heading. Smooth yaw rotation (rotated collision) is Milestone 4.
+  - *Space by flying up.* Climbing above the build limit moves a sealed ship and everyone
+    aboard into the shared `starwake:space` dimension. Descending re-enters the planet it's
+    orbiting. The console's "Set course" changes the orbited planet (the star map replaces
+    this list in Milestone 6).
 - **B. Planets = runtime dimensions via Fantasy (decided 2026-11-10)**, with **curated
   randomness** ("less random to make it more random"). Don't use raw noise soup. Each
   planet is a hand-authored *archetype* (lush, frozen, toxic, barren, ocean...) defined in
@@ -131,10 +143,15 @@ commit. **Don't start the next milestone until the user confirms the current one
       rust-world terrain with Ferrite Ore. Reachable with `/starwake planet tp starwake:veyra`
       and `/starwake planet leave`. *(Verified on server + client 2026-11-10; awaiting user
       playtest.)*
-- [ ] **3. Rocket.** A rocket entity with a launch sequence that travels to the
-      planet and back.
-- [ ] **4. Walkable ship.** A built block structure that moves as a ship, persistent
-      in the world (decision A).
+- [ ] **3. Built starships to space (decision A).**
+  - [x] 3a. Ship parts (Helm, Thruster, Fuel Tank), structure scan, pre-flight console
+        with conditions and stats, and data-driven ship stats JSON. *(Verified 2026-11-10.)*
+  - [ ] 3b. Assemble into a `ShipEntity`, render it, pilot it, collide with terrain, walk on
+        it while it moves, and interact with ship blocks (helm, fuel).
+  - [ ] 3c. Space dimension, leaving and re-entering atmosphere, setting a course between
+        planets, fuel burn.
+- [ ] **4. Ship editing and turning.** Place and break blocks on assembled ships, and
+      smooth yaw rotation.
 - [ ] **5. Procedural planets.** Terrain, biomes and ores seeded by galaxy
       coordinates (decision B).
 - [ ] **6. Star map.** A galaxy/star map UI for choosing seeded destinations.
@@ -167,6 +184,19 @@ Milestone 3) and `planet/PlanetCommands`.
 renderer, planned for Milestone 5 or 6. Non-living entities (items, arrows) still fall at
 normal gravity.
 
+## How ships work (Milestone 3)
+
+- `ship/scan/ShipScanner`: flood fill from the Helm. Stops at air, replaceable blocks and
+  `#starwake:ship_excluded` (hand-written tag JSON in `src/main/resources`). 4096-block cap.
+- `ship/scan/PreflightReport`: every functional condition lives here (lift vs mass x
+  gravity, exhaust clearance, fuel, pilot room, sealed cabin via air flood fill).
+- `ship/data/ShipStats`: `data/<ns>/starwake/ship_stats/*.json` has `blocks` (ids/#tags/"*"),
+  `mass`, `thrust`, `fuel_burn`, `fuel_capacity`. The most specific match wins; reloads with /reload.
+- `ship/data/ShipFuels`: `data/<ns>/starwake/ship_fuel/*.json` has `items` and `units`.
+- Ship Console: `HelmBlock` use -> `ShipConsole.open` -> `ShipConsolePayload` (S2C) ->
+  `ShipConsoleScreen`. Buttons send `ShipConsoleActionPayload` (C2S); the server re-validates.
+- `/starwake ship check <helmPos>` prints the report (useful for headless tests).
+
 ## 26.3 gotchas (learned the hard way)
 
 - **Every solid block must be in `#minecraft:blocks_motion_no_leaves`.** In 26.3,
@@ -181,6 +211,15 @@ normal gravity.
   The `{"argument", "modifier"}` form also requires `modifier`.
 - **Worldgen registries were renamed:** `worldgen/feature` (not `configured_feature`), and
   surface rules live in the `worldgen/material_rule` registry.
+- **Datagen tag validation rejects references to tags the provider didn't define** (e.g.
+  `#minecraft:dirt`). Put such tags in hand-written JSON under `src/main/resources`.
+- **GUI API:** screens override `extractRenderState(GuiGraphicsExtractor, ...)` (not `render`).
+  The current screen is `minecraft.gui.screen()` / `gui.setScreen(...)`. `ChatFormatting`
+  no longer carries colours; use ARGB ints.
+- **Blocks have no codecs** in 26.3; `HorizontalDirectionalBlock`/`DirectionalBlock` just
+  need a constructor and `createBlockStateDefinition`.
+- In xdotool client tests, use `mousedown 3; sleep 0.25; mouseup 3` for right-click.
+  A bare `click 3` doesn't register in-game.
 - `/place feature <ore>` fails on already-generated chunks (it needs worldgen heightmaps).
   Test ores by generating fresh chunks and counting with `/fill ... replace`.
 

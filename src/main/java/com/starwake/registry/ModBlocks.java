@@ -1,6 +1,9 @@
 package com.starwake.registry;
 
 import com.starwake.StarwakeMod;
+import com.starwake.ship.block.FuelTankBlock;
+import com.starwake.ship.block.HelmBlock;
+import com.starwake.ship.block.ThrusterBlock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +60,32 @@ public final class ModBlocks {
 					.mapColor(MapColor.TERRACOTTA_PURPLE)
 					.strength(3.0f, 3.0f)
 					.sound(SoundType.TUFF)
+					.requiresCorrectToolForDrops());
+
+	// --- Ship parts --------------------------------------------------------------------
+
+	/** Helm: the ship's control seat. A ship is the structure connected to one Helm. */
+	public static final Block HELM = register("helm", HelmBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.METAL)
+					.strength(4.0f, 6.0f)
+					.sound(SoundType.METAL)
+					.requiresCorrectToolForDrops());
+
+	/** Thruster: pushes the ship away from its nozzle. Stats in ship_stats JSON. */
+	public static final Block THRUSTER = register("thruster", ThrusterBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.METAL)
+					.strength(4.0f, 6.0f)
+					.sound(SoundType.METAL)
+					.requiresCorrectToolForDrops());
+
+	/** Fuel Tank: stores fuel for the ship's thrusters. */
+	public static final Block FUEL_TANK = register("fuel_tank", FuelTankBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.COLOR_ORANGE)
+					.strength(4.0f, 6.0f)
+					.sound(SoundType.METAL)
 					.requiresCorrectToolForDrops());
 
 	private ModBlocks() {}

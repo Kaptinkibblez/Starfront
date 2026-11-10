@@ -1,0 +1,7 @@
+{
+  "blocks": [
+    "#minecraft:impermeable",
+    "#c:glass_blocks"
+  ],
+  "mass": 0.5
+}

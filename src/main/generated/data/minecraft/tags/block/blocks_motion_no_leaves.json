@@ -3,6 +3,9 @@
     "starwake:hull_plating",
     "starwake:regolith",
     "starwake:rust_sand",
-    "starwake:ferrite_ore"
+    "starwake:ferrite_ore",
+    "starwake:helm",
+    "starwake:thruster",
+    "starwake:fuel_tank"
   ]
 }

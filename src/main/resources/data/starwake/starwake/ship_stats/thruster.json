@@ -1,0 +1,8 @@
+{
+  "blocks": [
+    "starwake:thruster"
+  ],
+  "mass": 2.0,
+  "thrust": 40,
+  "fuel_burn": 0.05
+}

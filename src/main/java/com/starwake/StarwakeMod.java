@@ -1,10 +1,15 @@
 package com.starwake;
 
+import com.starwake.network.ModNetworking;
 import com.starwake.planet.PlanetCommands;
 import com.starwake.planet.PlanetGravity;
 import com.starwake.planet.PlanetTravel;
 import com.starwake.planet.Planets;
+import com.starwake.registry.ModBlockEntities;
 import com.starwake.registry.ModBlocks;
+import com.starwake.ship.ShipCommands;
+import com.starwake.ship.data.ShipFuels;
+import com.starwake.ship.data.ShipStats;
 import com.starwake.registry.ModCreativeTabs;
 import com.starwake.registry.ModItems;
 import net.fabricmc.api.ModInitializer;
@@ -27,6 +32,7 @@ public final class StarwakeMod implements ModInitializer {
 	public void onInitialize() {
 		// Order matters: items reference blocks, and creative tabs reference both.
 		ModBlocks.init();
+		ModBlockEntities.init();
 		ModItems.init();
 		ModCreativeTabs.init();
 
@@ -35,6 +41,12 @@ public final class StarwakeMod implements ModInitializer {
 		PlanetGravity.init();
 		PlanetTravel.init();
 		PlanetCommands.init();
+
+		// Ships: data-driven stats, console networking.
+		ShipStats.init();
+		ShipFuels.init();
+		ModNetworking.init();
+		ShipCommands.init();
 
 		LOGGER.info("Starwake initialized: {} blocks, {} items registered",
 				ModBlocks.count(), ModItems.count());

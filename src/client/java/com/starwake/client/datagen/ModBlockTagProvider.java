@@ -23,6 +23,11 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(
 				key(ModBlocks.HULL_PLATING), key(ModBlocks.REGOLITH), key(ModBlocks.FERRITE_ORE));
 		builder(BlockTags.NEEDS_STONE_TOOL).add(key(ModBlocks.HULL_PLATING), key(ModBlocks.FERRITE_ORE));
+		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(
+				key(ModBlocks.HELM), key(ModBlocks.THRUSTER), key(ModBlocks.FUEL_TANK));
+
+		// #starwake:ship_excluded (terrain that never counts as ship) is hand-written JSON in
+		// src/main/resources so it can reference vanilla tags and be tweaked without datagen.
 		builder(BlockTags.MINEABLE_WITH_SHOVEL).add(key(ModBlocks.RUST_SAND));
 
 		// 26.3 gotcha: "solid" behaviour (heightmaps, ore placement, suffocation, fluid flow,

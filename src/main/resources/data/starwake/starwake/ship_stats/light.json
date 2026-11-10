@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    "#minecraft:wool",
+    "#minecraft:wool_carpets",
+    "#minecraft:beds",
+    "#minecraft:banners",
+    "minecraft:glass_pane",
+    "#c:glass_panes"
+  ],
+  "mass": 0.2
+}

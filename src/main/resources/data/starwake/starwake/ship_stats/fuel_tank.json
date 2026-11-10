@@ -1,0 +1,7 @@
+{
+  "blocks": [
+    "starwake:fuel_tank"
+  ],
+  "mass": 1.5,
+  "fuel_capacity": 2000
+}
