@@ -52,8 +52,8 @@ public final class PlanetTravel {
 			return "commands.starwake.planet.missing_dimension";
 		}
 
-		// Remember where the player came from, unless they're hopping between planets.
-		if (!Planets.isPlanet(player.level().dimension())) {
+		// Remember where the player came from when leaving a home (non-Starwake) dimension.
+		if (!player.level().dimension().identifier().getNamespace().equals(StarwakeMod.MOD_ID)) {
 			player.setAttached(RETURN_POINT, GlobalPos.of(player.level().dimension(), player.blockPosition()));
 		}
 

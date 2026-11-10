@@ -32,9 +32,7 @@ public class ShipConsoleScreen extends Screen {
 	/** Updates the report in place (after a re-scan) without closing the screen. */
 	public void update(ShipConsolePayload newReport) {
 		this.report = newReport;
-		if (assembleButton != null) {
-			assembleButton.active = newReport.actionEnabled();
-		}
+		rebuildWidgets(); // destinations may have changed
 	}
 
 	public boolean isFor(ShipConsolePayload other) {
@@ -60,6 +58,20 @@ public class ShipConsoleScreen extends Screen {
 		assembleButton.active = report.actionEnabled();
 		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
 				.bounds(left + 2 * (third + 4), buttonY, third, 20).build());
+
+		// In space: one "Set course" button per destination planet, in a row above.
+		int count = report.destinations().size();
+		if (count > 0) {
+			int width = Math.min(160, (PANEL_WIDTH - 4 * (count - 1)) / count);
+			for (int i = 0; i < count; i++) {
+				var target = report.destinations().get(i);
+				addRenderableWidget(Button.builder(Component.translatable("screen.starwake.ship_console.course",
+								report.destinationNames().get(i)),
+						b -> ClientPlayNetworking.send(new ShipConsoleActionPayload(report.helm(), report.shipId(),
+								ShipConsoleActionPayload.Action.SET_COURSE, target)))
+						.bounds(left + i * (width + 4), buttonY - 24, width, 20).build());
+			}
+		}
 	}
 
 	private void send(ShipConsoleActionPayload.Action action) {
@@ -67,11 +79,18 @@ public class ShipConsoleScreen extends Screen {
 	}
 
 	@Override
+	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+		super.extractBackground(graphics, mouseX, mouseY, partialTick);
+		// Panel behind the text and buttons (drawn in the background pass so widgets stay on top).
+		int left = (width - PANEL_WIDTH) / 2;
+		graphics.fill(left - 8, 16, left + PANEL_WIDTH + 8, height - 40, 0xC0101418);
+	}
+
+	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
 		super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 		int left = (width - PANEL_WIDTH) / 2;
 		int top = 24;
-		graphics.fill(left - 8, top - 8, left + PANEL_WIDTH + 8, height - 40, 0xC0101418);
 		graphics.centeredText(font, title, width / 2, top, 0xFFFFFFFF);
 
 		int y = top + 18;

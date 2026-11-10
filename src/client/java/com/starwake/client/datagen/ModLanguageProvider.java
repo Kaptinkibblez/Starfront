@@ -45,11 +45,26 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("message.starwake.helm_taken", "Someone is already at the helm");
 		builder.add("message.starwake.ship_block_locked", "Ship blocks can't be used while assembled yet (coming in Milestone 4)");
 		builder.add("hud.starwake.ship", "Fuel %s / %s   Speed %s m/s   Alt %s");
+		builder.add("hud.starwake.ship.space", "Fuel %s / %s   Speed %s m/s   Orbiting %s");
+		builder.add("message.starwake.not_sealed_for_space", "Hull not sealed: this ship can't leave the atmosphere");
+		builder.add("message.starwake.entered_space", "Leaving the atmosphere: you are in %s. Descend to re-enter, or press R to set a course");
+		builder.add("message.starwake.entered_atmosphere", "Entering the atmosphere of %s");
+		builder.add("message.starwake.course.set", "Course set: now orbiting %s. Descend to land");
+		builder.add("message.starwake.course.not_in_space", "Courses can only be set from space");
+		builder.add("message.starwake.course.unknown", "Unknown destination");
+		builder.add("message.starwake.course.no_fuel", "Not enough fuel to set a course (needs %s)");
+		builder.add("screen.starwake.ship_console.course", "Set course: %s");
+		builder.add("console.starwake.ship.sealed", "Cabin sealed: space-capable");
+		builder.add("console.starwake.ship.unsealed", "Cabin not sealed: atmosphere only");
+		builder.add("console.starwake.ship.orbiting", "Orbiting %s. Descend below Y 16 to re-enter. Setting a course costs %s fuel");
+		builder.add("console.starwake.ship.to_space", "Climb above Y %s to reach space");
 		builder.add("console.starwake.ship.mass", "%s blocks, mass %s t, gravity here %sg");
 		builder.add("console.starwake.ship.fuel", "Fuel %s / %s (refuel: right-click a fuel tank on board with fuel)");
 		builder.add("console.starwake.ship.controls", "WASD fly, Space up, Sprint down, Shift leave the helm. Engines hover automatically");
 		builder.add("console.starwake.ship.can_disassemble", "Stationary: you can disassemble the ship back into blocks to edit it");
 		builder.add("console.starwake.ship.moving", "Moving: stop to disassemble");
+		builder.add("console.starwake.ship.space_no_disassemble", "Land on a planet to disassemble");
+		builder.add("message.starwake.lost_in_space", "You drifted out of orbit and were brought home");
 		builder.add("key.starwake.ship_console", "Ship Console");
 		builder.add("key.category.starwake.starwake", "Starwake");
 		builder.add("entity.starwake.ship", "Ship");
@@ -74,6 +89,8 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 
 		// Planets (names referenced from data/starwake/starwake/planet/*.json)
 		builder.add("planet.starwake.veyra", "Veyra");
+		builder.add("planet.starwake.overworld", "Overworld");
+		builder.add("planet.starwake.space", "Deep Space");
 
 		// Commands
 		builder.add("commands.starwake.planet.unknown", "Unknown planet: %s");

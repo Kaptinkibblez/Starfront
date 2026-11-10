@@ -16,12 +16,14 @@ import net.minecraft.world.level.Level;
  *
  * @param name      display name shown in commands and, later, on the star map
  * @param dimension the dimension the planet's surface lives in
- * @param gravity   gravity relative to the Overworld (1.0 = normal, 0.5 = half)
+ * @param gravity     gravity relative to the Overworld (1.0 = normal, 0.5 = half)
+ * @param destination whether ships can set a course here (false for space itself)
  */
-public record Planet(Component name, ResourceKey<Level> dimension, double gravity) {
+public record Planet(Component name, ResourceKey<Level> dimension, double gravity, boolean destination) {
 	public static final Codec<Planet> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ComponentSerialization.CODEC.fieldOf("name").forGetter(Planet::name),
 			Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(Planet::dimension),
-			Codec.doubleRange(0.05, 4.0).optionalFieldOf("gravity", 1.0).forGetter(Planet::gravity)
+			Codec.doubleRange(0.05, 4.0).optionalFieldOf("gravity", 1.0).forGetter(Planet::gravity),
+			Codec.BOOL.optionalFieldOf("destination", true).forGetter(Planet::destination)
 	).apply(instance, Planet::new));
 }

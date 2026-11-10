@@ -143,15 +143,16 @@ commit. **Don't start the next milestone until the user confirms the current one
       rust-world terrain with Ferrite Ore. Reachable with `/starwake planet tp starwake:veyra`
       and `/starwake planet leave`. *(Verified on server + client 2026-11-10; awaiting user
       playtest.)*
-- [ ] **3. Built starships to space (decision A).**
+- [x] **3. Built starships to space (decision A).** *(Verified 2026-11-10; awaiting user playtest.)*
   - [x] 3a. Ship parts (Helm, Thruster, Fuel Tank), structure scan, pre-flight console
         with conditions and stats, and data-driven ship stats JSON. *(Verified 2026-11-10.)*
   - [x] 3b. Assemble into a `ShipEntity`, render it, pilot it, collide with terrain, walk on
         it while it moves, and interact with ship blocks (helm, fuel). *(Verified 2026-11-10:
         flight, roof-riding through all directions, mob carry, landing on terrain, persistence
         through Save & Quit while riding and parked, disassembly with fuel restored.)*
-  - [ ] 3c. Space dimension, leaving and re-entering atmosphere, setting a course between
-        planets, fuel burn.
+  - [x] 3c. Space dimension, leaving and re-entering atmosphere, setting a course between
+        planets, fuel burn. *(Verified: Overworld -> space -> set course -> Veyra landing with
+        the pilot aboard; mobs aboard come along; unsealed hulls are held at the ceiling.)*
 - [ ] **4. Ship editing and turning.** Place and break blocks on assembled ships, and
       smooth yaw rotation.
 - [ ] **5. Procedural planets.** Terrain, biomes and ores seeded by galaxy
@@ -214,6 +215,17 @@ normal gravity.
 - Interaction: ships are not pickable. `MinecraftMixin` raycasts ships at the start of every
   right-click (ship space, `BlockGetter.traverseBlocks`) and sends `ShipInteractPayload`.
 - Admin/testing: `/starwake ship assemble <helmPos>` and `/starwake ship drift <x y z>`.
+- **Space (3c):** `ship/SpaceTravel`. A sealed ship above `maxY + 32` teleports (vanilla
+  `Entity.teleport` carries the pilot; walkers aboard are moved with their offsets) to
+  `starwake:space` at Y 192, orbiting that planet. Below Y 16 in space it re-enters the
+  orbited planet at `maxY + 8`. "Set course" (console in space) costs
+  `course_fuel_cost` and changes `orbiting`. The Overworld is a planet entry; space is a
+  planet entry with `"destination": false` and 0.15g. Players falling out of space are
+  returned home (return point or spawn). The space dimension is void, black-sky and
+  fixed-time (`dimension_type/space.json`).
+- Known limits (Milestone 4/9): no in-flight editing or turning; ships don't collide with
+  each other or push mobs; unattended ships in unloaded chunks freeze (expected); the
+  per-frame block re-tessellation needs a cached mesh for big ships.
 
 ## 26.3 gotchas (learned the hard way)
 
@@ -252,6 +264,11 @@ normal gravity.
   `EntityRendererRegistry.register`, `PayloadTypeRegistry.clientboundPlay()/serverboundPlay()`.
 - In xdotool client tests, use `mousedown 3; sleep 0.25; mouseup 3` for right-click.
   A bare `click 3` doesn't register in-game.
+- **Entities only tick in "entity ticking" range**, and a level with no players barely
+  ticks. Unattended ships in space won't move in headless server tests. Test with a pilot.
+- **Screen background:** draw custom panels in `extractBackground` (after super). Drawing
+  them in `extractRenderState` after super covers the widgets.
+- Teleporting a riding player with `/tp` dismounts them. In tests, re-board via right-click.
 - `/place feature <ore>` fails on already-generated chunks (it needs worldgen heightmaps).
   Test ores by generating fresh chunks and counting with `/fill ... replace`.
 

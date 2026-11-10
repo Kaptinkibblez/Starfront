@@ -11,6 +11,7 @@ import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -51,6 +52,10 @@ public class ShipEntity extends Entity {
 	private BlockPos helmLocal = BlockPos.ZERO;
 	private Direction forward = Direction.NORTH;
 	private int fuelCapacity;
+	/** The planet this ship orbits while in space (where it re-enters). Saved. */
+	private @Nullable ResourceKey<Level> orbiting;
+	/** Whether the cabin around the helm is airtight (required to leave the atmosphere). */
+	private boolean sealed;
 
 	// Derived from the structure (recomputed on load; never saved).
 	private double mass = 1;
@@ -84,7 +89,53 @@ public class ShipEntity extends Entity {
 	public void setStructure(ShipStructure structure) {
 		this.structure = structure;
 		recomputeStats();
+		sealed = computeSealed();
 		setBoundingBox(makeBoundingBox(position()));
+	}
+
+	/**
+	 * Same rule as the pre-flight check, evaluated on the stored blocks: flood-fill air from the
+	 * pilot seat; full-collision blocks, doors and trapdoors seal; reaching the bounding box
+	 * edge means a leak.
+	 */
+	private boolean computeSealed() {
+		if (structure == null) return false;
+		BlockPos seat = helmLocal.above();
+		java.util.Set<BlockPos> visited = new java.util.HashSet<>(java.util.List.of(seat));
+		java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>(visited);
+		var size = structure.size();
+		while (!queue.isEmpty()) {
+			BlockPos pos = queue.poll();
+			if (pos.getX() < 0 || pos.getY() < 0 || pos.getZ() < 0 || pos.getX() >= size.getX()
+					|| pos.getY() >= size.getY() || pos.getZ() >= size.getZ() || visited.size() > 32768) {
+				return false;
+			}
+			for (Direction direction : Direction.values()) {
+				BlockPos next = pos.relative(direction);
+				if (visited.contains(next) || seals(next)) continue;
+				visited.add(next);
+				queue.add(next);
+			}
+		}
+		return true;
+	}
+
+	private boolean seals(BlockPos local) {
+		BlockState state = structure.get(local);
+		return state != null && (state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)
+				|| state.is(net.minecraft.tags.BlockTags.DOORS) || state.is(net.minecraft.tags.BlockTags.TRAPDOORS));
+	}
+
+	public boolean isSealed() {
+		return sealed;
+	}
+
+	public @Nullable ResourceKey<Level> orbiting() {
+		return orbiting;
+	}
+
+	public void setOrbiting(@Nullable ResourceKey<Level> orbiting) {
+		this.orbiting = orbiting;
 	}
 
 	public @Nullable ShipStructure structure() {
@@ -129,6 +180,11 @@ public class ShipEntity extends Entity {
 		return fuelCapacity;
 	}
 
+	/** Removes up to {@code amount} fuel. */
+	public void useFuel(int amount) {
+		entityData.set(FUEL, Math.max(0, fuel() - amount));
+	}
+
 	/** Adds fuel up to capacity; returns the amount actually added. */
 	public int addFuel(int amount) {
 		int added = Math.max(0, Math.min(amount, fuelCapacity - fuel()));
@@ -150,6 +206,11 @@ public class ShipEntity extends Entity {
 
 	public Vec3 lastMove() {
 		return lastMove;
+	}
+
+	/** Movement so far in the current tick (before riders have been carried). */
+	public Vec3 movementThisTick() {
+		return lastTickPos == null ? Vec3.ZERO : position().subtract(lastTickPos);
 	}
 
 	/** World position of a local block's min corner. */
@@ -225,11 +286,17 @@ public class ShipEntity extends Entity {
 		setDeltaMovement(velocity);
 		if (velocity.lengthSqr() > 0) {
 			moveWithCollision(velocity);
+			if (level() instanceof ServerLevel serverLevel && SpaceTravel.checkAltitude(this, serverLevel)) {
+				return; // this entity was replaced by its copy in the other dimension
+			}
 		}
 
 		if (pilot instanceof ServerPlayer player && tickCount % 10 == 0) {
-			player.sendOverlayMessage(Component.translatable("hud.starwake.ship",
-					fuel(), fuelCapacity, String.format("%.1f", getDeltaMovement().length() * 20), (int) getY()));
+			String speed = String.format("%.1f", getDeltaMovement().length() * 20);
+			player.sendOverlayMessage(SpaceTravel.isSpace(level())
+					? Component.translatable("hud.starwake.ship.space", fuel(), fuelCapacity, speed,
+							SpaceTravel.planetName(level(), orbiting))
+					: Component.translatable("hud.starwake.ship", fuel(), fuelCapacity, speed, (int) getY()));
 		}
 	}
 
@@ -268,7 +335,7 @@ public class ShipEntity extends Entity {
 
 		accel = accel.add(0, -gravity * physics.gravityToAccel(), 0);
 		if (fuelUsed > 0) burnFuel(fuelUsed);
-		return velocity.add(accel).scale(physics.dragAtmosphere());
+		return velocity.add(accel).scale(SpaceTravel.isSpace(level()) ? physics.dragSpace() : physics.dragAtmosphere());
 	}
 
 	private Vec3 push(Direction direction, double throttle, ShipPhysics physics) {
@@ -414,6 +481,7 @@ public class ShipEntity extends Entity {
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		fuelCapacity = input.getIntOr("fuel_capacity", 0);
+		orbiting = input.read("orbiting", Level.RESOURCE_KEY_CODEC).orElse(null);
 		entityData.set(FUEL, input.getIntOr("fuel", 0));
 		input.read("structure", ShipStructure.CODEC).ifPresent(this::setStructure);
 	}
@@ -422,6 +490,9 @@ public class ShipEntity extends Entity {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		output.putInt("fuel", fuel());
 		output.putInt("fuel_capacity", fuelCapacity);
+		if (orbiting != null) {
+			output.store("orbiting", Level.RESOURCE_KEY_CODEC, orbiting);
+		}
 		if (structure != null) {
 			output.store("structure", ShipStructure.CODEC, structure);
 		}

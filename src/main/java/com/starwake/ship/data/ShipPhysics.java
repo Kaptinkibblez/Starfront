@@ -21,17 +21,19 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * @param dragAtmosphere velocity multiplier per tick in an atmosphere
  * @param dragSpace      velocity multiplier per tick in space
  * @param maxSpeed       hard cap in blocks/tick (protects chunk loading and the network)
+ * @param courseFuelCost fuel units to set a course to another planet from space
  */
 public record ShipPhysics(double thrustToAccel, double gravityToAccel, double dragAtmosphere,
-		double dragSpace, double maxSpeed) {
-	public static final ShipPhysics DEFAULT = new ShipPhysics(0.05, 0.05, 0.9, 0.985, 2.0);
+		double dragSpace, double maxSpeed, int courseFuelCost) {
+	public static final ShipPhysics DEFAULT = new ShipPhysics(0.05, 0.05, 0.9, 0.985, 2.0, 150);
 
 	public static final Codec<ShipPhysics> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.DOUBLE.optionalFieldOf("thrust_to_accel", DEFAULT.thrustToAccel).forGetter(ShipPhysics::thrustToAccel),
 			Codec.DOUBLE.optionalFieldOf("gravity_to_accel", DEFAULT.gravityToAccel).forGetter(ShipPhysics::gravityToAccel),
 			Codec.doubleRange(0, 1).optionalFieldOf("drag_atmosphere", DEFAULT.dragAtmosphere).forGetter(ShipPhysics::dragAtmosphere),
 			Codec.doubleRange(0, 1).optionalFieldOf("drag_space", DEFAULT.dragSpace).forGetter(ShipPhysics::dragSpace),
-			Codec.doubleRange(0.1, 8).optionalFieldOf("max_speed", DEFAULT.maxSpeed).forGetter(ShipPhysics::maxSpeed)
+			Codec.doubleRange(0.1, 8).optionalFieldOf("max_speed", DEFAULT.maxSpeed).forGetter(ShipPhysics::maxSpeed),
+			Codec.intRange(0, 1_000_000).optionalFieldOf("course_fuel_cost", DEFAULT.courseFuelCost).forGetter(ShipPhysics::courseFuelCost)
 	).apply(i, ShipPhysics::new));
 
 	private static ShipPhysics current = DEFAULT;

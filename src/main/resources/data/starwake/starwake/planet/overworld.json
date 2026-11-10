@@ -1,0 +1,7 @@
+{
+  "name": {
+    "translate": "planet.starwake.overworld"
+  },
+  "dimension": "minecraft:overworld",
+  "gravity": 1.0
+}

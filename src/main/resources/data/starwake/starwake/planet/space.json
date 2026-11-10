@@ -1,0 +1,8 @@
+{
+  "name": {
+    "translate": "planet.starwake.space"
+  },
+  "dimension": "starwake:space",
+  "gravity": 0.15,
+  "destination": false
+}

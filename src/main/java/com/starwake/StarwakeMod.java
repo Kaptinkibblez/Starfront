@@ -10,6 +10,7 @@ import com.starwake.registry.ModBlocks;
 import com.starwake.registry.ModEntities;
 import com.starwake.ship.ShipCollisions;
 import com.starwake.ship.ShipInteraction;
+import com.starwake.ship.SpaceTravel;
 import com.starwake.ship.data.ShipPhysics;
 import com.starwake.ship.ShipCommands;
 import com.starwake.ship.data.ShipFuels;
@@ -53,6 +54,7 @@ public final class StarwakeMod implements ModInitializer {
 		ShipPhysics.init();
 		ShipCollisions.init();
 		ShipInteraction.init();
+		SpaceTravel.init();
 		ModNetworking.init();
 		ShipCommands.init();
 
