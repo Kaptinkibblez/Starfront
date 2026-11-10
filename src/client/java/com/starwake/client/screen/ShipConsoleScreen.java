@@ -25,7 +25,7 @@ public class ShipConsoleScreen extends Screen {
 	private Button assembleButton;
 
 	public ShipConsoleScreen(ShipConsolePayload report) {
-		super(Component.translatable("screen.starwake.ship_console"));
+		super(Component.translatable(report.shipId() >= 0 ? "screen.starwake.ship_status" : "screen.starwake.ship_console"));
 		this.report = report;
 	}
 
@@ -33,12 +33,12 @@ public class ShipConsoleScreen extends Screen {
 	public void update(ShipConsolePayload newReport) {
 		this.report = newReport;
 		if (assembleButton != null) {
-			assembleButton.active = newReport.canAssemble();
+			assembleButton.active = newReport.actionEnabled();
 		}
 	}
 
 	public boolean isFor(ShipConsolePayload other) {
-		return report.helm().equals(other.helm());
+		return report.shipId() == other.shipId() && report.helm().equals(other.helm());
 	}
 
 	@Override
@@ -46,17 +46,24 @@ public class ShipConsoleScreen extends Screen {
 		int left = (width - PANEL_WIDTH) / 2;
 		int buttonY = height - 32;
 		int third = (PANEL_WIDTH - 8) / 3;
+		boolean assembled = report.shipId() >= 0;
+		ShipConsoleActionPayload.Action refresh = assembled ? ShipConsoleActionPayload.Action.OPEN_SHIP : ShipConsoleActionPayload.Action.RESCAN;
+		ShipConsoleActionPayload.Action main = assembled ? ShipConsoleActionPayload.Action.DISASSEMBLE : ShipConsoleActionPayload.Action.ASSEMBLE;
 		addRenderableWidget(Button.builder(Component.translatable("screen.starwake.ship_console.rescan"),
-				b -> send(ShipConsoleActionPayload.Action.RESCAN)).bounds(left, buttonY, third, 20).build());
-		assembleButton = addRenderableWidget(Button.builder(Component.translatable("screen.starwake.ship_console.assemble"),
-				b -> send(ShipConsoleActionPayload.Action.ASSEMBLE)).bounds(left + third + 4, buttonY, third, 20).build());
-		assembleButton.active = report.canAssemble();
+				b -> send(refresh)).bounds(left, buttonY, third, 20).build());
+		assembleButton = addRenderableWidget(Button.builder(Component.translatable(assembled
+						? "screen.starwake.ship_console.disassemble" : "screen.starwake.ship_console.assemble"),
+				b -> {
+					send(main);
+					onClose(); // assembling seats you at the helm; disassembling ends the flight
+				}).bounds(left + third + 4, buttonY, third, 20).build());
+		assembleButton.active = report.actionEnabled();
 		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
 				.bounds(left + 2 * (third + 4), buttonY, third, 20).build());
 	}
 
 	private void send(ShipConsoleActionPayload.Action action) {
-		ClientPlayNetworking.send(new ShipConsoleActionPayload(report.helm(), action));
+		ClientPlayNetworking.send(new ShipConsoleActionPayload(report.helm(), report.shipId(), action));
 	}
 
 	@Override

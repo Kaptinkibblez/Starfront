@@ -14,6 +14,7 @@ import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.client.data.models.model.TexturedModel;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
@@ -46,8 +47,9 @@ public final class ModModelProvider extends FabricModelProvider {
 		TextureMapping textures = new TextureMapping()
 				.put(TextureSlot.FRONT, TextureMapping.getBlockTexture(block, "_front"))
 				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side"));
-		MultiVariant model = BlockModelGenerators.plainVariant(
-				ModelTemplates.CUBE_ORIENTABLE_VERTICAL.create(block, textures, generators.modelOutput));
+		Identifier modelId = ModelTemplates.CUBE_ORIENTABLE_VERTICAL.create(block, textures, generators.modelOutput);
+		MultiVariant model = BlockModelGenerators.plainVariant(modelId);
+		generators.registerSimpleItemModel(block, modelId); // the item shows the nozzle-up model
 		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(block).with(
 				PropertyDispatch.initial(BlockStateProperties.FACING)
 						.select(Direction.UP, model)

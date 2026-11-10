@@ -146,8 +146,10 @@ commit. **Don't start the next milestone until the user confirms the current one
 - [ ] **3. Built starships to space (decision A).**
   - [x] 3a. Ship parts (Helm, Thruster, Fuel Tank), structure scan, pre-flight console
         with conditions and stats, and data-driven ship stats JSON. *(Verified 2026-11-10.)*
-  - [ ] 3b. Assemble into a `ShipEntity`, render it, pilot it, collide with terrain, walk on
-        it while it moves, and interact with ship blocks (helm, fuel).
+  - [x] 3b. Assemble into a `ShipEntity`, render it, pilot it, collide with terrain, walk on
+        it while it moves, and interact with ship blocks (helm, fuel). *(Verified 2026-11-10:
+        flight, roof-riding through all directions, mob carry, landing on terrain, persistence
+        through Save & Quit while riding and parked, disassembly with fuel restored.)*
   - [ ] 3c. Space dimension, leaving and re-entering atmosphere, setting a course between
         planets, fuel burn.
 - [ ] **4. Ship editing and turning.** Place and break blocks on assembled ships, and
@@ -196,6 +198,22 @@ normal gravity.
 - Ship Console: `HelmBlock` use -> `ShipConsole.open` -> `ShipConsolePayload` (S2C) ->
   `ShipConsoleScreen`. Buttons send `ShipConsoleActionPayload` (C2S); the server re-validates.
 - `/starwake ship check <helmPos>` prints the report (useful for headless tests).
+- **Assembled ships (3b):** `ShipAssembler` lifts blocks out silently (no drops or updates;
+  block-entity NBT kept) into a `ShipEntity` holding a `ShipStructure` (local coords, origin =
+  min corner = entity position). Physics run server-side from the pilot's
+  `ServerPlayer.getLastClientInput()`: WASD = thrust per direction, Space = full lift, Sprint
+  = cut lift, auto-hover otherwise, fuel burn. Tuning is in `ship_physics/default.json`.
+  Unpiloted ships station-keep for free.
+- Collision for everyone else: `EntityCollideMixin` adds ship block shapes to
+  `Entity.collide`'s entity-collision list (works on client prediction and server alike).
+- Carrying: the server moves mobs standing on a ship. The client moves the local player in
+  `ShipCarry` (HEAD/TAIL of `LocalPlayer.tick`) by the ship's movement since the last
+  player tick. `ServerGamePacketListenerImplMixin` accepts client positions near ships.
+- Rendering: `ShipRenderer` submits each block via `submitMovingBlock` with a
+  `MovingBlockRenderState` subclass that answers neighbour lookups from the ship (face culling).
+- Interaction: ships are not pickable. `MinecraftMixin` raycasts ships at the start of every
+  right-click (ship space, `BlockGetter.traverseBlocks`) and sends `ShipInteractPayload`.
+- Admin/testing: `/starwake ship assemble <helmPos>` and `/starwake ship drift <x y z>`.
 
 ## 26.3 gotchas (learned the hard way)
 
@@ -218,6 +236,20 @@ normal gravity.
   no longer carries colours; use ARGB ints.
 - **Blocks have no codecs** in 26.3; `HorizontalDirectionalBlock`/`DirectionalBlock` just
   need a constructor and `createBlockStateDefinition`.
+- **Client entity position updates can land between ticks.** `commonTick()` saves the old
+  position and interpolates before `tick()`. Measure per-tick movement against your own
+  stored end-of-tick position.
+- **Order-independent carrying:** carry riders at the start of *their* tick by the vehicle's
+  movement since their last tick. Carrying after the vehicle moves (in either tick order)
+  embeds the rider in the deck on upward motion, and collision ignores already-overlapping
+  shapes, so they fall through.
+- **Server movement validation** lives in `ServerGamePacketListenerImpl.handlePlayerPositionChange`
+  (not `handleMovePlayer`). Mixin "Scanned 0 targets" = wrong method name.
+- **Vanilla skips `useItem` (and Fabric's UseItemCallback) with an empty hand** when the crosshair
+  hits nothing. Hook `Minecraft.startUseItem` for custom click targets.
+- Fabric 26.3 names: `ClientTickEvents.END_LEVEL_TICK`, `ClientEntityEvents.ENTITY_LOAD`,
+  `KeyMappingHelper.registerKeyMapping`, `InputConstants.KEY_*` (SDL-based key codes),
+  `EntityRendererRegistry.register`, `PayloadTypeRegistry.clientboundPlay()/serverboundPlay()`.
 - In xdotool client tests, use `mousedown 3; sleep 0.25; mouseup 3` for right-click.
   A bare `click 3` doesn't register in-game.
 - `/place feature <ore>` fails on already-generated chunks (it needs worldgen heightmaps).
@@ -267,5 +299,8 @@ environment before they work.
 - **Deliver a jar every milestone:** `./gradlew build`, then send `build/libs/starwake-<ver>.jar`
   to the user. CI (`.github/workflows/build.yml`) also uploads the jar as an artifact on every push.
 - Bump `mod_version` in `gradle.properties` per milestone (0.<milestone>.0).
+- Client test harness: `$scratchpad/mc.sh` (`start_client`, `join_world`, `cmd`, `shot`,
+  `save_quit`, `build_test_ship X Y Z`). Always `save_quit` before restarting, because a hard kill
+  loses everything since the last autosave. Set `/gamerule fall_damage false` in test worlds.
 - In the cloud container, don't block on long waits: start servers and clients in the
   background and poll with short, bounded loops.

@@ -43,6 +43,14 @@ public class FuelTankBlockEntity extends BlockEntity {
 		return items * unitsPerItem;
 	}
 
+	/** Adds raw fuel units (used when a ship is disassembled). Returns units accepted. */
+	public int refill(int units) {
+		int added = Math.max(0, Math.min(units, capacity() - fuel));
+		fuel += added;
+		setChanged();
+		return added;
+	}
+
 	/** Used when a ship is assembled: the tank's fuel moves into the ship. */
 	public int drain() {
 		int drained = fuel;

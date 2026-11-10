@@ -9,6 +9,8 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
@@ -16,6 +18,8 @@ import net.minecraft.network.chat.Component;
  * Admin/debug ship commands (permission level 2).
  * <pre>
  * /starwake ship check &lt;helmPos&gt;   print the pre-flight report for the ship at a Helm
+ * /starwake ship assemble &lt;helmPos&gt; assemble without seating anyone
+ * /starwake ship drift &lt;x y z&gt;     nearest unpiloted ship cruises at this velocity (blocks/tick); 0 0 0 stops
  * </pre>
  */
 public final class ShipCommands {
@@ -28,7 +32,52 @@ public final class ShipCommands {
 						.then(Commands.literal("ship")
 								.then(Commands.literal("check")
 										.then(Commands.argument("helm", BlockPosArgument.blockPos())
-												.executes(ShipCommands::check))))));
+												.executes(ShipCommands::check)))
+								.then(Commands.literal("assemble")
+										.then(Commands.argument("helm", BlockPosArgument.blockPos())
+												.executes(ShipCommands::assemble)))
+								.then(Commands.literal("drift")
+										.then(Commands.argument("velocity", Vec3Argument.vec3(false))
+												.executes(ShipCommands::drift))))));
+	}
+
+	/** Assembles the ship at a Helm without seating anyone (testing and admin builds). */
+	private static int assemble(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		BlockPos helm = BlockPosArgument.getLoadedBlockPos(ctx, "helm");
+		CommandSourceStack source = ctx.getSource();
+		if (!source.getLevel().getBlockState(helm).is(ModBlocks.HELM)) {
+			source.sendFailure(Component.translatable("commands.starwake.ship.not_helm"));
+			return 0;
+		}
+		ShipEntity ship = ShipAssembler.assemble(source.getLevel(), helm, null);
+		if (ship == null) {
+			source.sendFailure(Component.translatable("preflight.starwake.verdict_grounded"));
+			return 0;
+		}
+		source.sendSuccess(() -> Component.translatable("commands.starwake.ship.assembled",
+				ship.getId(), String.format("%.2f %.2f %.2f", ship.getX(), ship.getY(), ship.getZ())), true);
+		return 1;
+	}
+
+	/** Makes the nearest ship (within 64 blocks) cruise at a fixed velocity while unpiloted. */
+	private static int drift(CommandContext<CommandSourceStack> ctx) {
+		Vec3 velocity = Vec3Argument.getVec3(ctx, "velocity");
+		CommandSourceStack source = ctx.getSource();
+		ShipEntity nearest = null;
+		for (ShipEntity ship : ShipCollisions.shipsIn(source.getLevel())) {
+			if (ship.distanceToSqr(source.getPosition()) < 64 * 64
+					&& (nearest == null || ship.distanceToSqr(source.getPosition()) < nearest.distanceToSqr(source.getPosition()))) {
+				nearest = ship;
+			}
+		}
+		if (nearest == null) {
+			source.sendFailure(Component.translatable("commands.starwake.ship.none_nearby"));
+			return 0;
+		}
+		nearest.setDrift(velocity);
+		ShipEntity ship = nearest;
+		source.sendSuccess(() -> Component.translatable("commands.starwake.ship.drift", ship.getId()), false);
+		return 1;
 	}
 
 	private static int check(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

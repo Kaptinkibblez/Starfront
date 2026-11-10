@@ -33,9 +33,26 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 
 		// Ship console
 		builder.add("screen.starwake.ship_console", "Ship Console: Pre-flight Check");
+		builder.add("screen.starwake.ship_status", "Ship Console: Status");
 		builder.add("screen.starwake.ship_console.rescan", "Re-scan");
 		builder.add("screen.starwake.ship_console.assemble", "Assemble Ship");
-		builder.add("message.starwake.assemble_soon", "Ship assembly arrives in the next update (Milestone 3b)");
+		builder.add("screen.starwake.ship_console.disassemble", "Disassemble");
+		builder.add("message.starwake.assembled", "Ship assembled (%s blocks). WASD to fly, Space up, Sprint down, Shift to leave the helm, R for the console");
+		builder.add("message.starwake.disassembled", "Ship disassembled into blocks");
+		builder.add("message.starwake.disassemble.failed", "Can't disassemble this ship");
+		builder.add("message.starwake.disassemble.moving", "Bring the ship to a stop before disassembling");
+		builder.add("message.starwake.disassemble.obstructed", "Can't disassemble: blocked at %s %s %s");
+		builder.add("message.starwake.helm_taken", "Someone is already at the helm");
+		builder.add("message.starwake.ship_block_locked", "Ship blocks can't be used while assembled yet (coming in Milestone 4)");
+		builder.add("hud.starwake.ship", "Fuel %s / %s   Speed %s m/s   Alt %s");
+		builder.add("console.starwake.ship.mass", "%s blocks, mass %s t, gravity here %sg");
+		builder.add("console.starwake.ship.fuel", "Fuel %s / %s (refuel: right-click a fuel tank on board with fuel)");
+		builder.add("console.starwake.ship.controls", "WASD fly, Space up, Sprint down, Shift leave the helm. Engines hover automatically");
+		builder.add("console.starwake.ship.can_disassemble", "Stationary: you can disassemble the ship back into blocks to edit it");
+		builder.add("console.starwake.ship.moving", "Moving: stop to disassemble");
+		builder.add("key.starwake.ship_console", "Ship Console");
+		builder.add("key.category.starwake.starwake", "Starwake");
+		builder.add("entity.starwake.ship", "Ship");
 		builder.add("preflight.starwake.structure", "Structure: %s blocks, mass %s t");
 		builder.add("preflight.starwake.too_big", "Structure exceeds %s blocks. Is the ship touching another build?");
 		builder.add("preflight.starwake.multiple_helms", "%s Helms found: a ship can only have one");
@@ -61,6 +78,9 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		// Commands
 		builder.add("commands.starwake.planet.unknown", "Unknown planet: %s");
 		builder.add("commands.starwake.ship.not_helm", "That block isn't a Helm");
+		builder.add("commands.starwake.ship.none_nearby", "No ship within 64 blocks");
+		builder.add("commands.starwake.ship.drift", "Ship %s is drifting");
+		builder.add("commands.starwake.ship.assembled", "Assembled ship %s at %s");
 		builder.add("commands.starwake.planet.missing_dimension", "Planet %s has no loaded dimension");
 		builder.add("commands.starwake.planet.list.header", "%s planet(s) charted:");
 		builder.add("commands.starwake.planet.list.entry", " - %s (%s), gravity %sg");

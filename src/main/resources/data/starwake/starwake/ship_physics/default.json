@@ -1,0 +1,7 @@
+{
+  "thrust_to_accel": 0.05,
+  "gravity_to_accel": 0.05,
+  "drag_atmosphere": 0.9,
+  "drag_space": 0.985,
+  "max_speed": 2.0
+}
