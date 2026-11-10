@@ -3,5 +3,8 @@
   "gravity_to_accel": 0.05,
   "drag_atmosphere": 0.9,
   "drag_space": 0.985,
-  "max_speed": 2.0
+  "max_speed": 2.0,
+  "turn_rate": 60.0,
+  "boost_multiplier": 1.6,
+  "course_fuel_cost": 150
 }

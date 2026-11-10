@@ -17,6 +17,7 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -83,18 +84,20 @@ public final class ShipAssembler {
 
 		ShipEntity ship = ModEntities.SHIP.create(level, EntitySpawnReason.TRIGGERED);
 		if (ship == null) return null;
-		ship.setPos(min.getX(), min.getY(), min.getZ());
 		ship.initialize(new ShipStructure(entries), helm.subtract(min), forward, fuel, capacity);
+		// The entity position is the pivot (structure centre), not the min corner.
+		ship.setPos(min.getX() + ship.pivot().x, min.getY() + ship.pivot().y, min.getZ() + ship.pivot().z);
 		level.addFreshEntity(ship);
 		if (pilot != null) {
-			pilot.startRiding(ship);
+			ship.seat(pilot, helm.subtract(min));
 			pilot.sendOverlayMessage(Component.translatable("message.starwake.assembled", entries.size()));
 		}
 		return ship;
 	}
 
 	/**
-	 * Places the ship's blocks back into the world at the nearest whole-block position.
+	 * Places the ship's blocks back into the world. The ship must be stationary, level, and
+	 * facing a cardinal direction (blocks are rotated to match its heading).
 	 *
 	 * @return null on success, otherwise the reason it can't disassemble
 	 */
@@ -105,23 +108,46 @@ public final class ShipAssembler {
 		if (ship.getDeltaMovement().lengthSqr() > 1.0e-4) {
 			return Component.translatable("message.starwake.disassemble.moving");
 		}
-		BlockPos origin = BlockPos.containing(ship.position().add(0.5, 0.5, 0.5));
+		// Must be roughly level (within 20 degrees); it then squares up to the nearest of N/E/S/W.
+		if (ship.worldDirection(net.minecraft.core.Direction.UP).y < Math.cos(Math.toRadians(20))) {
+			return Component.translatable("message.starwake.disassemble.not_level");
+		}
+		Vec3 north = ship.worldDirection(net.minecraft.core.Direction.NORTH);
+		net.minecraft.core.Direction heading = net.minecraft.core.Direction.getApproximateNearest(north.x, 0, north.z);
+		float yaw = switch (heading) { // rotation about +Y that maps local north onto the heading
+			case WEST -> (float) (Math.PI / 2);
+			case SOUTH -> (float) Math.PI;
+			case EAST -> (float) (-Math.PI / 2);
+			default -> 0f;
+		};
+		if (!ship.trySetOrientation(new org.joml.Quaternionf().rotationY(yaw))) {
+			return Component.translatable("message.starwake.disassemble.obstructed_rotation");
+		}
+		Rotation rotation = Rotation.NONE;
+		for (Rotation r : Rotation.values()) {
+			if (r.rotate(net.minecraft.core.Direction.NORTH) == heading) rotation = r;
+		}
+
+		// Each block lands in the world cell containing its (snapped) centre.
+		List<BlockPos> targets = new ArrayList<>();
 		for (ShipStructure.Entry entry : ship.structure().entries()) {
-			BlockPos target = origin.offset(entry.pos());
+			BlockPos target = BlockPos.containing(ship.blockCenter(entry.pos()));
 			if (!level.getBlockState(target).canBeReplaced()) {
 				return Component.translatable("message.starwake.disassemble.obstructed", target.getX(), target.getY(), target.getZ());
 			}
+			targets.add(target);
 		}
 
-		Vec3 snap = Vec3.atLowerCornerOf(origin).subtract(ship.position());
 		AABB zone = ship.getBoundingBox().expandTowards(0, 1.0, 0);
-		List<Entity> aboard = level.getEntities(ship, zone, e -> !(e instanceof ShipEntity));
+		List<Entity> aboard = level.getEntities(ship, zone, e -> !(e instanceof ShipEntity) && ship.isSupporting(e));
 		ship.ejectPassengers();
 
 		int fuel = ship.fuel();
-		for (ShipStructure.Entry entry : ship.structure().entries()) {
-			BlockPos target = origin.offset(entry.pos());
-			level.setBlock(target, entry.state(), SILENT);
+		List<ShipStructure.Entry> entries = ship.structure().entries();
+		for (int i = 0; i < entries.size(); i++) {
+			ShipStructure.Entry entry = entries.get(i);
+			BlockPos target = targets.get(i);
+			level.setBlock(target, entry.state().rotate(rotation), SILENT);
 			entry.blockEntity().ifPresent(tag -> {
 				BlockEntity blockEntity = level.getBlockEntity(target);
 				if (blockEntity != null) {
@@ -131,15 +157,15 @@ public final class ShipAssembler {
 			});
 		}
 		// Pour the ship's fuel back into its tanks.
-		for (ShipStructure.Entry entry : ship.structure().entries()) {
+		for (BlockPos target : targets) {
 			if (fuel <= 0) break;
-			if (level.getBlockEntity(origin.offset(entry.pos())) instanceof FuelTankBlockEntity tank) {
+			if (level.getBlockEntity(target) instanceof FuelTankBlockEntity tank) {
 				fuel -= tank.refill(fuel);
 			}
 		}
-		// Shift everyone aboard by the same snap so nobody ends up inside a block.
+		// Nudge everyone aboard up slightly so nobody is left inside a block after snapping.
 		for (Entity entity : aboard) {
-			entity.setPos(entity.position().add(snap));
+			entity.setPos(entity.position().add(0, 0.05, 0));
 		}
 		ship.discard();
 		return null;

@@ -36,6 +36,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.createHorizontallyRotatedBlock(ModBlocks.HELM, TexturedModel.ORIENTABLE_ONLY_TOP);
 		generators.createTrivialBlock(ModBlocks.FUEL_TANK, TexturedModel.COLUMN);
 		createNozzleBlock(generators, ModBlocks.THRUSTER);
+		createSeat(generators, ModBlocks.SEAT);
 	}
 
 	/**
@@ -58,6 +59,17 @@ public final class ModModelProvider extends FabricModelProvider {
 						.select(Direction.SOUTH, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_180))
 						.select(Direction.WEST, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_270))
 						.select(Direction.EAST, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_90))));
+	}
+
+	/** A low cushioned seat: bottom-slab shape with {@code <name>_top} and {@code <name>_side}. */
+	private static void createSeat(BlockModelGenerators generators, Block block) {
+		TextureMapping textures = new TextureMapping()
+				.put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top"))
+				.put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(block, "_side"))
+				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side"));
+		Identifier modelId = ModelTemplates.SLAB_BOTTOM.create(block, textures, generators.modelOutput);
+		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(modelId)));
+		generators.registerSimpleItemModel(block, modelId);
 	}
 
 	@Override

@@ -3,21 +3,24 @@ package com.starwake.client.ship;
 import com.starwake.ship.ShipCollisions;
 import com.starwake.ship.ShipEntity;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Keeps the local player riding along on a moving ship (standing on deck, not piloting).
+ * Keeps the local player riding along on a moving ship (standing on deck, not seated).
  *
- * Runs around the player's own tick (see LocalPlayerMixin): after each tick it records which
- * ship the player stands on and where that ship was, and at the start of the next tick it
- * moves the player by however far that ship has moved since. Applying the carry before the
- * player's own collision step makes it independent of entity tick order and of bursty
- * network position updates.
+ * Runs around the player's own tick (LocalPlayerMixin). After each tick it records which ship
+ * the player stands on and their position *in that ship's frame*. At the start of the next
+ * tick it puts the player back at that ship-local position under the ship's new transform,
+ * so the player follows translation and rotation, and turns their view with the ship's
+ * heading. Doing this before the player's own collision step makes it independent of tick
+ * order and of bursty network updates.
  */
 public final class ShipCarry {
 	private static @Nullable ShipEntity standingOn;
-	private static Vec3 shipPosAtLastTick = Vec3.ZERO;
+	private static Vec3 localPos = Vec3.ZERO;
+	private static double shipHeading;
 
 	private ShipCarry() {}
 
@@ -26,9 +29,12 @@ public final class ShipCarry {
 		if (ship == null || ship.isRemoved() || ship.level() != player.level() || player.isPassenger()) {
 			return;
 		}
-		Vec3 delta = ship.position().subtract(shipPosAtLastTick);
-		if (delta.lengthSqr() > 0 && delta.lengthSqr() < 64) { // ignore teleports
-			player.setPos(player.position().add(delta));
+		Vec3 target = ship.toWorld(localPos);
+		if (target.distanceToSqr(player.position()) < 64) { // ignore teleports
+			player.setPos(target);
+			float turn = (float) (heading(ship) - shipHeading);
+			player.setYRot(player.getYRot() + turn);
+			player.setYHeadRot(player.getYHeadRot() + turn);
 		}
 	}
 
@@ -38,9 +44,16 @@ public final class ShipCarry {
 		for (ShipEntity ship : ShipCollisions.shipsIn(player.level())) {
 			if (ship.isSupporting(player)) {
 				standingOn = ship;
-				shipPosAtLastTick = ship.position();
+				localPos = ship.toLocal(player.position());
+				shipHeading = heading(ship);
 				return;
 			}
 		}
+	}
+
+	/** The ship's nose heading in Minecraft yaw degrees. */
+	private static double heading(ShipEntity ship) {
+		Vec3 nose = ship.worldDirection(ship.forward());
+		return Math.toDegrees(Math.atan2(-nose.x, nose.z));
 	}
 }

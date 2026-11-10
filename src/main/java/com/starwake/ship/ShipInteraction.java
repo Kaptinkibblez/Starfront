@@ -37,14 +37,12 @@ public final class ShipInteraction {
 		if (state == null) return;
 		// Reach check against the block's current world position (plus slack for latency).
 		double reach = player.blockInteractionRange() + 3;
-		if (player.getEyePosition().distanceToSqr(ship.toWorld(payload.local()).add(0.5, 0.5, 0.5)) > reach * reach) {
+		if (player.getEyePosition().distanceToSqr(ship.blockCenter(payload.local())) > reach * reach) {
 			return;
 		}
 
-		if (state.getBlock() instanceof HelmBlock) {
-			if (ship.getPassengers().isEmpty()) {
-				player.startRiding(ship);
-			} else if (!ship.hasPassenger(player)) {
+		if (state.getBlock() instanceof HelmBlock || state.getBlock() instanceof com.starwake.ship.block.SeatBlock) {
+			if (!ship.seat(player, payload.local())) {
 				player.sendOverlayMessage(Component.translatable("message.starwake.helm_taken"));
 			}
 		} else if (state.getBlock() instanceof FuelTankBlock) {

@@ -22,10 +22,12 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * @param dragSpace      velocity multiplier per tick in space
  * @param maxSpeed       hard cap in blocks/tick (protects chunk loading and the network)
  * @param courseFuelCost fuel units to set a course to another planet from space
+ * @param turnRateDegrees base turn rate in degrees/second (scaled by the ship's agility)
+ * @param boostMultiplier thrust (and fuel burn) multiplier while boosting
  */
 public record ShipPhysics(double thrustToAccel, double gravityToAccel, double dragAtmosphere,
-		double dragSpace, double maxSpeed, int courseFuelCost) {
-	public static final ShipPhysics DEFAULT = new ShipPhysics(0.05, 0.05, 0.9, 0.985, 2.0, 150);
+		double dragSpace, double maxSpeed, int courseFuelCost, double turnRateDegrees, double boostMultiplier) {
+	public static final ShipPhysics DEFAULT = new ShipPhysics(0.05, 0.05, 0.9, 0.985, 2.0, 150, 60.0, 1.6);
 
 	public static final Codec<ShipPhysics> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.DOUBLE.optionalFieldOf("thrust_to_accel", DEFAULT.thrustToAccel).forGetter(ShipPhysics::thrustToAccel),
@@ -33,7 +35,9 @@ public record ShipPhysics(double thrustToAccel, double gravityToAccel, double dr
 			Codec.doubleRange(0, 1).optionalFieldOf("drag_atmosphere", DEFAULT.dragAtmosphere).forGetter(ShipPhysics::dragAtmosphere),
 			Codec.doubleRange(0, 1).optionalFieldOf("drag_space", DEFAULT.dragSpace).forGetter(ShipPhysics::dragSpace),
 			Codec.doubleRange(0.1, 8).optionalFieldOf("max_speed", DEFAULT.maxSpeed).forGetter(ShipPhysics::maxSpeed),
-			Codec.intRange(0, 1_000_000).optionalFieldOf("course_fuel_cost", DEFAULT.courseFuelCost).forGetter(ShipPhysics::courseFuelCost)
+			Codec.intRange(0, 1_000_000).optionalFieldOf("course_fuel_cost", DEFAULT.courseFuelCost).forGetter(ShipPhysics::courseFuelCost),
+			Codec.doubleRange(1, 720).optionalFieldOf("turn_rate", DEFAULT.turnRateDegrees).forGetter(ShipPhysics::turnRateDegrees),
+			Codec.doubleRange(1, 5).optionalFieldOf("boost_multiplier", DEFAULT.boostMultiplier).forGetter(ShipPhysics::boostMultiplier)
 	).apply(i, ShipPhysics::new));
 
 	private static ShipPhysics current = DEFAULT;

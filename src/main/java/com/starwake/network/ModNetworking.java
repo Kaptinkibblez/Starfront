@@ -17,9 +17,19 @@ public final class ModNetworking {
 		PayloadTypeRegistry.clientboundPlay().register(ShipStructurePayload.TYPE, ShipStructurePayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipConsoleActionPayload.TYPE, ShipConsoleActionPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipInteractPayload.TYPE, ShipInteractPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ShipControlPayload.TYPE, ShipControlPayload.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(ShipConsoleActionPayload.TYPE,
 				(payload, context) -> ShipConsole.handleAction(context.player(), payload));
+		ServerPlayNetworking.registerGlobalReceiver(ShipControlPayload.TYPE, (payload, context) -> {
+			if (context.player().getVehicle() instanceof com.starwake.ship.ShipEntity ship) {
+				if (payload.leave()) {
+					context.player().stopRiding();
+				} else if (ship.pilot() == context.player()) {
+					ship.setControls(payload.controls());
+				}
+			}
+		});
 		ServerPlayNetworking.registerGlobalReceiver(ShipInteractPayload.TYPE,
 				(payload, context) -> ShipInteraction.handle(context.player(), payload));
 	}

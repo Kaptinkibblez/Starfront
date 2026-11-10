@@ -3,6 +3,7 @@ package com.starwake.client.ship;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.starwake.StarwakeMod;
 import com.starwake.network.ShipConsoleActionPayload;
+import com.starwake.network.ShipControlPayload;
 import com.starwake.network.ShipInteractPayload;
 import com.starwake.network.ShipStructurePayload;
 import com.starwake.registry.ModEntities;
@@ -37,6 +38,17 @@ public final class ShipClient {
 	private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(StarwakeMod.id("starwake"));
 	private static final KeyMapping SHIP_CONSOLE = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.ship_console", InputConstants.KEY_R, CATEGORY));
+	private static final KeyMapping ROLL_LEFT = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.roll_left", InputConstants.KEY_Z, CATEGORY));
+	private static final KeyMapping ROLL_RIGHT = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.roll_right", InputConstants.KEY_C, CATEGORY));
+	private static final KeyMapping FREE_LOOK = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.free_look", InputConstants.KEY_LALT, CATEGORY));
+	private static final KeyMapping LEAVE_SEAT = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.leave_seat", InputConstants.KEY_X, CATEGORY));
+
+	/** Last control bits sent, so we only send changes. */
+	private static int sentControls = -1;
 
 	private ShipClient() {}
 
@@ -57,6 +69,7 @@ public final class ShipClient {
 		});
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			sendControls(client);
 			while (SHIP_CONSOLE.consumeClick()) {
 				if (client.player != null && client.player.getVehicle() instanceof ShipEntity ship) {
 					ClientPlayNetworking.send(new ShipConsoleActionPayload(BlockPos.ZERO, ship.getId(),
@@ -64,6 +77,25 @@ public final class ShipClient {
 				}
 			}
 		});
+	}
+
+	/** Sends roll/free-look changes while seated on a ship, and "leave seat" presses. */
+	private static void sendControls(Minecraft client) {
+		if (client.player == null || !(client.player.getVehicle() instanceof ShipEntity)) {
+			sentControls = -1;
+			while (LEAVE_SEAT.consumeClick()) { /* discard */ }
+			return;
+		}
+		int controls = (ROLL_LEFT.isDown() ? ShipEntity.CONTROL_ROLL_LEFT : 0)
+				| (ROLL_RIGHT.isDown() ? ShipEntity.CONTROL_ROLL_RIGHT : 0)
+				| (FREE_LOOK.isDown() ? ShipEntity.CONTROL_FREE_LOOK : 0);
+		if (controls != sentControls) {
+			ClientPlayNetworking.send(new ShipControlPayload(controls, false));
+			sentControls = controls;
+		}
+		while (LEAVE_SEAT.consumeClick()) {
+			ClientPlayNetworking.send(new ShipControlPayload(0, true));
+		}
 	}
 
 	/** Result of a ray hitting a ship block. */
@@ -97,8 +129,9 @@ public final class ShipClient {
 			if (ship.structure() == null || !ship.getBoundingBox().inflate(player.blockInteractionRange()).contains(eye)) {
 				continue;
 			}
-			Vec3 from = eye.subtract(ship.position());
-			Vec3 to = end.subtract(ship.position());
+			// Raycast in the ship's own frame, where its blocks are axis-aligned.
+			Vec3 from = ship.toLocal(eye);
+			Vec3 to = ship.toLocal(end);
 			BlockHitResult local = BlockGetter.traverseBlocks(from, to, ship, (s, pos) -> {
 				BlockState state = s.structure().get(pos);
 				if (state == null) return null;

@@ -102,18 +102,24 @@ public final class SpaceTravel {
 		// haven't been carried for this tick's move yet, so measure in the ship's old frame.
 		Vec3 pending = ship.movementThisTick();
 		List<Entity> aboard = new ArrayList<>();
+		List<Vec3> locals = new ArrayList<>();
 		for (Entity entity : from.getEntities(ship, ship.getBoundingBox().expandTowards(pending.reverse()).inflate(0.5, 1.5, 0.5),
 				e -> !(e instanceof ShipEntity) && !e.isPassenger())) {
-			if (ship.isSupporting(entity, pending)) aboard.add(entity);
+			Vec3 local = ship.toLocalAtLastTick(entity.position());
+			if (ship.isAboard(entity, local)) {
+				aboard.add(entity);
+				locals.add(local);
+			}
 		}
-		List<Vec3> offsets = aboard.stream().map(e -> e.position().add(pending).subtract(ship.position())).toList();
+		Vec3 shift = origin.subtract(ship.position());
 
 		Entity moved = ship.teleport(new TeleportTransition(to, origin, ship.getDeltaMovement(), 0, 0,
 				TeleportTransition.PLACE_PORTAL_TICKET));
 		if (moved == null) return false;
 		for (int i = 0; i < aboard.size(); i++) {
 			Entity entity = aboard.get(i);
-			entity.teleport(new TeleportTransition(to, origin.add(offsets.get(i)), entity.getDeltaMovement(),
+			Vec3 target = ship.toWorld(locals.get(i)).add(shift); // same local spot on the moved ship
+			entity.teleport(new TeleportTransition(to, target, entity.getDeltaMovement(),
 					entity.getYRot(), entity.getXRot(), TeleportTransition.DO_NOTHING));
 		}
 		if (moved.getFirstPassenger() instanceof ServerPlayer pilot) {

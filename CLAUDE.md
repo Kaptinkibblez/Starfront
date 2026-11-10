@@ -113,8 +113,13 @@ only learn from them, not depend on them.
     Editing blocks on an assembled ship needs ship-space raycasts and placement, so it's
     Milestone 4. Until then, an explicit "Disassemble" (when landed) turns it back into
     blocks for editing.
-  - *No turning yet* (user's choice). Ships translate in all directions but keep their
-    built heading. Smooth yaw rotation (rotated collision) is Milestone 4.
+  - *Full 6DOF, Star Citizen style* (user's choice, 2026-11-10, replacing "no turning
+    yet"). Ships pitch, yaw and roll. Mouse-aim steering: the ship turns toward the pilot's
+    look direction, Z/C roll, Alt free-look, boost. Orientation is a quaternion about a
+    pivot (the structure's centre), and the entity position is the pivot's world position.
+  - *Walking aboard a rotated ship* uses **ship-local physics** (3e): players aboard
+    move in the ship's frame with deck-aligned artificial gravity, so decks stay "down" at
+    any attitude. Until 3e, crew ride in Seats while the ship maneuvers.
   - *Space by flying up.* Climbing above the build limit moves a sealed ship and everyone
     aboard into the shared `starwake:space` dimension. Descending re-enters the planet it's
     orbiting. The console's "Set course" changes the orbited planet (the star map replaces
@@ -153,8 +158,22 @@ commit. **Don't start the next milestone until the user confirms the current one
   - [x] 3c. Space dimension, leaving and re-entering atmosphere, setting a course between
         planets, fuel burn. *(Verified: Overworld -> space -> set course -> Veyra landing with
         the pilot aboard; mobs aboard come along; unsealed hulls are held at the ceiling.)*
-- [ ] **4. Ship editing and turning.** Place and break blocks on assembled ships, and
-      smooth yaw rotation.
+  - **Star Citizen pass** (user request, 2026-11-10: all four feature sets plus full
+    pitch/roll):
+  - [x] 3d. 6DOF flight: quaternion orientation (synced, interpolated), rotated rendering
+        and bounding box, rotated terrain collision, mouse-aim steering + roll + free-look +
+        boost, attitude HUD, Seats for crew, rotation-aware disassembly (cardinal headings).
+        *(Verified 2026-11-10: yaw/pitch/roll in flight, rotated rendering inside and out,
+        atmospheric auto-level, mob carried rigidly through rotation, disassembly squaring up
+        to east with rotated block states, seating synced to clients.)*
+  - [ ] 3e. Lived-in interiors: ship-local player physics with deck-aligned artificial
+        gravity, camera roll with the ship, usable doors/chests/beds aboard, EVA jetpack in
+        zero-g, airlocks.
+  - [ ] 3f. Components and power: Power Plant, Shield Generator, Cooler, Quantum Drive
+        blocks; power routing screen; more pre-flight conditions.
+  - [ ] 3g. Space as a real place: planets rendered as spheres in space, enter by flying
+        into them, quantum travel between them.
+- [ ] **4. Ship editing.** Place and break blocks on assembled ships (turning moved to 3d).
 - [ ] **5. Procedural planets.** Terrain, biomes and ores seeded by galaxy
       coordinates (decision B).
 - [ ] **6. Star map.** A galaxy/star map UI for choosing seeded destinations.
@@ -223,6 +242,15 @@ normal gravity.
   planet entry with `"destination": false` and 0.15g. Players falling out of space are
   returned home (return point or spawn). The space dimension is void, black-sky and
   fixed-time (`dimension_type/space.json`).
+- **6DOF (3d):** entity position = pivot (structure centre); `world = pos + R(local - pivot)`.
+  Old saves (no `frame` tag) are migrated on load. Orientation is a synced `QUATERNION`;
+  the client slerps the previous and current tick for rendering. `steer()` turns the nose
+  toward the pilot's look vector (shortest arc, eased, rate = `turn_rate` x agility).
+  Z/C roll; in atmosphere, wings auto-level when not rolling. Rotations that would hit
+  terrain are retried up to 1 block higher (self-righting). Collision shapes for other
+  entities are rotated block boxes (exact when axis-aligned, shrunk 0.85 otherwise).
+  Seats: `seatOf` (server), synced as a string in `SEATS`. Shift = boost (PlayerMixin
+  stops vanilla shift-dismount on ships); X leaves the seat via `ShipControlPayload`.
 - Known limits (Milestone 4/9): no in-flight editing or turning; ships don't collide with
   each other or push mobs; unattended ships in unloaded chunks freeze (expected); the
   per-frame block re-tessellation needs a cached mesh for big ships.
@@ -268,6 +296,10 @@ normal gravity.
   ticks. Unattended ships in space won't move in headless server tests. Test with a pilot.
 - **Screen background:** draw custom panels in `extractBackground` (after super). Drawing
   them in `extractRenderState` after super covers the widgets.
+- **No compound-tag entity data serializer in 26.3**: encode small maps as STRING.
+- `/data get entity <rider> Pos` shows the *vehicle's* position (vanilla saves riders at the
+  vehicle). Log `passenger.position()` to see where a rider really is.
+- PoseStack rotation is `poseStack.rotate(Quaternionfc)` (not `mulPose`).
 - Teleporting a riding player with `/tp` dismounts them. In tests, re-board via right-click.
 - `/place feature <ore>` fails on already-generated chunks (it needs worldgen heightmaps).
   Test ores by generating fresh chunks and counting with `/fill ... replace`.

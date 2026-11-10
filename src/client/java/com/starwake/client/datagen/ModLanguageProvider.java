@@ -25,6 +25,16 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModBlocks.HELM, "Helm");
 		builder.add(ModBlocks.THRUSTER, "Thruster");
 		builder.add(ModBlocks.FUEL_TANK, "Fuel Tank");
+		builder.add(ModBlocks.SEAT, "Seat");
+		builder.add("key.starwake.roll_left", "Roll Left");
+		builder.add("key.starwake.roll_right", "Roll Right");
+		builder.add("key.starwake.free_look", "Free Look (hold)");
+		builder.add("key.starwake.leave_seat", "Leave Seat");
+		builder.add("hud.starwake.ship6", "Fuel %s/%s  %s m/s  HDG %s°  PIT %s°  ROL %s°  %s");
+		builder.add("hud.starwake.ship.alt", "ALT %s");
+		builder.add("hud.starwake.ship.orbit", "Orbiting %s");
+		builder.add("message.starwake.disassemble.not_level", "Level the ship (within 20 degrees) to disassemble");
+		builder.add("message.starwake.disassemble.obstructed_rotation", "Not enough room to square the ship up for disassembly");
 
 		// Fuel tank messages
 		builder.add("message.starwake.fuel_tank.filled", "Loaded %s fuel (%s / %s)");
@@ -37,7 +47,7 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("screen.starwake.ship_console.rescan", "Re-scan");
 		builder.add("screen.starwake.ship_console.assemble", "Assemble Ship");
 		builder.add("screen.starwake.ship_console.disassemble", "Disassemble");
-		builder.add("message.starwake.assembled", "Ship assembled (%s blocks). WASD to fly, Space up, Sprint down, Shift to leave the helm, R for the console");
+		builder.add("message.starwake.assembled", "Ship assembled (%s blocks). Steer with the mouse, WASD/Space/Ctrl thrust, Z/C roll, Shift boost, Alt free look, X leave, R console");
 		builder.add("message.starwake.disassembled", "Ship disassembled into blocks");
 		builder.add("message.starwake.disassemble.failed", "Can't disassemble this ship");
 		builder.add("message.starwake.disassemble.moving", "Bring the ship to a stop before disassembling");
@@ -60,7 +70,7 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("console.starwake.ship.to_space", "Climb above Y %s to reach space");
 		builder.add("console.starwake.ship.mass", "%s blocks, mass %s t, gravity here %sg");
 		builder.add("console.starwake.ship.fuel", "Fuel %s / %s (refuel: right-click a fuel tank on board with fuel)");
-		builder.add("console.starwake.ship.controls", "WASD fly, Space up, Sprint down, Shift leave the helm. Engines hover automatically");
+		builder.add("console.starwake.ship.controls", "Mouse steers. WASD/Space/Ctrl thrust, Z/C roll, Shift boost, Alt free look, X leave seat. Engines hover automatically");
 		builder.add("console.starwake.ship.can_disassemble", "Stationary: you can disassemble the ship back into blocks to edit it");
 		builder.add("console.starwake.ship.moving", "Moving: stop to disassemble");
 		builder.add("console.starwake.ship.space_no_disassemble", "Land on a planet to disassemble");

@@ -71,7 +71,7 @@ public final class ShipConsole {
 		add(status, lines, stationary && !inSpace ? PreflightReport.Status.INFO : PreflightReport.Status.WARN,
 				Component.translatable(disassembly));
 		ServerPlayNetworking.send(player, new ShipConsolePayload(
-				BlockPos.containing(ship.toWorld(ship.helmLocal())), ship.getId(), status, lines,
+				BlockPos.containing(ship.blockCenter(ship.helmLocal())), ship.getId(), status, lines,
 				stationary && !inSpace, destinations, destinationNames));
 	}
 
@@ -97,7 +97,7 @@ public final class ShipConsole {
 			}
 			case OPEN_SHIP, DISASSEMBLE, SET_COURSE -> {
 				// Only the pilot can use the ship console.
-				if (!(player.getVehicle() instanceof ShipEntity ship) || ship.getId() != payload.shipId()) {
+				if (!(player.getVehicle() instanceof ShipEntity ship) || ship.getId() != payload.shipId() || ship.pilot() != player) {
 					return;
 				}
 				if (payload.action() == ShipConsoleActionPayload.Action.OPEN_SHIP) {

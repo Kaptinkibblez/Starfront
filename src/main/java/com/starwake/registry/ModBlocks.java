@@ -3,6 +3,7 @@ package com.starwake.registry;
 import com.starwake.StarwakeMod;
 import com.starwake.ship.block.FuelTankBlock;
 import com.starwake.ship.block.HelmBlock;
+import com.starwake.ship.block.SeatBlock;
 import com.starwake.ship.block.ThrusterBlock;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,6 +88,14 @@ public final class ModBlocks {
 					.strength(4.0f, 6.0f)
 					.sound(SoundType.METAL)
 					.requiresCorrectToolForDrops());
+
+	/** Seat: crew ride here while the ship maneuvers. */
+	public static final Block SEAT = register("seat", SeatBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.COLOR_GRAY)
+					.strength(2.0f, 6.0f)
+					.sound(SoundType.METAL)
+					.noOcclusion());
 
 	private ModBlocks() {}
 
