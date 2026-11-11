@@ -18,6 +18,7 @@ public final class ModNetworking {
 		PayloadTypeRegistry.serverboundPlay().register(ShipConsoleActionPayload.TYPE, ShipConsoleActionPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipInteractPayload.TYPE, ShipInteractPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipControlPayload.TYPE, ShipControlPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ShipPowerPayload.TYPE, ShipPowerPayload.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(ShipConsoleActionPayload.TYPE,
 				(payload, context) -> ShipConsole.handleAction(context.player(), payload));
@@ -28,6 +29,13 @@ public final class ModNetworking {
 				} else if (ship.pilot() == context.player()) {
 					ship.setControls(payload.controls());
 				}
+			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(ShipPowerPayload.TYPE, (payload, context) -> {
+			// Only the pilot routes power; the server normalizes whatever it receives.
+			if (context.player().getVehicle() instanceof com.starwake.ship.ShipEntity ship && ship.pilot() == context.player()) {
+				ship.setAllocation(com.starwake.ship.systems.PowerAllocation.fromPercents(
+						payload.engines(), payload.shields(), payload.quantum()));
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(ShipInteractPayload.TYPE,

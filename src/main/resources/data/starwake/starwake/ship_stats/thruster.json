@@ -4,5 +4,6 @@
   ],
   "mass": 2.0,
   "thrust": 40,
-  "fuel_burn": 0.05
+  "fuel_burn": 0.05,
+  "power_draw": 4
 }

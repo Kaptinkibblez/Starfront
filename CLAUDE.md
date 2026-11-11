@@ -173,8 +173,11 @@ commit. **Don't start the next milestone until the user confirms the current one
         in space persists edits; door opened onto space and walked out into EVA; ship-frame
         mouse look for walkers and the seated pilot. Beds aboard deferred: vanilla sleep
         needs a world bed and a planet with nights.)*
-  - [ ] 3f. Components and power: Power Plant, Shield Generator, Cooler, Quantum Drive
-        blocks; power routing screen; more pre-flight conditions.
+  - [x] 3f. Components and power: Power Plant, Shield Generator, Cooler, Quantum Drive
+        blocks; power routing screen; more pre-flight conditions. *(Verified 2026-11-11:
+        overheating/underpowered/shield/quantum checks; power triangle sliders re-route
+        live; cockpit HUD; quantum spool then arrival in Veyra orbit; shields absorbing
+        crash impacts, with the excess hurting crew.)*
   - [ ] 3g. Space as a real place: planets rendered as spheres in space, enter by flying
         into them, quantum travel between them.
 - [ ] **4. Ship editing.** Place and break blocks on assembled ships (turning moved to 3d).
@@ -271,6 +274,20 @@ normal gravity.
   Chests and barrels open a 27-slot menu backed by the ship's stored block-entity NBT
   (`ShipEntity.container`, written back on every change).
 - Admin/testing: `/starwake ship spin <yaw pitch roll deg/s>` for unpiloted ships.
+- **Components and power (3f):** `ship/systems/ShipSystems` sums component stats from
+  `ship_stats` JSON (`power_output`, `heat`, `cooling`, `power_draw`, `shield_capacity`,
+  `shield_regen`, `quantum_spool`), shared by pre-flight and the flying ship. Plants
+  throttle to cooling/heat. Available power is split by `PowerAllocation` (engines,
+  shields, quantum; default 60/20/20; saved per ship). Engine factor = given/wanted
+  (max 1.25) and scales thrust, hover and agility. Shields regen by their factor and absorb
+  crash energy (impact > 0.35 b/t, 40 HP per b/t, 10-tick cooldown); the excess hurts
+  everyone aboard. A course from space spools the quantum drive (spool time / quantum
+  factor), then `SpaceTravel.completeCourse` pays fuel and arrives. A Power Plant is
+  **required** to fly.
+- UI: `ShipConsoleScreen` shows `PowerSliders` (linked triangle, sends
+  `ShipPowerPayload`; pilot only). `client/hud/ShipHud` (Fabric `HudElementRegistry`,
+  top-left) shows speed, alt/orbit, HDG/PIT/ROL, fuel/shield bars, power split, engine
+  %, overheat and QT spool, all from synced entity data (ship stats are server-only data).
 - Known limits (Milestone 4/9): no in-flight editing or turning; ships don't collide with
   each other or push mobs; unattended ships in unloaded chunks freeze (expected); the
   per-frame block re-tessellation needs a cached mesh for big ships.
@@ -320,6 +337,9 @@ normal gravity.
 - `/data get entity <rider> Pos` shows the *vehicle's* position (vanilla saves riders at the
   vehicle). Log `passenger.position()` to see where a rider really is.
 - PoseStack rotation is `poseStack.rotate(Quaternionfc)` (not `mulPose`).
+- **Ship stats are server data**: remote clients don't have them. Anything the client
+  shows must be synced (entity data) or sent in a payload.
+- When packing several percents into one int, give each value 3 digits (100 needs 3).
 - `SimpleContainer` has no change listener in 26.3: subclass it and override `setChanged`.
 - Camera internals: `Camera.setRotation(yRot, xRot)` builds `rotation` and the
   `forwards/up/left` vectors; `alignWithEntity(partial)` positions it. Both are mixable.
@@ -373,8 +393,9 @@ environment before they work.
 - **Deliver a jar every milestone:** `./gradlew build`, then send `build/libs/starwake-<ver>.jar`
   to the user. CI (`.github/workflows/build.yml`) also uploads the jar as an artifact on every push.
 - Bump `mod_version` in `gradle.properties` per milestone (0.<milestone>.0).
-- Client test harness: `$scratchpad/mc.sh` (`start_client`, `join_world`, `cmd`, `shot`,
-  `save_quit`, `build_test_ship X Y Z`). Always `save_quit` before restarting, because a hard kill
+- Client test harness: `$scratchpad/mc.sh` (`start_client`, `join_world`, `ingame`, `cmd`,
+  `shot`, `rclick`, `save_quit`, `build_powered_ship X Y Z [coolers]`; the older
+  `build_*_ship` helpers have no power plant, so they no longer pass pre-flight). Always `save_quit` before restarting, because a hard kill
   loses everything since the last autosave. Set `/gamerule fall_damage false` in test worlds.
 - In the cloud container, don't block on long waits: start servers and clients in the
   background and poll with short, bounded loops.

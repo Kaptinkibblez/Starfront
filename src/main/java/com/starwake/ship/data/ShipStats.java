@@ -27,7 +27,14 @@ import net.minecraft.world.level.block.state.BlockState;
  *   "mass": 0.2,            // tonnes per block (default 1.0)
  *   "thrust": 40,           // thrusters only: force at full throttle
  *   "fuel_burn": 0.05,      // thrusters only: fuel units per tick at full throttle
- *   "fuel_capacity": 2000 } // fuel tanks only
+ *   "fuel_capacity": 2000,  // fuel tanks only
+ *   "power_output": 40,     // power plants: power generated
+ *   "heat": 40,             // heat produced while generating (coolers must keep up)
+ *   "cooling": 40,          // coolers: heat removed
+ *   "power_draw": 4,        // power used at full load (thrusters firing, shields charging, QT spooling)
+ *   "shield_capacity": 100, // shield generators: shield HP
+ *   "shield_regen": 0.5,    // shield HP regenerated per tick at full power
+ *   "quantum_spool": 10 }   // quantum drives: spool time in seconds at full power
  * }</pre>
  *
  * When several entries match a block, the most specific wins (exact id > tag > "*").
@@ -35,20 +42,41 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public final class ShipStats {
 	/** Resolved stats for one block. */
-	public record BlockStats(double mass, double thrust, double fuelBurn, int fuelCapacity) {
-		public static final BlockStats DEFAULT = new BlockStats(1.0, 0.0, 0.0, 0);
+	public record BlockStats(double mass, double thrust, double fuelBurn, int fuelCapacity, double powerOutput,
+			double heat, double cooling, double powerDraw, double shieldCapacity, double shieldRegen, double quantumSpool) {
+		public static final BlockStats DEFAULT = new BlockStats(1.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
 	/** One JSON file. */
 	public record Entry(IdMatcher blocks, Optional<Double> mass, Optional<Double> thrust,
-			Optional<Double> fuelBurn, Optional<Integer> fuelCapacity) {
+			Optional<Double> fuelBurn, Optional<Integer> fuelCapacity, Components components) {
 		public static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
 				IdMatcher.CODEC.fieldOf("blocks").forGetter(Entry::blocks),
 				Codec.doubleRange(0.0, 1000.0).optionalFieldOf("mass").forGetter(Entry::mass),
 				Codec.doubleRange(0.0, 100000.0).optionalFieldOf("thrust").forGetter(Entry::thrust),
 				Codec.doubleRange(0.0, 1000.0).optionalFieldOf("fuel_burn").forGetter(Entry::fuelBurn),
-				Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("fuel_capacity").forGetter(Entry::fuelCapacity)
+				Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("fuel_capacity").forGetter(Entry::fuelCapacity),
+				Components.CODEC.forGetter(Entry::components)
 		).apply(i, Entry::new));
+	}
+
+	/** Component fields (power, heat, shields, quantum), split out because codecs cap at 16 fields. */
+	public record Components(Optional<Double> powerOutput, Optional<Double> heat, Optional<Double> cooling,
+			Optional<Double> powerDraw, Optional<Double> shieldCapacity, Optional<Double> shieldRegen,
+			Optional<Double> quantumSpool) {
+		private static Codec<Double> nonNegative() {
+			return Codec.doubleRange(0.0, 1_000_000.0);
+		}
+
+		public static final com.mojang.serialization.MapCodec<Components> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+				nonNegative().optionalFieldOf("power_output").forGetter(Components::powerOutput),
+				nonNegative().optionalFieldOf("heat").forGetter(Components::heat),
+				nonNegative().optionalFieldOf("cooling").forGetter(Components::cooling),
+				nonNegative().optionalFieldOf("power_draw").forGetter(Components::powerDraw),
+				nonNegative().optionalFieldOf("shield_capacity").forGetter(Components::shieldCapacity),
+				nonNegative().optionalFieldOf("shield_regen").forGetter(Components::shieldRegen),
+				nonNegative().optionalFieldOf("quantum_spool").forGetter(Components::quantumSpool)
+		).apply(i, Components::new));
 	}
 
 	private static List<Entry> entries = List.of();
@@ -92,7 +120,14 @@ public final class ShipStats {
 				first(matches, Entry::mass).orElse(d.mass()),
 				first(matches, Entry::thrust).orElse(d.thrust()),
 				first(matches, Entry::fuelBurn).orElse(d.fuelBurn()),
-				first(matches, Entry::fuelCapacity).orElse(d.fuelCapacity()));
+				first(matches, Entry::fuelCapacity).orElse(d.fuelCapacity()),
+				first(matches, e -> e.components().powerOutput()).orElse(0.0),
+				first(matches, e -> e.components().heat()).orElse(0.0),
+				first(matches, e -> e.components().cooling()).orElse(0.0),
+				first(matches, e -> e.components().powerDraw()).orElse(0.0),
+				first(matches, e -> e.components().shieldCapacity()).orElse(0.0),
+				first(matches, e -> e.components().shieldRegen()).orElse(0.0),
+				first(matches, e -> e.components().quantumSpool()).orElse(0.0));
 	}
 
 	private static <T> Optional<T> first(List<Entry> matches, java.util.function.Function<Entry, Optional<T>> field) {

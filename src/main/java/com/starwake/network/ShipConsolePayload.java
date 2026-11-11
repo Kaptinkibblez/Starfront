@@ -20,9 +20,10 @@ import net.minecraft.resources.Identifier;
  * @param actionEnabled    whether the main button (Assemble / Disassemble) is usable
  * @param destinations     planets a ship in space can set a course for (empty otherwise)
  * @param destinationNames display names matching {@code destinations}
+ * @param power            power split percents [engines, shields, quantum] for an assembled ship (else empty)
  */
 public record ShipConsolePayload(BlockPos helm, int shipId, List<Integer> status, List<Component> lines,
-		boolean actionEnabled, List<Identifier> destinations, List<Component> destinationNames) implements CustomPacketPayload {
+		boolean actionEnabled, List<Identifier> destinations, List<Component> destinationNames, List<Integer> power) implements CustomPacketPayload {
 	public static final Type<ShipConsolePayload> TYPE = new Type<>(StarwakeMod.id("ship_console"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ShipConsolePayload> CODEC = StreamCodec.composite(
@@ -33,6 +34,7 @@ public record ShipConsolePayload(BlockPos helm, int shipId, List<Integer> status
 			ByteBufCodecs.BOOL, ShipConsolePayload::actionEnabled,
 			Identifier.STREAM_CODEC.apply(ByteBufCodecs.list(32)), ShipConsolePayload::destinations,
 			ComponentSerialization.TRUSTED_STREAM_CODEC.apply(ByteBufCodecs.list(32)), ShipConsolePayload::destinationNames,
+			ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list(3)), ShipConsolePayload::power,
 			ShipConsolePayload::new);
 
 	@Override

@@ -37,6 +37,10 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.createTrivialBlock(ModBlocks.FUEL_TANK, TexturedModel.COLUMN);
 		createNozzleBlock(generators, ModBlocks.THRUSTER);
 		createSeat(generators, ModBlocks.SEAT);
+		generators.createTrivialBlock(ModBlocks.POWER_PLANT, TexturedModel.COLUMN);
+		generators.createTrivialBlock(ModBlocks.COOLER, TexturedModel.COLUMN);
+		generators.createTrivialBlock(ModBlocks.SHIELD_GENERATOR, TexturedModel.COLUMN);
+		generators.createTrivialBlock(ModBlocks.QUANTUM_DRIVE, TexturedModel.COLUMN);
 	}
 
 	/**

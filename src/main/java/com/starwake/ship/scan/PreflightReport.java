@@ -6,6 +6,8 @@ import com.starwake.ship.block.FuelTankBlockEntity;
 import com.starwake.ship.block.HelmBlock;
 import com.starwake.ship.block.ThrusterBlock;
 import com.starwake.ship.data.ShipStats;
+import com.starwake.ship.systems.PowerAllocation;
+import com.starwake.ship.systems.ShipSystems;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -71,10 +73,12 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 		Map<Direction, Double> thrust = new EnumMap<>(Direction.class);
 		for (Direction d : Direction.values()) thrust.put(d, 0.0);
 
+		ShipSystems systems = new ShipSystems();
 		for (BlockPos pos : ship) {
 			BlockState state = level.getBlockState(pos);
 			ShipStats.BlockStats stats = ShipStats.get(state);
 			mass += stats.mass();
+			systems.add(state, !(state.getBlock() instanceof ThrusterBlock) || !ship.contains(pos.relative(state.getValue(ThrusterBlock.FACING))));
 			if (state.is(ModBlocks.HELM)) {
 				helms++;
 			} else if (state.getBlock() instanceof ThrusterBlock) {
@@ -111,10 +115,32 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 			canFly = false;
 		}
 
-		// --- Lift -----------------------------------------------------------------------
+		// --- Power and cooling -------------------------------------------------------------
+		PowerAllocation split = PowerAllocation.DEFAULT;
+		if (systems.powerPlants() == 0) {
+			lines.add(new Line(Status.FAIL, Component.translatable("preflight.starwake.no_power")));
+			canFly = false;
+		} else {
+			lines.add(new Line(Status.PASS, Component.translatable("preflight.starwake.power",
+					systems.powerPlants(), fmt(systems.powerOutput()))));
+			if (systems.thermalFactor() < 1.0) {
+				lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.overheating",
+						fmt(systems.heat()), fmt(systems.cooling()), pct(systems.thermalFactor()))));
+			} else {
+				lines.add(new Line(Status.PASS, Component.translatable("preflight.starwake.cooling",
+						fmt(systems.cooling()), fmt(systems.heat()))));
+			}
+		}
+		double engineFactor = systems.engineFactor(split);
+		if (systems.powerPlants() > 0 && engineFactor < 1.0) {
+			lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.engines_underpowered",
+					fmt(systems.engineDraw()), fmt(systems.availablePower() * split.engines()), pct(engineFactor))));
+		}
+
+		// --- Lift (at the default power split) ----------------------------------------------
 		double gravity = Planets.gravityOf(level.dimension());
 		double weight = mass * gravity;
-		double lift = thrust.get(Direction.UP);
+		double lift = thrust.get(Direction.UP) * engineFactor;
 		if (thrusters == 0) {
 			lines.add(new Line(Status.FAIL, Component.translatable("preflight.starwake.no_thrusters")));
 			canFly = false;
@@ -155,6 +181,20 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 			// Endurance at full throttle on every clear thruster: a worst-case number.
 			String endurance = fuelBurn > 0 ? fmt(fuel / fuelBurn / 20.0) : "∞";
 			lines.add(new Line(Status.PASS, Component.translatable("preflight.starwake.fuel_ok", fuel, capacity, endurance)));
+		}
+
+		// --- Shields and quantum drive ------------------------------------------------------
+		if (systems.shieldGenerators() == 0) {
+			lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.no_shields")));
+		} else {
+			lines.add(new Line(Status.PASS, Component.translatable("preflight.starwake.shields",
+					fmt(systems.shieldCapacity()), pct(systems.shieldFactor(split)))));
+		}
+		if (!systems.hasQuantumDrive()) {
+			lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.no_quantum")));
+		} else {
+			lines.add(new Line(Status.PASS, Component.translatable("preflight.starwake.quantum",
+					fmt(systems.quantumSpool() / Math.max(0.01, systems.quantumFactor(split))))));
 		}
 
 		// --- Cabin seal (needed to leave the atmosphere) -----------------------------------
@@ -215,6 +255,10 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 			return false;
 		}
 		return com.starwake.ship.ShipEntity.sealsCabin(level.getBlockState(pos));
+	}
+
+	private static String pct(double fraction) {
+		return Math.round(fraction * 100) + "%";
 	}
 
 	private static String fmt(double value) {

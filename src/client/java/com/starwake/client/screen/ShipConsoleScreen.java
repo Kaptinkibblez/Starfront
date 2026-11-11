@@ -59,6 +59,13 @@ public class ShipConsoleScreen extends Screen {
 		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
 				.bounds(left + 2 * (third + 4), buttonY, third, 20).build());
 
+		// Assembled ship: the power triangle, at the right of the panel.
+		if (report.power().size() == 3) {
+			int[] percents = report.power().stream().mapToInt(Integer::intValue).toArray();
+			new PowerSliders(percents).create(left + PANEL_WIDTH - 130, height - 32 - 24 * (report.destinations().isEmpty() ? 1 : 2) - 66,
+					130, this::addRenderableWidget);
+		}
+
 		// In space: one "Set course" button per destination planet, in a row above.
 		int count = report.destinations().size();
 		if (count > 0) {
@@ -107,7 +114,8 @@ public class ShipConsoleScreen extends Screen {
 	}
 
 	private List<FormattedCharSequence> wrap(Component text) {
-		return new ArrayList<>(font.split(text, PANEL_WIDTH - 12));
+		// Leave room on the right for the power sliders on an assembled ship.
+		return new ArrayList<>(font.split(text, PANEL_WIDTH - 12 - (report.power().size() == 3 ? 140 : 0)));
 	}
 
 	@Override

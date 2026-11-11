@@ -1,0 +1,8 @@
+{
+  "blocks": [
+    "starwake:power_plant"
+  ],
+  "mass": 3.0,
+  "power_output": 40,
+  "heat": 40
+}

@@ -22,6 +22,10 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		dropSelf(ModBlocks.THRUSTER);
 		dropSelf(ModBlocks.FUEL_TANK);
 		dropSelf(ModBlocks.SEAT);
+		dropSelf(ModBlocks.POWER_PLANT);
+		dropSelf(ModBlocks.COOLER);
+		dropSelf(ModBlocks.SHIELD_GENERATOR);
+		dropSelf(ModBlocks.QUANTUM_DRIVE);
 		// Vanilla ore behaviour: drops raw ore, affected by Fortune; Silk Touch drops the block.
 		add(ModBlocks.FERRITE_ORE, createOreDrop(ModBlocks.FERRITE_ORE, ModItems.RAW_FERRITE));
 	}

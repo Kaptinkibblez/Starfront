@@ -6,6 +6,10 @@
     "starwake:helm",
     "starwake:thruster",
     "starwake:fuel_tank",
-    "starwake:seat"
+    "starwake:seat",
+    "starwake:power_plant",
+    "starwake:cooler",
+    "starwake:shield_generator",
+    "starwake:quantum_drive"
   ]
 }

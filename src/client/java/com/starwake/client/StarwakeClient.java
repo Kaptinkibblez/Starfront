@@ -2,6 +2,7 @@ package com.starwake.client;
 
 import com.starwake.StarwakeMod;
 import com.starwake.client.network.ModClientNetworking;
+import com.starwake.client.hud.ShipHud;
 import com.starwake.client.ship.ShipClient;
 import net.fabricmc.api.ClientModInitializer;
 
@@ -14,6 +15,7 @@ public final class StarwakeClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		ModClientNetworking.init();
 		ShipClient.init();
+		ShipHud.init();
 		StarwakeMod.LOGGER.info("Starwake client initialized");
 	}
 }

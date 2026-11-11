@@ -43,6 +43,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.starwake.ship.systems.PowerAllocation;
+import com.starwake.ship.systems.ShipSystems;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
 import org.joml.Vector3f;
@@ -73,6 +75,18 @@ public class ShipEntity extends Entity {
 	 * {@code "uuid=packedPos;uuid=packedPos"} (26.3 has no compound-tag data serializer).
 	 */
 	private static final EntityDataAccessor<String> SEATS = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
+	// Ship systems state for the client HUD (computed server-side, where ship stats data lives).
+	private static final EntityDataAccessor<Integer> FUEL_CAPACITY = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Float> SHIELD = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	private static final EntityDataAccessor<Float> SHIELD_MAX = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	/** Packed power split percents (0-100 each): engines * 1_000_000 + shields * 1000 + quantum. */
+	private static final EntityDataAccessor<Integer> POWER_SPLIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Float> ENGINE_FACTOR = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	private static final EntityDataAccessor<Float> THERMAL = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	/** Quantum spool progress 0..1, or -1 when not spooling. */
+	private static final EntityDataAccessor<Float> QUANTUM = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	/** Orbited planet's dimension id ("" when not in space / unknown). */
+	private static final EntityDataAccessor<String> ORBIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
 
 	/** Control bits from {@link com.starwake.network.ShipControlPayload}. */
 	public static final int CONTROL_ROLL_LEFT = 1, CONTROL_ROLL_RIGHT = 2, CONTROL_FREE_LOOK = 4;
@@ -86,6 +100,11 @@ public class ShipEntity extends Entity {
 	private Direction forward = Direction.NORTH;
 	private Vec3 pivot = Vec3.ZERO;
 	private int fuelCapacity;
+	private PowerAllocation allocation = PowerAllocation.DEFAULT;
+	private ShipSystems systems = new ShipSystems();
+	/** Quantum travel being spooled (null if none), and progress in [0, 1]. Not saved. */
+	private @Nullable ResourceKey<com.starwake.planet.Planet> quantumTarget;
+	private double quantumProgress;
 	private @Nullable ResourceKey<Level> orbiting;
 	private boolean sealed;
 
@@ -128,7 +147,9 @@ public class ShipEntity extends Entity {
 		this.forward = forward;
 		this.fuelCapacity = fuelCapacity;
 		this.entityData.set(FUEL, fuel);
+		this.entityData.set(FUEL_CAPACITY, fuelCapacity);
 		setStructure(structure);
+		entityData.set(SHIELD, (float) systems.shieldCapacity()); // shields start charged
 	}
 
 	/** Sets the blocks (server on assembly/load; client when the structure payload arrives). */
@@ -181,6 +202,26 @@ public class ShipEntity extends Entity {
 			}
 		}
 		mass = Math.max(mass, 1);
+
+		systems = new ShipSystems();
+		for (ShipStructure.Entry entry : structure.entries()) {
+			boolean clear = !(entry.state().getBlock() instanceof ThrusterBlock)
+					|| structure.get(entry.pos().relative(entry.state().getValue(ThrusterBlock.FACING))) == null;
+			systems.add(entry.state(), clear);
+		}
+		publishSystems();
+	}
+
+	/** Server: pushes systems numbers to the synced HUD fields. */
+	private void publishSystems() {
+		if (level() == null || level().isClientSide()) return;
+		entityData.set(SHIELD_MAX, (float) systems.shieldCapacity());
+		entityData.set(SHIELD, (float) Math.min(entityData.get(SHIELD), systems.shieldCapacity()));
+		int[] p = allocation.percents();
+		entityData.set(POWER_SPLIT, p[0] * 1_000_000 + p[1] * 1000 + p[2]);
+		entityData.set(ENGINE_FACTOR, (float) systems.engineFactor(allocation));
+		entityData.set(THERMAL, (float) systems.thermalFactor());
+		entityData.set(ORBIT, orbiting == null ? "" : orbiting.identifier().toString());
 	}
 
 	/**
@@ -285,6 +326,14 @@ public class ShipEntity extends Entity {
 		builder.define(FUEL, 0);
 		builder.define(ORIENTATION, new Quaternionf());
 		builder.define(SEATS, "");
+		builder.define(FUEL_CAPACITY, 0);
+		builder.define(SHIELD, 0f);
+		builder.define(SHIELD_MAX, 0f);
+		builder.define(POWER_SPLIT, 60_020_020);
+		builder.define(ENGINE_FACTOR, 1f);
+		builder.define(THERMAL, 1f);
+		builder.define(QUANTUM, -1f);
+		builder.define(ORBIT, "");
 	}
 
 	// =========================================================================================
@@ -292,7 +341,25 @@ public class ShipEntity extends Entity {
 	// =========================================================================================
 
 	public int fuel() { return entityData.get(FUEL); }
-	public int fuelCapacity() { return fuelCapacity; }
+	public int fuelCapacity() { return level().isClientSide() ? entityData.get(FUEL_CAPACITY) : fuelCapacity; }
+	public float shield() { return entityData.get(SHIELD); }
+	public float shieldMax() { return entityData.get(SHIELD_MAX); }
+	public float engineFactor() { return entityData.get(ENGINE_FACTOR); }
+	public float thermalFactor() { return entityData.get(THERMAL); }
+	public float quantumProgress() { return entityData.get(QUANTUM); }
+	public String orbitId() { return entityData.get(ORBIT); }
+	public int[] powerPercents() {
+		int packed = entityData.get(POWER_SPLIT);
+		return new int[] {packed / 1_000_000, packed / 1000 % 1000, packed % 1000};
+	}
+	public ShipSystems systems() { return systems; }
+	public PowerAllocation allocation() { return allocation; }
+
+	/** Server: the pilot re-routes power. */
+	public void setAllocation(PowerAllocation allocation) {
+		this.allocation = allocation;
+		publishSystems();
+	}
 	public BlockPos helmLocal() { return helmLocal; }
 	public Direction forward() { return forward; }
 	public double mass() { return mass; }
@@ -300,7 +367,10 @@ public class ShipEntity extends Entity {
 	public boolean isSealed() { return sealed; }
 	public boolean isGrounded() { return grounded; }
 	public @Nullable ResourceKey<Level> orbiting() { return orbiting; }
-	public void setOrbiting(@Nullable ResourceKey<Level> orbiting) { this.orbiting = orbiting; }
+	public void setOrbiting(@Nullable ResourceKey<Level> orbiting) {
+		this.orbiting = orbiting;
+		publishSystems();
+	}
 	public void setDrift(Vec3 drift) { this.drift = drift; }
 	/** Admin/testing: constant spin (yaw, pitch, roll in degrees/second about the ship's own axes). Not saved. */
 	public void setSpin(Vec3 spin) { this.spin = spin; }
@@ -576,10 +646,49 @@ public class ShipEntity extends Entity {
 			}
 		}
 
-		if (pilot instanceof ServerPlayer player && tickCount % 10 == 0) {
-			sendHud(player);
-		}
+		tickSystems();
 		return false;
+	}
+
+	/** Shield regeneration and quantum spool, scaled by the power routed to each. */
+	private void tickSystems() {
+		float shield = entityData.get(SHIELD);
+		if (shield < systems.shieldCapacity()) {
+			double regen = systems.shieldRegen() * systems.shieldFactor(allocation);
+			entityData.set(SHIELD, (float) Math.min(systems.shieldCapacity(), shield + regen));
+		}
+		if (quantumTarget != null) {
+			if (!SpaceTravel.isSpace(level())) {
+				cancelQuantum(Component.translatable("message.starwake.quantum.aborted"));
+				return;
+			}
+			double rate = systems.quantumFactor(allocation) / Math.max(1.0, systems.quantumSpool() * 20.0);
+			quantumProgress = Math.min(1.0, quantumProgress + rate);
+			entityData.set(QUANTUM, (float) quantumProgress);
+			if (quantumProgress >= 1.0) {
+				var target = quantumTarget;
+				quantumTarget = null;
+				entityData.set(QUANTUM, -1f);
+				Component result = SpaceTravel.completeCourse(this, target);
+				if (pilot() instanceof ServerPlayer player) player.sendOverlayMessage(result);
+			}
+		}
+	}
+
+	/** Starts spooling the quantum drive toward a planet (server). */
+	public @Nullable Component startQuantum(ResourceKey<com.starwake.planet.Planet> target) {
+		if (!systems.hasQuantumDrive()) return Component.translatable("message.starwake.quantum.no_drive");
+		if (systems.quantumFactor(allocation) <= 0) return Component.translatable("message.starwake.quantum.no_power");
+		quantumTarget = target;
+		quantumProgress = 0;
+		entityData.set(QUANTUM, 0f);
+		return null;
+	}
+
+	private void cancelQuantum(Component reason) {
+		quantumTarget = null;
+		entityData.set(QUANTUM, -1f);
+		if (pilot() instanceof ServerPlayer player) player.sendOverlayMessage(reason);
 	}
 
 	/** The passenger sitting at the Helm, if any. */
@@ -658,7 +767,8 @@ public class ShipEntity extends Entity {
 		Input input = pilot instanceof ServerPlayer sp ? sp.getLastClientInput() : Input.EMPTY;
 		boolean space = SpaceTravel.isSpace(level());
 		double gravity = Planets.gravityOf(level().dimension());
-		double boost = input.shift() ? physics.boostMultiplier() : 1.0;
+		// Boost and engine power both scale thrust (and fuel burn).
+		double boost = (input.shift() ? physics.boostMultiplier() : 1.0) * systems.engineFactor(allocation);
 		Vec3 accel = new Vec3(0, -gravity * physics.gravityToAccel(), 0);
 		double fuelUsed = 0;
 
@@ -680,7 +790,7 @@ public class ShipEntity extends Entity {
 				double capacity = 0, burnPerThrust = 0;
 				for (Direction d : Direction.values()) {
 					double up = Math.max(0, worldDirection(d).y);
-					capacity += thrust.get(d) * up;
+					capacity += thrust.get(d) * up * systems.engineFactor(allocation);
 					burnPerThrust += burn.get(d) * up;
 				}
 				double needed = mass * gravity;
@@ -705,21 +815,6 @@ public class ShipEntity extends Entity {
 		}
 	}
 
-	private void sendHud(ServerPlayer player) {
-		Vec3 nose = worldDirection(forward);
-		Vec3 up = worldDirection(Direction.UP);
-		Vec3 right = worldDirection(forward.getClockWise());
-		int heading = Math.floorMod((int) Math.round(Math.toDegrees(Math.atan2(nose.x, -nose.z))), 360);
-		int pitch = (int) Math.round(Math.toDegrees(Math.asin(Mth.clamp(nose.y, -1, 1))));
-		int roll = (int) Math.round(Math.toDegrees(Math.atan2(-right.y, up.y)));
-		String speed = String.format("%.1f", getDeltaMovement().length() * 20);
-		Component where = SpaceTravel.isSpace(level())
-				? Component.translatable("hud.starwake.ship.orbit", SpaceTravel.planetName(level(), orbiting))
-				: Component.translatable("hud.starwake.ship.alt", (int) getY());
-		player.sendOverlayMessage(Component.translatable("hud.starwake.ship6", fuel(), fuelCapacity, speed,
-				heading, pitch, roll, where));
-	}
-
 	// --- Terrain collision -------------------------------------------------------------------
 
 	/** Moves axis by axis, clipping each against terrain using the hull blocks' world boxes. */
@@ -732,6 +827,39 @@ public class ShipEntity extends Entity {
 		double dz = clip(Direction.Axis.Z, velocity.z);
 		setPos(getX(), getY(), getZ() + dz);
 		setDeltaMovement(dx == velocity.x ? velocity.x : 0, dy == velocity.y ? velocity.y : 0, dz == velocity.z ? velocity.z : 0);
+		double impact = Math.abs(velocity.x - dx) + Math.abs(velocity.y - dy) + Math.abs(velocity.z - dz);
+		if (impactCooldown > 0) impactCooldown--;
+		else if (impact > SAFE_IMPACT) onImpact(impact);
+	}
+
+	/** Ticks before another impact can register: a crash counts once, not once per tick of scraping. */
+	private int impactCooldown;
+
+	/** Impact speed (blocks/tick) a ship absorbs without consequence: a firm landing. */
+	private static final double SAFE_IMPACT = 0.35;
+
+	/**
+	 * A crash: shields soak the impact energy first; anything left hurts everyone aboard
+	 * (crew in seats and people walking inside).
+	 */
+	private void onImpact(double impact) {
+		if (!(level() instanceof ServerLevel serverLevel)) return;
+		impactCooldown = 10;
+		double energy = (impact - SAFE_IMPACT) * 40.0; // 1 b/t over the limit = 40 shield HP
+		float shield = entityData.get(SHIELD);
+		double absorbed = Math.min(shield, energy);
+		entityData.set(SHIELD, (float) (shield - absorbed));
+		double excess = energy - absorbed;
+		serverLevel.playSound(null, BlockPos.containing(position()), net.minecraft.sounds.SoundEvents.ANVIL_LAND,
+				net.minecraft.sounds.SoundSource.BLOCKS, (float) Math.min(1.5, impact), absorbed > 0 ? 1.6f : 0.6f);
+		if (excess <= 0) return;
+		float damage = (float) Math.min(30.0, excess / 4.0);
+		AABB inside = getBoundingBox().inflate(1.0);
+		for (Entity entity : serverLevel.getEntities(this, inside, e -> e instanceof LivingEntity)) {
+			if (entity.getVehicle() == this || isSupporting(entity)) {
+				entity.hurtServer(serverLevel, serverLevel.damageSources().flyIntoWall(), damage);
+			}
+		}
 	}
 
 	private double clip(Direction.Axis axis, double distance) {
@@ -936,6 +1064,9 @@ public class ShipEntity extends Entity {
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		fuelCapacity = input.getIntOr("fuel_capacity", 0);
+		entityData.set(FUEL_CAPACITY, fuelCapacity);
+		allocation = input.read("power", PowerAllocation.CODEC).orElse(PowerAllocation.DEFAULT);
+		entityData.set(SHIELD, (float) input.getDoubleOr("shield", 0));
 		entityData.set(FUEL, input.getIntOr("fuel", 0));
 		orbiting = input.read("orbiting", Level.RESOURCE_KEY_CODEC).orElse(null);
 		input.read("orientation", ExtraCodecs.QUATERNIONF).ifPresent(q -> entityData.set(ORIENTATION, new Quaternionf(q)));
@@ -954,6 +1085,8 @@ public class ShipEntity extends Entity {
 		output.putInt("frame", FRAME_VERSION);
 		output.putInt("fuel", fuel());
 		output.putInt("fuel_capacity", fuelCapacity);
+		output.store("power", PowerAllocation.CODEC, allocation);
+		output.putDouble("shield", entityData.get(SHIELD));
 		output.store("orientation", ExtraCodecs.QUATERNIONF, orientation());
 		if (orbiting != null) {
 			output.store("orbiting", Level.RESOURCE_KEY_CODEC, orbiting);

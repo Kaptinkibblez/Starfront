@@ -1,0 +1,8 @@
+{
+  "blocks": [
+    "starwake:quantum_drive"
+  ],
+  "mass": 3.0,
+  "power_draw": 10,
+  "quantum_spool": 8
+}

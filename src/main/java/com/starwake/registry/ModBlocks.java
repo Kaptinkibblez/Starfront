@@ -97,6 +97,26 @@ public final class ModBlocks {
 					.sound(SoundType.METAL)
 					.noOcclusion());
 
+	// --- Ship components (stats in ship_stats JSON) -------------------------------------
+
+	/** Power Plant: generates power (and heat). Every ship needs at least one. */
+	public static final Block POWER_PLANT = component("power_plant", MapColor.COLOR_LIGHT_BLUE, 7);
+	/** Cooler: removes heat so power plants can run at full output. */
+	public static final Block COOLER = component("cooler", MapColor.COLOR_CYAN, 0);
+	/** Shield Generator: a regenerating shield that absorbs crash impacts. */
+	public static final Block SHIELD_GENERATOR = component("shield_generator", MapColor.COLOR_BLUE, 5);
+	/** Quantum Drive: spools up and jumps the ship between planets. */
+	public static final Block QUANTUM_DRIVE = component("quantum_drive", MapColor.COLOR_PURPLE, 6);
+
+	private static Block component(String name, MapColor color, int light) {
+		return register(name, Block::new, BlockBehaviour.Properties.of()
+				.mapColor(color)
+				.strength(4.0f, 6.0f)
+				.sound(SoundType.METAL)
+				.lightLevel(state -> light)
+				.requiresCorrectToolForDrops());
+	}
+
 	private ModBlocks() {}
 
 	/** Registers a block and its block item under {@code starwake:<name>}. */

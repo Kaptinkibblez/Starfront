@@ -140,16 +140,31 @@ public final class SpaceTravel {
 		return result;
 	}
 
-	/** @return null on success, or why the course can't be set */
+	/**
+	 * Begins quantum travel to a planet: validates, then spools the quantum drive. The jump
+	 * happens when the spool completes ({@link #completeCourse}).
+	 *
+	 * @return null if spooling started, or why it can't
+	 */
 	public static @Nullable Component setCourse(ShipEntity ship, ResourceKey<Planet> target) {
 		if (!isSpace(ship.level())) return Component.translatable("message.starwake.course.not_in_space");
 		var planet = Planets.registry(ship.level().getServer()).get(target).orElse(null);
 		if (planet == null || !planet.value().destination()) return Component.translatable("message.starwake.course.unknown");
 		int cost = ShipPhysics.get().courseFuelCost();
 		if (ship.fuel() < cost) return Component.translatable("message.starwake.course.no_fuel", cost);
+		return ship.startQuantum(target);
+	}
+
+	/** Called when the quantum spool completes: pay fuel and arrive in orbit of the target. */
+	public static Component completeCourse(ShipEntity ship, ResourceKey<Planet> target) {
+		var planet = Planets.registry(ship.level().getServer()).get(target).orElse(null);
+		int cost = ShipPhysics.get().courseFuelCost();
+		if (planet == null || ship.fuel() < cost) {
+			return Component.translatable("message.starwake.course.no_fuel", cost);
+		}
 		ship.useFuel(cost);
 		ship.setOrbiting(planet.value().dimension());
-		return null;
+		return Component.translatable("message.starwake.course.set", planet.value().name());
 	}
 
 	public static Component planetName(Level level, @Nullable ResourceKey<Level> dimension) {

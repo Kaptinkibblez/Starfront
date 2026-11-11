@@ -26,6 +26,31 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModBlocks.THRUSTER, "Thruster");
 		builder.add(ModBlocks.FUEL_TANK, "Fuel Tank");
 		builder.add(ModBlocks.SEAT, "Seat");
+		builder.add(ModBlocks.POWER_PLANT, "Power Plant");
+		builder.add(ModBlocks.COOLER, "Cooler");
+		builder.add(ModBlocks.SHIELD_GENERATOR, "Shield Generator");
+		builder.add(ModBlocks.QUANTUM_DRIVE, "Quantum Drive");
+		// Pre-flight: components
+		builder.add("preflight.starwake.no_power", "No power plant: nothing to run the engines");
+		builder.add("preflight.starwake.power", "Power: %s plant(s), %s output");
+		builder.add("preflight.starwake.cooling", "Cooling %s vs heat %s: plants at full output");
+		builder.add("preflight.starwake.overheating", "Overheating: heat %s vs cooling %s, plants throttled to %s. Add coolers");
+		builder.add("preflight.starwake.engines_underpowered", "Engines want %s power but get %s at the default split: thrust %s");
+		builder.add("preflight.starwake.no_shields", "No shield generator: crashes hurt the crew");
+		builder.add("preflight.starwake.shields", "Shields %s HP (regen %s at the default split)");
+		builder.add("preflight.starwake.no_quantum", "No quantum drive: can't travel between planets");
+		builder.add("preflight.starwake.quantum", "Quantum drive: spools in %ss at the default split");
+		// Quantum travel
+		builder.add("message.starwake.quantum.no_drive", "No quantum drive aboard");
+		builder.add("message.starwake.quantum.no_power", "Route power to Quantum to spool the drive");
+		builder.add("message.starwake.quantum.spooling", "Quantum drive spooling...");
+		builder.add("message.starwake.quantum.aborted", "Quantum travel aborted");
+		// Power routing
+		builder.add("screen.starwake.power.engines", "Engines: %s%%");
+		builder.add("screen.starwake.power.shields", "Shields: %s%%");
+		builder.add("screen.starwake.power.quantum", "Quantum: %s%%");
+		builder.add("console.starwake.ship.power", "Power %s, cooling %s, engines %s, shield %s");
+		builder.add("hud.starwake.qt", "QT %s%%");
 		builder.add("key.starwake.roll_left", "Roll Left");
 		builder.add("key.starwake.roll_right", "Roll Right");
 		builder.add("key.starwake.free_look", "Free Look (hold)");
@@ -66,10 +91,10 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("screen.starwake.ship_console.course", "Set course: %s");
 		builder.add("console.starwake.ship.sealed", "Cabin sealed: space-capable");
 		builder.add("console.starwake.ship.unsealed", "Cabin not sealed: atmosphere only");
-		builder.add("console.starwake.ship.orbiting", "Orbiting %s. Descend below Y 16 to re-enter. Setting a course costs %s fuel");
+		builder.add("console.starwake.ship.orbiting", "Orbiting %s (descend to land; course: %s fuel)");
 		builder.add("console.starwake.ship.to_space", "Climb above Y %s to reach space");
-		builder.add("console.starwake.ship.mass", "%s blocks, mass %s t, gravity here %sg");
-		builder.add("console.starwake.ship.fuel", "Fuel %s / %s (refuel: right-click a fuel tank on board with fuel)");
+		builder.add("console.starwake.ship.mass", "%s blocks, %s t, %sg");
+		builder.add("console.starwake.ship.fuel", "Fuel %s / %s");
 		builder.add("console.starwake.ship.controls", "Mouse steers. WASD/Space/Ctrl thrust, Z/C roll, Shift boost, Alt free look, X leave seat. Engines hover automatically");
 		builder.add("console.starwake.ship.can_disassemble", "Stationary: you can disassemble the ship back into blocks to edit it");
 		builder.add("console.starwake.ship.moving", "Moving: stop to disassemble");
