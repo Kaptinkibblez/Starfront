@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "star_class.starwake.g"
+  },
+  "symbol": "G",
+  "weight": 0.076,
+  "temperature": [
+    5200,
+    6000
+  ],
+  "luminosity": [
+    0.6,
+    1.5
+  ],
+  "radius": [
+    0.96,
+    1.15
+  ],
+  "mass": [
+    0.8,
+    1.04
+  ],
+  "color": "#fff4ea",
+  "planets": [
+    2,
+    8
+  ],
+  "binary": 0.4
+}

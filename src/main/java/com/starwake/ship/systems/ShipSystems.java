@@ -29,6 +29,8 @@ public final class ShipSystems {
 	private double shieldCapacity, shieldRegen;
 	private double quantumSpool; // best (shortest) drive spool time; 0 = no quantum drive
 	private int powerPlants, coolers, shieldGenerators, quantumDrives;
+	private double jumpRange, jumpSpool, jumpDraw; // jump drives (M6): best range, shortest spool
+	private int jumpDrives;
 
 	/** Adds one block. {@code clearExhaust} only matters for thrusters. */
 	public void add(BlockState state, boolean clearExhaust) {
@@ -49,6 +51,12 @@ public final class ShipSystems {
 			shieldRegen += stats.shieldRegen();
 			shieldDraw += stats.powerDraw();
 			shieldGenerators++;
+		} else if (stats.jumpRange() > 0) {
+			jumpRange = Math.max(jumpRange, stats.jumpRange());
+			jumpSpool = jumpSpool == 0 ? stats.jumpSpool() : Math.min(jumpSpool, stats.jumpSpool());
+			jumpDraw += stats.powerDraw();
+			quantumDraw += stats.powerDraw(); // jump drives run on the quantum share of power
+			jumpDrives++;
 		} else if (stats.quantumSpool() > 0) {
 			quantumSpool = quantumSpool == 0 ? stats.quantumSpool() : Math.min(quantumSpool, stats.quantumSpool());
 			quantumDraw += stats.powerDraw();
@@ -95,4 +103,8 @@ public final class ShipSystems {
 	public int shieldGenerators() { return shieldGenerators; }
 	public int quantumDrives() { return quantumDrives; }
 	public boolean hasQuantumDrive() { return quantumDrives > 0; }
+	public boolean hasJumpDrive() { return jumpDrives > 0; }
+	public double jumpRange() { return jumpRange; }
+	public double jumpSpool() { return jumpSpool; }
+	public int jumpDrives() { return jumpDrives; }
 }

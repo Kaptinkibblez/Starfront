@@ -62,6 +62,13 @@ public final class ShipClient {
 	/** Star Citizen's coupled/decoupled toggle. */
 	private static final KeyMapping DECOUPLE = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.decouple", InputConstants.KEY_V, CATEGORY));
+	/** Jump drive (M6): tap to arm, hold to jump. */
+	private static final KeyMapping JUMP = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.jump", InputConstants.KEY_J, CATEGORY));
+	/** The galaxy map (M6). */
+	private static final KeyMapping GALAXY_MAP = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.galaxy_map", InputConstants.KEY_M, CATEGORY));
+	private static int jumpHeld;
 	/** Ticks B must be held to engage (0.75 s). */
 	private static final int QUANTUM_HOLD_TICKS = 15;
 	private static int quantumHeld;
@@ -90,6 +97,10 @@ public final class ShipClient {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			sendControls(client);
 			quantumKey(client);
+			jumpKey(client);
+			while (GALAXY_MAP.consumeClick()) {
+				if (client.player != null && client.gui.screen() == null) client.gui.setScreen(new com.starwake.client.galaxy.GalaxyMapScreen());
+			}
 			decoupleKey(client);
 			gearKey(client);
 			while (WRISTCOM.consumeClick()) {
@@ -167,6 +178,23 @@ public final class ShipClient {
 			if (client.player != null && client.player.getVehicle() instanceof ShipEntity ship && ship.pilot() == client.player) {
 				ClientPlayNetworking.send(new ShipQuantumPayload(ShipQuantumPayload.ACTION_DECOUPLE));
 			}
+		}
+	}
+
+	/** J: a tap arms/disarms the jump drive; holding past {@link #QUANTUM_HOLD_TICKS} jumps once. */
+	private static void jumpKey(Minecraft client) {
+		while (JUMP.consumeClick()) { /* edge presses are handled through isDown below */ }
+		boolean piloting = client.player != null && client.player.getVehicle() instanceof ShipEntity ship && ship.pilot() == client.player;
+		if (!piloting) {
+			jumpHeld = 0;
+			return;
+		}
+		if (JUMP.isDown()) {
+			jumpHeld++;
+			if (jumpHeld == QUANTUM_HOLD_TICKS) ClientPlayNetworking.send(new ShipQuantumPayload(ShipQuantumPayload.ACTION_JUMP_ENGAGE));
+		} else {
+			if (jumpHeld > 0 && jumpHeld < QUANTUM_HOLD_TICKS) ClientPlayNetworking.send(new ShipQuantumPayload(ShipQuantumPayload.ACTION_JUMP_TOGGLE));
+			jumpHeld = 0;
 		}
 	}
 

@@ -81,6 +81,52 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("chem.starwake.source.ice", "ice");
 		builder.add("chem.starwake.source.brine", "brine");
 		builder.add("chem.starwake.source.coal", "coal");
+		// Galaxy (M6)
+		for (String[] c : new String[][] {{"o", "Blue giant (O)"}, {"b", "Blue-white star (B)"}, {"a", "White star (A)"},
+				{"f", "Yellow-white star (F)"}, {"g", "Yellow dwarf (G)"}, {"k", "Orange dwarf (K)"}, {"m", "Red dwarf (M)"},
+				{"white_dwarf", "White dwarf (D)"}, {"neutron_star", "Neutron star"}}) {
+			builder.add("star_class.starwake." + c[0], c[1]);
+		}
+		builder.add("key.starwake.jump", "Jump drive (tap: arm, hold: jump)");
+		builder.add("key.starwake.galaxy_map", "Galaxy map");
+		builder.add("screen.starwake.galaxy", "Galaxy Map");
+		builder.add("screen.starwake.galaxy.here", "You are at %s");
+		builder.add("screen.starwake.galaxy.pick", "Click a star to inspect it");
+		builder.add("screen.starwake.galaxy.binary", "Binary: + %s");
+		builder.add("screen.starwake.galaxy.distance", "Distance: %s ly");
+		builder.add("screen.starwake.galaxy.planets", "Planets: %s");
+		builder.add("screen.starwake.galaxy.loading", "Scanning...");
+		builder.add("screen.starwake.galaxy.set_jump", "Set Jump Target");
+		builder.add("screen.starwake.galaxy.is_target", "Jump target set");
+		builder.add("screen.starwake.galaxy.no_data", "No galaxy data (not connected?)");
+		builder.add("screen.starwake.galaxy.help", "Left-drag rotate · Right-drag pan · Scroll zoom · Click select · F focus · H here · M close");
+		builder.add("wristcom.starmap.galaxy", "Galaxy");
+		builder.add("hud.starwake.jump.mode", "JUMP: %s");
+		builder.add("hud.starwake.jump.travel", "JUMPING TO %s");
+		builder.add("hud.starwake.jump.tunnel", "In the jump tunnel");
+		builder.add("hud.starwake.jump.no_target", "Pick a star on the galaxy map (M)");
+		builder.add("hud.starwake.jump.out_of_range", "Out of range");
+		builder.add("hud.starwake.jump.gravity_well", "Too close to a gravity well");
+		builder.add("hud.starwake.jump.no_fuel", "Not enough fuel");
+		builder.add("hud.starwake.jump.spooling", "Spooling...");
+		builder.add("hud.starwake.jump.align", "Align with the target star");
+		builder.add("hud.starwake.jump.ready", "READY: hold J");
+		builder.add("message.starwake.jump.no_drive", "This ship has no Jump Drive");
+		builder.add("message.starwake.jump.unknown", "Unknown star system");
+		builder.add("message.starwake.jump.here", "You're already in that system");
+		builder.add("message.starwake.jump.on", "Jump drive armed");
+		builder.add("message.starwake.jump.off", "Jump drive disarmed");
+		builder.add("message.starwake.jump.target", "Jump target: %s");
+		builder.add("message.starwake.jump.not_pilot", "Only the pilot can set a jump target");
+		builder.add("message.starwake.jump.in_tunnel", "Can't while jumping");
+		builder.add("message.starwake.jump.no_target", "No jump target: pick a star on the galaxy map (M)");
+		builder.add("message.starwake.jump.out_of_range", "Target is out of jump range");
+		builder.add("message.starwake.jump.not_spooled", "Jump drive still spooling");
+		builder.add("message.starwake.jump.gravity_well", "Too close to a gravity well: fly further from planets and stars");
+		builder.add("message.starwake.jump.no_fuel", "Not enough fuel for this jump");
+		builder.add("message.starwake.jump.not_aligned", "Point the nose at the target star");
+		builder.add("message.starwake.jump.engaged", "Jumping to %s (%s ly, %s)");
+		builder.add("message.starwake.jump.arrived", "Arrived at %s");
 		builder.add(ModItems.SURVEY_SUIT, "Survey Suit");
 		for (String[] kind : new String[][] {{"lush", "Lush world"}, {"frozen", "Frozen world"}, {"barren", "Barren world"},
 				{"toxic", "Toxic world"}, {"volcanic", "Volcanic world"}, {"ocean", "Ocean world"}, {"desert", "Desert world"},
@@ -116,6 +162,7 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModBlocks.COOLER, "Cooler");
 		builder.add(ModBlocks.SHIELD_GENERATOR, "Shield Generator");
 		builder.add(ModBlocks.QUANTUM_DRIVE, "Quantum Drive");
+		builder.add(ModBlocks.JUMP_DRIVE, "Jump Drive");
 		// Pre-flight: components
 		builder.add("preflight.starwake.no_power", "No power plant: nothing to run the engines");
 		builder.add("preflight.starwake.power", "Power: %s plant(s), %s output");

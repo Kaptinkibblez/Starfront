@@ -246,7 +246,7 @@ public final class FlightHud {
 		String value, label;
 		double fraction;
 		if (space) {
-			var nearest = SolarSystem.nearest(ship.level().registryAccess(), ship.position());
+			var nearest = SolarSystem.nearest(ship.level(), ship.position());
 			double range = nearest.map(b -> ship.position().distanceTo(b.body().position()) - b.body().entryRadius()).orElse(0.0);
 			value = SolarSystem.formatDistance(Math.max(0, range));
 			label = nearest.map(b -> b.displayName().getString()).orElse("--");

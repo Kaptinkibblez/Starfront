@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "star_class.starwake.b"
+  },
+  "symbol": "B",
+  "weight": 0.003,
+  "temperature": [
+    10000,
+    30000
+  ],
+  "luminosity": [
+    25,
+    30000
+  ],
+  "radius": [
+    1.8,
+    6.6
+  ],
+  "mass": [
+    2.1,
+    16
+  ],
+  "color": "#aabfff",
+  "planets": [
+    0,
+    4
+  ],
+  "binary": 0.6
+}

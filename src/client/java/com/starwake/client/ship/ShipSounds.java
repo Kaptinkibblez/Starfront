@@ -79,7 +79,7 @@ public final class ShipSounds {
 		FIRING_RCS.keySet().removeIf(id -> client.level.getEntity(id) == null);
 
 		ShipEntity mine = client.player.getVehicle() instanceof ShipEntity s ? s : ShipLocalMotion.activeShip();
-		if (mine != null && mine.isQuantumTravelling() && (travel == null || travel.isStopped())) {
+		if (mine != null && (mine.isQuantumTravelling() || mine.isJumping()) && (travel == null || travel.isStopped())) {
 			travel = new Loop(mine, ModSounds.QUANTUM_TRAVEL_LOOP, Loop.Kind.QUANTUM);
 			client.getSoundManager().play(travel);
 		}

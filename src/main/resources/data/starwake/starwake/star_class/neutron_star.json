@@ -1,0 +1,30 @@
+{
+  "name": {
+    "translate": "star_class.starwake.neutron_star"
+  },
+  "symbol": "NS",
+  "weight": 0.001,
+  "temperature": [
+    500000,
+    1000000
+  ],
+  "luminosity": [
+    1e-05,
+    0.0001
+  ],
+  "radius": [
+    2e-05,
+    2e-05
+  ],
+  "mass": [
+    1.4,
+    2.1
+  ],
+  "color": "#c0d8ff",
+  "planets": [
+    0,
+    1
+  ],
+  "binary": 0.1,
+  "remnant": true
+}

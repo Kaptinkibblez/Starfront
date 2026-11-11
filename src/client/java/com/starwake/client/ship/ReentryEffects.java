@@ -57,7 +57,7 @@ public final class ReentryEffects {
 		if (fromSpeed <= 0) return 0;
 		Level level = ship.level();
 		if (SpaceTravel.isSpace(level)) {
-			var nearest = SolarSystem.nearest(level.registryAccess(), ship.position());
+			var nearest = SolarSystem.nearest(level, ship.position());
 			if (nearest.isEmpty()) return 0;
 			var body = nearest.get().body();
 			double gap = ship.position().distanceTo(body.position()) - body.entryRadius();

@@ -142,6 +142,8 @@ public final class ModBlocks {
 	public static final Block SHIELD_GENERATOR = component("shield_generator", MapColor.COLOR_BLUE, 5);
 	/** Quantum Drive: spools up and jumps the ship between planets. */
 	public static final Block QUANTUM_DRIVE = component("quantum_drive", MapColor.COLOR_PURPLE, 6);
+	/** Jump Drive (M6): folds space to jump between star systems, light-years at a time. */
+	public static final Block JUMP_DRIVE = component("jump_drive", MapColor.COLOR_ORANGE, 8);
 
 	private static Block component(String name, MapColor color, int light) {
 		return register(name, Block::new, BlockBehaviour.Properties.of()

@@ -49,8 +49,9 @@ public final class SpaceTravel {
 
 	private SpaceTravel() {}
 
+	/** Any star system's space (M6: every system has its own). */
 	public static boolean isSpace(Level level) {
-		return level.dimension().equals(SPACE);
+		return SolarSystem.isSpace(level.dimension());
 	}
 
 	/**
@@ -85,7 +86,7 @@ public final class SpaceTravel {
 		}
 
 		// Flying into a planet's atmosphere takes you down to its surface.
-		for (SolarSystem.Entry body : SolarSystem.bodies(level.registryAccess())) {
+		for (SolarSystem.Entry body : SolarSystem.bodies(level)) {
 			double distance = ship.position().distanceTo(body.body().position());
 			if (body.body().star() && distance < body.body().radius() * 1.2) {
 				// Too close to the star: the hull is pushed back out (and the crew get the hint).
@@ -119,7 +120,7 @@ public final class SpaceTravel {
 			}
 			return false;
 		}
-		ServerLevel space = level.getServer().getLevel(SPACE);
+		ServerLevel space = level.getServer().getLevel(SolarSystem.spaceOf(SolarSystem.systemOf(level)));
 		if (space == null) return false;
 		ship.setOrbiting(level.dimension());
 		Optional<SolarSystem.Entry> planet = SolarSystem.forDimension(level.registryAccess(), level.dimension());
@@ -139,7 +140,7 @@ public final class SpaceTravel {
 	 * Moves the ship and everyone on board (pilot included) to {@code origin} in {@code to},
 	 * turning the whole ship (and its velocity, and everyone's view) by {@code rotation}.
 	 */
-	private static boolean transfer(ShipEntity ship, @Nullable ServerLevel to, Vec3 origin, Quaternionfc rotation) {
+	public static boolean transfer(ShipEntity ship, @Nullable ServerLevel to, Vec3 origin, Quaternionfc rotation) {
 		if (to == null || !(ship.level() instanceof ServerLevel from)) return false;
 
 		// Everyone standing on or inside the ship (the pilot rides along via vanilla). Riders
@@ -221,7 +222,7 @@ public final class SpaceTravel {
 		double distance = from.distanceTo(arrival);
 		boolean tooClose = from.distanceTo(target.body().position()) - target.body().entryRadius()
 				< physics.quantumMinDistance();
-		var obstruction = SolarSystem.obstruction(ship.level().registryAccess(), from, arrival, target.key()).orElse(null);
+		var obstruction = SolarSystem.obstruction(ship.level(), from, arrival, target.key()).orElse(null);
 		return new Route(target, arrival, distance, physics.quantumFuel(distance),
 				SolarSystem.travelTicks(distance, physics.quantumSpeed(), physics.quantumRamp()), obstruction, tooClose);
 	}
@@ -230,7 +231,7 @@ public final class SpaceTravel {
 	public static List<Route> destinations(ShipEntity ship) {
 		if (!isSpace(ship.level())) return List.of();
 		List<Route> result = new ArrayList<>();
-		for (SolarSystem.Entry body : SolarSystem.bodies(ship.level().registryAccess())) {
+		for (SolarSystem.Entry body : SolarSystem.bodies(ship.level())) {
 			if (body.enterable()) result.add(route(ship, body));
 		}
 		result.sort(Comparator.comparingDouble(Route::distance));

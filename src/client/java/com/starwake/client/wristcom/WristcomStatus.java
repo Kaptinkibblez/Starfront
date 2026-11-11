@@ -15,7 +15,7 @@ public final class WristcomStatus {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.level == null || minecraft.player == null) return Component.literal("--");
 		if (SpaceTravel.isSpace(minecraft.level)) {
-			var near = SolarSystem.nearest(minecraft.level.registryAccess(), minecraft.player.position());
+			var near = SolarSystem.nearest(minecraft.level, minecraft.player.position());
 			return near.map(b -> Component.translatable("screen.starwake.wristcom.in_space_near", b.displayName()))
 					.orElse(Component.translatable("planet.starwake.space"));
 		}

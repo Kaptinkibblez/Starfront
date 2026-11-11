@@ -65,6 +65,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.createTrivialBlock(ModBlocks.COOLER, TexturedModel.COLUMN);
 		generators.createTrivialBlock(ModBlocks.SHIELD_GENERATOR, TexturedModel.COLUMN);
 		generators.createTrivialBlock(ModBlocks.QUANTUM_DRIVE, TexturedModel.COLUMN);
+		generators.createTrivialBlock(ModBlocks.JUMP_DRIVE, TexturedModel.COLUMN);
 	}
 
 	/**

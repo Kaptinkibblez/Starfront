@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "star_class.starwake.o"
+  },
+  "symbol": "O",
+  "weight": 0.0008,
+  "temperature": [
+    30000,
+    45000
+  ],
+  "luminosity": [
+    30000,
+    400000
+  ],
+  "radius": [
+    6.6,
+    15
+  ],
+  "mass": [
+    16,
+    60
+  ],
+  "color": "#9bb0ff",
+  "planets": [
+    0,
+    3
+  ],
+  "binary": 0.7
+}

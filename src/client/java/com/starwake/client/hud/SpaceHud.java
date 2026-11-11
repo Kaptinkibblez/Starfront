@@ -27,7 +27,7 @@ import org.joml.Vector3f;
  */
 public final class SpaceHud {
 	private static final int TEXT = 0xFFE6F2FF, DIM = 0xFF7F95AA, CYAN = 0xFF55D8FF, QT = 0xFFC27BFF,
-			WARN = 0xFFFFB347, BAD = 0xFFFF6A4D, GOOD = 0xFF59E38C, BG = 0x90081018;
+			WARN = 0xFFFFB347, BAD = 0xFFFF6A4D, GOOD = 0xFF59E38C, BG = 0x90081018, JUMP = 0xFFFFC870;
 
 	private SpaceHud() {}
 
@@ -42,6 +42,15 @@ public final class SpaceHud {
 		boolean travelling = ship != null && ship.isQuantumTravelling();
 		int w = graphics.guiWidth(), h = graphics.guiHeight();
 		Font font = minecraft.font;
+		if (ship != null && ship.isJumping()) {
+			// Jump tunnel (M6): a white-gold wash, brighter at the edges.
+			graphics.fill(0, 0, w, h, 0x30FFB347);
+			for (int i = 0; i < 8; i++) {
+				int inset = i * 5;
+				graphics.fill(inset, inset, w - inset, inset + 5, 0x14FFE0A0);
+				graphics.fill(inset, h - inset - 5, w - inset, h - inset, 0x14FFE0A0);
+			}
+		}
 
 		if (travelling) {
 			// Quantum tunnel: a blue wash, darker at the edges.
@@ -63,7 +72,8 @@ public final class SpaceHud {
 
 		// Body markers. Labels that would overlap one already drawn step down until clear.
 		java.util.List<int[]> placed = new java.util.ArrayList<>();
-		for (SolarSystem.Entry body : SolarSystem.bodies(minecraft.level.registryAccess())) {
+		for (SolarSystem.Entry body : SolarSystem.bodies(minecraft.level)) {
+			if (ship != null && ship.isJumping()) break; // leaving this system: no markers in the tunnel
 			Vec3 rel = body.body().position().subtract(eye);
 			double distance = rel.length();
 			int[] screen = HudProjection.project(mvp, forward, rel, w, h);
@@ -99,6 +109,11 @@ public final class SpaceHud {
 			}
 		}
 		if (quantumMode || travelling) quantumPanel(graphics, font, ship, eye, w);
+		boolean jumpMode = (ship.jumpState() & (ShipEntity.JD_MODE | ShipEntity.JD_TRAVEL)) != 0;
+		if (jumpMode) {
+			jumpTargetMarker(graphics, font, ship, mvp, forward, w, h);
+			jumpPanel(graphics, font, ship, quantumMode || travelling);
+		}
 	}
 
 	/** Quantum drive panel (top-left MFD). */
@@ -110,7 +125,7 @@ public final class SpaceHud {
 		FlightHud.corners(graphics, x - 4, y - 4, width + 8, 48, QT);
 
 		SolarSystem.Entry target = null;
-		for (SolarSystem.Entry e : SolarSystem.bodies(ship.level().registryAccess())) {
+		for (SolarSystem.Entry e : SolarSystem.bodies(ship.level())) {
 			if (e.key().identifier().toString().equals(ship.quantumTargetId())) target = e;
 		}
 		String name = target == null ? "--" : target.displayName().getString();
@@ -169,6 +184,78 @@ public final class SpaceHud {
 			if (x < r[2] && x + w > r[0] && y < r[3] && y + h > r[1]) return true;
 		}
 		return false;
+	}
+
+	/** The jump target star, in its true direction in the sky, with its distance in light-years. */
+	private static void jumpTargetMarker(GuiGraphicsExtractor graphics, Font font, ShipEntity ship, Matrix4f mvp, Vector3f forward, int w, int h) {
+		var here = com.starwake.client.galaxy.GalaxyClient.here();
+		var there = com.starwake.galaxy.Galaxy.star(ship.jumpTargetId()).orElse(null);
+		if (here == null || there == null || ship.isJumping()) return;
+		Vec3 dir = there.position().subtract(here.position()).normalize();
+		int[] p = HudProjection.project(mvp, forward, dir.scale(1000), w, h);
+		if (p == null) return;
+		int color = (ship.jumpState() & ShipEntity.JD_ALIGNED) != 0 ? GOOD : JUMP;
+		bracket(graphics, p[0], p[1], 9, color);
+		String label = there.name() + "  " + String.format("%.1f ly", here.distanceTo(there));
+		graphics.text(font, label, p[0] - font.width(label) / 2, p[1] + 12, color);
+		// Nose reticle, as for quantum alignment.
+		Vec3 nose = ship.worldDirection(ship.forward());
+		int[] n = HudProjection.project(mvp, forward, nose.scale(100), w, h);
+		if (n != null) {
+			graphics.fill(n[0] - 9, n[1], n[0] - 3, n[1] + 1, color);
+			graphics.fill(n[0] + 4, n[1], n[0] + 10, n[1] + 1, color);
+			graphics.fill(n[0], n[1] - 9, n[0] + 1, n[1] - 3, color);
+			graphics.fill(n[0], n[1] + 4, n[0] + 1, n[1] + 10, color);
+		}
+	}
+
+	/** Jump drive panel (top-left MFD, below the quantum panel if both show). */
+	private static void jumpPanel(GuiGraphicsExtractor graphics, Font font, ShipEntity ship, boolean belowQuantum) {
+		int state = ship.jumpState();
+		int width = 150, x = 8, y = (FlightHud.pilotedShip() == ship ? 8 : 56) + (belowQuantum ? 56 : 0);
+		graphics.fill(x - 4, y - 4, x + width + 4, y + 44, FlightHud.PANEL);
+		FlightHud.corners(graphics, x - 4, y - 4, width + 8, 48, JUMP);
+		var target = com.starwake.galaxy.Galaxy.star(ship.jumpTargetId()).orElse(null);
+		String name = target == null ? "--" : target.name();
+		if ((state & ShipEntity.JD_TRAVEL) != 0) {
+			graphics.text(font, Component.translatable("hud.starwake.jump.travel", name), x, y, JUMP);
+			graphics.text(font, "ETA " + SolarSystem.formatTime(ship.jumpInfo()), x, y + 11, TEXT);
+			graphics.text(font, Component.translatable("hud.starwake.jump.tunnel"), x, y + 22, DIM);
+			return;
+		}
+		graphics.text(font, Component.translatable("hud.starwake.jump.mode", name), x, y, JUMP);
+		float spool = Math.max(0, ship.jumpProgress());
+		graphics.text(font, "SPOOL", x, y + 11, DIM);
+		graphics.fill(x + 34, y + 12, x + width, y + 18, 0x60FFFFFF);
+		graphics.fill(x + 34, y + 12, x + 34 + (int) ((width - 34) * spool), y + 18, spool >= 1 ? GOOD : JUMP);
+		if (target != null) {
+			graphics.text(font, "FUEL " + ship.jumpInfo() + " / " + ship.fuel(), x, y + 22, (state & ShipEntity.JD_NO_FUEL) != 0 ? BAD : TEXT);
+		}
+		Component status;
+		int color;
+		if ((state & ShipEntity.JD_NO_TARGET) != 0) {
+			status = Component.translatable("hud.starwake.jump.no_target");
+			color = DIM;
+		} else if ((state & ShipEntity.JD_RANGE) != 0) {
+			status = Component.translatable("hud.starwake.jump.out_of_range");
+			color = BAD;
+		} else if ((state & ShipEntity.JD_WELL) != 0) {
+			status = Component.translatable("hud.starwake.jump.gravity_well");
+			color = WARN;
+		} else if ((state & ShipEntity.JD_NO_FUEL) != 0) {
+			status = Component.translatable("hud.starwake.jump.no_fuel");
+			color = BAD;
+		} else if ((state & ShipEntity.JD_SPOOLED) == 0) {
+			status = Component.translatable("hud.starwake.jump.spooling");
+			color = JUMP;
+		} else if ((state & ShipEntity.JD_ALIGNED) == 0) {
+			status = Component.translatable("hud.starwake.jump.align");
+			color = WARN;
+		} else {
+			status = Component.translatable("hud.starwake.jump.ready");
+			color = GOOD;
+		}
+		graphics.text(font, status, x, y + 33, color);
 	}
 
 	/** Four corner brackets around (x, y). */

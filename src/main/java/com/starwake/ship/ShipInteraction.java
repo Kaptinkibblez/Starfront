@@ -127,7 +127,7 @@ public final class ShipInteraction {
 		} else if (state.getBlock() instanceof ChestBlock || state.getBlock() instanceof BarrelBlock) {
 			openContainer(player, ship, payload.local(), state);
 		} else {
-			player.sendOverlayMessage(Component.translatable("message.starwake.edit.hint"));
+			// Nothing to use here (vanilla is silent too); hold a block to build against it.
 		}
 	}
 }

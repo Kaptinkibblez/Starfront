@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "star_class.starwake.f"
+  },
+  "symbol": "F",
+  "weight": 0.03,
+  "temperature": [
+    6000,
+    7500
+  ],
+  "luminosity": [
+    1.5,
+    5
+  ],
+  "radius": [
+    1.15,
+    1.4
+  ],
+  "mass": [
+    1.04,
+    1.4
+  ],
+  "color": "#f8f7ff",
+  "planets": [
+    2,
+    7
+  ],
+  "binary": 0.45
+}

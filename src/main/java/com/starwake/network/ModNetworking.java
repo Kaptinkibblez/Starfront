@@ -16,6 +16,10 @@ public final class ModNetworking {
 		PayloadTypeRegistry.clientboundPlay().register(ShipConsolePayload.TYPE, ShipConsolePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ShipStructurePayload.TYPE, ShipStructurePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(PlanetListPayload.TYPE, PlanetListPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(GalaxyInfoPayload.TYPE, GalaxyInfoPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(SystemInfoPayload.TYPE, SystemInfoPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(SystemInfoRequestPayload.TYPE, SystemInfoRequestPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(JumpTargetPayload.TYPE, JumpTargetPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipConsoleActionPayload.TYPE, ShipConsoleActionPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipInteractPayload.TYPE, ShipInteractPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipControlPayload.TYPE, ShipControlPayload.CODEC);
@@ -49,9 +53,26 @@ public final class ModNetworking {
 					case ShipQuantumPayload.ACTION_QUANTUM_TOGGLE -> ship.toggleQuantumMode();
 					case ShipQuantumPayload.ACTION_DECOUPLE -> ship.toggleDecoupled();
 					case ShipQuantumPayload.ACTION_GEAR -> ship.toggleGear();
+					case ShipQuantumPayload.ACTION_JUMP_TOGGLE -> ship.toggleJumpMode();
+					case ShipQuantumPayload.ACTION_JUMP_ENGAGE -> ship.engageJump();
 					default -> { }
 				}
 			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(JumpTargetPayload.TYPE, (payload, context) -> {
+			var player = context.player();
+			if (player.getVehicle() instanceof com.starwake.ship.ShipEntity ship && ship.pilot() == player) {
+				var error = ship.setJumpTarget(payload.system());
+				player.sendOverlayMessage(error != null ? error : net.minecraft.network.chat.Component.translatable(
+						"message.starwake.jump.target", com.starwake.galaxy.Galaxy.star(payload.system())
+								.map(com.starwake.galaxy.Galaxy.Star::name).orElse(payload.system())));
+			} else {
+				player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.starwake.jump.not_pilot"));
+			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(SystemInfoRequestPayload.TYPE, (payload, context) -> {
+			var info = com.starwake.galaxy.StarSystems.info(context.player().level().registryAccess(), payload.system());
+			if (info != null) context.responseSender().sendPacket(info);
 		});
 		ServerPlayNetworking.registerGlobalReceiver(ShipEditPayload.TYPE, (payload, context) -> {
 			var player = context.player();

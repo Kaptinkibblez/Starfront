@@ -1,0 +1,10 @@
+{
+  "blocks": [
+    "starwake:jump_drive"
+  ],
+  "mass": 6.0,
+  "power_draw": 12,
+  "heat": 2,
+  "jump_range": 8,
+  "jump_spool": 20
+}

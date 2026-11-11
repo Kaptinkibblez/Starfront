@@ -99,7 +99,7 @@ public final class SpaceRenderer {
 		Vec3 eye = systemPosition(camera.pos, partial);
 		double reach = Math.min(camera.depthFar * 0.6, 1400);
 
-		List<SolarSystem.Entry> bodies = SolarSystem.bodies(minecraft.level.registryAccess());
+		List<SolarSystem.Entry> bodies = SolarSystem.bodies(minecraft.level);
 		Vec3 starPos = bodies.stream().filter(e -> e.body().star()).map(e -> e.body().position()).findFirst().orElse(Vec3.ZERO);
 
 		// Far to near, so nearer bodies paint over farther ones.
@@ -123,7 +123,12 @@ public final class SpaceRenderer {
 			double speed = step.length(); // blocks per tick
 			if (speed > 1.0e-3) travel = step.normalize().scale(Mth.clamp(speed / 1500.0, 0.05, 1.0));
 		}
+		if (ship != null && ship.isJumping()) {
+			// Jump tunnel: everything streams past along the nose, hard.
+			travel = ship.worldDirection(ship.forward()).scale(1.0);
+		}
 		final Vec3 streak = travel;
+		final List<float[]> neighbours = neighbourStars(minecraft);
 		final float starDistance = (float) (reach * 1.25); // behind every (scaled) body
 
 		if (DEBUG && frames++ % 200 == 0) {
@@ -132,11 +137,46 @@ public final class SpaceRenderer {
 		}
 		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.debugQuads(), (pose, buffer) -> {
 			drawStars(pose, buffer, starDistance, streak);
+			if (streak.lengthSqr() == 0) drawNeighbours(pose, buffer, starDistance * 0.99f, neighbours);
 			for (Draw draw : draws) drawBody(pose, buffer, draw);
 		});
 	}
 
 	// ---------------------------------------------------------------------------------------
+
+	// Real neighbouring stars (M6): every star within 60 ly, in its true direction from this
+	// system, sized and faded by apparent brightness (luminosity / distance^2). Cached per system.
+	private static String neighboursFor = "";
+	private static List<float[]> neighbours = List.of();
+
+	private static List<float[]> neighbourStars(Minecraft minecraft) {
+		if (minecraft.level == null || !com.starwake.galaxy.Galaxy.configured()) return List.of();
+		String system = SolarSystem.systemOf(minecraft.level);
+		if (system.equals(neighboursFor)) return neighbours;
+		var here = com.starwake.galaxy.Galaxy.star(system).orElse(null);
+		if (here == null) return List.of();
+		List<float[]> list = new ArrayList<>();
+		for (var s : com.starwake.galaxy.Galaxy.within(here.position(), 60)) {
+			if (s.id().equals(here.id())) continue;
+			Vec3 d = s.position().subtract(here.position());
+			double ly = d.length();
+			double apparent = s.luminosity() / (ly * ly); // relative flux
+			float brightness = (float) Mth.clamp(0.35 + 0.18 * Math.log10(apparent * 1.0e4), 0.15, 1.0);
+			Vec3 n = d.normalize();
+			list.add(new float[] {(float) n.x, (float) n.y, (float) n.z, brightness, s.color()});
+		}
+		neighboursFor = system;
+		neighbours = List.copyOf(list);
+		return neighbours;
+	}
+
+	private static void drawNeighbours(PoseStack.Pose pose, VertexConsumer buffer, float distance, List<float[]> stars) {
+		for (float[] s : stars) {
+			float size = distance * (0.0018f + 0.0035f * s[3]);
+			int color = ARGB.color((int) (255 * s[3]), (int) s[4]);
+			billboard(pose, buffer, s[0] * distance, s[1] * distance, s[2] * distance, size, color);
+		}
+	}
 
 	private static void drawStars(PoseStack.Pose pose, VertexConsumer buffer, float distance, Vec3 travel) {
 		float size = distance * 0.0022f;

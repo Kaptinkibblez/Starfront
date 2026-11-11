@@ -49,7 +49,7 @@ com.starwake
 ├── planet/                 planet definitions, dimensions, gravity, atmosphere
 ├── worldgen/               procedural terrain, biomes, and ore features
 ├── ship/                   ship entity, launch sequence, interior pocket dimension
-├── galaxy/                 star system layout (Body, SolarSystem); seeded systems in M6
+├── galaxy/                 galaxy (seeded stars), star systems, SolarSystem bodies, jump targets
 ├── chem/                   periodic table and minerals (bundled data), element items
 ├── trade/                  factions, NPCs, price model, trade menus
 ├── progression/            fuel, upgrades, crafting chains
@@ -227,7 +227,16 @@ commit. **Don't start the next milestone until the user confirms the current one
       calcite terraces); a ship drifted from space into a procedural planet; hypoxia kills,
       the Survey Suit's oxygen keeps you alive; element and mineral tooltips; Starmap lists the
       new planets.)*
-- [ ] **6. Star map.** A galaxy/star map UI for choosing seeded destinations.
+- [x] **6. Star map.** A galaxy/star map UI for choosing seeded destinations. User's choices
+      (2026-11-11): a Jump Drive that works anywhere (range/fuel limited), an endless seeded
+      galaxy, real star classes (incl. white dwarfs, neutron stars, binaries), a 3D rotatable
+      map. *(Verified 2026-11-11: galaxy generated identically on server and client; 14 stars
+      within 10 ly of Solace, mostly red dwarfs; 3D map orbit/zoom/select with live planet
+      details; Jump Drive ship armed, spooled, aligned and jumped 5.8 ly to Kalvair (17 s
+      tunnel, 351 fuel); arrival in the new system's space; its planets generated with
+      luminosity-scaled orbits (a 1 C desert at 0.2 Mm, a -71 C frozen world at 0.6 Mm around
+      a 0.006 L red dwarf); the Starmap shows the current system; the opened system and the
+      player in it survive a restart.)*
 - [ ] **7. Trading.** NPCs with factions, pricing and trade GUIs.
 - [ ] **8. Progression.** Fuel, upgrades and crafting chains.
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
@@ -536,7 +545,62 @@ normal gravity.
   `/starwake planet tp starwake:solace_<n>`. The server log prints every planet's archetype,
   terrain, orbit, position, entry radius, gravity and temperature.
 
+## How the galaxy works (Milestone 6)
+
+- **Stars** (`galaxy/Galaxy`, both sides): an endless field generated sector by sector (10 ly
+  cubes; Poisson, mean 4 stars = the real 0.004 stars/ly^3, modulated by a large-scale density
+  field) from the galaxy seed (`Galaxy.seedFor(worldSeed)`; clients get it in
+  `GalaxyInfoPayload` and never see the world seed). Coordinates are light-years; Solace is the
+  origin (`Galaxy.HOME`). System ids: `s<x>_<y>_<z>_<i>`. Star classes are a **synced** dynamic
+  registry (`galaxy/StarClass`, `data/<ns>/starwake/star_class/*.json`: O B A F G K M with
+  real frequencies, white dwarfs, neutron stars; temperature, luminosity, radius, mass ranges,
+  colour, planet count, binary chance, remnant flag).
+- **Systems** (`galaxy/StarSystems`, server): `plan(star)` places the star (and binary
+  companion) at the centre of the system's space and planets on log-spaced orbits scaled by the
+  square root of the total luminosity (the habitable zone); each orbit gets an archetype whose
+  scaled band fits (remnants: barren/frozen only). `open(server, id)` registers the system with
+  `ProceduralPlanets`, opens its space (`starwake:<id>/space`, Fantasy void level with the space
+  dimension type) and planets (`starwake:<id>/p<n>`), rebuilds the planet index, saves the id
+  (`StarSystems.State`, SavedData `starwake:galaxy`) and broadcasts `PlanetListPayload`.
+  Opened systems reopen on server start.
+- **System-aware lookups:** every `Planet` has a `system` (default `solace`).
+  `SolarSystem.bodies(level)` / `nearest(level, pos)` / `obstruction(level, ...)` only see the
+  level's own system; `SolarSystem.systemOf(level)`, `spaceOf(system)`, `isSpace(dimension)`
+  (any `starwake:*/space`, plus `starwake:space` for Solace). Leaving a planet goes to its
+  system's space.
+- **Jump Drive** (block `jump_drive`; `ship_stats` `jump_range` ly + `jump_spool` s;
+  `ship/data/JumpTuning` from `starwake/jump_drive/default.json`: fuel per ly, alignment,
+  gravity-well clearances, tunnel time, arrival distance). `ShipEntity` "Jump drive" section:
+  target from the map (`JumpTargetPayload`, pilot only), J tap arms (exclusive with quantum
+  mode), spool on the quantum power share, checks (range, fuel, clear of planets x12 entry
+  radius / stars x25 radius, nose within 5 degrees of the target's true direction), hold J to
+  engage; the hull holds still in the tunnel (200 + 40/ly ticks, max 1200), the target system is
+  opened 5 s before arrival, then `SpaceTravel.transfer` moves ship + crew to the target's space
+  on the side facing the origin, at `arrival x sqrt(L)` from the star. A tunnel in progress is
+  saved and resumes. Synced: `JD_STATE`/`JD_TARGET`/`JD_INFO`/`JD_SPOOL`/`JD_REACH` (range).
+- **Client:** `client/galaxy/GalaxyClient` (seed, `SystemInfoRequestPayload` ->
+  `SystemInfoPayload` cache). `GalaxyMapScreen` (M, or the Starmap app's Galaxy button): 3D
+  projected star field (left-drag orbit, right-drag pan, scroll zoom, click select, F focus, H
+  here), jump-range ring, route line, side panel with class, temperature, luminosity, mass,
+  radius, distance and the system's planets, and "Set Jump Target". `SpaceRenderer` draws every
+  real star within 60 ly in its true direction (brightness from luminosity / distance^2), so the
+  jump target is really in the sky; `SpaceHud` marks it with its distance and shows the jump
+  panel and the gold tunnel wash.
+- Admin/testing: `/starwake galaxy here|near [ly]|target <id>|tp <id>` (`near` prints each
+  star's look yaw/pitch for `/rotate`).
+- Known limits: a planet's sky colour comes from its archetype, not its star; a star's light
+  doesn't tint its planets yet.
+
 ## 26.3 gotchas (learned the hard way)
+
+- **Mouse buttons are SDL numbers in screens:** `MouseButtonEvent.button()` is 1 for left and
+  3 for right (`InputConstants.MOUSE_BUTTON_LEFT/RIGHT`), not GLFW's 0/1. Key constants are
+  `InputConstants.KEY_*` (there is no `org.lwjgl.glfw` on the classpath).
+- jspecify on nested types: `Galaxy.@Nullable Star`, not `@Nullable Galaxy.Star`.
+- `SavedDataType` needs a `DataFixTypes` (null crashes on load); `server.getDataStorage()
+  .computeIfAbsent(TYPE)`.
+- Inside a ship the player's look is ship-relative, so `/tp ... facing` doesn't aim there; in
+  tests use `/rotate @s <yaw> <pitch>` (seated pilots steer toward it).
 
 - **Block states in JSON are `{"id": ..., "properties": {...}}`** (not `Name`/`Properties`).
 - **Features are records implementing `Feature`** with a `MapCodec`, registered in

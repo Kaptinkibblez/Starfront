@@ -48,42 +48,87 @@ public final class SolarSystem {
 	}
 
 	private static @Nullable List<com.starwake.planet.PlanetRef> cachedFor;
-	private static List<Entry> cached = List.of();
+	private static java.util.Map<String, List<Entry>> cached = java.util.Map.of();
 
 	private SolarSystem() {}
 
-	/** Every body in space: registry and procedural planets (cached per planet list). */
-	public static synchronized List<Entry> bodies(RegistryAccess access) {
-		List<com.starwake.planet.PlanetRef> planets = Planets.all(access);
-		if (planets != cachedFor) {
-			List<Entry> list = new ArrayList<>();
-			for (var ref : planets) {
-				ref.planet().body().ifPresent(body -> list.add(new Entry(ref.key(), ref.planet(), body)));
-			}
-			cached = List.copyOf(list);
-			cachedFor = planets;
-		}
-		return cached;
+	// ---------------------------------------------------------------------------------------
+	// Which system (M6)
+	// ---------------------------------------------------------------------------------------
+
+	/** The space dimension of a star system. */
+	public static ResourceKey<Level> spaceOf(String system) {
+		if (system.equals(Galaxy.HOME)) return com.starwake.ship.SpaceTravel.SPACE;
+		return ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
+				com.starwake.StarwakeMod.id(system + "/space"));
 	}
 
+	/** True for any system's space dimension. */
+	public static boolean isSpace(ResourceKey<Level> dimension) {
+		if (dimension.equals(com.starwake.ship.SpaceTravel.SPACE)) return true;
+		var id = dimension.identifier();
+		return id.getNamespace().equals(com.starwake.StarwakeMod.MOD_ID) && id.getPath().endsWith("/space");
+	}
+
+	/** The system a dimension belongs to: its space, or the system of the planet on it. */
+	public static String systemOf(RegistryAccess access, ResourceKey<Level> dimension) {
+		if (dimension.equals(com.starwake.ship.SpaceTravel.SPACE)) return Galaxy.HOME;
+		if (isSpace(dimension)) {
+			String path = dimension.identifier().getPath();
+			return path.substring(0, path.length() - "/space".length());
+		}
+		return Planets.forDimension(access, dimension).map(p -> p.planet().system()).orElse(Galaxy.HOME);
+	}
+
+	public static String systemOf(Level level) {
+		return systemOf(level.registryAccess(), level.dimension());
+	}
+
+	// ---------------------------------------------------------------------------------------
+
+	/** Every body of one system (cached per planet list). */
+	public static synchronized List<Entry> bodies(RegistryAccess access, String system) {
+		List<com.starwake.planet.PlanetRef> planets = Planets.all(access);
+		if (planets != cachedFor) {
+			java.util.Map<String, List<Entry>> bySystem = new java.util.HashMap<>();
+			for (var ref : planets) {
+				ref.planet().body().ifPresent(body -> bySystem.computeIfAbsent(ref.planet().system(), k -> new ArrayList<>())
+						.add(new Entry(ref.key(), ref.planet(), body)));
+			}
+			bySystem.replaceAll((k, v) -> List.copyOf(v));
+			cached = java.util.Map.copyOf(bySystem);
+			cachedFor = planets;
+		}
+		return cached.getOrDefault(system, List.of());
+	}
+
+	/** The bodies of the system this level is in. */
+	public static List<Entry> bodies(Level level) {
+		return bodies(level.registryAccess(), systemOf(level));
+	}
+
+	/** Any body in any loaded system, by key. */
 	public static Optional<Entry> get(RegistryAccess access, ResourceKey<Planet> key) {
-		return bodies(access).stream().filter(e -> e.key().equals(key)).findFirst();
+		for (var ref : Planets.all(access)) {
+			if (ref.key().equals(key) && ref.planet().body().isPresent()) return Optional.of(new Entry(ref.key(), ref.planet(), ref.planet().body().get()));
+		}
+		return Optional.empty();
 	}
 
 	public static Optional<Entry> forDimension(RegistryAccess access, ResourceKey<Level> dimension) {
-		return bodies(access).stream().filter(e -> !e.body().star() && e.dimension().equals(dimension)).findFirst();
+		return bodies(access, systemOf(access, dimension)).stream().filter(e -> !e.body().star() && e.dimension().equals(dimension)).findFirst();
 	}
 
 	/** The star the planets are lit by, if the system has one. */
-	public static Optional<Entry> star(RegistryAccess access) {
-		return bodies(access).stream().filter(e -> e.body().star()).findFirst();
+	public static Optional<Entry> star(Level level) {
+		return bodies(level).stream().filter(e -> e.body().star()).findFirst();
 	}
 
-	/** The enterable body whose atmosphere is closest to {@code pos}. */
-	public static Optional<Entry> nearest(RegistryAccess access, Vec3 pos) {
+	/** The enterable body whose atmosphere is closest to {@code pos}, in this level's system. */
+	public static Optional<Entry> nearest(Level level, Vec3 pos) {
 		Entry best = null;
 		double bestDistance = Double.MAX_VALUE;
-		for (Entry e : bodies(access)) {
+		for (Entry e : bodies(level)) {
 			if (!e.enterable()) continue;
 			double d = pos.distanceTo(e.body().position()) - e.body().entryRadius();
 			if (d < bestDistance) {
@@ -143,10 +188,10 @@ public final class SolarSystem {
 	}
 
 	/** The first body (other than {@code ignore}) whose sphere the segment passes through. */
-	public static Optional<Entry> obstruction(RegistryAccess access, Vec3 from, Vec3 to, @Nullable ResourceKey<Planet> ignore) {
+	public static Optional<Entry> obstruction(Level level, Vec3 from, Vec3 to, @Nullable ResourceKey<Planet> ignore) {
 		Vec3 seg = to.subtract(from);
 		double len2 = seg.lengthSqr();
-		for (Entry e : bodies(access)) {
+		for (Entry e : bodies(level)) {
 			if (e.key().equals(ignore)) continue;
 			Vec3 c = e.body().position();
 			double t = len2 == 0 ? 0 : Mth.clamp(c.subtract(from).dot(seg) / len2, 0, 1);

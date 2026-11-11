@@ -59,7 +59,10 @@ public final class ProceduralPlanets {
 	/** A generated planet: its public definition plus the server-side generator picks. */
 	public record Generated(PlanetRef ref, ResourceKey<PlanetArchetype> archetype, Spec spec) {}
 
-	private static List<Generated> generated = List.of();
+	/** Server: each open system's generated planets. */
+	private static final java.util.Map<String, List<Generated>> SYSTEMS = new java.util.LinkedHashMap<>();
+	/** Server: extra bodies per system (its star or stars) that have no generator. */
+	private static final java.util.Map<String, List<PlanetRef>> EXTRA = new java.util.LinkedHashMap<>();
 	private static List<PlanetRef> planets = List.of();
 	private static int generation;
 
@@ -68,22 +71,37 @@ public final class ProceduralPlanets {
 	public static void init() {
 		DynamicRegistries.register(PlanetArchetype.REGISTRY_KEY, PlanetArchetype.CODEC);
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-			generate(server);
+			synchronized (ProceduralPlanets.class) {
+				SYSTEMS.clear();
+				EXTRA.clear();
+			}
+			generateHome(server);
 			Planets.rebuildIndex(server);
 		});
-		ServerLifecycleEvents.SERVER_STARTED.register(ProceduralPlanets::openLevels);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> set(List.of(), List.of()));
+		ServerLifecycleEvents.SERVER_STARTED.register(server -> openLevels(server, generated(com.starwake.galaxy.Galaxy.HOME)));
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			synchronized (ProceduralPlanets.class) {
+				SYSTEMS.clear();
+				EXTRA.clear();
+			}
+			refresh();
+		});
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
 				sender.sendPacket(new PlanetListPayload(planets)));
 	}
 
-	/** The procedural planets known on this side (server: generated; client: received). */
+	/** The procedural planets known on this side (server: every open system; client: received). */
 	public static List<PlanetRef> planets() {
 		return planets;
 	}
 
-	public static List<Generated> generated() {
-		return generated;
+	/** Server: one system's generated planets (empty if it isn't open). */
+	public static synchronized List<Generated> generated(String system) {
+		return SYSTEMS.getOrDefault(system, List.of());
+	}
+
+	public static synchronized boolean isOpen(String system) {
+		return SYSTEMS.containsKey(system);
 	}
 
 	/** Bumps whenever the list changes, so caches ({@code Planets.all}) know to rebuild. */
@@ -92,23 +110,42 @@ public final class ProceduralPlanets {
 	}
 
 	/** Client: the list the server sent. */
-	public static void setFromServer(List<PlanetRef> list) {
-		set(generated, List.copyOf(list));
+	public static synchronized void setFromServer(List<PlanetRef> list) {
+		planets = List.copyOf(list);
+		generation++;
 	}
 
-	private static synchronized void set(List<Generated> gen, List<PlanetRef> list) {
-		generated = gen;
-		planets = list;
+	/** Server: adds a newly opened system (its planets and its star bodies). */
+	public static void addSystem(String system, List<Generated> generated, List<PlanetRef> extra) {
+		synchronized (ProceduralPlanets.class) {
+			SYSTEMS.put(system, List.copyOf(generated));
+			EXTRA.put(system, List.copyOf(extra));
+		}
+		refresh();
+	}
+
+	private static synchronized void refresh() {
+		List<PlanetRef> all = new ArrayList<>();
+		for (var e : EXTRA.values()) all.addAll(e);
+		for (var g : SYSTEMS.values()) for (Generated x : g) all.add(x.ref());
+		planets = List.copyOf(all);
 		generation++;
+	}
+
+	/** Server: sends the current planet list to every player (after a system opens). */
+	public static void broadcast(MinecraftServer server) {
+		PlanetListPayload payload = new PlanetListPayload(planets);
+		for (var player : server.getPlayerList().getPlayers()) ServerPlayNetworking.send(player, payload);
 	}
 
 	// ---------------------------------------------------------------------------------------
 
-	private static void generate(MinecraftServer server) {
+	/** The home system: 4-6 planets around Solace, each archetype first, then its orbit band. */
+	private static void generateHome(MinecraftServer server) {
 		RegistryAccess access = server.registryAccess();
 		Registry<PlanetArchetype> archetypes = access.lookupOrThrow(PlanetArchetype.REGISTRY_KEY);
 		if (archetypes.size() == 0) {
-			set(List.of(), List.of());
+			addSystem(com.starwake.galaxy.Galaxy.HOME, List.of(), List.of());
 			return;
 		}
 		long worldSeed = server.getWorldGenSettings().options().seed();
@@ -126,21 +163,23 @@ public final class ProceduralPlanets {
 			Holder.Reference<PlanetArchetype> archetype = pickWeighted(system, bag);
 			bag.remove(archetype);
 			long seed = RandomSupport.mixStafford13(worldSeed + index * 0x9E3779B97F4A7C15L);
-			result.add(create(access, archetype, index, seed, taken));
+			result.add(create(archetype, StarwakeMod.id(SYSTEM + "_" + index), com.starwake.galaxy.Galaxy.HOME, seed, taken, Double.NaN, 1.0));
 		}
-		set(List.copyOf(result), result.stream().map(Generated::ref).toList());
-		for (Generated g : result) {
-			Vec3 at = g.ref().planet().body().orElseThrow().position();
-			StarwakeMod.LOGGER.info("Planet {} = {} ({}), {} at {} Mm [{} {}] r={}, {}g, {} C{}", g.ref().key().identifier(),
-					g.ref().planet().name().getString(), g.archetype().identifier(), g.spec().terrain().identifier(),
-					Math.round(g.ref().planet().body().orElseThrow().position().length() / 1e5) / 10.0, Math.round(at.x), Math.round(at.z),
-					Math.round(g.ref().planet().body().orElseThrow().entryRadius()),
-					String.format("%.2f", g.ref().planet().gravity()), Math.round(g.ref().planet().hazards().temperature()),
-					g.ref().planet().hazards().breathable() ? ", breathable" : "");
-		}
+		addSystem(com.starwake.galaxy.Galaxy.HOME, result, List.of());
+		result.forEach(ProceduralPlanets::log);
 	}
 
-	private static Holder.Reference<PlanetArchetype> pickWeighted(RandomSource random, List<Holder.Reference<PlanetArchetype>> bag) {
+	public static void log(Generated g) {
+		Vec3 at = g.ref().planet().body().orElseThrow().position();
+		StarwakeMod.LOGGER.info("Planet {} = {} ({}), {} at {} Mm [{} {}] r={}, {}g, {} C{}", g.ref().key().identifier(),
+				g.ref().planet().name().getString(), g.archetype().identifier(), g.spec().terrain().identifier(),
+				Math.round(at.length() / 1e5) / 10.0, Math.round(at.x), Math.round(at.z),
+				Math.round(g.ref().planet().body().orElseThrow().entryRadius()),
+				String.format("%.2f", g.ref().planet().gravity()), Math.round(g.ref().planet().hazards().temperature()),
+				g.ref().planet().hazards().breathable() ? ", breathable" : "");
+	}
+
+	public static Holder.Reference<PlanetArchetype> pickWeighted(RandomSource random, List<Holder.Reference<PlanetArchetype>> bag) {
 		double total = bag.stream().mapToDouble(a -> a.value().weight()).sum();
 		double roll = random.nextDouble() * total;
 		for (var a : bag) {
@@ -150,19 +189,28 @@ public final class ProceduralPlanets {
 		return bag.getLast();
 	}
 
-	private static Generated create(RegistryAccess access, Holder.Reference<PlanetArchetype> holder, int index, long seed, List<Vec3> taken) {
+	/**
+	 * Generates one planet of an archetype.
+	 *
+	 * @param distance orbit radius in blocks, or NaN to pick one in the archetype's band
+	 * @param scale    habitable-zone scale of the star (sqrt of its luminosity; Solace = 1):
+	 *                 the archetype's orbit band is multiplied by it, and temperature follows the
+	 *                 orbit's place in the scaled band
+	 */
+	public static Generated create(Holder.Reference<PlanetArchetype> holder, Identifier id, String system, long seed, List<Vec3> taken,
+			double distance, double scale) {
 		PlanetArchetype a = holder.value();
 		RandomSource r = RandomSource.create(seed);
-		Identifier id = StarwakeMod.id(SYSTEM + "_" + index);
 
 		// Orbit: the archetype's distance band, at an angle clear of every other body.
-		double distance = a.orbit().pick(r) * 1.0e6;
+		if (Double.isNaN(distance)) distance = a.orbit().pick(r) * 1.0e6 * scale;
 		Vec3 position = Vec3.ZERO;
 		for (int attempt = 0; attempt < 40; attempt++) {
 			double angle = r.nextDouble() * Math.PI * 2;
 			position = new Vec3(Math.cos(angle) * distance, 0, Math.sin(angle) * distance);
 			final Vec3 p = position;
-			if (taken.stream().allMatch(t -> t.distanceTo(p) > MIN_SPACING)) break;
+			final double spacing = Math.min(MIN_SPACING, distance * 0.4);
+			if (taken.stream().allMatch(t -> t.distanceTo(p) > spacing)) break;
 			distance *= 1.04; // drift outward if this band is crowded
 		}
 		taken.add(position);
@@ -175,7 +223,7 @@ public final class ProceduralPlanets {
 		float toxicity = (float) Math.max(0, env.toxicity().pick(r));
 		// Temperature follows the orbit: the inner edge of the archetype's band is its hottest.
 		double band = Math.max(1e-6, a.orbit().max() - a.orbit().min());
-		double outward = Math.clamp((distance / 1.0e6 - a.orbit().min()) / band, 0, 1);
+		double outward = Math.clamp((distance / (1.0e6 * scale) - a.orbit().min()) / band, 0, 1);
 		double span = env.temperature().max() - env.temperature().min();
 		float temperature = (float) (env.temperature().max() - span * outward + (r.nextDouble() - 0.5) * span * 0.2);
 		Hazards hazards = new Hazards(breathable, toxicity, temperature);
@@ -186,7 +234,7 @@ public final class ProceduralPlanets {
 		String name = PlanetNames.generate(r);
 		ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, id);
 		Planet planet = new Planet(Component.literal(name), dimension, gravity, true, Optional.of(body), air, hazards,
-				Optional.of(a.name()));
+				Optional.of(a.name()), system);
 
 		// Biomes: the required ones plus a seeded handful of the optional ones.
 		List<PlanetArchetype.BiomeOption> required = new ArrayList<>(), optional = new ArrayList<>();
@@ -207,8 +255,8 @@ public final class ProceduralPlanets {
 
 	// ---------------------------------------------------------------------------------------
 
-	/** Opens (or loads) every procedural planet's dimension before players can join. */
-	private static void openLevels(MinecraftServer server) {
+	/** Opens (or loads) planet dimensions (home planets before players can join). */
+	public static void openLevels(MinecraftServer server, List<Generated> generated) {
 		Fantasy fantasy = Fantasy.get(server);
 		for (Generated g : generated) {
 			RuntimeLevelConfig config = new RuntimeLevelConfig()

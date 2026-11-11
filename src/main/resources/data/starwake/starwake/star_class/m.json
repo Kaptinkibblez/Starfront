@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "star_class.starwake.m"
+  },
+  "symbol": "M",
+  "weight": 0.7,
+  "temperature": [
+    2400,
+    3700
+  ],
+  "luminosity": [
+    0.001,
+    0.08
+  ],
+  "radius": [
+    0.1,
+    0.7
+  ],
+  "mass": [
+    0.08,
+    0.45
+  ],
+  "color": "#ffb070",
+  "planets": [
+    0,
+    6
+  ],
+  "binary": 0.25
+}

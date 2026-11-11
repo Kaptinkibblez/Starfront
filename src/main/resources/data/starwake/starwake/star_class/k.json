@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "star_class.starwake.k"
+  },
+  "symbol": "K",
+  "weight": 0.121,
+  "temperature": [
+    3700,
+    5200
+  ],
+  "luminosity": [
+    0.08,
+    0.6
+  ],
+  "radius": [
+    0.7,
+    0.96
+  ],
+  "mass": [
+    0.45,
+    0.8
+  ],
+  "color": "#ffd2a1",
+  "planets": [
+    1,
+    7
+  ],
+  "binary": 0.3
+}

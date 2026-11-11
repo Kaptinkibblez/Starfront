@@ -31,7 +31,7 @@ public class StarmapApp implements WristcomApp {
 
 	private static List<SolarSystem.Entry> bodies() {
 		Minecraft minecraft = Minecraft.getInstance();
-		return minecraft.level == null ? List.of() : SolarSystem.bodies(minecraft.level.registryAccess());
+		return minecraft.level == null ? List.of() : SolarSystem.bodies(minecraft.level);
 	}
 
 	/** The player's position in the system: in space, where they are; on a planet, that planet. */
@@ -49,6 +49,10 @@ public class StarmapApp implements WristcomApp {
 		ShipEntity ship = FlightHud.pilotedShip();
 		boolean canPlot = ship != null && minecraft.level != null && SpaceTravel.isSpace(minecraft.level);
 		int listX = x + height + 6, row = 0;
+		// The galaxy map (M6), from the system map's corner.
+		screen.add(Button.builder(Component.translatable("wristcom.starmap.galaxy"), b ->
+				Minecraft.getInstance().gui.setScreen(new com.starwake.client.galaxy.GalaxyMapScreen()))
+				.bounds(x + height - 4 - 50, y + 4, 50, 14).build());
 		for (SolarSystem.Entry body : bodies()) {
 			if (!body.enterable()) continue;
 			if (16 + (row + 1) * ROW > height) break; // no room for more rows

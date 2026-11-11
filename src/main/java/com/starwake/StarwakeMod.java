@@ -50,6 +50,8 @@ public final class StarwakeMod implements ModInitializer {
 		// Planets: data-driven registry, gravity, travel, and commands.
 		Planets.init();
 		com.starwake.planet.proc.ProceduralPlanets.init();
+		com.starwake.galaxy.StarSystems.init();
+		com.starwake.galaxy.GalaxyCommands.init();
 		PlanetGravity.init();
 		com.starwake.planet.PlanetHazards.init();
 		PlanetTravel.init();
@@ -59,6 +61,7 @@ public final class StarwakeMod implements ModInitializer {
 		ShipStats.init();
 		ShipFuels.init();
 		ShipPhysics.init();
+		com.starwake.ship.data.JumpTuning.init();
 		com.starwake.ship.data.ShipBlueprints.init();
 		ShipCollisions.init();
 		ShipInteraction.init();

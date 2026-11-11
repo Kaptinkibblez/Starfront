@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "star_class.starwake.a"
+  },
+  "symbol": "A",
+  "weight": 0.006,
+  "temperature": [
+    7500,
+    10000
+  ],
+  "luminosity": [
+    5,
+    25
+  ],
+  "radius": [
+    1.4,
+    1.8
+  ],
+  "mass": [
+    1.4,
+    2.1
+  ],
+  "color": "#cad7ff",
+  "planets": [
+    1,
+    5
+  ],
+  "binary": 0.5
+}

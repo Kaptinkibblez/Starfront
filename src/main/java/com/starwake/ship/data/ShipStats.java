@@ -34,7 +34,9 @@ import net.minecraft.world.level.block.state.BlockState;
  *   "power_draw": 4,        // power used at full load (thrusters firing, shields charging, QT spooling)
  *   "shield_capacity": 100, // shield generators: shield HP
  *   "shield_regen": 0.5,    // shield HP regenerated per tick at full power
- *   "quantum_spool": 10 }   // quantum drives: spool time in seconds at full power
+ *   "quantum_spool": 10,    // quantum drives: spool time in seconds at full power
+ *   "jump_range": 8,        // jump drives (M6): range in light-years
+ *   "jump_spool": 20 }      // jump drives: spool time in seconds at full quantum power
  * }</pre>
  *
  * When several entries match a block, the most specific wins (exact id > tag > "*").
@@ -43,8 +45,9 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class ShipStats {
 	/** Resolved stats for one block. */
 	public record BlockStats(double mass, double thrust, double fuelBurn, int fuelCapacity, double powerOutput,
-			double heat, double cooling, double powerDraw, double shieldCapacity, double shieldRegen, double quantumSpool) {
-		public static final BlockStats DEFAULT = new BlockStats(1.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0);
+			double heat, double cooling, double powerDraw, double shieldCapacity, double shieldRegen, double quantumSpool,
+			double jumpRange, double jumpSpool) {
+		public static final BlockStats DEFAULT = new BlockStats(1.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
 	/** One JSON file. */
@@ -63,7 +66,7 @@ public final class ShipStats {
 	/** Component fields (power, heat, shields, quantum), split out because codecs cap at 16 fields. */
 	public record Components(Optional<Double> powerOutput, Optional<Double> heat, Optional<Double> cooling,
 			Optional<Double> powerDraw, Optional<Double> shieldCapacity, Optional<Double> shieldRegen,
-			Optional<Double> quantumSpool) {
+			Optional<Double> quantumSpool, Optional<Double> jumpRange, Optional<Double> jumpSpool) {
 		private static Codec<Double> nonNegative() {
 			return Codec.doubleRange(0.0, 1_000_000.0);
 		}
@@ -75,7 +78,9 @@ public final class ShipStats {
 				nonNegative().optionalFieldOf("power_draw").forGetter(Components::powerDraw),
 				nonNegative().optionalFieldOf("shield_capacity").forGetter(Components::shieldCapacity),
 				nonNegative().optionalFieldOf("shield_regen").forGetter(Components::shieldRegen),
-				nonNegative().optionalFieldOf("quantum_spool").forGetter(Components::quantumSpool)
+				nonNegative().optionalFieldOf("quantum_spool").forGetter(Components::quantumSpool),
+				nonNegative().optionalFieldOf("jump_range").forGetter(Components::jumpRange),
+				nonNegative().optionalFieldOf("jump_spool").forGetter(Components::jumpSpool)
 		).apply(i, Components::new));
 	}
 
@@ -127,7 +132,9 @@ public final class ShipStats {
 				first(matches, e -> e.components().powerDraw()).orElse(0.0),
 				first(matches, e -> e.components().shieldCapacity()).orElse(0.0),
 				first(matches, e -> e.components().shieldRegen()).orElse(0.0),
-				first(matches, e -> e.components().quantumSpool()).orElse(0.0));
+				first(matches, e -> e.components().quantumSpool()).orElse(0.0),
+				first(matches, e -> e.components().jumpRange()).orElse(0.0),
+				first(matches, e -> e.components().jumpSpool()).orElse(0.0));
 	}
 
 	private static <T> Optional<T> first(List<Entry> matches, java.util.function.Function<Entry, Optional<T>> field) {

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "starwake:block/jump_drive_top",
+    "side": "starwake:block/jump_drive_side"
+  }
+}

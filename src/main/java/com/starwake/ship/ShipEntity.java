@@ -107,6 +107,17 @@ public class ShipEntity extends Entity {
 	private static final EntityDataAccessor<String> ACCESS = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
 	private static final EntityDataAccessor<Boolean> DECOUPLED = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Float> WING_LIFT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	/** Jump drive (M6): state bits ({@code JD_*}), target system id, info (fuel or ticks left), spool. */
+	private static final EntityDataAccessor<Integer> JD_STATE = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<String> JD_TARGET = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
+	private static final EntityDataAccessor<Integer> JD_INFO = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Float> JD_SPOOL = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	/** Jump range in light-years (ship stats are server data; the galaxy map needs it). */
+	private static final EntityDataAccessor<Float> JD_REACH = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+
+	/** {@link #jumpState()} bits. */
+	public static final int JD_MODE = 1, JD_TRAVEL = 2, JD_ALIGNED = 4, JD_WELL = 8, JD_NO_FUEL = 16, JD_RANGE = 32,
+			JD_NO_TARGET = 64, JD_SPOOLED = 128;
 
 	/** {@link #quantumState()} bits. */
 	public static final int QT_MODE = 1, QT_TRAVEL = 2, QT_ALIGNED = 4, QT_OBSTRUCTED = 8, QT_NO_FUEL = 16,
@@ -131,6 +142,12 @@ public class ShipEntity extends Entity {
 	private @Nullable ResourceKey<com.starwake.planet.Planet> quantumTarget;
 	private double quantumSpool;
 	private @Nullable QuantumJump jump;
+	/** Jump drive (M6): armed, selected system, spool, and a jump in progress (ticks left / total). */
+	private boolean jumpMode;
+	private @Nullable String jumpTarget;
+	private double jumpSpool;
+	private int jumpTicks = -1, jumpTotal;
+	private Vec3 jumpDirection = Vec3.ZERO;
 	/** Client: travel offset at the previous tick, for interpolation. */
 	private final Vector3f prevQtOffset = new Vector3f();
 	private final Vector3f lastTickQtOffset = new Vector3f();
@@ -439,6 +456,11 @@ public class ShipEntity extends Entity {
 		builder.define(QT_TARGET, "");
 		builder.define(QT_INFO, 0);
 		builder.define(QT_OFFSET, new Vector3f());
+		builder.define(JD_STATE, 0);
+		builder.define(JD_TARGET, "");
+		builder.define(JD_INFO, 0);
+		builder.define(JD_SPOOL, -1f);
+		builder.define(JD_REACH, 0f);
 	}
 
 	// =========================================================================================
@@ -457,6 +479,13 @@ public class ShipEntity extends Entity {
 	public String quantumTargetId() { return entityData.get(QT_TARGET); }
 	public int quantumInfo() { return entityData.get(QT_INFO); }
 	public boolean isQuantumTravelling() { return (quantumState() & QT_TRAVEL) != 0; }
+	public int jumpState() { return entityData.get(JD_STATE); }
+	public String jumpTargetId() { return entityData.get(JD_TARGET); }
+	public int jumpInfo() { return entityData.get(JD_INFO); }
+	public float jumpProgress() { return entityData.get(JD_SPOOL); }
+	public boolean isJumping() { return (jumpState() & JD_TRAVEL) != 0; }
+	public double jumpRange() { return entityData.get(JD_REACH); }
+	public ShipSystems systemsView() { return systems; }
 
 	/** Positions over the last 10 ticks, for a steady speed readout. */
 	private final Vec3[] recentPositions = new Vec3[10];
@@ -766,6 +795,14 @@ public class ShipEntity extends Entity {
 		shipRiders = findShipRiders();
 		Player pilot = pilot();
 		Vec3 velocity = getDeltaMovement();
+		if (jumpTicks >= 0) {
+			// In a jump tunnel (M6): the hull holds still until it arrives in the other system.
+			setDeltaMovement(Vec3.ZERO);
+			angularVelocity.zero();
+			java.util.Arrays.fill(throttles, 0);
+			publishThrottles();
+			return tickJumpTravel();
+		}
 		if (jump != null) {
 			// In quantum travel: the hull holds still while the jump plays out.
 			setDeltaMovement(Vec3.ZERO);
@@ -831,9 +868,11 @@ public class ShipEntity extends Entity {
 			entityData.set(SHIELD, (float) Math.min(systems.shieldCapacity(), shield + regen));
 		}
 		tickQuantum();
+		tickJumpMode();
+		if (tickCount % 20 == 0) entityData.set(JD_REACH, (float) systems.jumpRange());
 		if (SpaceTravel.isSpace(level()) && tickCount % 20 == 0) {
 			// "Orbiting" = the nearest planet, for the HUD and as the fallback home.
-			com.starwake.galaxy.SolarSystem.nearest(level().registryAccess(), position())
+			com.starwake.galaxy.SolarSystem.nearest(level(), position())
 					.ifPresent(body -> setOrbiting(body.dimension()));
 		}
 	}
@@ -858,6 +897,12 @@ public class ShipEntity extends Entity {
 	public @Nullable Component enterQuantumMode(@Nullable ResourceKey<com.starwake.planet.Planet> target) {
 		if (!SpaceTravel.isSpace(level())) return Component.translatable("message.starwake.course.not_in_space");
 		if (!systems.hasQuantumDrive()) return Component.translatable("message.starwake.quantum.no_drive");
+		if (jumpTicks >= 0) return Component.translatable("message.starwake.jump.in_tunnel");
+		if (jumpMode) {
+			jumpMode = false;
+			entityData.set(JD_STATE, 0);
+			entityData.set(JD_SPOOL, -1f);
+		}
 		if (jump != null) return null;
 		if (!quantumMode) {
 			quantumSpool = 0;
@@ -909,7 +954,7 @@ public class ShipEntity extends Entity {
 
 		// Auto-target whatever destination marker the nose is on (within 10 degrees).
 		double bestAngle = Math.toRadians(10);
-		for (var body : com.starwake.galaxy.SolarSystem.bodies(access)) {
+		for (var body : com.starwake.galaxy.SolarSystem.bodies(level())) {
 			if (!body.enterable()) continue;
 			Vec3 to = body.body().position().subtract(position());
 			double angle = Math.acos(Mth.clamp(nose.dot(to.normalize()), -1, 1));
@@ -1013,6 +1058,171 @@ public class ShipEntity extends Entity {
 			player.sendOverlayMessage(Component.translatable("message.starwake.quantum.arrived",
 					SpaceTravel.planetName(level(), orbiting)));
 		}
+	}
+
+	// =========================================================================================
+	// Jump drive (M6): between star systems
+	// =========================================================================================
+	//
+	// 1. Pick a star on the galaxy map ({@link #setJumpTarget}); J arms the drive (jump mode).
+	// 2. The drive spools on the quantum share of power. The HUD shows the target star (it is
+	//    really in the sky, in its true direction) and what's missing: range, fuel, distance
+	//    from gravity wells, alignment.
+	// 3. Hold J to engage: fuel is burned, the hull holds still in the tunnel for a time that
+	//    grows with distance, then the ship and everyone aboard arrive in the target system's
+	//    space, on the side facing where they came from, pointed at the star.
+
+	/** Selects the jump target (from the galaxy map; pilot only). Returns why not, or null. */
+	public @Nullable Component setJumpTarget(String system) {
+		if (!systems.hasJumpDrive()) return Component.translatable("message.starwake.jump.no_drive");
+		if (com.starwake.galaxy.Galaxy.star(system).isEmpty()) return Component.translatable("message.starwake.jump.unknown");
+		if (system.equals(com.starwake.galaxy.SolarSystem.systemOf(level()))) return Component.translatable("message.starwake.jump.here");
+		jumpTarget = system;
+		if (!jumpMode) toggleJumpMode();
+		return null;
+	}
+
+	/** Pilot tapped J: arm or disarm the jump drive. */
+	public void toggleJumpMode() {
+		if (jumpTicks >= 0) return;
+		Player pilot = pilot();
+		if (jumpMode) {
+			jumpMode = false;
+			jumpSpool = 0;
+			entityData.set(JD_STATE, 0);
+			entityData.set(JD_SPOOL, -1f);
+			if (pilot instanceof ServerPlayer p) p.sendOverlayMessage(Component.translatable("message.starwake.jump.off"));
+			return;
+		}
+		Component error = !SpaceTravel.isSpace(level()) ? Component.translatable("message.starwake.course.not_in_space")
+				: !systems.hasJumpDrive() ? Component.translatable("message.starwake.jump.no_drive") : null;
+		if (error == null && quantumMode) exitQuantumMode(null);
+		if (error == null) {
+			jumpMode = true;
+			jumpSpool = 0;
+		}
+		if (pilot instanceof ServerPlayer p) p.sendOverlayMessage(error != null ? error : Component.translatable("message.starwake.jump.on"));
+	}
+
+	/** Spools and evaluates the jump every tick while armed. */
+	private void tickJumpMode() {
+		if (!jumpMode || jumpTicks >= 0) return;
+		if (!SpaceTravel.isSpace(level()) || !systems.hasJumpDrive()) {
+			jumpMode = false;
+			entityData.set(JD_STATE, 0);
+			entityData.set(JD_SPOOL, -1f);
+			return;
+		}
+		var tuning = com.starwake.ship.data.JumpTuning.get();
+		double rate = systems.quantumFactor(allocation) / Math.max(1.0, systems.jumpSpool() * 20.0);
+		boolean wasSpooled = jumpSpool >= 1;
+		jumpSpool = Math.min(1.0, jumpSpool + rate);
+		if (!wasSpooled && jumpSpool >= 1 && level() instanceof ServerLevel serverLevel) {
+			serverLevel.playSound(null, BlockPos.containing(position()), com.starwake.registry.ModSounds.QUANTUM_SPOOL,
+					net.minecraft.sounds.SoundSource.NEUTRAL, 1.5f, 0.7f);
+		}
+		entityData.set(JD_SPOOL, (float) jumpSpool);
+		int state = JD_MODE | (jumpSpool >= 1 ? JD_SPOOLED : 0);
+		var here = com.starwake.galaxy.Galaxy.star(com.starwake.galaxy.SolarSystem.systemOf(level())).orElse(null);
+		var there = jumpTarget == null ? null : com.starwake.galaxy.Galaxy.star(jumpTarget).orElse(null);
+		if (here == null || there == null) {
+			state |= JD_NO_TARGET;
+			entityData.set(JD_TARGET, "");
+			entityData.set(JD_INFO, 0);
+		} else {
+			double ly = here.distanceTo(there);
+			Vec3 dir = there.position().subtract(here.position()).normalize();
+			Vec3 nose = worldDirection(forward());
+			if (Math.acos(Mth.clamp(nose.dot(dir), -1, 1)) < Math.toRadians(tuning.alignDegrees())) state |= JD_ALIGNED;
+			if (ly > systems.jumpRange()) state |= JD_RANGE;
+			int fuel = tuning.fuel(ly);
+			if (fuel() < fuel) state |= JD_NO_FUEL;
+			for (var body : com.starwake.galaxy.SolarSystem.bodies(level())) {
+				double clearance = body.body().star() ? body.body().radius() * tuning.starWell() : body.body().entryRadius() * tuning.planetWell();
+				if (position().distanceTo(body.body().position()) < clearance) state |= JD_WELL;
+			}
+			entityData.set(JD_TARGET, there.id());
+			entityData.set(JD_INFO, fuel);
+		}
+		entityData.set(JD_STATE, state);
+	}
+
+	/** Pilot held J: jump if everything is ready, else say what's missing. */
+	public void engageJump() {
+		if (!jumpMode || jumpTicks >= 0 || !(pilot() instanceof ServerPlayer player)) return;
+		int state = jumpState();
+		String problem = (state & JD_NO_TARGET) != 0 ? "no_target"
+				: (state & JD_RANGE) != 0 ? "out_of_range"
+				: (state & JD_SPOOLED) == 0 ? "not_spooled"
+				: (state & JD_WELL) != 0 ? "gravity_well"
+				: (state & JD_NO_FUEL) != 0 ? "no_fuel"
+				: (state & JD_ALIGNED) == 0 ? "not_aligned" : null;
+		if (problem != null) {
+			player.sendOverlayMessage(Component.translatable("message.starwake.jump." + problem));
+			return;
+		}
+		var here = com.starwake.galaxy.Galaxy.star(com.starwake.galaxy.SolarSystem.systemOf(level())).orElseThrow();
+		var there = com.starwake.galaxy.Galaxy.star(jumpTarget).orElseThrow();
+		double ly = here.distanceTo(there);
+		var tuning = com.starwake.ship.data.JumpTuning.get();
+		useFuel(tuning.fuel(ly));
+		jumpDirection = there.position().subtract(here.position()).normalize();
+		jumpTotal = tuning.ticks(ly);
+		jumpTicks = jumpTotal;
+		jumpMode = false;
+		entityData.set(JD_SPOOL, -1f);
+		entityData.set(JD_STATE, JD_TRAVEL);
+		entityData.set(JD_INFO, jumpTicks);
+		if (level() instanceof ServerLevel serverLevel) {
+			serverLevel.playSound(null, BlockPos.containing(position()), com.starwake.registry.ModSounds.QUANTUM_ENGAGE,
+					net.minecraft.sounds.SoundSource.NEUTRAL, 2.5f, 0.35f);
+		}
+		player.sendOverlayMessage(Component.translatable("message.starwake.jump.engaged", there.name(),
+				String.format("%.1f", ly), com.starwake.galaxy.SolarSystem.formatTime(jumpTotal)));
+	}
+
+	/** One tick in the jump tunnel; at the end, arrive in the target system. True if transferred. */
+	private boolean tickJumpTravel() {
+		jumpTicks--;
+		entityData.set(JD_INFO, Math.max(0, jumpTicks));
+		if (!(level() instanceof ServerLevel serverLevel)) return false;
+		var server = serverLevel.getServer();
+		if (jumpTicks == 100 || jumpTicks <= 0) {
+			// Make the target system real (opening it is idempotent) and load the arrival point.
+			com.starwake.galaxy.StarSystems.open(server, jumpTarget);
+		}
+		var space = server.getLevel(com.starwake.galaxy.SolarSystem.spaceOf(jumpTarget));
+		if (jumpTicks == 100 && space != null) {
+			space.getChunkSource().addTicketWithRadius(net.minecraft.server.level.TicketType.PORTAL,
+					net.minecraft.world.level.ChunkPos.containing(BlockPos.containing(jumpArrival(server))), 3);
+		}
+		if (jumpTicks > 0) return false;
+		jumpTicks = -1;
+		entityData.set(JD_STATE, 0);
+		entityData.set(JD_TARGET, "");
+		if (space == null) return false;
+		Vec3 arrival = jumpArrival(server);
+		String name = com.starwake.galaxy.Galaxy.star(jumpTarget).map(com.starwake.galaxy.Galaxy.Star::name).orElse(jumpTarget);
+		Player pilot = pilot();
+		jumpTarget = null;
+		boolean moved = SpaceTravel.transfer(this, space, arrival, new org.joml.Quaternionf());
+		if (pilot instanceof ServerPlayer player) {
+			player.sendOverlayMessage(Component.translatable("message.starwake.jump.arrived", name));
+		}
+		space.playSound(null, BlockPos.containing(arrival), com.starwake.registry.ModSounds.QUANTUM_EXIT,
+				net.minecraft.sounds.SoundSource.NEUTRAL, 2.5f, 0.5f);
+		return moved;
+	}
+
+	/** Where a jump drops out: on the near side of the target star, at its habitable-zone distance. */
+	private Vec3 jumpArrival(net.minecraft.server.MinecraftServer server) {
+		var star = com.starwake.galaxy.Galaxy.star(jumpTarget).orElse(null);
+		double luminosity = star == null ? 1 : star.luminosity() + star.companion().map(com.starwake.galaxy.Galaxy.Companion::luminosity).orElse(0.0);
+		double starRadius = star == null ? 40_000 : star.radius() * com.starwake.galaxy.StarSystems.SOLAR_RADIUS;
+		double distance = Math.clamp(com.starwake.ship.data.JumpTuning.get().arrival() * Math.sqrt(luminosity), starRadius * 40, 20_000_000);
+		Vec3 back = new Vec3(-jumpDirection.x, 0, -jumpDirection.z);
+		if (back.lengthSqr() < 1.0e-6) back = new Vec3(1, 0, 0);
+		return back.normalize().scale(distance).add(0, Math.clamp(-jumpDirection.y * 200, -300, 300), 0);
 	}
 
 	/** The passenger sitting at the Helm, if any. */
@@ -1745,6 +1955,15 @@ public class ShipEntity extends Entity {
 		}
 		lastTickOrientation.set(orientation());
 		prevOrientation.set(orientation());
+		// A jump-drive tunnel in progress resumes (M6).
+		input.getString("jump_target").ifPresent(target -> {
+			jumpTarget = target;
+			jumpTicks = input.getIntOr("jump_ticks", 1);
+			jumpTotal = input.getIntOr("jump_total", jumpTicks);
+			jumpDirection = input.read("jump_direction", Vec3.CODEC).orElse(new Vec3(1, 0, 0));
+			entityData.set(JD_STATE, JD_TRAVEL);
+			entityData.set(JD_TARGET, target);
+		});
 		// A jump in progress resumes where it was (target, start, drop-out point, ticks so far).
 		input.read("quantum_target", ResourceKey.codec(com.starwake.planet.Planets.REGISTRY_KEY)).ifPresent(target -> {
 			var from = input.read("quantum_from", Vec3.CODEC);
@@ -1779,6 +1998,12 @@ public class ShipEntity extends Entity {
 		});
 		if (orbiting != null) {
 			output.store("orbiting", Level.RESOURCE_KEY_CODEC, orbiting);
+		}
+		if (jumpTicks >= 0 && jumpTarget != null) {
+			output.putString("jump_target", jumpTarget);
+			output.putInt("jump_ticks", jumpTicks);
+			output.putInt("jump_total", jumpTotal);
+			output.store("jump_direction", Vec3.CODEC, jumpDirection);
 		}
 		if (jump != null) {
 			output.store("quantum_target", ResourceKey.codec(com.starwake.planet.Planets.REGISTRY_KEY), jump.target());
