@@ -1,2 +1,0 @@
-/say hello from bob
-/say ping 98
