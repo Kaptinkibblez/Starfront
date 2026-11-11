@@ -45,6 +45,7 @@ public final class ModNetworking {
 					case ShipQuantumPayload.ACTION_QUANTUM_ENGAGE -> ship.engageQuantum();
 					case ShipQuantumPayload.ACTION_QUANTUM_TOGGLE -> ship.toggleQuantumMode();
 					case ShipQuantumPayload.ACTION_DECOUPLE -> ship.toggleDecoupled();
+					case ShipQuantumPayload.ACTION_GEAR -> ship.toggleGear();
 					default -> { }
 				}
 			}

@@ -139,13 +139,18 @@ public final class FlightHud {
 		g.fill(x, y - 8, x + 1, y - 3, GOOD);
 	}
 
-	/** Horizon and pitch lines every 10 degrees, rotated by roll, scrolled by pitch. */
+	/**
+	 * Horizon and pitch lines every 10 degrees, rotated by roll and scrolled by pitch. The
+	 * numbers ride along with their lines but stay upright, so they read at any bank angle.
+	 */
 	private static void pitchLadder(GuiGraphicsExtractor g, Font font, int cx, int cy, double pitch, double roll, boolean space) {
 		float pxPerDeg = 2.2f;
+		double angle = Math.toRadians(-roll);
+		float cos = (float) Math.cos(angle), sin = (float) Math.sin(angle);
+		int base = (int) Math.floor(pitch / 10) * 10;
 		g.pose().pushMatrix();
 		g.pose().translate(cx, cy);
-		g.pose().rotate((float) Math.toRadians(-roll));
-		int base = (int) Math.floor(pitch / 10) * 10;
+		g.pose().rotate((float) angle);
 		for (int deg = base - 30; deg <= base + 30; deg += 10) {
 			if (deg < -90 || deg > 90) continue;
 			int y = Math.round((float) (pitch - deg) * pxPerDeg);
@@ -159,11 +164,20 @@ public final class FlightHud {
 				int tick = deg > 0 ? 3 : -3;
 				g.fill(-outer, Math.min(y, y + tick), -outer + 1, Math.max(y, y + tick) + 1, color);
 				g.fill(outer - 1, Math.min(y, y + tick), outer, Math.max(y, y + tick) + 1, color);
-				String label = Integer.toString(Math.abs(deg));
-				g.text(font, label, outer + 3, y - 3, color, false);
 			}
 		}
 		g.pose().popMatrix();
+		for (int deg = base - 30; deg <= base + 30; deg += 10) {
+			if (deg < -90 || deg > 90 || deg == 0) continue;
+			float y = (float) (pitch - deg) * pxPerDeg;
+			if (Math.abs(y) > 70) continue;
+			String label = Integer.toString(Math.abs(deg));
+			for (int side : new int[] {-1, 1}) {
+				float lx = side * (44 + 3 + font.width(label) / 2f), ly = y;
+				float rx = lx * cos - ly * sin, ry = lx * sin + ly * cos;
+				g.text(font, label, Math.round(cx + rx - font.width(label) / 2f), Math.round(cy + ry - 3), HOLO_FAINT, false);
+			}
+		}
 	}
 
 	// --- tapes ----------------------------------------------------------------------------------
@@ -230,6 +244,23 @@ public final class FlightHud {
 		String vs = String.format("%s%.0f", climb >= 0 ? "+" : "", climb);
 		int color = Math.abs(climb) < 0.5 ? HOLO_DIM : climb > 0 ? GOOD : WARN;
 		g.text(font, "VS " + vs, x + 5, bottom + 4, color, false);
+		// Landing aid: height above ground when it's close.
+		if (!space) {
+			double agl = heightAboveGround(ship);
+			if (agl >= 0 && agl < 64) {
+				g.text(font, String.format("AGL %.1f", agl), x + 5, bottom + 14, agl < 4 ? WHITE : HOLO, false);
+			}
+		}
+	}
+
+	/** Distance from the ship's lowest point to the ground below it, or -1 if out of range. */
+	static double heightAboveGround(ShipEntity ship) {
+		var box = ship.getBoundingBox();
+		Vec3 from = new Vec3(ship.getX(), box.minY, ship.getZ());
+		var hit = ship.level().clip(new net.minecraft.world.level.ClipContext(from, from.add(0, -96, 0),
+				net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.ANY,
+				net.minecraft.world.phys.shapes.CollisionContext.empty()));
+		return hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS ? -1 : from.y - hit.getLocation().y;
 	}
 
 	/** A vertical gauge: frame, fill from the bottom, ticks. */
@@ -269,6 +300,10 @@ public final class FlightHud {
 		g.text(font, "ENG " + Math.round(ship.engineFactor() * 100) + "%", sx, y, ship.engineFactor() < 0.75 ? WARN : HOLO, false);
 		float thermal = ship.thermalFactor();
 		g.text(font, thermal < 0.999f ? "HEAT " + Math.round(thermal * 100) + "%" : "TEMP OK", sx, y + 9, thermal < 0.999f ? ALERT : HOLO_DIM, false);
+		if (ship.gearCount() > 0) {
+			boolean down = ship.isGearDown();
+			g.text(font, down ? "GEAR DN" : "GEAR UP", sx + 48, y + 9, down ? GOOD : HOLO_DIM, false);
+		}
 		if (!space) {
 			int lift = Math.round(ship.wingLift() * 100);
 			g.text(font, "WING " + lift + "%", sx, y + 18, lift > 0 ? HOLO : HOLO_DIM, false);
@@ -292,6 +327,12 @@ public final class FlightHud {
 		if (ship.isDecoupled()) line = alert(g, font, cx, y, line, Component.translatable("hud.starwake.decoupled"), WARN);
 		if (ship.fuelCapacity() > 0 && ship.fuel() < ship.fuelCapacity() * 0.15 && blink) {
 			line = alert(g, font, cx, y, line, Component.translatable("hud.starwake.low_fuel"), ALERT);
+		}
+		if (ship.gearCount() > 0 && !ship.isGearDown() && !SpaceTravel.isSpace(ship.level()) && blink) {
+			double agl = heightAboveGround(ship);
+			if (agl >= 0 && agl < 15 && ship.recentVelocity().y < -0.02) {
+				line = alert(g, font, cx, y, line, Component.translatable("hud.starwake.gear_up"), ALERT);
+			}
 		}
 		if (ship.thermalFactor() < 0.999f) line = alert(g, font, cx, y, line, Component.translatable("hud.starwake.overheat"), ALERT);
 		if (ship.shieldMax() > 0 && ship.shield() < 1 && blink) {

@@ -93,7 +93,7 @@ public class StarmapApp implements WristcomApp {
 			g.fill(px - r, pz - r, px + r + 1, pz + r + 1, b.body().star() ? 0xFFFFD27A : b.body().color() | 0xFF000000);
 			// The star's label goes below it, planets' to the right, so neighbours don't collide.
 			if (b.body().star()) g.centeredText(font, b.displayName(), px, pz + r + 3, 0xFFFFD27A);
-			else g.text(font, b.displayName(), px + r + 3, pz - 4, WristcomScreen.TEXT, false);
+			else g.centeredText(font, b.displayName(), px, pz - r - 11, WristcomScreen.TEXT);
 		}
 		// You: a blinking diamond.
 		if ((System.currentTimeMillis() / 500) % 2 == 0) {

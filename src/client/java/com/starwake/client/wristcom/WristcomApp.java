@@ -21,6 +21,11 @@ public interface WristcomApp {
 	/** Called when the app is opened (or the screen resized): add widgets to the content area. */
 	default void init(WristcomScreen screen, int x, int y, int width, int height) {}
 
+	/** Mouse wheel over the screen; return true if the app scrolled. */
+	default boolean scrolled(double amount) {
+		return false;
+	}
+
 	/** Draws the app into its content area. */
 	void render(WristcomScreen screen, GuiGraphicsExtractor graphics, int x, int y, int width, int height,
 			int mouseX, int mouseY, float partialTick);

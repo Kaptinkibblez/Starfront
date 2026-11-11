@@ -111,6 +111,9 @@ public final class ShipAssembler {
 		if (ship.getDeltaMovement().lengthSqr() > 1.0e-4) {
 			return Component.translatable("message.starwake.disassemble.moving");
 		}
+		if (ship.gearCount() > 0 && !ship.isGearDown()) {
+			return Component.translatable("message.starwake.disassemble.gear_up");
+		}
 		// Must be roughly level (within 20 degrees); it then squares up to the nearest of N/E/S/W.
 		if (ship.worldDirection(net.minecraft.core.Direction.UP).y < Math.cos(Math.toRadians(20))) {
 			return Component.translatable("message.starwake.disassemble.not_level");

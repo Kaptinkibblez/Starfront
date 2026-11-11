@@ -107,6 +107,15 @@ public final class ModBlocks {
 					.noOcclusion()
 					.requiresCorrectToolForDrops());
 
+	/** Landing Gear: deploy/retract with N; soft landings need it down (3j). */
+	public static final Block LANDING_GEAR = register("landing_gear", com.starwake.ship.block.LandingGearBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.COLOR_GRAY)
+					.strength(3.0f, 6.0f)
+					.sound(SoundType.METAL)
+					.noOcclusion()
+					.requiresCorrectToolForDrops());
+
 	/** Fuel Tank: stores fuel for the ship's thrusters. */
 	public static final Block FUEL_TANK = register("fuel_tank", FuelTankBlock::new,
 			BlockBehaviour.Properties.of()

@@ -50,6 +50,9 @@ public final class ShipClient {
 	/** Star Citizen's quantum key: tap to toggle quantum mode, hold to engage. */
 	private static final KeyMapping QUANTUM = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.quantum", InputConstants.KEY_B, CATEGORY));
+	/** Landing gear up/down. */
+	private static final KeyMapping GEAR = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.gear", InputConstants.KEY_N, CATEGORY));
 	/** The Wristcom (wrist computer). */
 	private static final KeyMapping WRISTCOM = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.wristcom", InputConstants.KEY_G, CATEGORY));
@@ -85,6 +88,7 @@ public final class ShipClient {
 			sendControls(client);
 			quantumKey(client);
 			decoupleKey(client);
+			gearKey(client);
 			while (WRISTCOM.consumeClick()) {
 				if (client.player != null && client.gui.screen() == null) client.gui.setScreen(new com.starwake.client.wristcom.WristcomScreen());
 			}
@@ -114,6 +118,15 @@ public final class ShipClient {
 		}
 		while (LEAVE_SEAT.consumeClick()) {
 			ClientPlayNetworking.send(new ShipControlPayload(0, true));
+		}
+	}
+
+	/** N: landing gear (pilot only). */
+	private static void gearKey(Minecraft client) {
+		while (GEAR.consumeClick()) {
+			if (client.player != null && client.player.getVehicle() instanceof ShipEntity ship && ship.pilot() == client.player) {
+				ClientPlayNetworking.send(new ShipQuantumPayload(ShipQuantumPayload.ACTION_GEAR));
+			}
 		}
 	}
 

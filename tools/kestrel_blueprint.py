@@ -45,6 +45,8 @@ for x in (5, 9):
 # VTOL: main engines in the belly + thrusters under the wings
 for x, z in ((6, 5), (8, 5), (6, 13), (8, 13)): put(x, 0, z, 'M')
 for x in (2, 12): put(x, 1, 11, 'D')
+# Tricycle landing gear: nose and two mains, around the centre of mass
+for x, z in ((7, 4), (5, 11), (9, 11)): put(x, 0, z, 'L')
 # Maneuvering thrusters (RCS)
 put(6, 2, 1, 'n'); put(8, 2, 1, 'n')                      # retros
 put(5, 3, 2, 'w'); put(9, 3, 2, 'e')                      # nose yaw/strafe
@@ -59,7 +61,8 @@ palette = {
   "D": "starwake:thruster[facing=down]", "W": "starwake:wing[axis=y]", "F": "starwake:wing[axis=x]",
   "n": "starwake:maneuvering_thruster[facing=north]", "w": "starwake:maneuvering_thruster[facing=west]",
   "e": "starwake:maneuvering_thruster[facing=east]", "u": "starwake:maneuvering_thruster[facing=up]",
-  "d": "starwake:maneuvering_thruster[facing=down]"}
+  "d": "starwake:maneuvering_thruster[facing=down]",
+  "L": "starwake:landing_gear[deployed=true]"}
 layers = []
 for y in range(Hgt):
     rows = []

@@ -22,7 +22,8 @@
     "w": "starwake:maneuvering_thruster[facing=west]",
     "e": "starwake:maneuvering_thruster[facing=east]",
     "u": "starwake:maneuvering_thruster[facing=up]",
-    "d": "starwake:maneuvering_thruster[facing=down]"
+    "d": "starwake:maneuvering_thruster[facing=down]",
+    "L": "starwake:landing_gear[deployed=true]"
   },
   "layers": [
     [
@@ -30,14 +31,14 @@
       "...............",
       ".......d.......",
       "...............",
-      "...............",
+      ".......L.......",
       "......M.M......",
       "...............",
       "...............",
       "...............",
       "...............",
       "...............",
-      "...............",
+      ".....L...L.....",
       "...............",
       "......M.M......",
       "...............",

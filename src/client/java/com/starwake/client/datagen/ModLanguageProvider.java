@@ -26,6 +26,7 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModBlocks.THRUSTER, "Thruster");
 		builder.add(ModBlocks.MAIN_ENGINE, "Main Engine");
 		builder.add(ModBlocks.WING, "Wing");
+		builder.add(ModBlocks.LANDING_GEAR, "Landing Gear");
 		builder.add(ModBlocks.MANEUVERING_THRUSTER, "Maneuvering Thruster");
 		builder.add(ModBlocks.FUEL_TANK, "Fuel Tank");
 		builder.add(ModBlocks.SEAT, "Seat");
@@ -53,6 +54,14 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("screen.starwake.power.quantum", "Quantum: %s%%");
 		builder.add("console.starwake.ship.power", "Power %s, cooling %s, engines %s, shield %s");
 		builder.add("hud.starwake.decoupled", "DECOUPLED");
+		builder.add("hud.starwake.gear_up", "GEAR UP");
+		builder.add("key.starwake.gear", "Landing Gear");
+		builder.add("message.starwake.gear.down", "Landing gear down");
+		builder.add("message.starwake.gear.up", "Landing gear up");
+		builder.add("message.starwake.gear.blocked", "No room to lower the landing gear");
+		builder.add("message.starwake.disassemble.gear_up", "Lower the landing gear before disassembling");
+		builder.add("preflight.starwake.gear", "Landing gear: %s strut(s) (soft touchdowns up to ~6 m/s with gear down)");
+		builder.add("preflight.starwake.no_gear", "No landing gear: every touchdown is a belly landing (crash damage above ~1.6 m/s)");
 		builder.add("key.starwake.wristcom", "Wristcom");
 		builder.add("screen.starwake.wristcom", "WRISTCOM");
 		builder.add("screen.starwake.wristcom.hint", "G or Esc to close");
@@ -76,8 +85,9 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("wristcom.home.piloting", "Piloting: fuel %s/%s, shields %s");
 		builder.add("wristcom.home.aboard", "Aboard: fuel %s/%s, shields %s");
 		builder.add("wristcom.home.controls", "Flight controls");
-		builder.add("wristcom.ship.none", "You're not aboard a ship.");
+		builder.add("wristcom.ship.none", "You're not aboard a ship. Use a ship's Helm to run its pre-flight check and assemble it.");
 		builder.add("wristcom.ship.power", "Power routing");
+		builder.add("wristcom.ship.report", "Ship report");
 		builder.add("wristcom.ship.toggle_mode", "Coupled / Decoupled");
 		builder.add("wristcom.ship.pilot_only", "Only the pilot can route power.");
 		builder.add("wristcom.starmap.plot", "Plot QT: %s");

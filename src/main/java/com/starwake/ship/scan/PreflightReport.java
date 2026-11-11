@@ -216,6 +216,11 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 					dynamics.wings().size(), dynamics.liftingWings(), pct(weight > 0 ? wingLift / weight : 0), fmt(cruise * 20))));
 		}
 
+		// Landing gear (3j).
+		long gear = ship.stream().filter(p -> level.getBlockState(p).is(ModBlocks.LANDING_GEAR)).count();
+		lines.add(gear > 0 ? new Line(Status.PASS, Component.translatable("preflight.starwake.gear", gear))
+				: new Line(Status.WARN, Component.translatable("preflight.starwake.no_gear")));
+
 		// --- Fuel -----------------------------------------------------------------------
 		if (tanks == 0) {
 			lines.add(new Line(Status.FAIL, Component.translatable("preflight.starwake.no_tanks")));

@@ -164,7 +164,10 @@ public final class SpaceTravel {
 		Entity moved = ship.teleport(new TeleportTransition(to, origin, velocity, 0, 0,
 				TeleportTransition.PLACE_PORTAL_TICKET));
 		if (moved == null) return false;
-		if (moved instanceof ShipEntity movedShip) movedShip.setOrientation(newOrientation);
+		if (moved instanceof ShipEntity movedShip) {
+			movedShip.setOrientation(newOrientation);
+			if (isSpace(to) && !isSpace(from)) movedShip.startExitAssist();
+		}
 		for (int i = 0; i < aboard.size(); i++) {
 			Entity entity = aboard.get(i);
 			Vec3 target = ship.toWorldAt(locals.get(i), origin, newOrientation); // same spot on the moved ship

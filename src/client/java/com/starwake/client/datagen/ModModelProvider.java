@@ -39,6 +39,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		createNozzleBlock(generators, ModBlocks.THRUSTER);
 		createNozzleBlock(generators, ModBlocks.MAIN_ENGINE);
 		createWing(generators, ModBlocks.WING);
+		createLandingGear(generators, ModBlocks.LANDING_GEAR);
 		createNozzleBlock(generators, ModBlocks.MANEUVERING_THRUSTER);
 		createSeat(generators, ModBlocks.SEAT);
 		generators.createTrivialBlock(ModBlocks.POWER_PLANT, TexturedModel.COLUMN);
@@ -87,6 +88,25 @@ public final class ModModelProvider extends FabricModelProvider {
 						.select(Direction.Axis.Y, model)
 						.select(Direction.Axis.Z, model.with(BlockModelGenerators.X_ROT_90))
 						.select(Direction.Axis.X, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_90))));
+	}
+
+	/**
+	 * Landing gear: hand-written parents {@code block/template_gear_down} (strut + pad, reaching
+	 * below the block) and {@code block/template_gear_up} (flush hatch). Textures {@code _side} and {@code _top}.
+	 */
+	private static void createLandingGear(BlockModelGenerators generators, Block block) {
+		TextureMapping textures = new TextureMapping()
+				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side"))
+				.put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top"));
+		Identifier down = new ModelTemplate(java.util.Optional.of(com.starwake.StarwakeMod.id("block/template_gear_down")),
+				java.util.Optional.of("_down"), TextureSlot.SIDE, TextureSlot.TOP).create(block, textures, generators.modelOutput);
+		Identifier up = new ModelTemplate(java.util.Optional.of(com.starwake.StarwakeMod.id("block/template_gear_up")),
+				java.util.Optional.of("_up"), TextureSlot.SIDE, TextureSlot.TOP).create(block, textures, generators.modelOutput);
+		generators.registerSimpleItemModel(block, down);
+		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(block).with(
+				PropertyDispatch.initial(com.starwake.ship.block.LandingGearBlock.DEPLOYED)
+						.select(true, BlockModelGenerators.plainVariant(down))
+						.select(false, BlockModelGenerators.plainVariant(up))));
 	}
 
 	/** A low cushioned seat: bottom-slab shape with {@code <name>_top} and {@code <name>_side}. */

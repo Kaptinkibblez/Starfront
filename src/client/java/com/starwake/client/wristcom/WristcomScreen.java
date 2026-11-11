@@ -28,6 +28,29 @@ public class WristcomScreen extends Screen {
 		current = Mth.clamp(lastApp, 0, Math.max(0, apps.size() - 1));
 	}
 
+	/** Opens the Wristcom on the first app of the given type. */
+	public static WristcomScreen openOn(Class<? extends WristcomApp> type) {
+		WristcomScreen screen = new WristcomScreen();
+		for (int i = 0; i < screen.apps.size(); i++) {
+			if (type.isInstance(screen.apps.get(i))) {
+				screen.current = i;
+				lastApp = i;
+			}
+		}
+		return screen;
+	}
+
+	/** Rebuilds the current app's widgets (new data arrived). */
+	public void refresh() {
+		rebuildWidgets();
+	}
+
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		if (currentApp().scrolled(scrollY)) return true;
+		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+	}
+
 	public WristcomApp currentApp() {
 		return apps.get(current);
 	}

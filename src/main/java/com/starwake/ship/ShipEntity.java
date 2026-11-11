@@ -147,8 +147,14 @@ public class ShipEntity extends Entity {
 	/** Angular velocity in the ship's own frame, radians per tick. */
 	private final Vector3d angularVelocity = new Vector3d();
 	private final List<BlockPos> seats = new ArrayList<>();
-	/** Blocks with any exposed face: the hull used for terrain collision. */
-	private final List<BlockPos> hull = new ArrayList<>();
+	/**
+	 * Collision boxes (local) of blocks with any exposed face: the hull used for terrain
+	 * collision. Each is the block's real shape bounds, so retracted landing gear doesn't
+	 * touch the ground and deployed gear reaches below its block.
+	 */
+	private final List<AABB> hull = new ArrayList<>();
+	/** Landing gear blocks aboard (local positions). */
+	private final List<BlockPos> gear = new ArrayList<>();
 
 	/** Server: which seat (local pos) each passenger occupies. The Helm's seat makes you the pilot. */
 	private final Map<UUID, BlockPos> seatOf = new HashMap<>();
@@ -207,6 +213,7 @@ public class ShipEntity extends Entity {
 		mass = 0;
 		seats.clear();
 		hull.clear();
+		gear.clear();
 		if (structure == null) return;
 		ShipDynamics model = new ShipDynamics();
 		List<Integer> thrusterIndex = new ArrayList<>();
@@ -219,6 +226,7 @@ public class ShipEntity extends Entity {
 					|| structure.get(entry.pos().relative(state.getValue(ThrusterBlock.FACING))) == null;
 			model.add(entry.pos(), state, clear);
 			if (model.thrusterCount() > before) thrusterIndex.add(index);
+			if (state.getBlock() instanceof com.starwake.ship.block.LandingGearBlock) gear.add(entry.pos());
 			if (state.getBlock() instanceof HelmBlock) {
 				helmLocal = entry.pos();
 				forward = state.getValue(HelmBlock.FACING);
@@ -227,7 +235,8 @@ public class ShipEntity extends Entity {
 			}
 			for (Direction d : Direction.values()) {
 				if (!structure.hasCollision(entry.pos().relative(d)) && structure.hasCollision(entry.pos())) {
-					hull.add(entry.pos());
+					hull.add(state.getCollisionShape(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, BlockPos.ZERO)
+							.bounds().move(entry.pos()));
 					break;
 				}
 			}
@@ -734,6 +743,15 @@ public class ShipEntity extends Entity {
 		}
 		publishThrottles();
 
+		if (exitAssist > 0) {
+			// Just out of the atmosphere: the flight computer settles the ship into orbit, with a
+			// little free help so ships with weak downward thrusters don't drift away for ages.
+			exitAssist--;
+			if (!decoupled) {
+				velocity = velocity.scale(0.92);
+				angularVelocity.mul(0.9);
+			}
+		}
 		double maxSpeed = SpaceTravel.isSpace(level()) ? physics.maxSpeedSpace() : physics.maxSpeed();
 		if (velocity.lengthSqr() > maxSpeed * maxSpeed) {
 			velocity = velocity.normalize().scale(maxSpeed);
@@ -980,7 +998,8 @@ public class ShipEntity extends Entity {
 		ask(force, left, input.left(), scale);
 		ask(force, left.getOpposite(), input.right(), scale);
 		ask(force, Direction.UP, input.jump(), scale);
-		ask(force, Direction.DOWN, input.sprint(), scale);
+		// Ctrl: coupled = controlled descent (below); decoupled = cut lift and push down.
+		ask(force, Direction.DOWN, input.sprint() && (decoupled || gravity <= 0), scale);
 		// Coupled mode (Star Citizen's IFCS): on any axis the pilot isn't commanding, the flight
 		// computer fires the opposite thrusters to null the drift. No retros, no braking.
 		double perVelocity = mass / physics.thrustToAccel() * COUPLED_BRAKING; // force per (block/tick)
@@ -989,7 +1008,9 @@ public class ShipEntity extends Entity {
 		Vector3d fwdAxis = new Vector3d(forward.getStepX(), 0, forward.getStepZ());
 		Vector3d rightAxis = new Vector3d(right.getStepX(), 0, right.getStepZ());
 		Vector3d local = new Vector3d(v.x, v.y, v.z);
-		boolean hovering = !input.sprint() && !input.jump() && gravity > 0;
+		boolean hovering = !input.jump() && !(input.sprint() && decoupled) && gravity > 0;
+		// Coupled descent (Ctrl): hold a gentle sink rate the landing gear can take.
+		double targetClimb = input.sprint() && !decoupled ? -DESCENT_RATE : 0;
 		if (!decoupled) {
 			if (!input.forward() && !input.backward()) force.fma(-local.dot(fwdAxis) * perVelocity, fwdAxis);
 			if (!input.left() && !input.right()) force.fma(-local.dot(rightAxis) * perVelocity, rightAxis);
@@ -1002,7 +1023,7 @@ public class ShipEntity extends Entity {
 		// (Decoupled: gravity is still cancelled, but vertical drift is the pilot's problem.)
 		double weight = hovering
 				? Math.max(0, mass * gravity * physics.gravityToAccel() / physics.thrustToAccel()
-						- (decoupled ? 0 : velocity.y * perVelocity)) : 0;
+						- (decoupled ? 0 : (velocity.y - targetClimb) * perVelocity)) : 0;
 
 		// Wanted torque: steer the angular velocity toward what the pilot asks for.
 		Vector3d alpha = wantedRotation(pilot, physics, space).sub(angularVelocity).mul(0.35);
@@ -1032,6 +1053,65 @@ public class ShipEntity extends Entity {
 		return velocity.add(accel).scale(space ? physics.dragSpace() : physics.dragAtmosphere());
 	}
 
+	/** Number of landing gear blocks aboard (both sides: computed from the structure). */
+	public int gearCount() {
+		return gear.size();
+	}
+
+	/** True if the ship has landing gear and it's deployed. */
+	public boolean isGearDown() {
+		if (structure == null || gear.isEmpty()) return false;
+		BlockState state = structure.get(gear.get(0));
+		return state != null && state.hasProperty(com.starwake.ship.block.LandingGearBlock.DEPLOYED)
+				&& state.getValue(com.starwake.ship.block.LandingGearBlock.DEPLOYED);
+	}
+
+	/** Pilot pressed N: deploy or retract every landing gear block. */
+	public void toggleGear() {
+		if (structure == null || gear.isEmpty() || !(level() instanceof ServerLevel serverLevel)) return;
+		boolean deploy = !isGearDown();
+		ShipStructure before = structure;
+		ShipStructure next = structure;
+		for (BlockPos pos : gear) {
+			BlockState state = next.get(pos);
+			if (state != null) next = next.with(pos, state.setValue(com.starwake.ship.block.LandingGearBlock.DEPLOYED, deploy), next.blockEntity(pos));
+		}
+		setStructure(next);
+		if (deploy) {
+			// Extending gear into the ground lifts the ship onto it (or fails if there's no room).
+			boolean placed = false;
+			for (double lift : new double[] {0, 0.25, 0.5, 0.75}) {
+				if (!hullCollides(position().add(0, lift, 0), orientation())) {
+					if (lift > 0) setPos(position().add(0, lift, 0));
+					placed = true;
+					break;
+				}
+			}
+			if (!placed) {
+				setStructure(before);
+				if (pilot() instanceof ServerPlayer player) player.sendOverlayMessage(Component.translatable("message.starwake.gear.blocked"));
+				return;
+			}
+		}
+		var payload = new com.starwake.network.ShipStructurePayload(getId(), structure);
+		for (ServerPlayer player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(this)) {
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
+		}
+		serverLevel.playSound(null, BlockPos.containing(position()), deploy ? net.minecraft.sounds.SoundEvents.PISTON_EXTEND
+				: net.minecraft.sounds.SoundEvents.PISTON_CONTRACT, net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 0.7f);
+		if (pilot() instanceof ServerPlayer player) {
+			player.sendOverlayMessage(Component.translatable(deploy ? "message.starwake.gear.down" : "message.starwake.gear.up"));
+		}
+	}
+
+	/** Ticks of orbit-insertion assist left after leaving an atmosphere (not saved). */
+	private int exitAssist;
+
+	/** Called on the ship's new copy in space after it leaves a planet. */
+	public void startExitAssist() {
+		exitAssist = 100;
+	}
+
 	/** Decoupled flight (Star Citizen's "decoupled mode"): no automatic braking. Saved. */
 	private boolean decoupled;
 
@@ -1052,6 +1132,9 @@ public class ShipEntity extends Entity {
 			player.sendOverlayMessage(Component.translatable(decoupled ? "message.starwake.decoupled" : "message.starwake.coupled"));
 		}
 	}
+
+	/** Coupled descent rate while holding Ctrl (blocks/tick): 5 m/s, inside the gear's limit. */
+	private static final double DESCENT_RATE = 0.25;
 
 	/** Fraction of uncommanded velocity the flight computer tries to cancel each tick. */
 	private static final double COUPLED_BRAKING = 0.12;
@@ -1169,12 +1252,20 @@ public class ShipEntity extends Entity {
 		setPos(getX(), getY(), getZ() + dz);
 		setDeltaMovement(dx == velocity.x ? velocity.x : 0, dy == velocity.y ? velocity.y : 0, dz == velocity.z ? velocity.z : 0);
 		double impact = Math.abs(velocity.x - dx) + Math.abs(velocity.y - dy) + Math.abs(velocity.z - dz);
+		// Touchdowns (mostly vertical, downward) are soft only on deployed gear with the ship
+		// upright; anything else is a belly landing. Side impacts keep the general limit.
+		boolean touchdown = velocity.y < 0 && Math.abs(velocity.y - dy) > impact * 0.7;
+		double safe = !touchdown ? SAFE_IMPACT
+				: isGearDown() && worldDirection(Direction.UP).y > 0.8 ? SAFE_GEAR_LANDING : SAFE_BELLY_LANDING;
 		if (impactCooldown > 0) impactCooldown--;
-		else if (impact > SAFE_IMPACT) onImpact(impact);
+		else if (impact > safe) onImpact(impact, safe);
 	}
 
 	/** Ticks before another impact can register: a crash counts once, not once per tick of scraping. */
 	private int impactCooldown;
+
+	/** Touchdown limits (blocks/tick): ~6 m/s on deployed gear, ~1.6 m/s on the belly. */
+	private static final double SAFE_GEAR_LANDING = 0.3, SAFE_BELLY_LANDING = 0.08;
 
 	/** Impact speed (blocks/tick) a ship absorbs without consequence: a firm landing. */
 	private static final double SAFE_IMPACT = 0.35;
@@ -1183,10 +1274,11 @@ public class ShipEntity extends Entity {
 	 * A crash: shields soak the impact energy first; anything left hurts everyone aboard
 	 * (crew in seats and people walking inside).
 	 */
-	private void onImpact(double impact) {
+	private void onImpact(double impact, double safe) {
 		if (!(level() instanceof ServerLevel serverLevel)) return;
 		impactCooldown = 10;
-		double energy = (impact - SAFE_IMPACT) * 40.0; // 1 b/t over the limit = 40 shield HP
+		// 1 b/t over the limit = 40 shield HP; scraping in on the belly is five times worse.
+		double energy = (impact - safe) * (safe == SAFE_BELLY_LANDING ? 200.0 : 40.0); // 1 b/t over the limit = 40 shield HP
 		float shield = entityData.get(SHIELD);
 		double absorbed = Math.min(shield, energy);
 		entityData.set(SHIELD, (float) (shield - absorbed));
@@ -1206,8 +1298,8 @@ public class ShipEntity extends Entity {
 	private double clip(Direction.Axis axis, double distance) {
 		if (distance == 0 || structure == null) return distance;
 		boolean aligned = isAxisAligned();
-		for (BlockPos local : hull) {
-			AABB box = worldBox(new AABB(local), aligned ? 1.0 : 0.9).deflate(1.0e-7);
+		for (AABB local : hull) {
+			AABB box = worldBox(local, aligned ? 1.0 : 0.9).deflate(1.0e-7);
 			AABB swept = box.expandTowards(axis == Direction.Axis.X ? distance : 0,
 					axis == Direction.Axis.Y ? distance : 0, axis == Direction.Axis.Z ? distance : 0);
 			for (VoxelShape shape : level().getBlockCollisions(null, swept)) {
@@ -1221,8 +1313,8 @@ public class ShipEntity extends Entity {
 	/** Would the hull overlap terrain at this pose? (Used to refuse rotations into the ground.) */
 	private boolean hullCollides(Vec3 position, Quaternionfc rotation) {
 		boolean aligned = isAxisAligned(rotation);
-		for (BlockPos local : hull) {
-			AABB box = worldBox(new AABB(local), aligned ? 1.0 : 0.9, position, rotation).deflate(0.05);
+		for (AABB local : hull) {
+			AABB box = worldBox(local, aligned ? 1.0 : 0.9, position, rotation).deflate(0.05);
 			for (VoxelShape shape : level().getBlockCollisions(null, box)) {
 				if (!shape.isEmpty() && shape.bounds().intersects(box)) return true;
 			}

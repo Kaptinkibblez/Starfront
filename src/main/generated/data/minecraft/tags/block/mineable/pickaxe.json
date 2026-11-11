@@ -8,6 +8,7 @@
     "starwake:main_engine",
     "starwake:maneuvering_thruster",
     "starwake:wing",
+    "starwake:landing_gear",
     "starwake:fuel_tank",
     "starwake:seat",
     "starwake:power_plant",
