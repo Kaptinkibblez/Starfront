@@ -166,9 +166,13 @@ commit. **Don't start the next milestone until the user confirms the current one
         *(Verified 2026-11-10: yaw/pitch/roll in flight, rotated rendering inside and out,
         atmospheric auto-level, mob carried rigidly through rotation, disassembly squaring up
         to east with rotated block states, seating synced to clients.)*
-  - [ ] 3e. Lived-in interiors: ship-local player physics with deck-aligned artificial
-        gravity, camera roll with the ship, usable doors/chests/beds aboard, EVA jetpack in
-        zero-g, airlocks.
+  - [x] 3e. Lived-in interiors: ship-local player physics with deck-aligned artificial
+        gravity, camera roll with the ship, usable doors/chests aboard, EVA jetpack in
+        zero-g, airlocks. *(Verified 2026-11-11: walking/strafing/jumping in a cabin rolled
+        86-90 degrees and while it spins on two axes; camera stays deck-aligned; chest aboard
+        in space persists edits; door opened onto space and walked out into EVA; ship-frame
+        mouse look for walkers and the seated pilot. Beds aboard deferred: vanilla sleep
+        needs a world bed and a planet with nights.)*
   - [ ] 3f. Components and power: Power Plant, Shield Generator, Cooler, Quantum Drive
         blocks; power routing screen; more pre-flight conditions.
   - [ ] 3g. Space as a real place: planets rendered as spheres in space, enter by flying
@@ -251,6 +255,22 @@ normal gravity.
   entities are rotated block boxes (exact when axis-aligned, shrunk 0.85 otherwise).
   Seats: `seatOf` (server), synced as a string in `SEATS`. Shift = boost (PlayerMixin
   stops vanilla shift-dismount on ships); X leaves the seat via `ShipControlPayload`.
+- **Interiors (3e), client `ShipLocalMotion`:** once the local player stands on or is
+  inside a ship, they move in the ship's frame. `PlayerTravelMixin` replaces travel with
+  ship-local walking (vanilla-like friction/jump, 0.08 artificial gravity toward the deck,
+  exact collision against `collectLocalShapes`, 0.6 step-up). `LocalPlayerMixin`
+  re-anchors to the ship's new transform at tick start and adopts external teleports
+  and look changes. `EntityTurnMixin`: mouse look is ship-relative, both walking and
+  seated. `CameraMixin`: adds camera roll so the deck stays level on screen, and places
+  the eye along the ship's up axis. EVA: off-ship in space, WASD thrusts along the view,
+  Space up, Shift down, with drag 0.985 (no gravity). Leaving the hull (beyond 1.5 blocks,
+  or airborne outside it) exits the frame with momentum preserved.
+- Live interior (server): doors, trapdoors and gates toggle via `ShipEntity.updateBlock`
+  (re-syncs the structure to trackers). Closed doors seal and open ones leak
+  (`ShipEntity.sealsCabin`, shared with the pre-flight check), so a door is an airlock.
+  Chests and barrels open a 27-slot menu backed by the ship's stored block-entity NBT
+  (`ShipEntity.container`, written back on every change).
+- Admin/testing: `/starwake ship spin <yaw pitch roll deg/s>` for unpiloted ships.
 - Known limits (Milestone 4/9): no in-flight editing or turning; ships don't collide with
   each other or push mobs; unattended ships in unloaded chunks freeze (expected); the
   per-frame block re-tessellation needs a cached mesh for big ships.
@@ -300,6 +320,11 @@ normal gravity.
 - `/data get entity <rider> Pos` shows the *vehicle's* position (vanilla saves riders at the
   vehicle). Log `passenger.position()` to see where a rider really is.
 - PoseStack rotation is `poseStack.rotate(Quaternionfc)` (not `mulPose`).
+- `SimpleContainer` has no change listener in 26.3: subclass it and override `setChanged`.
+- Camera internals: `Camera.setRotation(yRot, xRot)` builds `rotation` and the
+  `forwards/up/left` vectors; `alignWithEntity(partial)` positions it. Both are mixable.
+- Client harness: `ingame` dismisses the friends popup and the pause menu. Never press
+  Escape to close a container screen in tests unless you're sure one is open.
 - Teleporting a riding player with `/tp` dismounts them. In tests, re-board via right-click.
 - `/place feature <ore>` fails on already-generated chunks (it needs worldgen heightmaps).
   Test ores by generating fresh chunks and counting with `/fill ... replace`.

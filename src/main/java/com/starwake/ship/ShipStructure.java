@@ -82,6 +82,22 @@ public final class ShipStructure {
 		return entries;
 	}
 
+	/** A copy with one block's state and/or block-entity data replaced (structures are immutable). */
+	public ShipStructure with(BlockPos local, BlockState state, Optional<CompoundTag> blockEntity) {
+		List<Entry> updated = new ArrayList<>(entries.size());
+		for (Entry entry : entries) {
+			updated.add(entry.pos().equals(local) ? new Entry(local, state, blockEntity) : entry);
+		}
+		return new ShipStructure(updated);
+	}
+
+	public Optional<CompoundTag> blockEntity(BlockPos local) {
+		for (Entry entry : entries) {
+			if (entry.pos().equals(local)) return entry.blockEntity();
+		}
+		return Optional.empty();
+	}
+
 	/** Size of the bounding box in blocks. */
 	public Vec3i size() {
 		return size;

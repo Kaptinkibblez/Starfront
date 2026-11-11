@@ -110,6 +110,7 @@ public class ShipEntity extends Entity {
 	private boolean grounded;
 	/** Admin/testing: constant velocity while unpiloted ({@code /starwake ship drift}). Not saved. */
 	private Vec3 drift = Vec3.ZERO;
+	private Vec3 spin = Vec3.ZERO;
 	private double fuelDebt;
 
 	public ShipEntity(EntityType<? extends ShipEntity> type, Level level) {
@@ -209,9 +210,74 @@ public class ShipEntity extends Entity {
 	}
 
 	private boolean seals(BlockPos local) {
-		BlockState state = structure.get(local);
-		return state != null && (state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)
-				|| state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS));
+		return sealsCabin(structure.get(local));
+	}
+
+	/**
+	 * Airtight rule shared with the pre-flight check: full-collision blocks seal, and doors and
+	 * trapdoors seal only while closed (they're the ship's airlocks).
+	 */
+	public static boolean sealsCabin(@Nullable BlockState state) {
+		if (state == null) return false;
+		if (state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS)) {
+			return !state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.OPEN)
+					|| !state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.OPEN);
+		}
+		return state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+	}
+
+	// =========================================================================================
+	// Live interior: changing blocks and containers on an assembled ship
+	// =========================================================================================
+
+	/** Containers opened aboard, shared between viewers so two players can't duplicate items. */
+	private final Map<BlockPos, net.minecraft.world.SimpleContainer> containers = new HashMap<>();
+
+	/** Server: changes one block's state (e.g. a door) and re-syncs the ship to watchers. */
+	public void updateBlock(BlockPos local, BlockState state) {
+		if (structure == null) return;
+		setStructure(structure.with(local, state, structure.blockEntity(local)));
+		var payload = new com.starwake.network.ShipStructurePayload(getId(), structure);
+		for (ServerPlayer player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(this)) {
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
+		}
+	}
+
+	/**
+	 * Server: the inventory of a container block aboard (chest, barrel...), backed by the block
+	 * entity data stored in the structure. Changes are written straight back, so they persist
+	 * with the ship and survive disassembly.
+	 */
+	public net.minecraft.world.SimpleContainer container(BlockPos local, int size) {
+		return containers.computeIfAbsent(local.immutable(), pos -> {
+			var registries = level().registryAccess();
+			var items = net.minecraft.core.NonNullList.withSize(size, net.minecraft.world.item.ItemStack.EMPTY);
+			structure.blockEntity(pos).ifPresent(tag -> net.minecraft.world.ContainerHelper.loadAllItems(
+					net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, registries, tag), items));
+			var container = new net.minecraft.world.SimpleContainer(size) {
+				@Override
+				public void setChanged() {
+					super.setChanged();
+					saveContainer(pos, this);
+				}
+			};
+			for (int i = 0; i < size; i++) container.setItem(i, items.get(i));
+			return container;
+		});
+	}
+
+	private void saveContainer(BlockPos local, net.minecraft.world.SimpleContainer container) {
+		if (structure == null) return;
+		var registries = level().registryAccess();
+		var items = net.minecraft.core.NonNullList.withSize(container.getContainerSize(), net.minecraft.world.item.ItemStack.EMPTY);
+		for (int i = 0; i < items.size(); i++) items.set(i, container.getItem(i));
+		var output = net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, registries);
+		net.minecraft.world.ContainerHelper.saveAllItems(output, items, true);
+		var tag = structure.blockEntity(local).map(net.minecraft.nbt.CompoundTag::copy).orElseGet(net.minecraft.nbt.CompoundTag::new);
+		tag.remove("Items");
+		tag.merge(output.buildResult());
+		// Block-entity data never goes to clients, so no re-sync is needed.
+		structure = structure.with(local, structure.get(local), java.util.Optional.of(tag));
 	}
 
 	@Override
@@ -236,6 +302,8 @@ public class ShipEntity extends Entity {
 	public @Nullable ResourceKey<Level> orbiting() { return orbiting; }
 	public void setOrbiting(@Nullable ResourceKey<Level> orbiting) { this.orbiting = orbiting; }
 	public void setDrift(Vec3 drift) { this.drift = drift; }
+	/** Admin/testing: constant spin (yaw, pitch, roll in degrees/second about the ship's own axes). Not saved. */
+	public void setSpin(Vec3 spin) { this.spin = spin; }
 	public void setControls(int controls) { this.controls = controls; }
 
 	/** Removes up to {@code amount} fuel. */
@@ -385,7 +453,43 @@ public class ShipEntity extends Entity {
 		}
 	}
 
-	/** World AABB enclosing a local box after rotation (current pose), scaled about its centre. */
+	/**
+	 * Collision shapes of ship blocks in ship-local space (exact, axis-aligned) that intersect
+	 * {@code localArea}. Used by ship-local player physics (walking aboard at any attitude).
+	 */
+	public void collectLocalShapes(AABB localArea, List<VoxelShape> out) {
+		if (structure == null) return;
+		var size = structure.size();
+		int minX = Math.max(0, Mth.floor(localArea.minX)), maxX = Math.min(size.getX() - 1, Mth.floor(localArea.maxX));
+		int minY = Math.max(0, Mth.floor(localArea.minY)), maxY = Math.min(size.getY() - 1, Mth.floor(localArea.maxY));
+		int minZ = Math.max(0, Mth.floor(localArea.minZ)), maxZ = Math.min(size.getZ() - 1, Mth.floor(localArea.maxZ));
+		for (int x = minX; x <= maxX; x++) {
+			for (int y = minY; y <= maxY; y++) {
+				for (int z = minZ; z <= maxZ; z++) {
+					BlockState state = structure.get(x, y, z);
+					if (state == null) continue;
+					VoxelShape shape = state.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+					if (!shape.isEmpty()) out.add(shape.move(x, y, z));
+				}
+			}
+		}
+	}
+
+	/** True if a local point is within the structure's box grown by {@code margin}. */
+	public boolean isNearLocal(Vec3 local, double margin) {
+		if (structure == null) return false;
+		var size = structure.size();
+		return local.x > -margin && local.y > -margin && local.z > -margin
+				&& local.x < size.getX() + margin && local.y < size.getY() + margin && local.z < size.getZ() + margin;
+	}
+
+	/** World velocity of a ship-local point due to the ship's last-tick motion (translation + rotation). */
+	public Vec3 pointVelocity(Vec3 local) {
+		if (lastTickPos == null) return Vec3.ZERO;
+		return toWorld(local).subtract(toWorld(local, lastTickPos, prevOrientation));
+	}
+
+		/** World AABB enclosing a local box after rotation (current pose), scaled about its centre. */
 	private AABB worldBox(AABB local, double scale) {
 		return worldBox(local, scale, position(), orientation());
 	}
@@ -444,6 +548,12 @@ public class ShipEntity extends Entity {
 		Player pilot = pilot();
 		Vec3 velocity = getDeltaMovement();
 
+		if (pilot == null && spin.lengthSqr() > 0) {
+			Quaternionf next = new Quaternionf(orientation())
+					.rotateY((float) Math.toRadians(-spin.x / 20)).rotateX((float) Math.toRadians(spin.y / 20))
+					.rotateZ((float) Math.toRadians(spin.z / 20));
+			setOrientation(next.normalize());
+		}
 		if (pilot == null && drift.lengthSqr() > 0) {
 			velocity = drift;
 		} else if (pilot == null) {
@@ -655,7 +765,7 @@ public class ShipEntity extends Entity {
 
 	/**
 	 * Server: moves non-player entities on or inside the ship rigidly with it (translation and
-	 * rotation). Players move themselves; the client carries the local player (ShipCarry).
+	 * rotation). Players move themselves; the client moves the local player in the ship frame (ShipLocalMotion).
 	 */
 	private void carryEntities() {
 		Vec3 oldPos = lastTickPos;

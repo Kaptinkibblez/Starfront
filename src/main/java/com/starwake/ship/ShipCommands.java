@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
  * <pre>
  * /starwake ship check &lt;helmPos&gt;   print the pre-flight report for the ship at a Helm
  * /starwake ship assemble &lt;helmPos&gt; assemble without seating anyone
+ * /starwake ship spin &lt;yaw pitch roll&gt;  nearest unpiloted ship spins (degrees/second)
  * /starwake ship drift &lt;x y z&gt;     nearest unpiloted ship cruises at this velocity (blocks/tick); 0 0 0 stops
  * </pre>
  */
@@ -38,7 +39,34 @@ public final class ShipCommands {
 												.executes(ShipCommands::assemble)))
 								.then(Commands.literal("drift")
 										.then(Commands.argument("velocity", Vec3Argument.vec3(false))
-												.executes(ShipCommands::drift))))));
+												.executes(ShipCommands::drift)))
+								.then(Commands.literal("spin")
+										.then(Commands.argument("rates", Vec3Argument.vec3(false))
+												.executes(ShipCommands::spin))))));
+	}
+
+	/** Makes the nearest unpiloted ship spin (yaw pitch roll, degrees/second). 0 0 0 stops. */
+	private static int spin(CommandContext<CommandSourceStack> ctx) {
+		Vec3 rates = Vec3Argument.getVec3(ctx, "rates");
+		ShipEntity ship = nearest(ctx.getSource());
+		if (ship == null) {
+			ctx.getSource().sendFailure(Component.translatable("commands.starwake.ship.none_nearby"));
+			return 0;
+		}
+		ship.setSpin(rates);
+		ctx.getSource().sendSuccess(() -> Component.literal("Ship " + ship.getId() + " spinning " + rates), false);
+		return 1;
+	}
+
+	private static ShipEntity nearest(CommandSourceStack source) {
+		ShipEntity nearest = null;
+		for (ShipEntity ship : ShipCollisions.shipsIn(source.getLevel())) {
+			if (ship.distanceToSqr(source.getPosition()) < 64 * 64
+					&& (nearest == null || ship.distanceToSqr(source.getPosition()) < nearest.distanceToSqr(source.getPosition()))) {
+				nearest = ship;
+			}
+		}
+		return nearest;
 	}
 
 	/** Assembles the ship at a Helm without seating anyone (testing and admin builds). */

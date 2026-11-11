@@ -3,7 +3,10 @@
 	"package": "com.starwake.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
+		"CameraMixin",
+		"EntityTurnMixin",
 		"LocalPlayerMixin",
+		"PlayerTravelMixin",
 		"MinecraftMixin"
 	],
 	"injectors": {

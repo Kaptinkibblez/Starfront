@@ -8,7 +8,17 @@ import com.starwake.ship.data.ShipFuels;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.level.block.BarrelBlock;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,6 +37,30 @@ public final class ShipInteraction {
 				ServerPlayNetworking.send(player, new ShipStructurePayload(ship.getId(), ship.structure()));
 			}
 		});
+	}
+
+	/** Doors (both halves), trapdoors and gates swing open and shut aboard a flying ship. */
+	private static void toggleOpen(ShipEntity ship, BlockPos local, BlockState state) {
+		boolean open = !state.getValue(BlockStateProperties.OPEN);
+		ship.updateBlock(local, state.setValue(BlockStateProperties.OPEN, open));
+		if (state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)) {
+			BlockPos other = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER ? local.above() : local.below();
+			BlockState otherState = ship.structure().get(other);
+			if (otherState != null && otherState.hasProperty(BlockStateProperties.OPEN)) {
+				ship.updateBlock(other, otherState.setValue(BlockStateProperties.OPEN, open));
+			}
+		}
+		ship.level().playSound(null, BlockPos.containing(ship.blockCenter(local)),
+				open ? SoundEvents.WOODEN_DOOR_OPEN : SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.BLOCKS, 1.0f, 1.0f);
+	}
+
+	/** Chests and barrels aboard open a normal 27-slot inventory backed by the ship's data. */
+	private static void openContainer(ServerPlayer player, ShipEntity ship, BlockPos local, BlockState state) {
+		var container = ship.container(local, 27);
+		player.openMenu(new SimpleMenuProvider((id, inventory, p) -> ChestMenu.threeRows(id, inventory, container),
+				state.getBlock().getName()));
+		ship.level().playSound(null, BlockPos.containing(ship.blockCenter(local)),
+				state.getBlock() instanceof BarrelBlock ? SoundEvents.BARREL_OPEN : SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.5f, 1.0f);
 	}
 
 	public static void handle(ServerPlayer player, ShipInteractPayload payload) {
@@ -57,6 +91,11 @@ public final class ShipInteraction {
 				}
 			}
 			player.sendOverlayMessage(Component.translatable("message.starwake.fuel_tank.gauge", ship.fuel(), ship.fuelCapacity()));
+		} else if (state.hasProperty(BlockStateProperties.OPEN)
+				&& (state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS) || state.is(BlockTags.FENCE_GATES))) {
+			toggleOpen(ship, payload.local(), state);
+		} else if (state.getBlock() instanceof ChestBlock || state.getBlock() instanceof BarrelBlock) {
+			openContainer(player, ship, payload.local(), state);
 		} else {
 			player.sendOverlayMessage(Component.translatable("message.starwake.ship_block_locked"));
 		}

@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  * Client half of ships:
  * - renderer and structure sync
  * - keeps the client's ship index (for collision prediction)
- * - (carrying the local player on deck lives in ShipCarry + LocalPlayerMixin)
+ * - (walking aboard lives in ShipLocalMotion + its mixins)
  * - right-click raycasts against ship blocks (ships aren't pickable; see MinecraftMixin)
  * - the "Ship Console" key (default R) for the pilot
  */
@@ -122,7 +122,7 @@ public final class ShipClient {
 
 	/** Raycasts the player's view against every nearby ship, in each ship's local space. */
 	private static @Nullable ShipHit raycastShips(Player player) {
-		Vec3 eye = player.getEyePosition();
+		Vec3 eye = player instanceof net.minecraft.client.player.LocalPlayer local ? ShipLocalMotion.eyePosition(local) : player.getEyePosition();
 		Vec3 end = eye.add(player.getViewVector(1.0f).scale(player.blockInteractionRange()));
 		ShipHit best = null;
 		for (ShipEntity ship : ShipCollisions.shipsIn(player.level())) {

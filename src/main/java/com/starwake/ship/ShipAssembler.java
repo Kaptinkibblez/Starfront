@@ -87,6 +87,9 @@ public final class ShipAssembler {
 		ship.initialize(new ShipStructure(entries), helm.subtract(min), forward, fuel, capacity);
 		// The entity position is the pivot (structure centre), not the min corner.
 		ship.setPos(min.getX() + ship.pivot().x, min.getY() + ship.pivot().y, min.getZ() + ship.pivot().z);
+		if (SpaceTravel.isSpace(level)) {
+			ship.setOrbiting(net.minecraft.world.level.Level.OVERWORLD); // built in orbit: default to home
+		}
 		level.addFreshEntity(ship);
 		if (pilot != null) {
 			ship.seat(pilot, helm.subtract(min));

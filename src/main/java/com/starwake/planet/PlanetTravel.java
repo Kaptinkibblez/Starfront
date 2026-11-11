@@ -99,7 +99,8 @@ public final class PlanetTravel {
 			return new BlockPos(x, y, z);
 		}
 
-		int platformY = level.getSeaLevel() + 1;
+		// Never below 64 above the floor: void dimensions (space) report a meaningless sea level.
+		int platformY = Math.max(level.getSeaLevel() + 1, level.getMinY() + 64);
 		BlockState plating = ModBlocks.HULL_PLATING.defaultBlockState();
 		for (int dx = -1; dx <= 1; dx++) {
 			for (int dz = -1; dz <= 1; dz++) {

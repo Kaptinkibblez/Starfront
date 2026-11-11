@@ -184,7 +184,7 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 
 	/**
 	 * Flood-fills the air around the pilot seat. Only ship blocks can seal: full-collision
-	 * blocks (any material, glass included), plus doors and trapdoors (treated as airlocks).
+	 * blocks (any material, glass included), plus closed doors and trapdoors (airlocks).
 	 * If the air reaches the edge of the ship's bounding box, the cabin leaks.
 	 */
 	private static CabinResult floodCabin(Level level, Set<BlockPos> ship, BlockPos seat) {
@@ -214,8 +214,7 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 		if (!ship.contains(pos)) {
 			return false;
 		}
-		BlockState state = level.getBlockState(pos);
-		return state.isCollisionShapeFullBlock(level, pos) || state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS);
+		return com.starwake.ship.ShipEntity.sealsCabin(level.getBlockState(pos));
 	}
 
 	private static String fmt(double value) {
