@@ -23,15 +23,19 @@ import net.minecraft.world.level.Level;
  * @param body        where the planet sits in space and how it looks from orbit (3g). Space's
  *                    own entry uses this for the system's star.
  * @param airDensity  atmosphere density relative to the Overworld: scales wing lift and drag (3i)
+ * @param hazards     air, toxicity and temperature for unprotected players (M5)
+ * @param archetype   for procedural planets: the archetype's display name ("Frozen world")
  */
 public record Planet(Component name, ResourceKey<Level> dimension, double gravity, boolean destination, Optional<Body> body,
-		double airDensity) {
+		double airDensity, Hazards hazards, Optional<Component> archetype) {
 	public static final Codec<Planet> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ComponentSerialization.CODEC.fieldOf("name").forGetter(Planet::name),
 			Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(Planet::dimension),
 			Codec.doubleRange(0.05, 4.0).optionalFieldOf("gravity", 1.0).forGetter(Planet::gravity),
 			Codec.BOOL.optionalFieldOf("destination", true).forGetter(Planet::destination),
 			Body.CODEC.optionalFieldOf("body").forGetter(Planet::body),
-			Codec.doubleRange(0.0, 10.0).optionalFieldOf("air_density", 1.0).forGetter(Planet::airDensity)
+			Codec.doubleRange(0.0, 10.0).optionalFieldOf("air_density", 1.0).forGetter(Planet::airDensity),
+			Hazards.CODEC.optionalFieldOf("hazards", Hazards.EARTHLIKE).forGetter(Planet::hazards),
+			ComponentSerialization.CODEC.optionalFieldOf("archetype").forGetter(Planet::archetype)
 	).apply(instance, Planet::new));
 }

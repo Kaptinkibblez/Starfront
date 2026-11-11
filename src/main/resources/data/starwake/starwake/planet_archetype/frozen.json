@@ -1,0 +1,312 @@
+{
+  "name": {
+    "translate": "archetype.starwake.frozen"
+  },
+  "weight": 1.0,
+  "orbit": [
+    6.0,
+    9.5
+  ],
+  "radius": [
+    2500,
+    4200
+  ],
+  "environment": {
+    "gravity": [
+      0.6,
+      1.0
+    ],
+    "air_density": [
+      0.4,
+      1.0
+    ],
+    "breathable": 0.15,
+    "toxicity": [
+      0.0,
+      0.08
+    ],
+    "temperature": [
+      -110,
+      -40
+    ]
+  },
+  "dimension_types": [
+    "starwake:planet/frozen"
+  ],
+  "terrain": [
+    "starwake:planet/standard",
+    "starwake:planet/rugged"
+  ],
+  "stone": [
+    {
+      "id": "minecraft:stone"
+    },
+    {
+      "id": "minecraft:andesite"
+    },
+    {
+      "id": "minecraft:tuff"
+    }
+  ],
+  "fluid": [
+    {
+      "id": "minecraft:water",
+      "properties": {
+        "level": "0"
+      }
+    }
+  ],
+  "sea_level": [
+    55,
+    64
+  ],
+  "biome_count": [
+    3,
+    4
+  ],
+  "biomes": [
+    {
+      "biome": "starwake:planet/frozen_ice_sheet",
+      "required": true,
+      "parameters": {
+        "temperature": -0.6,
+        "humidity": 0.3,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": 0.0,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:snow_block"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:gravel"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:packed_ice"
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:deep_under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:packed_ice"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "biome": "starwake:planet/frozen_tundra",
+      "required": false,
+      "parameters": {
+        "temperature": -0.2,
+        "humidity": -0.4,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": 0.0,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:steep"
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:stone"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "starwake:permafrost"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:gravel"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "starwake:permafrost"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "biome": "starwake:planet/frozen_glacier_peaks",
+      "required": false,
+      "parameters": {
+        "temperature": -0.4,
+        "humidity": 0.0,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": -0.8,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:steep"
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:packed_ice"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:snow_block"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:gravel"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:blue_ice"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "biome": "starwake:planet/frozen_frozen_sea",
+      "required": true,
+      "parameters": {
+        "temperature": -0.4,
+        "humidity": 0.0,
+        "continentalness": [
+          -1.2,
+          -0.19
+        ],
+        "erosion": 0.0,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:gravel"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:gravel"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:gravel"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "colors": {
+    "surface": [
+      "#D8E6F2",
+      "#C4D8EA",
+      "#E8EEF4"
+    ],
+    "secondary": [
+      "#8FA8C4",
+      "#9AB4C8"
+    ],
+    "atmosphere": [
+      "#BFE0FF",
+      "#DDF0FF"
+    ]
+  }
+}

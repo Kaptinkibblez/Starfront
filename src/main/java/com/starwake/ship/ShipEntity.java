@@ -273,6 +273,7 @@ public class ShipEntity extends Entity {
 	 * seat; full-collision blocks, doors and trapdoors seal; reaching the edge means a leak.
 	 */
 	private boolean computeSealed() {
+		cabinAir = Set.of();
 		if (structure == null) return false;
 		BlockPos seat = helmLocal.above();
 		Set<BlockPos> visited = new HashSet<>(List.of(seat));
@@ -291,7 +292,20 @@ public class ShipEntity extends Entity {
 				queue.add(next);
 			}
 		}
+		cabinAir = Set.copyOf(visited);
 		return true;
+	}
+
+	/** Air cells inside the sealed cabin (empty when the hull leaks). */
+	private Set<BlockPos> cabinAir = Set.of();
+
+	/**
+	 * True if a world position is inside this ship's sealed, pressurized cabin (M5 hazards:
+	 * breathable air and a stable temperature whatever the planet outside).
+	 */
+	public boolean isInPressurizedCabin(Vec3 world) {
+		if (!sealed || cabinAir.isEmpty()) return false;
+		return cabinAir.contains(BlockPos.containing(toLocal(world)));
 	}
 
 	private boolean seals(BlockPos local) {

@@ -5,7 +5,6 @@ import com.starwake.planet.Planets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -48,21 +47,21 @@ public final class SolarSystem {
 		}
 	}
 
-	private static @Nullable Registry<Planet> cachedFor;
+	private static @Nullable List<com.starwake.planet.PlanetRef> cachedFor;
 	private static List<Entry> cached = List.of();
 
 	private SolarSystem() {}
 
-	/** Every body in space (cached per registry instance; registries are fixed per session). */
+	/** Every body in space: registry and procedural planets (cached per planet list). */
 	public static synchronized List<Entry> bodies(RegistryAccess access) {
-		Registry<Planet> registry = access.lookup(Planets.REGISTRY_KEY).orElse(null);
-		if (registry == null) return List.of();
-		if (registry != cachedFor) {
+		List<com.starwake.planet.PlanetRef> planets = Planets.all(access);
+		if (planets != cachedFor) {
 			List<Entry> list = new ArrayList<>();
-			registry.listElements().forEach(ref -> ref.value().body()
-					.ifPresent(body -> list.add(new Entry(ref.key(), ref.value(), body))));
+			for (var ref : planets) {
+				ref.planet().body().ifPresent(body -> list.add(new Entry(ref.key(), ref.planet(), body)));
+			}
 			cached = List.copyOf(list);
-			cachedFor = registry;
+			cachedFor = planets;
 		}
 		return cached;
 	}

@@ -17,5 +17,10 @@
     "secondary_color": "#C98A52",
     "atmosphere_color": "#6FE0D0"
   },
-  "air_density": 0.6
+  "air_density": 0.6,
+  "hazards": {
+    "breathable": false,
+    "toxicity": 0.0,
+    "temperature": -35
+  }
 }

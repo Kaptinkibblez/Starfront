@@ -45,7 +45,8 @@ public final class PlanetCommands {
 						.then(Commands.literal("tp")
 								.then(Commands.argument("planet", IdentifierArgument.id())
 										.suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
-												Planets.registry(ctx.getSource().getServer()).keySet(), builder))
+												Planets.all(ctx.getSource().getServer().registryAccess()).stream()
+														.map(p -> p.key().identifier()), builder))
 										.executes(ctx -> travel(ctx, List.of(ctx.getSource().getPlayerOrException())))
 										.then(Commands.argument("players", EntityArgument.players())
 												.executes(ctx -> travel(ctx, EntityArgument.getPlayers(ctx, "players"))))))
@@ -56,22 +57,22 @@ public final class PlanetCommands {
 	}
 
 	private static int list(CommandContext<CommandSourceStack> ctx) {
-		var registry = Planets.registry(ctx.getSource().getServer());
-		ctx.getSource().sendSuccess(() -> Component.translatable("commands.starwake.planet.list.header", registry.size()), false);
-		registry.listElements().forEach(planet -> ctx.getSource().sendSuccess(() -> Component.translatable(
+		var planets = Planets.all(ctx.getSource().getServer().registryAccess());
+		ctx.getSource().sendSuccess(() -> Component.translatable("commands.starwake.planet.list.header", planets.size()), false);
+		planets.forEach(planet -> ctx.getSource().sendSuccess(() -> Component.translatable(
 				"commands.starwake.planet.list.entry",
-				planet.value().name(),
+				planet.planet().archetype().map(a -> Component.empty().append(planet.planet().name()).append(" (").append(a).append(")"))
+						.orElse(planet.planet().name().copy()),
 				planet.key().identifier().toString(),
-				String.format("%.2f", planet.value().gravity())), false));
-		return registry.size();
+				String.format("%.2f", planet.planet().gravity())), false));
+		return planets.size();
 	}
 
 	private static int travel(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> players)
 			throws CommandSyntaxException {
 		Identifier id = IdentifierArgument.getId(ctx, "planet");
-		Holder<Planet> planet = Planets.registry(ctx.getSource().getServer())
-				.get(ResourceKey.create(Planets.REGISTRY_KEY, id))
-				.orElseThrow(() -> UNKNOWN_PLANET.create(id));
+		Planet planet = Planets.get(ctx.getSource().getServer().registryAccess(), ResourceKey.create(Planets.REGISTRY_KEY, id))
+				.orElseThrow(() -> UNKNOWN_PLANET.create(id)).planet();
 
 		int moved = 0;
 		for (ServerPlayer player : players) {
@@ -84,7 +85,7 @@ public final class PlanetCommands {
 		}
 		int count = moved;
 		ctx.getSource().sendSuccess(() -> Component.translatable(
-				"commands.starwake.planet.tp.success", count, planet.value().name()), true);
+				"commands.starwake.planet.tp.success", count, planet.name()), true);
 		return moved;
 	}
 

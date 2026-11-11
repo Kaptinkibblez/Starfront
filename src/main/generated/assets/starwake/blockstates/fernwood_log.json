@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "starwake:block/fernwood_log",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "starwake:block/fernwood_log"
+    },
+    "axis=z": {
+      "model": "starwake:block/fernwood_log",
+      "x": 90
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "attributes": {
+    "minecraft:gameplay/natural_mob_spawns": {
+      "spawn_costs": {},
+      "spawns_by_category": {}
+    },
+    "minecraft:visual/water_fog_color": "#050533"
+  },
+  "carvers": [
+    "minecraft:cave",
+    "minecraft:cave_extra_underground",
+    "minecraft:canyon"
+  ],
+  "downfall": 0.5,
+  "effects": {
+    "water_color": "#3f76e4"
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "starwake:planet/ore_iron",
+      "starwake:planet/ore_cassiterite",
+      "starwake:planet/ore_pyrolusite",
+      "starwake:planet/ore_zircon",
+      "starwake:planet/ore_monazite",
+      "starwake:planet/ore_barite",
+      "starwake:planet/ore_celestine"
+    ],
+    [],
+    [],
+    [
+      "starwake:planet/tuft_grass_sparse",
+      "minecraft:kelp_warm",
+      "minecraft:seagrass_normal"
+    ],
+    []
+  ],
+  "has_precipitation": true,
+  "temperature": 0.8
+}

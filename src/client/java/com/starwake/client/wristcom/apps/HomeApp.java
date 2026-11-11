@@ -29,14 +29,19 @@ public class HomeApp implements WristcomApp {
 		if (minecraft.player == null || minecraft.level == null) return;
 		g.text(font, Component.translatable("wristcom.home.hello", minecraft.player.getName()), x + 4, y + 4, WristcomScreen.TEXT, false);
 		g.text(font, Component.translatable("wristcom.home.location", WristcomStatus.location()), x + 4, y + 18, WristcomScreen.DIM, false);
-		double gravity = 1.0;
-		var registry = minecraft.level.registryAccess().lookup(Planets.REGISTRY_KEY);
-		if (registry.isPresent()) {
-			for (var planet : registry.get()) {
-				if (planet.dimension().equals(minecraft.level.dimension())) gravity = planet.gravity();
-			}
-		}
-		g.text(font, Component.translatable("wristcom.home.gravity", String.format("%.2f", gravity)), x + 4, y + 30, WristcomScreen.DIM, false);
+		double gravity = Planets.forDimension(minecraft.level.registryAccess(), minecraft.level.dimension())
+				.map(p -> p.planet().gravity()).orElse(1.0);
+		var here = Planets.forDimension(minecraft.level.registryAccess(), minecraft.level.dimension());
+		Component type = here.flatMap(p -> p.planet().archetype()).orElse(null);
+		g.text(font, Component.translatable("wristcom.home.gravity", String.format("%.2f", gravity))
+				.append(type == null ? Component.empty() : Component.literal("   ").append(Component.translatable("wristcom.home.type", type))),
+				x + 4, y + 30, WristcomScreen.DIM, false);
+		var hazards = here.map(p -> p.planet().hazards()).orElse(com.starwake.planet.Hazards.EARTHLIKE);
+		Component air = !hazards.breathable() ? Component.translatable("hud.starwake.env.no_air")
+				: hazards.toxic() ? Component.translatable("hud.starwake.env.toxic", Math.round(hazards.toxicity() * 100))
+				: Component.translatable("hud.starwake.env.breathable");
+		g.text(font, Component.translatable("wristcom.home.environment", air, Math.round(hazards.temperature())), x + 4, y + 54,
+				hazards.any() ? 0xFFFFB347 : WristcomScreen.DIM, false);
 
 		ShipEntity ship = minecraft.player.getVehicle() instanceof ShipEntity s ? s : ShipLocalMotion.activeShip();
 		Component shipLine = ship == null ? Component.translatable("wristcom.home.no_ship")
@@ -44,7 +49,7 @@ public class HomeApp implements WristcomApp {
 						ship.fuel(), ship.fuelCapacity(), Math.round(ship.shield()));
 		g.text(font, shipLine, x + 4, y + 44, ship == null ? WristcomScreen.DIM : WristcomScreen.TEXT, false);
 
-		int top = y + 64;
+		int top = y + 70;
 		g.text(font, Component.translatable("wristcom.home.controls"), x + 4, top, WristcomScreen.FRAME, false);
 		// Two columns when there's room, else one.
 		int keyWidth = 0;

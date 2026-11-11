@@ -21,6 +21,10 @@ public final class ModCreativeTabs {
 	/** Translation key for the tab title; the text itself comes from the generated lang file. */
 	public static final String MAIN_TITLE_KEY = "itemGroup.starwake.main";
 
+	public static final ResourceKey<CreativeModeTab> ELEMENTS_KEY =
+			ResourceKey.create(Registries.CREATIVE_MODE_TAB, StarwakeMod.id("elements"));
+	public static final String ELEMENTS_TITLE_KEY = "itemGroup.starwake.elements";
+
 	private ModCreativeTabs() {}
 
 	public static void init() {
@@ -31,6 +35,13 @@ public final class ModCreativeTabs {
 					ModBlocks.all().forEach(output::accept);
 					ModItems.all().forEach(output::accept);
 				})
+				.build());
+		// The periodic table, in atomic-number order (vanilla ingots for Fe, Cu, Au).
+		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ELEMENTS_KEY, FabricCreativeModeTab.builder()
+				.title(Component.translatable(ELEMENTS_TITLE_KEY))
+				.icon(() -> new ItemStack(BuiltInRegistries.ITEM.getValue(StarwakeMod.id("titanium_ingot"))))
+				.displayItems((parameters, output) -> com.starwake.chem.Chemistry.elements().forEach(e ->
+						output.accept(BuiltInRegistries.ITEM.getValue(e.item()))))
 				.build());
 	}
 }

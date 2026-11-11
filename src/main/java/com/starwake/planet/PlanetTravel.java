@@ -45,9 +45,9 @@ public final class PlanetTravel {
 	 *
 	 * @return null on success, or a translation key describing the failure
 	 */
-	public static @Nullable String travelTo(ServerPlayer player, Holder<Planet> planet) {
+	public static @Nullable String travelTo(ServerPlayer player, Planet planet) {
 		MinecraftServer server = player.level().getServer();
-		ServerLevel target = server.getLevel(planet.value().dimension());
+		ServerLevel target = server.getLevel(planet.dimension());
 		if (target == null) {
 			return "commands.starwake.planet.missing_dimension";
 		}

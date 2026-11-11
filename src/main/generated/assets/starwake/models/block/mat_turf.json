@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "minecraft:block/dirt",
+    "side": "starwake:block/mat_turf_side",
+    "top": "starwake:block/mat_turf_top"
+  }
+}

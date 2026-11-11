@@ -155,7 +155,7 @@ public final class ModBlocks {
 	private ModBlocks() {}
 
 	/** Registers a block and its block item under {@code starwake:<name>}. */
-	private static Block register(String name, Function<BlockBehaviour.Properties, Block> factory,
+	static Block register(String name, Function<BlockBehaviour.Properties, Block> factory,
 			BlockBehaviour.Properties properties) {
 		ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, StarwakeMod.id(name));
 		Block block = Registry.register(BuiltInRegistries.BLOCK, blockKey, factory.apply(properties.setId(blockKey)));

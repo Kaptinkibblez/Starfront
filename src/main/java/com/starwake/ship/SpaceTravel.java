@@ -247,7 +247,7 @@ public final class SpaceTravel {
 
 	public static Component planetName(Level level, @Nullable ResourceKey<Level> dimension) {
 		if (dimension == null) return Component.literal("?");
-		return Planets.forDimension(dimension).map(p -> p.value().name())
+		return Planets.forDimension(level.registryAccess(), dimension).map(p -> p.planet().name())
 				.orElse(Component.literal(dimension.identifier().toString()));
 	}
 }

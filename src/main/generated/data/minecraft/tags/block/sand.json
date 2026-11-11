@@ -1,5 +1,7 @@
 {
   "values": [
+    "starwake:fine_regolith",
+    "starwake:volcanic_ash",
     "starwake:rust_sand"
   ]
 }

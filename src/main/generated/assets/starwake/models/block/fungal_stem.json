@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "starwake:block/fungal_stem_top",
+    "side": "starwake:block/fungal_stem"
+  }
+}

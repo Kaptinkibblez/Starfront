@@ -1,0 +1,49 @@
+{
+  "attributes": {
+    "minecraft:gameplay/natural_mob_spawns": {
+      "spawn_costs": {},
+      "spawns_by_category": {}
+    },
+    "minecraft:visual/water_fog_color": "#050533"
+  },
+  "carvers": [
+    "minecraft:cave",
+    "minecraft:cave_extra_underground",
+    "minecraft:canyon"
+  ],
+  "downfall": 0.0,
+  "effects": {
+    "water_color": "#3f76e4"
+  },
+  "features": [
+    [],
+    [],
+    [
+      "starwake:planet/selenite_geode"
+    ],
+    [],
+    [],
+    [],
+    [
+      "starwake:planet/ore_wolframite",
+      "starwake:planet/ore_cobaltite",
+      "starwake:planet/ore_molybdenite",
+      "starwake:planet/ore_spodumene",
+      "starwake:planet/ore_beryl",
+      "starwake:planet/ore_pollucite",
+      "starwake:planet/ore_xenotime",
+      "starwake:planet/ore_bastnaesite",
+      "starwake:planet/ore_columbite",
+      "starwake:planet/ore_fluorite"
+    ],
+    [],
+    [],
+    [
+      "starwake:planet/selenite_spire",
+      "starwake:planet/selenite_cluster"
+    ],
+    []
+  ],
+  "has_precipitation": false,
+  "temperature": 0.8
+}

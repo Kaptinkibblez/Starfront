@@ -2,6 +2,7 @@ package com.starwake.client.datagen;
 
 import com.starwake.registry.ModBlocks;
 import com.starwake.registry.ModItems;
+import com.starwake.registry.ModPlanetBlocks;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.minecraft.client.data.models.BlockModelGenerators;
@@ -32,6 +33,24 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.createTrivialCube(ModBlocks.REGOLITH);
 		generators.createTrivialCube(ModBlocks.RUST_SAND);
 		generators.createTrivialCube(ModBlocks.FERRITE_ORE);
+
+		// Planet content (M5)
+		for (Block block : new Block[] {ModPlanetBlocks.ANORTHOSITE, ModPlanetBlocks.FINE_REGOLITH, ModPlanetBlocks.VOLCANIC_ASH,
+				ModPlanetBlocks.PERMAFROST, ModPlanetBlocks.HALITE, ModPlanetBlocks.SELENITE, ModPlanetBlocks.FUNGAL_CAP}) {
+			generators.createTrivialCube(block);
+		}
+		ModPlanetBlocks.ores().forEach(ore -> generators.createTrivialCube(ore.block()));
+		generators.createTrivialBlock(ModPlanetBlocks.MAT_TURF, TexturedModel.CUBE_BOTTOM_TOP.updateTexture(t -> t
+				.put(TextureSlot.TOP, TextureMapping.getBlockTexture(ModPlanetBlocks.MAT_TURF, "_top"))
+				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModPlanetBlocks.MAT_TURF, "_side"))
+				.put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(net.minecraft.world.level.block.Blocks.DIRT))));
+		generators.woodProvider(ModPlanetBlocks.FERNWOOD_LOG).log(ModPlanetBlocks.FERNWOOD_LOG);
+		generators.woodProvider(ModPlanetBlocks.FUNGAL_STEM).log(ModPlanetBlocks.FUNGAL_STEM);
+		generators.createTrivialBlock(ModPlanetBlocks.FERNWOOD_FRONDS, TexturedModel.LEAVES);
+		generators.createCrossBlockWithDefaultItem(ModPlanetBlocks.TUFT_GRASS, BlockModelGenerators.PlantType.NOT_TINTED);
+		generators.createCrossBlockWithDefaultItem(ModPlanetBlocks.PUFFBALL, BlockModelGenerators.PlantType.NOT_TINTED);
+		generators.createAmethystCluster(ModPlanetBlocks.SELENITE_CLUSTER);
+		generators.registerSimpleFlatItemModel(ModPlanetBlocks.SELENITE_CLUSTER);
 
 		// Ship parts
 		generators.createHorizontallyRotatedBlock(ModBlocks.HELM, TexturedModel.ORIENTABLE_ONLY_TOP);
@@ -124,5 +143,15 @@ public final class ModModelProvider extends FabricModelProvider {
 	public void generateItemModels(ItemModelGenerators generators) {
 		// Flat 2D item sprite: textures/item/<name>.png.
 		generators.generateFlatItem(ModItems.RAW_FERRITE, ModelTemplates.FLAT_ITEM);
+		ModPlanetBlocks.ores().forEach(ore -> generators.generateFlatItem(ore.raw(), ModelTemplates.FLAT_ITEM));
+		generators.generateFlatItem(ModItems.SURVEY_SUIT, ModelTemplates.FLAT_ITEM);
+		// Element items: textures/item/element/<name>_<form>.png (tools/periodic_table.py).
+		for (var element : com.starwake.chem.Chemistry.elements()) {
+			if (!element.item().getNamespace().equals("starwake")) continue;
+			var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(element.item());
+			var texture = net.minecraft.resources.Identifier.fromNamespaceAndPath("starwake", "item/element/" + element.item().getPath());
+			generators.itemModelOutput.accept(item, net.minecraft.client.data.models.model.ItemModelUtils.plainModel(
+					ModelTemplates.FLAT_ITEM.create(item, net.minecraft.client.data.models.model.TextureMapping.layer0(new net.minecraft.client.resources.model.sprite.Material(texture)), generators.modelOutput)));
+		}
 	}
 }

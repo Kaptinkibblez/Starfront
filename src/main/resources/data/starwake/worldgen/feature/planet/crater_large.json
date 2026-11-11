@@ -1,0 +1,10 @@
+{
+  "type": "starwake:crater",
+  "radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 9,
+    "max_inclusive": 14
+  },
+  "depth": 0.2,
+  "rim": 0.08
+}

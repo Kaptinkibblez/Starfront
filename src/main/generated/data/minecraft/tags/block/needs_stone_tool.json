@@ -1,6 +1,25 @@
 {
   "values": [
     "starwake:hull_plating",
-    "starwake:ferrite_ore"
+    "starwake:ferrite_ore",
+    "starwake:bauxite_ore",
+    "starwake:pentlandite_ore",
+    "starwake:cassiterite_ore",
+    "starwake:cobaltite_ore",
+    "starwake:galena_ore",
+    "starwake:sphalerite_ore",
+    "starwake:pyrolusite_ore",
+    "starwake:stibnite_ore",
+    "starwake:bismuthinite_ore",
+    "starwake:spodumene_ore",
+    "starwake:pollucite_ore",
+    "starwake:monazite_ore",
+    "starwake:xenotime_ore",
+    "starwake:bastnaesite_ore",
+    "starwake:barite_ore",
+    "starwake:celestine_ore",
+    "starwake:fluorite_ore",
+    "starwake:apatite_ore",
+    "starwake:magnesite_ore"
   ]
 }

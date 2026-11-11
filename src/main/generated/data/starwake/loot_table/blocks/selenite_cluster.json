@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "condition": "minecraft:tool/can_silk_touch",
+              "name": "starwake:selenite_cluster"
+            },
+            {
+              "type": "minecraft:item",
+              "modifier": {
+                "type": "minecraft:explosion_decay"
+              },
+              "name": "starwake:selenite"
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

@@ -22,6 +22,9 @@ import net.minecraft.world.phys.Vec3;
  * this into the galaxy map.
  */
 public class StarmapApp implements WristcomApp {
+	/** Destination list row height: name over distance, with a QT button beside them. */
+	private static final int ROW = 22;
+
 	@Override public Component title() { return Component.translatable("wristcom.app.starmap"); }
 	@Override public String glyph() { return "M"; }
 	@Override public int accent() { return 0xFFC27BFF; }
@@ -48,10 +51,12 @@ public class StarmapApp implements WristcomApp {
 		int listX = x + height + 6, row = 0;
 		for (SolarSystem.Entry body : bodies()) {
 			if (!body.enterable()) continue;
-			Button button = Button.builder(Component.translatable("wristcom.starmap.plot", body.displayName()),
+			if (16 + (row + 1) * ROW > height) break; // no room for more rows
+			Button button = Button.builder(Component.literal("QT"),
 					b -> ClientPlayNetworking.send(new ShipConsoleActionPayload(BlockPos.ZERO, ship.getId(),
 							ShipConsoleActionPayload.Action.SET_COURSE, body.key().identifier())))
-					.bounds(listX, y + 30 + row * 46, width - height - 8, 18).build();
+					.tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("wristcom.starmap.plot", body.displayName())))
+					.bounds(x + width - 28, y + 17 + row * ROW, 26, 16).build();
 			button.active = canPlot;
 			screen.add(button);
 			row++;
@@ -86,14 +91,19 @@ public class StarmapApp implements WristcomApp {
 		}
 		// Route line from you to each destination (dim) and the bodies themselves.
 		int hx = cx + (int) Math.round(here.x * scale), hz = cy + (int) Math.round(here.z * scale);
+		// Labels go above each marker (the star's below), moved down a row at a time if they'd
+		// overlap one already drawn, so close neighbours stay readable.
+		List<int[]> placed = new java.util.ArrayList<>();
 		for (SolarSystem.Entry b : bodies) {
 			Vec3 p = b.body().position();
 			int px = cx + (int) Math.round(p.x * scale), pz = cy + (int) Math.round(p.z * scale);
 			int r = b.body().star() ? 5 : 3;
 			g.fill(px - r, pz - r, px + r + 1, pz + r + 1, b.body().star() ? 0xFFFFD27A : b.body().color() | 0xFF000000);
-			// The star's label goes below it, planets' to the right, so neighbours don't collide.
-			if (b.body().star()) g.centeredText(font, b.displayName(), px, pz + r + 3, 0xFFFFD27A);
-			else g.centeredText(font, b.displayName(), px, pz - r - 11, WristcomScreen.TEXT);
+			int w = font.width(b.displayName());
+			int ly = b.body().star() ? pz + r + 3 : pz - r - 11;
+			for (int tries = 0; tries < 6 && overlaps(placed, px - w / 2, ly, w); tries++) ly += 10;
+			placed.add(new int[] {px - w / 2 - 2, ly - 1, px + w / 2 + 2, ly + 9});
+			g.centeredText(font, b.displayName(), px, ly, b.body().star() ? 0xFFFFD27A : WristcomScreen.TEXT);
 		}
 		// You: a blinking diamond.
 		if ((System.currentTimeMillis() / 500) % 2 == 0) {
@@ -108,20 +118,30 @@ public class StarmapApp implements WristcomApp {
 		g.text(font, Component.translatable("wristcom.starmap.destinations"), listX, y + 4, accent(), false);
 		for (SolarSystem.Entry b : bodies) {
 			if (!b.enterable()) continue;
+			if (16 + (row + 1) * ROW > height) break;
+			int ry = y + 19 + row * ROW;
 			double distance = Math.max(0, here.distanceTo(b.body().position()) - b.body().entryRadius());
-			g.text(font, b.displayName(), listX, y + 18 + row * 46, WristcomScreen.TEXT, false);
-			String d = SolarSystem.formatDistance(distance);
-			g.text(font, d, x + width - font.width(d) - 2, y + 18 + row * 46, WristcomScreen.DIM, false);
+			int room = x + width - 32 - listX;
+			g.text(font, font.plainSubstrByWidth(b.displayName().getString(), room), listX, ry, WristcomScreen.TEXT, false);
+			g.text(font, SolarSystem.formatDistance(distance), listX, ry + 10, WristcomScreen.DIM, false);
 			row++;
 		}
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean canPlot = FlightHud.pilotedShip() != null && minecraft.level != null && SpaceTravel.isSpace(minecraft.level);
+		int hintTop = y + 18 + row * ROW + 2;
 		if (!canPlot) {
 			var lines = font.split(Component.translatable("wristcom.starmap.plot_hint"), x + width - listX);
-			for (int i = 0; i < lines.size(); i++) {
-				g.text(font, lines.get(i), listX, y + height - 10 - (lines.size() - 1 - i) * 10, WristcomScreen.DIM, false);
+			if (hintTop + lines.size() * 10 <= y + height) {
+				for (int i = 0; i < lines.size(); i++) g.text(font, lines.get(i), listX, hintTop + i * 10, WristcomScreen.DIM, false);
 			}
 		}
+	}
+
+	private static boolean overlaps(List<int[]> placed, int x, int y, int w) {
+		for (int[] r : placed) {
+			if (x < r[2] && x + w > r[0] && y < r[3] && y + 9 > r[1]) return true;
+		}
+		return false;
 	}
 
 	private static void circle(GuiGraphicsExtractor g, int cx, int cy, double radius, int color) {

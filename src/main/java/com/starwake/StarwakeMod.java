@@ -36,16 +36,22 @@ public final class StarwakeMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		// Order matters: items reference blocks, and creative tabs reference both.
+		com.starwake.registry.ModComponents.init();
 		ModBlocks.init();
+		com.starwake.registry.ModPlanetBlocks.init();
+		com.starwake.worldgen.CraterFeature.init();
 		com.starwake.registry.ModSounds.init();
 		ModBlockEntities.init();
 		ModEntities.init();
 		ModItems.init();
+		com.starwake.chem.ElementItems.init();
 		ModCreativeTabs.init();
 
 		// Planets: data-driven registry, gravity, travel, and commands.
 		Planets.init();
+		com.starwake.planet.proc.ProceduralPlanets.init();
 		PlanetGravity.init();
+		com.starwake.planet.PlanetHazards.init();
 		PlanetTravel.init();
 		PlanetCommands.init();
 

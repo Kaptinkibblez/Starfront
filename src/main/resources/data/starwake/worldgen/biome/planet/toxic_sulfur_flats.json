@@ -1,0 +1,47 @@
+{
+  "attributes": {
+    "minecraft:gameplay/natural_mob_spawns": {
+      "spawn_costs": {},
+      "spawns_by_category": {}
+    },
+    "minecraft:visual/water_fog_color": "#2a4010"
+  },
+  "carvers": [
+    "minecraft:cave",
+    "minecraft:cave_extra_underground",
+    "minecraft:canyon"
+  ],
+  "downfall": 0.0,
+  "effects": {
+    "water_color": "#9ad04a"
+  },
+  "features": [
+    [],
+    [
+      "minecraft:sulfur_pool"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [
+      "starwake:planet/ore_copper",
+      "starwake:planet/ore_cinnabar",
+      "starwake:planet/ore_sulfur",
+      "starwake:planet/ore_cobaltite",
+      "starwake:planet/ore_sphalerite",
+      "starwake:planet/ore_stibnite",
+      "starwake:planet/ore_bismuthinite",
+      "starwake:planet/ore_calaverite",
+      "starwake:planet/ore_barite"
+    ],
+    [],
+    [],
+    [
+      "minecraft:sulfur_spike_cluster"
+    ],
+    []
+  ],
+  "has_precipitation": false,
+  "temperature": 1.5
+}

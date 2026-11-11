@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:basalt", "minecraft:smooth_basalt", "minecraft:blackstone", "minecraft:calcite",
+    "minecraft:red_sandstone", "minecraft:sulfur", "minecraft:cinnabar", "starwake:anorthosite", "starwake:fine_regolith",
+    "starwake:volcanic_ash", "starwake:permafrost", "starwake:halite", "starwake:selenite", "starwake:mat_turf"
+  ]
+}

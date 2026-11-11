@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "starwake:block/fernwood_log_top",
+    "side": "starwake:block/fernwood_log"
+  }
+}

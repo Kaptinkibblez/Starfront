@@ -1,0 +1,245 @@
+{
+  "name": {
+    "translate": "archetype.starwake.barren"
+  },
+  "weight": 1.2,
+  "orbit": [
+    0.9,
+    8.0
+  ],
+  "radius": [
+    1200,
+    2600
+  ],
+  "environment": {
+    "gravity": [
+      0.15,
+      0.45
+    ],
+    "air_density": 0.0,
+    "breathable": 0.0,
+    "toxicity": 0.0,
+    "temperature": [
+      -160,
+      110
+    ]
+  },
+  "dimension_types": [
+    "starwake:planet/barren"
+  ],
+  "terrain": [
+    "starwake:planet/standard",
+    "starwake:planet/large"
+  ],
+  "stone": [
+    {
+      "id": "starwake:anorthosite"
+    },
+    {
+      "id": "minecraft:smooth_basalt"
+    },
+    {
+      "id": "minecraft:stone"
+    }
+  ],
+  "fluid": [
+    {
+      "id": "minecraft:air"
+    }
+  ],
+  "sea_level": -60,
+  "biome_count": [
+    2,
+    3
+  ],
+  "biomes": [
+    {
+      "biome": "starwake:planet/barren_highlands",
+      "required": true,
+      "parameters": {
+        "temperature": 0.0,
+        "humidity": 0.5,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": 0.0,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "starwake:fine_regolith"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "starwake:anorthosite"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "starwake:anorthosite"
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:deep_under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "starwake:anorthosite"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "biome": "starwake:planet/barren_maria",
+      "required": false,
+      "parameters": {
+        "temperature": 0.0,
+        "humidity": -0.5,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": 0.0,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "starwake:fine_regolith"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:smooth_basalt"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:smooth_basalt"
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:deep_under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:smooth_basalt"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "biome": "starwake:planet/barren_crater_fields",
+      "required": false,
+      "parameters": {
+        "temperature": 0.5,
+        "humidity": 0.0,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": -0.5,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "starwake:fine_regolith"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "starwake:fine_regolith"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "starwake:fine_regolith"
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:deep_under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "starwake:anorthosite"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "colors": {
+    "surface": [
+      "#8E8C88",
+      "#6E6C69",
+      "#A8A49C"
+    ],
+    "secondary": [
+      "#5A5856",
+      "#7A7672"
+    ],
+    "atmosphere": [
+      "#000000"
+    ]
+  }
+}

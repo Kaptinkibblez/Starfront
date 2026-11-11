@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "starwake:block/fernwood_fronds"
+  }
+}

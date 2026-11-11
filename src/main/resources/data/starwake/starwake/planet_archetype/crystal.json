@@ -1,0 +1,304 @@
+{
+  "name": {
+    "translate": "archetype.starwake.crystal"
+  },
+  "weight": 0.35,
+  "orbit": [
+    1.2,
+    6.0
+  ],
+  "radius": [
+    2000,
+    3500
+  ],
+  "environment": {
+    "gravity": [
+      0.6,
+      1.0
+    ],
+    "air_density": [
+      0.3,
+      1.0
+    ],
+    "breathable": 0.1,
+    "toxicity": [
+      0.0,
+      0.3
+    ],
+    "temperature": [
+      -20,
+      70
+    ]
+  },
+  "dimension_types": [
+    "starwake:planet/crystal"
+  ],
+  "terrain": [
+    "starwake:planet/rugged",
+    "starwake:planet/standard"
+  ],
+  "stone": [
+    {
+      "id": "minecraft:calcite"
+    },
+    {
+      "id": "minecraft:diorite"
+    },
+    {
+      "id": "minecraft:tuff"
+    }
+  ],
+  "fluid": [
+    {
+      "id": "minecraft:water",
+      "properties": {
+        "level": "0"
+      }
+    }
+  ],
+  "sea_level": [
+    40,
+    60
+  ],
+  "biome_count": [
+    3,
+    4
+  ],
+  "biomes": [
+    {
+      "biome": "starwake:planet/crystal_selenite_fields",
+      "required": true,
+      "parameters": {
+        "temperature": 0.3,
+        "humidity": -0.3,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": 0.0,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:steep"
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:calcite"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "starwake:selenite"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:gravel"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:calcite"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "biome": "starwake:planet/crystal_geode_hills",
+      "required": false,
+      "parameters": {
+        "temperature": -0.2,
+        "humidity": 0.3,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": -0.5,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:steep"
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:tuff"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:calcite"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:gravel"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:calcite"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "biome": "starwake:planet/crystal_calcite_terraces",
+      "required": false,
+      "parameters": {
+        "temperature": 0.5,
+        "humidity": 0.6,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": 0.5,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:calcite"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:clay"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:dripstone_block"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "biome": "starwake:planet/crystal_crystal_lake",
+      "required": true,
+      "parameters": {
+        "temperature": 0.3,
+        "humidity": 0.0,
+        "continentalness": [
+          -1.2,
+          -0.19
+        ],
+        "erosion": 0.0,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:calcite"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:calcite"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:calcite"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "colors": {
+    "surface": [
+      "#E8E4DC",
+      "#D0D8E8",
+      "#E0D0E8"
+    ],
+    "secondary": [
+      "#A890C8",
+      "#8AA8D0"
+    ],
+    "atmosphere": [
+      "#D0E0FF",
+      "#E8D8FF"
+    ]
+  }
+}

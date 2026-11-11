@@ -3,6 +3,7 @@ package com.starwake.client.datagen;
 import com.starwake.registry.ModBlocks;
 import com.starwake.registry.ModCreativeTabs;
 import com.starwake.registry.ModItems;
+import com.starwake.registry.ModPlanetBlocks;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
@@ -22,6 +23,87 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModBlocks.RUST_SAND, "Rust Sand");
 		builder.add(ModBlocks.FERRITE_ORE, "Ferrite Ore");
 		builder.add(ModItems.RAW_FERRITE, "Raw Ferrite");
+
+		// Planet content (M5)
+		builder.add(ModPlanetBlocks.ANORTHOSITE, "Anorthosite");
+		builder.add(ModPlanetBlocks.FINE_REGOLITH, "Fine Regolith");
+		builder.add(ModPlanetBlocks.VOLCANIC_ASH, "Volcanic Ash");
+		builder.add(ModPlanetBlocks.PERMAFROST, "Permafrost");
+		builder.add(ModPlanetBlocks.HALITE, "Halite");
+		builder.add(ModPlanetBlocks.SELENITE, "Selenite");
+		builder.add(ModPlanetBlocks.SELENITE_CLUSTER, "Selenite Cluster");
+		builder.add(ModPlanetBlocks.MAT_TURF, "Mat Turf");
+		builder.add(ModPlanetBlocks.TUFT_GRASS, "Tuft Grass");
+		builder.add(ModPlanetBlocks.FERNWOOD_LOG, "Fernwood Log");
+		builder.add(ModPlanetBlocks.FERNWOOD_FRONDS, "Fernwood Fronds");
+		builder.add(ModPlanetBlocks.FUNGAL_STEM, "Fungal Stem");
+		builder.add(ModPlanetBlocks.FUNGAL_CAP, "Fungal Cap");
+		builder.add(ModPlanetBlocks.PUFFBALL, "Puffball");
+		for (var ore : ModPlanetBlocks.ores()) {
+			String name = title(ore.id());
+			builder.add(ore.block(), name + " Ore");
+			builder.add(ore.raw(), "Raw " + name);
+		}
+		for (var mineral : com.starwake.chem.Chemistry.minerals()) {
+			builder.add("mineral.starwake." + mineral.id(), title(mineral.id()));
+		}
+		// The periodic table.
+		builder.add(ModCreativeTabs.ELEMENTS_TITLE_KEY, "Starwake: Elements");
+		for (var element : com.starwake.chem.Chemistry.elements()) {
+			String name = title(element.name());
+			builder.add("element.starwake." + element.name(), name);
+			if (!element.item().getNamespace().equals("starwake")) continue;
+			String form = switch (element.form()) {
+				case "ingot" -> name + " Ingot";
+				case "powder" -> name + " Powder";
+				case "canister" -> name + " Canister";
+				case "flask" -> name + " Flask";
+				default -> name + " Sample";
+			};
+			builder.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(element.item()), form);
+		}
+		for (String[] c : new String[][] {{"alkali", "Alkali metal"}, {"alkaline_earth", "Alkaline earth metal"},
+				{"transition", "Transition metal"}, {"post_transition", "Post-transition metal"}, {"metalloid", "Metalloid"},
+				{"nonmetal", "Nonmetal"}, {"halogen", "Halogen"}, {"noble_gas", "Noble gas"}, {"lanthanide", "Lanthanide"},
+				{"actinide", "Actinide"}}) {
+			builder.add("chem.starwake.category." + c[0], c[1]);
+		}
+		builder.add("chem.starwake.element", "%s  ·  Z %s  ·  %s");
+		builder.add("chem.starwake.properties", "%s u  ·  %s g/cm³  ·  melts %s K");
+		builder.add("chem.starwake.radioactive", "Radioactive");
+		builder.add("chem.starwake.synthetic", "Synthetic: made in reactors and accelerators");
+		builder.add("chem.starwake.trace_occurrence", "Natural only in traces (uranium ores)");
+		builder.add("chem.starwake.sources", "Sources: %s");
+		builder.add("chem.starwake.mineral", "%s  ·  %s");
+		builder.add("chem.starwake.trace", "Trace: %s");
+		builder.add("chem.starwake.source.atmosphere", "atmosphere");
+		builder.add("chem.starwake.source.water", "water");
+		builder.add("chem.starwake.source.ice", "ice");
+		builder.add("chem.starwake.source.brine", "brine");
+		builder.add("chem.starwake.source.coal", "coal");
+		builder.add(ModItems.SURVEY_SUIT, "Survey Suit");
+		for (String[] kind : new String[][] {{"lush", "Lush world"}, {"frozen", "Frozen world"}, {"barren", "Barren world"},
+				{"toxic", "Toxic world"}, {"volcanic", "Volcanic world"}, {"ocean", "Ocean world"}, {"desert", "Desert world"},
+				{"crystal", "Crystal world"}}) {
+			builder.add("archetype.starwake." + kind[0], kind[1]);
+		}
+		builder.add("item.starwake.survey_suit.oxygen", "Oxygen: %s:%s");
+		builder.add("item.starwake.survey_suit.rating", "Rated %s to %s °C");
+		builder.add("death.attack.starwake.hypoxia", "%1$s ran out of air");
+		builder.add("death.attack.starwake.hypoxia.player", "%1$s ran out of air while fighting %2$s");
+		builder.add("death.attack.starwake.toxic_atmosphere", "%1$s breathed a toxic atmosphere");
+		builder.add("death.attack.starwake.toxic_atmosphere.player", "%1$s breathed a toxic atmosphere while fighting %2$s");
+		builder.add("death.attack.starwake.extreme_heat", "%1$s was cooked by the planet's heat");
+		builder.add("death.attack.starwake.extreme_heat.player", "%1$s was cooked by the planet's heat while fighting %2$s");
+		builder.add("hud.starwake.env.breathable", "AIR OK");
+		builder.add("hud.starwake.env.no_air", "NO AIR");
+		builder.add("hud.starwake.env.toxic", "TOXIC %s%%");
+		builder.add("hud.starwake.env.cabin", "CABIN PRESSURIZED");
+		builder.add("hud.starwake.env.suit", "SUIT O2");
+		builder.add("hud.starwake.env.exposed", "EXPOSED");
+		builder.add("hud.starwake.env.suit_rating", "SUIT RATING EXCEEDED");
+		builder.add("wristcom.home.environment", "Air: %s   Temp: %s °C");
+		builder.add("wristcom.home.type", "Type: %s");
 		builder.add(ModBlocks.HELM, "Helm");
 		builder.add(ModBlocks.THRUSTER, "Thruster");
 		builder.add(ModBlocks.MAIN_ENGINE, "Main Engine");
@@ -251,5 +333,15 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("commands.starwake.planet.list.entry", " - %s (%s), gravity %sg");
 		builder.add("commands.starwake.planet.tp.success", "Sent %s player(s) to %s");
 		builder.add("commands.starwake.planet.leave.success", "Returned %s player(s) home");
+	}
+
+	/** "native_gold" -> "Native Gold". */
+	private static String title(String id) {
+		StringBuilder out = new StringBuilder();
+		for (String part : id.split("_")) {
+			if (!out.isEmpty()) out.append(' ');
+			out.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+		}
+		return out.toString();
 	}
 }

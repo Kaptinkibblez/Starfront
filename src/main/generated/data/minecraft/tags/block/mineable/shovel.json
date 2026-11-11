@@ -1,5 +1,9 @@
 {
   "values": [
-    "starwake:rust_sand"
+    "starwake:rust_sand",
+    "starwake:fine_regolith",
+    "starwake:volcanic_ash",
+    "starwake:permafrost",
+    "starwake:mat_turf"
   ]
 }

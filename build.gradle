@@ -11,7 +11,11 @@ base {
 
 repositories {
 	// Loom adds Mojang + Fabric repositories automatically.
-	// Add third-party mod repositories here when we depend on them (e.g. Fantasy in M5).
+	// Fantasy (runtime dimensions for procedural planets, M5).
+	exclusiveContent {
+		forRepository { maven { url = "https://maven.nucleoid.xyz/" } }
+		filter { includeGroup "xyz.nucleoid" }
+	}
 }
 
 loom {
@@ -30,6 +34,9 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// Bundled jar-in-jar so players don't need to install it separately.
+	implementation "xyz.nucleoid:fantasy:${project.fantasy_version}"
+	include "xyz.nucleoid:fantasy:${project.fantasy_version}"
 }
 
 processResources {

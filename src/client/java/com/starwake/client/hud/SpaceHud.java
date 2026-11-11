@@ -61,7 +61,8 @@ public final class SpaceHud {
 		String target = ship == null ? "" : ship.quantumTargetId();
 		boolean quantumMode = ship != null && (ship.quantumState() & ShipEntity.QT_MODE) != 0;
 
-		// Body markers.
+		// Body markers. Labels that would overlap one already drawn step down until clear.
+		java.util.List<int[]> placed = new java.util.ArrayList<>();
 		for (SolarSystem.Entry body : SolarSystem.bodies(minecraft.level.registryAccess())) {
 			Vec3 rel = body.body().position().subtract(eye);
 			double distance = rel.length();
@@ -76,6 +77,9 @@ public final class SpaceHud {
 			// Labels go under the marker, or above it when that would run into the systems strip.
 			boolean above = y + s + 22 > h - 34;
 			int ly = above ? y - s - 22 : y + s + 3;
+			int lw = Math.max(font.width(label), font.width(range));
+			for (int tries = 0; tries < 5 && overlaps(placed, x - lw / 2, ly, lw, 20); tries++) ly += above ? -21 : 21;
+			placed.add(new int[] {x - lw / 2 - 2, ly - 1, x + lw / 2 + 2, ly + 20});
 			graphics.text(font, label, x - font.width(label) / 2, ly, color);
 			graphics.text(font, range, x - font.width(range) / 2, ly + 10, DIM);
 			if (selected) graphics.text(font, "QT", x - font.width("QT") / 2, above ? y + s + 3 : y - s - 11, QT);
@@ -158,6 +162,13 @@ public final class SpaceHud {
 			color = GOOD;
 		}
 		graphics.text(font, status, x, y + 33, color);
+	}
+
+	private static boolean overlaps(java.util.List<int[]> placed, int x, int y, int w, int h) {
+		for (int[] r : placed) {
+			if (x < r[2] && x + w > r[0] && y < r[3] && y + h > r[1]) return true;
+		}
+		return false;
 	}
 
 	/** Four corner brackets around (x, y). */

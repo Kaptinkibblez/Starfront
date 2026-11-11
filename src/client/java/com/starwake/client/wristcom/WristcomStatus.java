@@ -19,12 +19,8 @@ public final class WristcomStatus {
 			return near.map(b -> Component.translatable("screen.starwake.wristcom.in_space_near", b.displayName()))
 					.orElse(Component.translatable("planet.starwake.space"));
 		}
-		var registry = minecraft.level.registryAccess().lookup(Planets.REGISTRY_KEY);
-		if (registry.isPresent()) {
-			for (var planet : registry.get()) {
-				if (planet.dimension().equals(minecraft.level.dimension())) return planet.name();
-			}
-		}
+		var planet = Planets.forDimension(minecraft.level.registryAccess(), minecraft.level.dimension());
+		if (planet.isPresent()) return planet.get().planet().name();
 		return Component.literal(minecraft.level.dimension().identifier().toString());
 	}
 

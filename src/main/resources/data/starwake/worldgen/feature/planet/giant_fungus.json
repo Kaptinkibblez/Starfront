@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:huge_fungus",
+  "decor_state": "starwake:fungal_cap",
+  "hat_state": "starwake:fungal_cap",
+  "stem_state": "starwake:fungal_stem",
+  "valid_base_block": "minecraft:mycelium",
+  "replaceable_blocks": {
+    "type": "minecraft:matching_blocks",
+    "blocks": [
+      "starwake:puffball"
+    ]
+  }
+}

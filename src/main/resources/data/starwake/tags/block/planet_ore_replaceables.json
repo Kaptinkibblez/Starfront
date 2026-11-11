@@ -1,0 +1,7 @@
+{
+  "values": [
+    "minecraft:stone", "minecraft:andesite", "minecraft:diorite", "minecraft:granite", "minecraft:tuff",
+    "minecraft:deepslate", "minecraft:calcite", "minecraft:basalt", "minecraft:smooth_basalt", "minecraft:blackstone",
+    "minecraft:sandstone", "minecraft:red_sandstone", "minecraft:terracotta", "starwake:anorthosite", "starwake:regolith"
+  ]
+}

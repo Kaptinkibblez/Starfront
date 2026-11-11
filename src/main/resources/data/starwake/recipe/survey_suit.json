@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "L": "minecraft:leather",
+    "G": "minecraft:glass_pane",
+    "C": "minecraft:copper_ingot"
+  },
+  "pattern": [
+    "L L",
+    "IGI",
+    "LCL"
+  ],
+  "result": {
+    "id": "starwake:survey_suit"
+  }
+}

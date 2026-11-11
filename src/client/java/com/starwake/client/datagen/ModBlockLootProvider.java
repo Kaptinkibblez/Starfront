@@ -2,6 +2,7 @@ package com.starwake.client.datagen;
 
 import com.starwake.registry.ModBlocks;
 import com.starwake.registry.ModItems;
+import com.starwake.registry.ModPlanetBlocks;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootSubProvider;
@@ -32,5 +33,18 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		dropSelf(ModBlocks.QUANTUM_DRIVE);
 		// Vanilla ore behaviour: drops raw ore, affected by Fortune; Silk Touch drops the block.
 		add(ModBlocks.FERRITE_ORE, createOreDrop(ModBlocks.FERRITE_ORE, ModItems.RAW_FERRITE));
+
+		// Planet content (M5)
+		for (var block : new net.minecraft.world.level.block.Block[] {ModPlanetBlocks.ANORTHOSITE, ModPlanetBlocks.FINE_REGOLITH,
+				ModPlanetBlocks.VOLCANIC_ASH, ModPlanetBlocks.PERMAFROST, ModPlanetBlocks.HALITE, ModPlanetBlocks.SELENITE,
+				ModPlanetBlocks.MAT_TURF, ModPlanetBlocks.FERNWOOD_LOG, ModPlanetBlocks.FUNGAL_STEM, ModPlanetBlocks.FUNGAL_CAP}) {
+			dropSelf(block);
+		}
+		add(ModPlanetBlocks.SELENITE_CLUSTER, createSilkTouchDispatchTable(ModPlanetBlocks.SELENITE_CLUSTER,
+				applyExplosionDecay(ModPlanetBlocks.SELENITE_CLUSTER, net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(ModPlanetBlocks.SELENITE))));
+		add(ModPlanetBlocks.FERNWOOD_FRONDS, createShearsOrSilkTouchOnlyDrop(ModPlanetBlocks.FERNWOOD_FRONDS));
+		add(ModPlanetBlocks.TUFT_GRASS, createShearsOrSilkTouchOnlyDrop(ModPlanetBlocks.TUFT_GRASS));
+		dropSelf(ModPlanetBlocks.PUFFBALL);
+		ModPlanetBlocks.ores().forEach(ore -> add(ore.block(), createOreDrop(ore.block(), ore.raw())));
 	}
 }

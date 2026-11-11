@@ -11,6 +11,8 @@ public final class ModClientNetworking {
 	private ModClientNetworking() {}
 
 	public static void init() {
+		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.PlanetListPayload.TYPE,
+				(payload, context) -> com.starwake.planet.proc.ProceduralPlanets.setFromServer(payload.planets()));
 		ClientPlayNetworking.registerGlobalReceiver(ShipConsolePayload.TYPE, (payload, context) -> {
 			// Ship reports (Helm pre-flight, ship status) show in the Wristcom's Ship app: refresh
 			// it in place if it's open, otherwise open the Wristcom on that app.
