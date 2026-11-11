@@ -21,6 +21,7 @@ public final class ModNetworking {
 		PayloadTypeRegistry.serverboundPlay().register(ShipPowerPayload.TYPE, ShipPowerPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipQuantumPayload.TYPE, ShipQuantumPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipCrewPayload.TYPE, ShipCrewPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ShipEditPayload.TYPE, ShipEditPayload.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(ShipConsoleActionPayload.TYPE,
 				(payload, context) -> ShipConsole.handleAction(context.player(), payload));
@@ -50,6 +51,16 @@ public final class ModNetworking {
 					default -> { }
 				}
 			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(ShipEditPayload.TYPE, (payload, context) -> {
+			var player = context.player();
+			if (payload.action() == ShipEditPayload.ABORT) {
+				com.starwake.ship.edit.ShipEditing.abortBreak(player);
+				return;
+			}
+			if (!(player.level().getEntity(payload.shipId()) instanceof com.starwake.ship.ShipEntity ship)) return;
+			if (payload.action() == ShipEditPayload.START) com.starwake.ship.edit.ShipEditing.startBreak(player, ship, payload.local());
+			else if (payload.action() == ShipEditPayload.FINISH) com.starwake.ship.edit.ShipEditing.finishBreak(player, ship, payload.local());
 		});
 		ServerPlayNetworking.registerGlobalReceiver(ShipCrewPayload.TYPE, (payload, context) -> {
 			var player = context.player();

@@ -63,6 +63,15 @@ public final class ShipInteraction {
 				state.getBlock() instanceof BarrelBlock ? SoundEvents.BARREL_OPEN : SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.5f, 1.0f);
 	}
 
+	/** Blocks a right-click uses rather than builds against. */
+	private static boolean isUsable(BlockState state, ServerPlayer player) {
+		return state.getBlock() instanceof HelmBlock || state.getBlock() instanceof com.starwake.ship.block.SeatBlock
+				|| (state.getBlock() instanceof FuelTankBlock && ShipFuels.unitsFor(player.getMainHandItem()) > 0)
+				|| (state.hasProperty(BlockStateProperties.OPEN)
+						&& (state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS) || state.is(BlockTags.FENCE_GATES)))
+				|| state.getBlock() instanceof ChestBlock || state.getBlock() instanceof BarrelBlock;
+	}
+
 	public static void handle(ServerPlayer player, ShipInteractPayload payload) {
 		if (!(player.level().getEntity(payload.shipId()) instanceof ShipEntity ship) || ship.structure() == null) {
 			return;
@@ -75,6 +84,15 @@ public final class ShipInteraction {
 			return;
 		}
 
+		// Milestone 4: sneak + block in hand always builds; otherwise blocks you can't use build too.
+		boolean holdingBlock = player.getMainHandItem().getItem() instanceof net.minecraft.world.item.BlockItem
+				|| player.getOffhandItem().getItem() instanceof net.minecraft.world.item.BlockItem;
+		if (holdingBlock && (player.isSecondaryUseActive() || !isUsable(state, player))) {
+			for (var hand : net.minecraft.world.InteractionHand.values()) {
+				if (com.starwake.ship.edit.ShipEditing.place(player, ship, hand, payload.local(), payload.face(), payload.hit())) return;
+			}
+			return;
+		}
 		boolean helm = state.getBlock() instanceof HelmBlock;
 		// Ownership: the Helm needs owner/crew (an ownerless ship is claimed by its first pilot);
 		// everything else is open unless the owner locked the ship. Fuelling is always allowed.
@@ -109,7 +127,7 @@ public final class ShipInteraction {
 		} else if (state.getBlock() instanceof ChestBlock || state.getBlock() instanceof BarrelBlock) {
 			openContainer(player, ship, payload.local(), state);
 		} else {
-			player.sendOverlayMessage(Component.translatable("message.starwake.ship_block_locked"));
+			player.sendOverlayMessage(Component.translatable("message.starwake.edit.hint"));
 		}
 	}
 }

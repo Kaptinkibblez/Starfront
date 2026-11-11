@@ -179,7 +179,12 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("message.starwake.disassemble.moving", "Bring the ship to a stop before disassembling");
 		builder.add("message.starwake.disassemble.obstructed", "Can't disassemble: blocked at %s %s %s");
 		builder.add("message.starwake.helm_taken", "Someone is already at the helm");
-		builder.add("message.starwake.ship_block_locked", "Ship blocks can't be used while assembled yet (coming in Milestone 4)");
+		builder.add("message.starwake.edit.hint", "Hold a block to build here (sneak to build against usable blocks)");
+		builder.add("message.starwake.edit.not_allowed", "Only %s's crew can modify this ship");
+		builder.add("message.starwake.edit.helm", "The Helm holds the ship together: disassemble to remove it");
+		builder.add("message.starwake.edit.detached", "%s blocks broke away from the ship");
+		builder.add("message.starwake.edit.unsupported", "That block can't be placed on a ship");
+		builder.add("message.starwake.edit.too_big", "Ships are limited to %s blocks");
 		builder.add("hud.starwake.ship", "Fuel %s / %s   Speed %s m/s   Alt %s");
 		builder.add("hud.starwake.ship.space", "Fuel %s / %s   Speed %s m/s   Orbiting %s");
 		builder.add("message.starwake.not_sealed_for_space", "Hull not sealed: this ship can't leave the atmosphere");

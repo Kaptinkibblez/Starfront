@@ -14,6 +14,7 @@ public final class StarwakeClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		ModClientNetworking.init();
 		ShipClient.init();
+		com.starwake.client.ship.ShipEditingClient.init();
 		com.starwake.client.hud.FlightHud.init();
 		com.starwake.client.wristcom.WristcomApps.init();
 		com.starwake.client.hud.SpaceHud.init();

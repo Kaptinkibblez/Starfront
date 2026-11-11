@@ -73,9 +73,12 @@ public final class SpaceHud {
 			bracket(graphics, x, y, s, color);
 			String label = body.displayName().getString();
 			String range = SolarSystem.formatDistance(Math.max(0, distance - body.body().radius()));
-			graphics.text(font, label, x - font.width(label) / 2, y + s + 3, color);
-			graphics.text(font, range, x - font.width(range) / 2, y + s + 13, DIM);
-			if (selected) graphics.text(font, "QT", x - font.width("QT") / 2, y - s - 11, QT);
+			// Labels go under the marker, or above it when that would run into the systems strip.
+			boolean above = y + s + 22 > h - 34;
+			int ly = above ? y - s - 22 : y + s + 3;
+			graphics.text(font, label, x - font.width(label) / 2, ly, color);
+			graphics.text(font, range, x - font.width(range) / 2, ly + 10, DIM);
+			if (selected) graphics.text(font, "QT", x - font.width("QT") / 2, above ? y + s + 3 : y - s - 11, QT);
 		}
 
 		if (ship == null) return;
@@ -97,7 +100,8 @@ public final class SpaceHud {
 	/** Quantum drive panel (top-left MFD). */
 	private static void quantumPanel(GuiGraphicsExtractor graphics, Font font, ShipEntity ship, Vec3 eye, int w) {
 		int state = ship.quantumState();
-		int width = 150, x = 8, y = 8; // top-left, an MFD next to the heading tape
+		// Top-left MFD; for crew it sits under their status card.
+		int width = 150, x = 8, y = FlightHud.pilotedShip() == ship ? 8 : 56;
 		graphics.fill(x - 4, y - 4, x + width + 4, y + 44, FlightHud.PANEL);
 		FlightHud.corners(graphics, x - 4, y - 4, width + 8, 48, QT);
 

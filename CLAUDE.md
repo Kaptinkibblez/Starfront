@@ -208,7 +208,12 @@ commit. **Don't start the next milestone until the user confirms the current one
   - **Scaffolds (user, 2026-11-11):** the 3a-3g systems are deliberate scaffolds. They copy
     Star Citizen's systems and feel ("just copy star citizen's systems", long quantum travel)
     and will be overhauled once every core system exists. Prefer simple, replaceable code.
-- [ ] **4. Ship editing.** Place and break blocks on assembled ships (turning moved to 3d).
+- [x] **4. Ship editing.** Place and break blocks on assembled ships, any time (parked, flying,
+      in space), with survival rules; detached parts become debris; HUD spread to the edges.
+      *(Verified 2026-11-11: creative and survival breaking (pickaxe timing, drops to inventory,
+      durability), placing outward and oriented (stairs), placing on a rotated ship snaps to its
+      grid, breaking a support detaches 2 blocks as items in space. Owner/crew permission is
+      the 3j `canPilot` rule; not re-tested in multiplayer.)*
 - [ ] **5. Procedural planets.** Terrain, biomes and ores seeded by galaxy
       coordinates (decision B).
 - [ ] **6. Star map.** A galaxy/star map UI for choosing seeded destinations.
@@ -428,11 +433,40 @@ normal gravity.
     from the floating kick (`noBlocksAround`) and the "moved too quickly" check. A new pilot's
     view snaps to the nose (server `forceSetRotation` + client `facePilotForward`). The ship
     raycast used a mutable position (clicks hit the wrong block): fixed with `immutable()`.
-- Known limits (Milestone 4/9): no in-flight editing; ships don't push mobs or other ships
+## How ship editing works (Milestone 4)
+
+- Server: `ship/edit/ShipEditing`. Owner + crew (`canPilot`) may edit; others get
+  `edit.not_allowed`. Every edit builds a new `ShipStructure` and calls `ShipEntity.applyEdit`
+  (unseats removed seats, drops stale containers, recomputes fuel capacity, re-syncs
+  `ShipStructurePayload`). Mass, thrusters, seal and systems are recomputed from the structure.
+- `ShipStructure` keeps a **fixed pivot** and real `min()`/`max()` bounds, so local coordinates
+  never shift when blocks are added on the negative side (old saves without a pivot use the box
+  centre). Everything that used `size()` as bounds now uses min/max.
+- Breaking: the client times mining (`client/ship/ShipEditingClient`, vanilla
+  `getDestroyProgress` against `ShipBlockView`, hit sounds, a progress bar under the crosshair;
+  creative is instant, 5-tick pause between blocks) and sends `ShipEditPayload` START/ABORT/FINISH.
+  The server re-checks reach, permission and elapsed time (>= 70% of needed, minus 2 ticks).
+  Drops (plus container contents) go to the inventory; the tool takes durability. The Helm can't
+  be broken while assembled. Door halves go together.
+- Detached parts: BFS from the Helm after each break. If the ship is parked level on a planet,
+  orphans become world blocks; otherwise they drop as items (`edit.detached`).
+- Placing: right-click with a block item on a non-usable block (or sneak on usable ones like
+  seats, doors, chests). `ShipInteractPayload` carries the face and the local hit point.
+  `ShipPlaceContext` gives `getStateForPlacement` ship-local look directions, so stairs, logs
+  and doors orient in the ship's frame. Double blocks take two cells; beds are refused; entity
+  overlap and the 4096-block cap are checked. Held right-click repeats every 4 ticks (vanilla).
+- Client hooks: `MinecraftMixin` `startAttack`/`continueAttack` HEAD (ship hit closer than the
+  vanilla target wins); the outline is drawn in the ship's rotated frame from `COLLECT_SUBMITS`
+  and vanilla's is suppressed via `BEFORE_BLOCK_OUTLINE`.
+- Vanilla's 5x slower mining while airborne also applies in EVA (zero-g repairs are slow).
+- Known limits (Milestone 9): ships don't push mobs or other ships
   (they stop against them); unattended ships in unloaded chunks freeze (expected).
 
 ## 26.3 gotchas (learned the hard way)
 
+- `ServerPlayer.drop` takes a `Prediction` (`drop(stack, false, Prediction.PREDICTED)`);
+  `swing` takes `(hand, SwingAnimation, boolean)`. `Minecraft.rightClickDelay` is private: set
+  it from a mixin when you cancel `startUseItem`, or a held click fires every tick.
 - **Every solid block must be in `#minecraft:blocks_motion_no_leaves`.** In 26.3,
   heightmaps, ore placement, suffocation, fluid flow and teleport targets use this tag,
   not the block's shape. Without it, worldgen treats the block as hollow (our ores

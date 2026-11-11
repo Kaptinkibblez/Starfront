@@ -196,7 +196,7 @@ public class ShipEntity extends Entity {
 	/** Sets the blocks (server on assembly/load; client when the structure payload arrives). */
 	public void setStructure(ShipStructure structure) {
 		this.structure = structure;
-		this.pivot = new Vec3(structure.size().getX() / 2.0, structure.size().getY() / 2.0, structure.size().getZ() / 2.0);
+		this.pivot = structure.pivot(); // fixed at assembly, kept through edits
 		recomputeStats();
 		sealed = computeSealed();
 		setBoundingBox(makeBoundingBox(position()));
@@ -277,11 +277,11 @@ public class ShipEntity extends Entity {
 		BlockPos seat = helmLocal.above();
 		Set<BlockPos> visited = new HashSet<>(List.of(seat));
 		ArrayDeque<BlockPos> queue = new ArrayDeque<>(visited);
-		var size = structure.size();
+		BlockPos min = structure.min(), max = structure.max();
 		while (!queue.isEmpty()) {
 			BlockPos pos = queue.poll();
-			if (pos.getX() < 0 || pos.getY() < 0 || pos.getZ() < 0 || pos.getX() >= size.getX()
-					|| pos.getY() >= size.getY() || pos.getZ() >= size.getZ() || visited.size() > 32768) {
+			if (pos.getX() < min.getX() || pos.getY() < min.getY() || pos.getZ() < min.getZ() || pos.getX() > max.getX()
+					|| pos.getY() > max.getY() || pos.getZ() > max.getZ() || visited.size() > 32768) {
 				return false;
 			}
 			for (Direction direction : Direction.values()) {
@@ -326,6 +326,45 @@ public class ShipEntity extends Entity {
 		for (ServerPlayer player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(this)) {
 			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
 		}
+	}
+
+	/**
+	 * Server: replaces the ship's blocks after an edit (Milestone 4). Anyone sitting on a seat
+	 * that's gone stands up; container caches for removed blocks are dropped; fuel capacity
+	 * follows the tanks aboard (fuel beyond it is lost); stats, seal and systems are
+	 * recomputed and every tracking client gets the new structure.
+	 */
+	public void applyEdit(ShipStructure next) {
+		for (Entity passenger : List.copyOf(getPassengers())) {
+			BlockPos seat = seatOf(passenger);
+			if (seat != null && next.get(seat) == null) passenger.stopRiding();
+		}
+		containers.keySet().removeIf(pos -> next.get(pos) == null);
+		setStructure(next);
+		int capacity = 0;
+		for (ShipStructure.Entry entry : next.entries()) capacity += ShipStats.get(entry.state()).fuelCapacity();
+		fuelCapacity = capacity;
+		entityData.set(FUEL_CAPACITY, capacity);
+		if (fuel() > capacity) entityData.set(FUEL, capacity);
+		var payload = new com.starwake.network.ShipStructurePayload(getId(), next);
+		for (ServerPlayer player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(this)) {
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
+		}
+	}
+
+	/** The block rotation matching the ship's heading (local north -> nearest world direction). */
+	public net.minecraft.world.level.block.Rotation cardinalRotation() {
+		Vec3 north = worldDirection(Direction.NORTH);
+		Direction heading = Direction.getApproximateNearest(north.x, 0, north.z);
+		for (var r : net.minecraft.world.level.block.Rotation.values()) {
+			if (r.rotate(Direction.NORTH) == heading) return r;
+		}
+		return net.minecraft.world.level.block.Rotation.NONE;
+	}
+
+	/** World box around a local block cell at the current pose. */
+	public AABB worldBoxOf(BlockPos local) {
+		return worldBox(new AABB(local), 1.0);
 	}
 
 	/**
@@ -571,13 +610,14 @@ public class ShipEntity extends Entity {
 		if (structure == null) {
 			return new AABB(pos, pos.add(1, 1, 1));
 		}
-		var size = structure.size();
+		BlockPos lo = structure.min(), hi = structure.max().offset(1, 1, 1);
 		// The world AABB of the rotated local box: transform all 8 corners.
 		Quaternionfc rotation = this.entityData == null ? new Quaternionf() : orientation();
 		double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE, minZ = Double.MAX_VALUE;
 		double maxX = -Double.MAX_VALUE, maxY = -Double.MAX_VALUE, maxZ = -Double.MAX_VALUE;
 		for (int i = 0; i < 8; i++) {
-			Vec3 corner = toWorld(new Vec3((i & 1) * size.getX(), ((i >> 1) & 1) * size.getY(), ((i >> 2) & 1) * size.getZ()), pos, rotation);
+			Vec3 corner = toWorld(new Vec3((i & 1) == 0 ? lo.getX() : hi.getX(), ((i >> 1) & 1) == 0 ? lo.getY() : hi.getY(),
+					((i >> 2) & 1) == 0 ? lo.getZ() : hi.getZ()), pos, rotation);
 			minX = Math.min(minX, corner.x); minY = Math.min(minY, corner.y); minZ = Math.min(minZ, corner.z);
 			maxX = Math.max(maxX, corner.x); maxY = Math.max(maxY, corner.y); maxZ = Math.max(maxZ, corner.z);
 		}
@@ -592,10 +632,10 @@ public class ShipEntity extends Entity {
 	public void collectShapes(AABB area, List<VoxelShape> out) {
 		if (structure == null) return;
 		AABB local = localBounds(area.inflate(1.0));
-		var size = structure.size();
-		int minX = Math.max(0, Mth.floor(local.minX)), maxX = Math.min(size.getX() - 1, Mth.floor(local.maxX));
-		int minY = Math.max(0, Mth.floor(local.minY)), maxY = Math.min(size.getY() - 1, Mth.floor(local.maxY));
-		int minZ = Math.max(0, Mth.floor(local.minZ)), maxZ = Math.min(size.getZ() - 1, Mth.floor(local.maxZ));
+		BlockPos lo = structure.min(), hi = structure.max();
+		int minX = Math.max(lo.getX(), Mth.floor(local.minX)), maxX = Math.min(hi.getX(), Mth.floor(local.maxX));
+		int minY = Math.max(lo.getY(), Mth.floor(local.minY)), maxY = Math.min(hi.getY(), Mth.floor(local.maxY));
+		int minZ = Math.max(lo.getZ(), Mth.floor(local.minZ)), maxZ = Math.min(hi.getZ(), Mth.floor(local.maxZ));
 		boolean aligned = isAxisAligned();
 		for (int x = minX; x <= maxX; x++) {
 			for (int y = minY; y <= maxY; y++) {
@@ -621,10 +661,10 @@ public class ShipEntity extends Entity {
 	 */
 	public void collectLocalShapes(AABB localArea, List<VoxelShape> out) {
 		if (structure == null) return;
-		var size = structure.size();
-		int minX = Math.max(0, Mth.floor(localArea.minX)), maxX = Math.min(size.getX() - 1, Mth.floor(localArea.maxX));
-		int minY = Math.max(0, Mth.floor(localArea.minY)), maxY = Math.min(size.getY() - 1, Mth.floor(localArea.maxY));
-		int minZ = Math.max(0, Mth.floor(localArea.minZ)), maxZ = Math.min(size.getZ() - 1, Mth.floor(localArea.maxZ));
+		BlockPos lo = structure.min(), hi = structure.max();
+		int minX = Math.max(lo.getX(), Mth.floor(localArea.minX)), maxX = Math.min(hi.getX(), Mth.floor(localArea.maxX));
+		int minY = Math.max(lo.getY(), Mth.floor(localArea.minY)), maxY = Math.min(hi.getY(), Mth.floor(localArea.maxY));
+		int minZ = Math.max(lo.getZ(), Mth.floor(localArea.minZ)), maxZ = Math.min(hi.getZ(), Mth.floor(localArea.maxZ));
 		for (int x = minX; x <= maxX; x++) {
 			for (int y = minY; y <= maxY; y++) {
 				for (int z = minZ; z <= maxZ; z++) {
@@ -640,9 +680,7 @@ public class ShipEntity extends Entity {
 	/** True if a local point is within the structure's box grown by {@code margin}. */
 	public boolean isNearLocal(Vec3 local, double margin) {
 		if (structure == null) return false;
-		var size = structure.size();
-		return local.x > -margin && local.y > -margin && local.z > -margin
-				&& local.x < size.getX() + margin && local.y < size.getY() + margin && local.z < size.getZ() + margin;
+		return structure.inBounds(local.x, local.y, local.z, margin);
 	}
 
 	/** World velocity of a ship-local point due to the ship's last-tick motion (translation + rotation). */
@@ -1515,9 +1553,7 @@ public class ShipEntity extends Entity {
 				if (structure.hasCollision(below)) return true;
 			}
 		}
-		var size = structure.size();
-		return local.x >= 0 && local.z >= 0 && local.y >= 0 && local.x <= size.getX() && local.z <= size.getZ()
-				&& local.y <= size.getY() && !entity.onGround();
+		return structure.inBounds(local.x, local.y, local.z, 0) && !entity.onGround();
 	}
 
 	/** True if the entity is aboard at the current transform. */

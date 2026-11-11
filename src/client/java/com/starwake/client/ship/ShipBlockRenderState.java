@@ -35,7 +35,7 @@ final class ShipBlockRenderState extends MovingBlockRenderState {
 
 	@Override
 	public int getMinY() {
-		return blockPos.getY() - local.getY() - 1;
+		return blockPos.getY() - local.getY() + structure.min().getY() - 1;
 	}
 
 	@Override

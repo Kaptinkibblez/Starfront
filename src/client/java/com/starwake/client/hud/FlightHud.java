@@ -98,7 +98,12 @@ public final class FlightHud {
 		double speed = velocity.length();
 		boolean space = SpaceTravel.isSpace(piloted.level());
 
-		pitchLadder(graphics, font, cx, cy, pitch, roll, space);
+		// Layout scales with the screen: tapes out at about a third of the width, the ladder
+		// small in the middle, alerts under the heading tape, systems along the bottom. The
+		// centre stays clear for flying.
+		int tapeOffset = Mth.clamp(Math.round(w * 0.32f), 100, 260);
+		int tapeHalf = Mth.clamp(Math.round(h * 0.18f), 28, 70);
+		pitchLadder(graphics, font, cx, cy, pitch, roll, space, tapeHalf, tapeOffset - 48);
 		reticle(graphics, cx, cy);
 		int[] n = HudProjection.project(mvp, look, nose, w, h);
 		if (n != null) noseMarker(graphics, n[0], n[1]);
@@ -106,11 +111,11 @@ public final class FlightHud {
 			int[] v = HudProjection.project(mvp, look, velocity, w, h);
 			if (v != null) velocityMarker(graphics, v[0], v[1]);
 		}
-		headingTape(graphics, font, cx, 6, heading);
-		speedTape(graphics, font, cx - 118, cy, speed, piloted, space);
-		altitudeTape(graphics, font, cx + 118, cy, piloted, velocity.y, space);
-		systemsStrip(graphics, font, cx, h - 30, piloted, space);
-		alerts(graphics, font, cx, cy + 34, piloted);
+		headingTape(graphics, font, cx, 4, heading, Math.min(80, Math.round(w * 0.18f)));
+		speedTape(graphics, font, cx - tapeOffset, cy, tapeHalf, speed, piloted, space);
+		altitudeTape(graphics, font, cx + tapeOffset, cy, tapeHalf, piloted, velocity.y, space);
+		systemsStrip(graphics, font, cx, h - 26, Math.min(w - 16, 300), piloted, space);
+		alerts(graphics, font, cx, 34, piloted);
 	}
 
 	/** Re-entry: an orange glow creeping in from the screen edges. */
@@ -159,8 +164,10 @@ public final class FlightHud {
 	 * Horizon and pitch lines every 10 degrees, rotated by roll and scrolled by pitch. The
 	 * numbers ride along with their lines but stay upright, so they read at any bank angle.
 	 */
-	private static void pitchLadder(GuiGraphicsExtractor g, Font font, int cx, int cy, double pitch, double roll, boolean space) {
-		float pxPerDeg = 2.2f;
+	private static void pitchLadder(GuiGraphicsExtractor g, Font font, int cx, int cy, double pitch, double roll, boolean space,
+			int range, int maxWidth) {
+		float pxPerDeg = 1.6f;
+		int lineOuter = Math.min(34, maxWidth - 20), horizonOuter = Math.min(52, maxWidth), inner = 12;
 		double angle = Math.toRadians(-roll);
 		float cos = (float) Math.cos(angle), sin = (float) Math.sin(angle);
 		int base = (int) Math.floor(pitch / 10) * 10;
@@ -170,9 +177,9 @@ public final class FlightHud {
 		for (int deg = base - 30; deg <= base + 30; deg += 10) {
 			if (deg < -90 || deg > 90) continue;
 			int y = Math.round((float) (pitch - deg) * pxPerDeg);
-			if (Math.abs(y) > 70) continue;
-			int color = deg == 0 ? (space ? HOLO_DIM : HOLO) : HOLO_FAINT;
-			int inner = 22, outer = deg == 0 ? 70 : 44;
+			if (Math.abs(y) > range) continue;
+			int color = deg == 0 ? (space ? HOLO_FAINT : HOLO_DIM) : HOLO_FAINT;
+			int outer = deg == 0 ? horizonOuter : lineOuter;
 			g.fill(-outer, y, -inner, y + 1, color);
 			g.fill(inner, y, outer, y + 1, color);
 			if (deg != 0) {
@@ -186,10 +193,10 @@ public final class FlightHud {
 		for (int deg = base - 30; deg <= base + 30; deg += 10) {
 			if (deg < -90 || deg > 90 || deg == 0) continue;
 			float y = (float) (pitch - deg) * pxPerDeg;
-			if (Math.abs(y) > 70) continue;
+			if (Math.abs(y) > range) continue;
 			String label = Integer.toString(Math.abs(deg));
 			for (int side : new int[] {-1, 1}) {
-				float lx = side * (44 + 3 + font.width(label) / 2f), ly = y;
+				float lx = side * (lineOuter + 3 + font.width(label) / 2f), ly = y;
 				float rx = lx * cos - ly * sin, ry = lx * sin + ly * cos;
 				g.text(font, label, Math.round(cx + rx - font.width(label) / 2f), Math.round(cy + ry - 3), HOLO_FAINT, false);
 			}
@@ -198,8 +205,7 @@ public final class FlightHud {
 
 	// --- tapes ----------------------------------------------------------------------------------
 
-	private static void headingTape(GuiGraphicsExtractor g, Font font, int cx, int y, double heading) {
-		int half = 90;
+	private static void headingTape(GuiGraphicsExtractor g, Font font, int cx, int y, double heading, int half) {
 		g.fill(cx - half, y + 10, cx + half, y + 11, HOLO_FAINT);
 		float pxPerDeg = 2.0f;
 		int start = (int) Math.floor((heading - half / pxPerDeg) / 5) * 5;
@@ -219,24 +225,24 @@ public final class FlightHud {
 		g.text(font, readout, cx - font.width(readout) / 2 + 1, y + 15, WHITE, false);
 	}
 
-	private static void speedTape(GuiGraphicsExtractor g, Font font, int x, int cy, double speed, ShipEntity ship, boolean space) {
+	private static void speedTape(GuiGraphicsExtractor g, Font font, int x, int cy, int half, double speed, ShipEntity ship, boolean space) {
 		ShipPhysics physics = ShipPhysics.get();
 		double max = (space ? physics.maxSpeedSpace() : physics.maxSpeed()) * 20;
-		int top = cy - 50, bottom = cy + 50;
+		int top = cy - half, bottom = cy + half;
 		tape(g, x, top, bottom, speed / max, HOLO);
 		g.fill(x - 6, top, x + 1, top + 1, WARN); // top speed
-		String value = String.format("%.0f", speed);
-		box(g, x - 34, cy - 6, 30, 12);
-		g.text(font, value, x - 6 - font.width(value), cy - 4, WHITE, false);
-		g.text(font, "m/s", x - 22, cy + 9, HOLO_DIM, false);
-		g.text(font, space ? "NAV" : "SCM", x - 22, top - 10, HOLO, false);
+		String value = String.format("%.0f m/s", speed);
+		int boxW = font.width(value) + 8;
+		box(g, x - 8 - boxW, cy - 6, boxW, 12);
+		g.text(font, value, x - 4 - boxW, cy - 4, WHITE, false);
+		rightText(g, font, space ? "NAV" : "SCM", x + 2, top - 11, HOLO);
 		boolean decoupled = ship.isDecoupled();
-		g.text(font, decoupled ? "DCPL" : "CPLD", x - 26, bottom + 4, decoupled ? WARN : HOLO, false);
-		if (Minecraft.getInstance().options.keyShift.isDown()) g.text(font, "BOOST", x - 30, bottom + 14, WARN, false);
+		rightText(g, font, decoupled ? "DCPL" : "CPLD", x + 2, bottom + 4, decoupled ? WARN : HOLO);
+		if (Minecraft.getInstance().options.keyShift.isDown()) rightText(g, font, "BOOST", x + 2, bottom + 14, WARN);
 	}
 
-	private static void altitudeTape(GuiGraphicsExtractor g, Font font, int x, int cy, ShipEntity ship, double climb, boolean space) {
-		int top = cy - 50, bottom = cy + 50;
+	private static void altitudeTape(GuiGraphicsExtractor g, Font font, int x, int cy, int half, ShipEntity ship, double climb, boolean space) {
+		int top = cy - half, bottom = cy + half;
 		String value, label;
 		double fraction;
 		if (space) {
@@ -252,21 +258,27 @@ public final class FlightHud {
 			int min = ship.level().getMinY(), maxY = ship.level().getMaxY() + SpaceTravel.EXIT_MARGIN;
 			fraction = (alt - min) / (maxY - min);
 		}
+		if (label.length() > 10) label = label.substring(0, 10);
 		tape(g, x, top, bottom, fraction, HOLO);
-		box(g, x + 4, cy - 6, Math.max(34, font.width(value) + 6), 12);
-		g.text(font, value, x + 7, cy - 4, WHITE, false);
-		g.text(font, label, x + 5, top - 10, HOLO, false);
-		// Vertical speed with a direction arrow.
-		String vs = String.format("%s%.0f", climb >= 0 ? "+" : "", climb);
+		int boxW = font.width(value) + 8;
+		box(g, x + 8, cy - 6, boxW, 12);
+		g.text(font, value, x + 12, cy - 4, WHITE, false);
+		g.text(font, label, x - 2, top - 11, HOLO, false);
+		String vs = String.format("VS %s%.0f", climb >= 0 ? "+" : "", climb);
 		int color = Math.abs(climb) < 0.5 ? HOLO_DIM : climb > 0 ? GOOD : WARN;
-		g.text(font, "VS " + vs, x + 5, bottom + 4, color, false);
+		g.text(font, vs, x - 2, bottom + 4, color, false);
 		// Landing aid: height above ground when it's close.
 		if (!space) {
 			double agl = heightAboveGround(ship);
 			if (agl >= 0 && agl < 64) {
-				g.text(font, String.format("AGL %.1f", agl), x + 5, bottom + 14, agl < 4 ? WHITE : HOLO, false);
+				g.text(font, String.format("AGL %.1f", agl), x - 2, bottom + 14, agl < 4 ? WHITE : HOLO, false);
 			}
 		}
+	}
+
+	/** Text whose right edge is at {@code right}. */
+	private static void rightText(GuiGraphicsExtractor g, Font font, String text, int right, int y, int color) {
+		g.text(font, text, right - font.width(text), y, color, false);
 	}
 
 	/** Distance from the ship's lowest point to the ground below it, or -1 if out of range. */
@@ -292,76 +304,105 @@ public final class FlightHud {
 
 	// --- systems --------------------------------------------------------------------------------
 
-	private static void systemsStrip(GuiGraphicsExtractor g, Font font, int cx, int y, ShipEntity ship, boolean space) {
-		int width = 230, x = cx - width / 2;
-		g.fill(x - 4, y - 4, x + width + 4, y + 24, PANEL);
-		corners(g, x - 4, y - 4, width + 8, 28, HOLO_DIM);
-		bar(g, font, x, y, 70, "FUEL", ship.fuel(), ship.fuelCapacity(), ship.fuel() < ship.fuelCapacity() * 0.15 ? ALERT : WARN);
-		bar(g, font, x, y + 11, 70, "SHLD", ship.shield(), ship.shieldMax(), 0xFF6EA8FF);
+	/**
+	 * Two rows along the bottom. Row 1: fuel and shield bars side by side. Row 2: the power
+	 * split as one segmented bar, then status items laid out left to right by their measured
+	 * widths, so nothing can overlap whatever the GUI scale.
+	 */
+	private static void systemsStrip(GuiGraphicsExtractor g, Font font, int cx, int y, int width, ShipEntity ship, boolean space) {
+		int x = cx - width / 2;
+		g.fill(x - 4, y - 4, x + width + 4, y + 21, PANEL);
+		corners(g, x - 4, y - 4, width + 8, 25, HOLO_DIM);
+		int half = (width - 8) / 2;
+		bar(g, font, x, y, half - 52, "FUEL", ship.fuel(), ship.fuelCapacity(), ship.fuel() < ship.fuelCapacity() * 0.15 ? ALERT : WARN);
+		bar(g, font, x + half + 8, y, half - 52, "SHLD", ship.shield(), ship.shieldMax(), 0xFF6EA8FF);
 
-		// Power triangle as three columns.
-		int px = x + 112;
+		int row = y + 11;
+		g.text(font, "PWR", x, row, HOLO_DIM, false);
+		int px = x + 26, pw = 48;
 		int[] split = ship.powerPercents();
-		String[] names = {"E", "S", "Q"};
-		int[] colors = {GOOD, 0xFF6EA8FF, 0xFFC27BFF};
-		for (int i = 0; i < 3; i++) {
-			int bx = px + i * 12;
-			g.fill(bx, y, bx + 6, y + 16, HOLO_FAINT);
-			int fill = 16 * split[i] / 100;
-			g.fill(bx, y + 16 - fill, bx + 6, y + 16, colors[i]);
-			g.text(font, names[i], bx, y + 17, HOLO_DIM, false);
-		}
+		int e = pw * split[0] / 100, sh = pw * split[1] / 100;
+		g.fill(px, row + 1, px + e, row + 7, GOOD);
+		g.fill(px + e, row + 1, px + e + sh, row + 7, 0xFF6EA8FF);
+		g.fill(px + e + sh, row + 1, px + pw, row + 7, 0xFFC27BFF);
 
-		int sx = x + 158;
-		g.text(font, "ENG " + Math.round(ship.engineFactor() * 100) + "%", sx, y, ship.engineFactor() < 0.75 ? WARN : HOLO, false);
+		java.util.List<String> items = new java.util.ArrayList<>();
+		java.util.List<Integer> colors = new java.util.ArrayList<>();
+		items.add("ENG " + Math.round(ship.engineFactor() * 100) + "%");
+		colors.add(ship.engineFactor() < 0.75 ? WARN : HOLO);
 		float thermal = ship.thermalFactor();
-		g.text(font, thermal < 0.999f ? "HEAT " + Math.round(thermal * 100) + "%" : "TEMP OK", sx, y + 9, thermal < 0.999f ? ALERT : HOLO_DIM, false);
+		items.add(thermal < 0.999f ? "HEAT " + Math.round(thermal * 100) + "%" : "TEMP OK");
+		colors.add(thermal < 0.999f ? ALERT : HOLO_DIM);
 		if (ship.gearCount() > 0) {
-			boolean down = ship.isGearDown();
-			g.text(font, down ? "GEAR DN" : "GEAR UP", sx + 48, y + 9, down ? GOOD : HOLO_DIM, false);
+			items.add(ship.isGearDown() ? "GEAR DN" : "GEAR UP");
+			colors.add(ship.isGearDown() ? GOOD : HOLO_DIM);
 		}
 		if (!space) {
 			int lift = Math.round(ship.wingLift() * 100);
-			g.text(font, "WING " + lift + "%", sx, y + 18, lift > 0 ? HOLO : HOLO_DIM, false);
+			items.add("WING " + lift + "%");
+			colors.add(lift > 0 ? HOLO : HOLO_DIM);
 		} else if (ship.isQuantumTravelling()) {
-			g.text(font, "QUANTUM", sx, y + 18, 0xFFC27BFF, false);
+			items.add("QUANTUM");
+			colors.add(0xFFC27BFF);
+		}
+		int ix = px + pw + 10;
+		for (int i = 0; i < items.size(); i++) {
+			int iw = font.width(items.get(i));
+			if (ix + iw > x + width) break; // out of room: drop the rest rather than overlap
+			g.text(font, items.get(i), ix, row, colors.get(i), false);
+			ix += iw + 10;
 		}
 	}
 
 	private static void bar(GuiGraphicsExtractor g, Font font, int x, int y, int width, String label, double value, double max, int color) {
 		g.text(font, label, x, y, HOLO_DIM, false);
 		int bx = x + 26;
+		width = Math.max(16, width);
 		g.fill(bx, y + 1, bx + width, y + 7, HOLO_FAINT);
 		if (max > 0) g.fill(bx, y + 1, bx + (int) (width * Mth.clamp(value / max, 0, 1)), y + 7, color);
 		String text = max > 0 ? String.format("%.0f", value) : "--";
 		g.text(font, text, bx + width + 3, y, WHITE, false);
 	}
 
+	/** Active warnings, side by side in one centred row under the heading tape. */
 	private static void alerts(GuiGraphicsExtractor g, Font font, int cx, int y, ShipEntity ship) {
 		boolean blink = (System.currentTimeMillis() / 400) % 2 == 0;
-		int line = 0;
-		if (ship.isDecoupled()) line = alert(g, font, cx, y, line, Component.translatable("hud.starwake.decoupled"), WARN);
-		if (ship.fuelCapacity() > 0 && ship.fuel() < ship.fuelCapacity() * 0.15 && blink) {
-			line = alert(g, font, cx, y, line, Component.translatable("hud.starwake.low_fuel"), ALERT);
+		java.util.List<Component> texts = new java.util.ArrayList<>();
+		java.util.List<Integer> colors = new java.util.ArrayList<>();
+		if (ship.isDecoupled()) {
+			texts.add(Component.translatable("hud.starwake.decoupled"));
+			colors.add(WARN);
 		}
-		if (ship.gearCount() > 0 && !ship.isGearDown() && !SpaceTravel.isSpace(ship.level()) && blink) {
+		if (ship.fuelCapacity() > 0 && ship.fuel() < ship.fuelCapacity() * 0.15) {
+			texts.add(Component.translatable("hud.starwake.low_fuel"));
+			colors.add(blink ? ALERT : WARN);
+		}
+		if (ship.gearCount() > 0 && !ship.isGearDown() && !SpaceTravel.isSpace(ship.level())) {
 			double agl = heightAboveGround(ship);
 			if (agl >= 0 && agl < 15 && ship.recentVelocity().y < -0.02) {
-				line = alert(g, font, cx, y, line, Component.translatable("hud.starwake.gear_up"), ALERT);
+				texts.add(Component.translatable("hud.starwake.gear_up"));
+				colors.add(blink ? ALERT : WARN);
 			}
 		}
-		if (ship.thermalFactor() < 0.999f) line = alert(g, font, cx, y, line, Component.translatable("hud.starwake.overheat"), ALERT);
-		if (ship.shieldMax() > 0 && ship.shield() < 1 && blink) {
-			alert(g, font, cx, y, line, Component.translatable("hud.starwake.shields_down"), ALERT);
+		if (ship.thermalFactor() < 0.999f) {
+			texts.add(Component.translatable("hud.starwake.overheat"));
+			colors.add(ALERT);
 		}
-	}
-
-	private static int alert(GuiGraphicsExtractor g, Font font, int cx, int y, int line, Component text, int color) {
-		int width = font.width(text);
-		int ty = y + line * 12;
-		g.fill(cx - width / 2 - 4, ty - 2, cx + width / 2 + 4, ty + 9, 0x70100808);
-		g.text(font, text, cx - width / 2, ty, color, false);
-		return line + 1;
+		if (ship.shieldMax() > 0 && ship.shield() < 1) {
+			texts.add(Component.translatable("hud.starwake.shields_down"));
+			colors.add(blink ? ALERT : WARN);
+		}
+		if (texts.isEmpty()) return;
+		int gap = 8, total = -gap;
+		for (Component t : texts) total += font.width(t) + 8 + gap;
+		int x = cx - total / 2;
+		for (int i = 0; i < texts.size(); i++) {
+			int tw = font.width(texts.get(i));
+			g.fill(x, y - 2, x + tw + 8, y + 9, 0x70100808);
+			g.outline(x, y - 2, tw + 8, 11, (colors.get(i) & 0x00FFFFFF) | 0x80000000);
+			g.text(font, texts.get(i), x + 4, y, colors.get(i), false);
+			x += tw + 8 + gap;
+		}
 	}
 
 	/** Compact status for crew and people walking aboard. */

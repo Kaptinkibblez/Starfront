@@ -189,7 +189,7 @@ public final class ShipClient {
 	}
 
 	/** Result of a ray hitting a ship block. */
-	private record ShipHit(ShipEntity ship, BlockPos local, double distanceSqr) {}
+	public record ShipHit(ShipEntity ship, BlockPos local, net.minecraft.core.Direction face, Vec3 hitLocal, double distanceSqr) {}
 
 	/**
 	 * Called at the start of every right-click (MinecraftMixin). Returns true if the click hit
@@ -199,19 +199,32 @@ public final class ShipClient {
 		Minecraft minecraft = Minecraft.getInstance();
 		Player player = minecraft.player;
 		if (player == null || minecraft.gameMode == null || player.isSpectator()) return false;
-		ShipHit hit = raycastShips(player);
+		ShipHit hit = targetedShipBlock(minecraft);
 		if (hit == null) return false;
-		HitResult vanilla = minecraft.hitResult;
-		if (vanilla != null && vanilla.getType() != HitResult.Type.MISS
-				&& vanilla.getLocation().distanceToSqr(player.getEyePosition()) < hit.distanceSqr()) {
-			return false; // something in the world is closer
-		}
-		ClientPlayNetworking.send(new ShipInteractPayload(hit.ship().getId(), hit.local()));
+		ClientPlayNetworking.send(new ShipInteractPayload(hit.ship().getId(), hit.local(), hit.face(), hit.hitLocal()));
+		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
 		return true;
 	}
 
+	/**
+	 * The ship block under the crosshair, if it's closer than whatever vanilla targets in the
+	 * world (block or entity); null otherwise.
+	 */
+	public static @Nullable ShipHit targetedShipBlock(Minecraft minecraft) {
+		Player player = minecraft.player;
+		if (player == null || player.isSpectator()) return null;
+		ShipHit hit = raycastShips(player);
+		if (hit == null) return null;
+		HitResult vanilla = minecraft.hitResult;
+		if (vanilla != null && vanilla.getType() != HitResult.Type.MISS
+				&& vanilla.getLocation().distanceToSqr(player.getEyePosition()) < hit.distanceSqr()) {
+			return null; // something in the world is closer
+		}
+		return hit;
+	}
+
 	/** Raycasts the player's view against every nearby ship, in each ship's local space. */
-	private static @Nullable ShipHit raycastShips(Player player) {
+	public static @Nullable ShipHit raycastShips(Player player) {
 		Vec3 eye = player instanceof net.minecraft.client.player.LocalPlayer local ? ShipLocalMotion.eyePosition(local) : player.getEyePosition();
 		Vec3 end = eye.add(player.getViewVector(1.0f).scale(player.blockInteractionRange()));
 		ShipHit best = null;
@@ -231,7 +244,7 @@ public final class ShipClient {
 			if (local != null) {
 				double distanceSqr = local.getLocation().distanceToSqr(from);
 				if (best == null || distanceSqr < best.distanceSqr()) {
-					best = new ShipHit(ship, local.getBlockPos(), distanceSqr);
+					best = new ShipHit(ship, local.getBlockPos(), local.getDirection(), local.getLocation(), distanceSqr);
 				}
 			}
 		}
