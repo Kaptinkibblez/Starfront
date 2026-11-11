@@ -104,6 +104,9 @@ public class ShipEntity extends Entity {
 	/** Firing thrusters for exhaust effects (see {@link #publishThrottles}). */
 	private static final EntityDataAccessor<String> THROTTLES = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
 
+	private static final EntityDataAccessor<Boolean> DECOUPLED = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Float> WING_LIFT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+
 	/** {@link #quantumState()} bits. */
 	public static final int QT_MODE = 1, QT_TRAVEL = 2, QT_ALIGNED = 4, QT_OBSTRUCTED = 8, QT_NO_FUEL = 16,
 			QT_TOO_CLOSE = 32, QT_NO_TARGET = 64, QT_SPOOLED = 128, QT_NO_DRIVE = 256;
@@ -367,6 +370,8 @@ public class ShipEntity extends Entity {
 		builder.define(ORBIT, "");
 		builder.define(QT_STATE, 0);
 		builder.define(THROTTLES, "");
+		builder.define(DECOUPLED, false);
+		builder.define(WING_LIFT, 0f);
 		builder.define(QT_TARGET, "");
 		builder.define(QT_INFO, 0);
 		builder.define(QT_OFFSET, new Vector3f());
@@ -391,6 +396,14 @@ public class ShipEntity extends Entity {
 
 	/** Positions over the last 10 ticks, for a steady speed readout. */
 	private final Vec3[] recentPositions = new Vec3[10];
+
+	/** Average velocity over the last half second, in blocks per tick (HUDs). */
+	public Vec3 recentVelocity() {
+		Vec3 now = recentPositions[tickCount % recentPositions.length];
+		Vec3 then = recentPositions[(tickCount + 1) % recentPositions.length];
+		if (now == null || then == null) return lastMove;
+		return now.subtract(then).scale(1.0 / (recentPositions.length - 1));
+	}
 
 	/** Average speed over the last half second, in blocks per tick (HUDs). */
 	public double recentSpeed() {
@@ -976,24 +989,39 @@ public class ShipEntity extends Entity {
 		Vector3d fwdAxis = new Vector3d(forward.getStepX(), 0, forward.getStepZ());
 		Vector3d rightAxis = new Vector3d(right.getStepX(), 0, right.getStepZ());
 		Vector3d local = new Vector3d(v.x, v.y, v.z);
-		if (!input.forward() && !input.backward()) force.fma(-local.dot(fwdAxis) * perVelocity, fwdAxis);
-		if (!input.left() && !input.right()) force.fma(-local.dot(rightAxis) * perVelocity, rightAxis);
 		boolean hovering = !input.sprint() && !input.jump() && gravity > 0;
-		if (!input.sprint() && !input.jump() && !hovering) force.add(0, -local.y * perVelocity, 0);
+		if (!decoupled) {
+			if (!input.forward() && !input.backward()) force.fma(-local.dot(fwdAxis) * perVelocity, fwdAxis);
+			if (!input.left() && !input.right()) force.fma(-local.dot(rightAxis) * perVelocity, rightAxis);
+			if (!input.sprint() && !input.jump() && !hovering) force.add(0, -local.y * perVelocity, 0);
+		}
 
 		// Hover assist: hold the ship's weight, whatever its attitude (top priority), and null
 		// vertical drift so it holds altitude.
 		Vector3f upLocal = q.transformInverse(new Vector3f(0, 1, 0));
+		// (Decoupled: gravity is still cancelled, but vertical drift is the pilot's problem.)
 		double weight = hovering
-				? Math.max(0, mass * gravity * physics.gravityToAccel() / physics.thrustToAccel() - velocity.y * perVelocity) : 0;
+				? Math.max(0, mass * gravity * physics.gravityToAccel() / physics.thrustToAccel()
+						- (decoupled ? 0 : velocity.y * perVelocity)) : 0;
 
 		// Wanted torque: steer the angular velocity toward what the pilot asks for.
 		Vector3d alpha = wantedRotation(pilot, physics, space).sub(angularVelocity).mul(0.35);
 		Vector3d torque = dynamics.inertia().transform(alpha, new Vector3d()).div(physics.thrustToAccel());
 
-		double[] achieved = dynamics.allocate(new Vector3d(upLocal.x, upLocal.y, upLocal.z), weight, torque, force, scale, throttles);
+		// Wings (3i): their lift carries part of the weight, so thrusters only make up the rest,
+		// and the flight computer counters their pitching/yawing moments where it can.
+		double density = space ? 0 : Planets.airDensityOf(level().dimension());
+		double[] air = dynamics.aero(local, angularVelocity, new Vector3d(fwdAxis), density, physics.wingLift(), physics.wingDrag());
+		double airLift = air[0] * upLocal.x + air[1] * upLocal.y + air[2] * upLocal.z;
+		double fullWeight = mass * gravity * physics.gravityToAccel() / physics.thrustToAccel();
+		entityData.set(WING_LIFT, fullWeight > 0 ? (float) Mth.clamp(airLift / fullWeight, 0, 9) : 0f);
+		if (hovering) weight -= airLift; // may go negative: then hold the ship down
+		torque.sub(air[3], air[4], air[5]);
+
+		double[] achieved = dynamics.allocate(new Vector3d(upLocal.x, upLocal.y, upLocal.z), hovering, weight, torque, force, scale, throttles);
 		if (scale > 0) burnFuel(dynamics.burn(throttles) * scale);
 
+		for (int j = 0; j < 6; j++) achieved[j] += air[j]; // thrust + aerodynamics
 		Vector3f f = q.transform(new Vector3f((float) achieved[0], (float) achieved[1], (float) achieved[2]));
 		Vec3 accel = new Vec3(f.x, f.y, f.z).scale(physics.thrustToAccel() / mass).add(0, -gravity * physics.gravityToAccel(), 0);
 		Vector3d spin = dynamics.inverseInertia().transform(new Vector3d(achieved[3], achieved[4], achieved[5]))
@@ -1002,6 +1030,27 @@ public class ShipEntity extends Entity {
 		double cap = Math.toRadians(physics.turnRateDegrees()) / 20.0 * 1.25;
 		if (angularVelocity.length() > cap) angularVelocity.normalize(cap);
 		return velocity.add(accel).scale(space ? physics.dragSpace() : physics.dragAtmosphere());
+	}
+
+	/** Decoupled flight (Star Citizen's "decoupled mode"): no automatic braking. Saved. */
+	private boolean decoupled;
+
+	public boolean isDecoupled() {
+		return level().isClientSide() ? entityData.get(DECOUPLED) : decoupled;
+	}
+
+	/** Fraction of the ship's weight its wings are carrying right now (synced, for the HUD). */
+	public float wingLift() {
+		return entityData.get(WING_LIFT);
+	}
+
+	/** Pilot pressed V: coupled <-> decoupled. */
+	public void toggleDecoupled() {
+		decoupled = !decoupled;
+		entityData.set(DECOUPLED, decoupled);
+		if (pilot() instanceof ServerPlayer player) {
+			player.sendOverlayMessage(Component.translatable(decoupled ? "message.starwake.decoupled" : "message.starwake.coupled"));
+		}
 	}
 
 	/** Fraction of uncommanded velocity the flight computer tries to cancel each tick. */
@@ -1365,6 +1414,8 @@ public class ShipEntity extends Entity {
 		entityData.set(SHIELD, (float) input.getDoubleOr("shield", 0));
 		entityData.set(FUEL, input.getIntOr("fuel", 0));
 		orbiting = input.read("orbiting", Level.RESOURCE_KEY_CODEC).orElse(null);
+		decoupled = input.getBooleanOr("decoupled", false);
+		entityData.set(DECOUPLED, decoupled);
 		input.read("orientation", ExtraCodecs.QUATERNIONF).ifPresent(q -> entityData.set(ORIENTATION, new Quaternionf(q)));
 		int frame = input.getIntOr("frame", 1);
 		input.read("structure", ShipStructure.CODEC).ifPresent(this::setStructure);
@@ -1394,6 +1445,7 @@ public class ShipEntity extends Entity {
 		output.store("power", PowerAllocation.CODEC, allocation);
 		output.putDouble("shield", entityData.get(SHIELD));
 		output.store("orientation", ExtraCodecs.QUATERNIONF, orientation());
+		output.putBoolean("decoupled", decoupled);
 		if (orbiting != null) {
 			output.store("orbiting", Level.RESOURCE_KEY_CODEC, orbiting);
 		}

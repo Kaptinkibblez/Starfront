@@ -50,6 +50,12 @@ public final class ShipClient {
 	/** Star Citizen's quantum key: tap to toggle quantum mode, hold to engage. */
 	private static final KeyMapping QUANTUM = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.quantum", InputConstants.KEY_B, CATEGORY));
+	/** The Wristcom (wrist computer). */
+	private static final KeyMapping WRISTCOM = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.wristcom", InputConstants.KEY_G, CATEGORY));
+	/** Star Citizen's coupled/decoupled toggle. */
+	private static final KeyMapping DECOUPLE = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.decouple", InputConstants.KEY_V, CATEGORY));
 	/** Ticks B must be held to engage (0.75 s). */
 	private static final int QUANTUM_HOLD_TICKS = 15;
 	private static int quantumHeld;
@@ -78,6 +84,10 @@ public final class ShipClient {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			sendControls(client);
 			quantumKey(client);
+			decoupleKey(client);
+			while (WRISTCOM.consumeClick()) {
+				if (client.player != null && client.gui.screen() == null) client.gui.setScreen(new com.starwake.client.wristcom.WristcomScreen());
+			}
 			ThrusterEffects.tick(client);
 			while (SHIP_CONSOLE.consumeClick()) {
 				if (client.player != null && client.player.getVehicle() instanceof ShipEntity ship) {
@@ -107,6 +117,15 @@ public final class ShipClient {
 		}
 	}
 
+	/** V: toggle decoupled flight (pilot only). */
+	private static void decoupleKey(Minecraft client) {
+		while (DECOUPLE.consumeClick()) {
+			if (client.player != null && client.player.getVehicle() instanceof ShipEntity ship && ship.pilot() == client.player) {
+				ClientPlayNetworking.send(new ShipQuantumPayload(ShipQuantumPayload.ACTION_DECOUPLE));
+			}
+		}
+	}
+
 	/** B: a tap toggles quantum mode; holding past {@link #QUANTUM_HOLD_TICKS} engages once. */
 	private static void quantumKey(Minecraft client) {
 		while (QUANTUM.consumeClick()) { /* edge presses are handled through isDown below */ }
@@ -118,9 +137,9 @@ public final class ShipClient {
 		}
 		if (QUANTUM.isDown()) {
 			quantumHeld++;
-			if (quantumHeld == QUANTUM_HOLD_TICKS) ClientPlayNetworking.send(new ShipQuantumPayload(true));
+			if (quantumHeld == QUANTUM_HOLD_TICKS) ClientPlayNetworking.send(new ShipQuantumPayload(ShipQuantumPayload.ACTION_QUANTUM_ENGAGE));
 		} else {
-			if (quantumHeld > 0 && quantumHeld < QUANTUM_HOLD_TICKS) ClientPlayNetworking.send(new ShipQuantumPayload(false));
+			if (quantumHeld > 0 && quantumHeld < QUANTUM_HOLD_TICKS) ClientPlayNetworking.send(new ShipQuantumPayload(ShipQuantumPayload.ACTION_QUANTUM_TOGGLE));
 			quantumHeld = 0;
 		}
 	}

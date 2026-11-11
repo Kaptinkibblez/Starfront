@@ -9,6 +9,7 @@ import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.MultiVariant;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.client.data.models.blockstates.PropertyDispatch;
+import net.minecraft.client.data.models.model.ModelTemplate;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
@@ -37,6 +38,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.createTrivialBlock(ModBlocks.FUEL_TANK, TexturedModel.COLUMN);
 		createNozzleBlock(generators, ModBlocks.THRUSTER);
 		createNozzleBlock(generators, ModBlocks.MAIN_ENGINE);
+		createWing(generators, ModBlocks.WING);
 		createNozzleBlock(generators, ModBlocks.MANEUVERING_THRUSTER);
 		createSeat(generators, ModBlocks.SEAT);
 		generators.createTrivialBlock(ModBlocks.POWER_PLANT, TexturedModel.COLUMN);
@@ -65,6 +67,26 @@ public final class ModModelProvider extends FabricModelProvider {
 						.select(Direction.SOUTH, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_180))
 						.select(Direction.WEST, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_270))
 						.select(Direction.EAST, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_90))));
+	}
+
+	/**
+	 * A thin plate (hand-written parent {@code block/template_wing}), turned so its normal follows
+	 * AXIS: Y = horizontal wing, X/Z = vertical fin. Textures {@code <name>_top} (faces), {@code _side} (edges).
+	 */
+	private static void createWing(BlockModelGenerators generators, Block block) {
+		TextureMapping textures = new TextureMapping()
+				.put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top"))
+				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side"));
+		ModelTemplate template = new ModelTemplate(java.util.Optional.of(com.starwake.StarwakeMod.id("block/template_wing")),
+				java.util.Optional.empty(), TextureSlot.TOP, TextureSlot.SIDE);
+		Identifier modelId = template.create(block, textures, generators.modelOutput);
+		MultiVariant model = BlockModelGenerators.plainVariant(modelId);
+		generators.registerSimpleItemModel(block, modelId);
+		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(block).with(
+				PropertyDispatch.initial(BlockStateProperties.AXIS)
+						.select(Direction.Axis.Y, model)
+						.select(Direction.Axis.Z, model.with(BlockModelGenerators.X_ROT_90))
+						.select(Direction.Axis.X, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_90))));
 	}
 
 	/** A low cushioned seat: bottom-slab shape with {@code <name>_top} and {@code <name>_side}. */

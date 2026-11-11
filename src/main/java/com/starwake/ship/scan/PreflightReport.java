@@ -207,6 +207,15 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 			lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.cant_turn", String.join(", ", cantTurn))));
 		}
 
+		// Wings (3i): how much of the weight they carry at two-thirds of top speed, here.
+		if (!dynamics.wings().isEmpty()) {
+			double density = Planets.airDensityOf(level.dimension());
+			double cruise = physics.maxSpeed() * 2.0 / 3.0; // blocks per tick
+			double wingLift = dynamics.liftingWings() * physics.wingLift() * density * cruise * cruise;
+			lines.add(new Line(Status.INFO, Component.translatable("preflight.starwake.wings",
+					dynamics.wings().size(), dynamics.liftingWings(), pct(weight > 0 ? wingLift / weight : 0), fmt(cruise * 20))));
+		}
+
 		// --- Fuel -----------------------------------------------------------------------
 		if (tanks == 0) {
 			lines.add(new Line(Status.FAIL, Component.translatable("preflight.starwake.no_tanks")));

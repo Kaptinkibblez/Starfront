@@ -1,0 +1,7 @@
+{
+  "parent": "starwake:block/template_wing",
+  "textures": {
+    "side": "starwake:block/wing_side",
+    "top": "starwake:block/wing_top"
+  }
+}

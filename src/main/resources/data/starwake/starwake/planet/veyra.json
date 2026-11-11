@@ -5,12 +5,17 @@
   "dimension": "starwake:veyra",
   "gravity": 0.45,
   "body": {
-    "position": [-5200000, 0, 2200000],
+    "position": [
+      -5200000,
+      0,
+      2200000
+    ],
     "radius": 2600,
     "atmosphere": 3000,
     "world_radius": 16000,
     "color": "#9C4A26",
     "secondary_color": "#C98A52",
     "atmosphere_color": "#6FE0D0"
-  }
+  },
+  "air_density": 0.6
 }

@@ -58,6 +58,13 @@ public final class Planets {
 		return byDimension.containsKey(dimension);
 	}
 
+	/** Air density for a dimension: the planet's, 0 in space, 1.0 anywhere else. */
+	public static double airDensityOf(ResourceKey<Level> dimension) {
+		Holder.Reference<Planet> planet = byDimension.get(dimension);
+		if (planet == null) return 1.0;
+		return planet.value().destination() ? planet.value().airDensity() : 0.0;
+	}
+
 	/** Gravity multiplier for a dimension: the planet's gravity, or 1.0 anywhere else. */
 	public static double gravityOf(ResourceKey<Level> dimension) {
 		Holder.Reference<Planet> planet = byDimension.get(dimension);

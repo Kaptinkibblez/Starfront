@@ -1,9 +1,9 @@
 {
   "thrust_to_accel": 0.05,
   "gravity_to_accel": 0.05,
-  "drag_atmosphere": 0.97,
+  "drag_atmosphere": 0.985,
   "drag_space": 0.998,
-  "max_speed": 2.0,
+  "max_speed": 3.0,
   "max_speed_space": 5.0,
   "turn_rate": 60.0,
   "boost_multiplier": 1.6,
@@ -12,5 +12,7 @@
   "quantum_fuel_per_mm": 50,
   "quantum_min_distance": 20000,
   "quantum_standoff": 600,
-  "quantum_align": 3.0
+  "quantum_align": 3.0,
+  "wing_lift": 2.6,
+  "wing_drag": 10.0
 }

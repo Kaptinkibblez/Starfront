@@ -12,18 +12,18 @@ import net.minecraft.network.chat.Component;
  * power proportionally from the other two, so the split always totals 100%. Every change is
  * sent to the server, which normalizes and applies it.
  */
-final class PowerSliders {
+public final class PowerSliders {
 	private static final String[] KEYS = {"screen.starwake.power.engines", "screen.starwake.power.shields", "screen.starwake.power.quantum"};
 
 	private final double[] split = new double[3];
 	private final Slider[] sliders = new Slider[3];
 
-	PowerSliders(int[] percents) {
+	public PowerSliders(int[] percents) {
 		for (int i = 0; i < 3; i++) split[i] = percents[i] / 100.0;
 	}
 
 	/** Creates the three sliders stacked at (x, y). */
-	void create(int x, int y, int width, Consumer<AbstractWidget> add) {
+	public void create(int x, int y, int width, Consumer<AbstractWidget> add) {
 		for (int i = 0; i < 3; i++) {
 			sliders[i] = new Slider(i, x, y + i * 22, width);
 			add.accept(sliders[i]);

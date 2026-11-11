@@ -22,13 +22,16 @@ import net.minecraft.world.level.Level;
  * @param destination whether ships can set a course here (false for space itself)
  * @param body        where the planet sits in space and how it looks from orbit (3g). Space's
  *                    own entry uses this for the system's star.
+ * @param airDensity  atmosphere density relative to the Overworld: scales wing lift and drag (3i)
  */
-public record Planet(Component name, ResourceKey<Level> dimension, double gravity, boolean destination, Optional<Body> body) {
+public record Planet(Component name, ResourceKey<Level> dimension, double gravity, boolean destination, Optional<Body> body,
+		double airDensity) {
 	public static final Codec<Planet> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ComponentSerialization.CODEC.fieldOf("name").forGetter(Planet::name),
 			Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(Planet::dimension),
 			Codec.doubleRange(0.05, 4.0).optionalFieldOf("gravity", 1.0).forGetter(Planet::gravity),
 			Codec.BOOL.optionalFieldOf("destination", true).forGetter(Planet::destination),
-			Body.CODEC.optionalFieldOf("body").forGetter(Planet::body)
+			Body.CODEC.optionalFieldOf("body").forGetter(Planet::body),
+			Codec.doubleRange(0.0, 10.0).optionalFieldOf("air_density", 1.0).forGetter(Planet::airDensity)
 	).apply(instance, Planet::new));
 }

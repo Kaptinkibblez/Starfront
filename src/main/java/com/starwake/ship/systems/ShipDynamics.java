@@ -35,6 +35,9 @@ public final class ShipDynamics {
 	private final Vector3d weightedPos = new Vector3d();
 	private final List<double[]> blocks = new ArrayList<>(); // x, y, z, mass
 	private final List<Thruster> thrusters = new ArrayList<>();
+	/** Wing panels: position and plate normal (local); horizontal ones make lift (3i). */
+	public record Wing(Vector3d position, Vector3d normal, boolean horizontal) {}
+	private final List<Wing> wings = new ArrayList<>();
 
 	// Derived by finish().
 	private final Vector3d centre = new Vector3d();
@@ -56,6 +59,11 @@ public final class ShipDynamics {
 		mass += m;
 		weightedPos.add(x * m, y * m, z * m);
 		blocks.add(new double[] {x, y, z, m});
+		if (state.getBlock() instanceof com.starwake.ship.block.WingBlock) {
+			Direction.Axis axis = com.starwake.ship.block.WingBlock.normal(state);
+			Vector3d normal = new Vector3d(axis == Direction.Axis.X ? 1 : 0, axis == Direction.Axis.Y ? 1 : 0, axis == Direction.Axis.Z ? 1 : 0);
+			wings.add(new Wing(new Vector3d(x, y, z), normal, axis == Direction.Axis.Y));
+		}
 		if (state.getBlock() instanceof ThrusterBlock && clearExhaust && stats.thrust() > 0) {
 			Direction nozzle = state.getValue(ThrusterBlock.FACING);
 			Direction push = nozzle.getOpposite();
@@ -103,6 +111,45 @@ public final class ShipDynamics {
 	public List<Thruster> thrusters() { return thrusters; }
 	public int thrusterCount() { return thrusters.size(); }
 
+	public List<Wing> wings() { return wings; }
+
+	/** Number of horizontal (lifting) wing panels. */
+	public int liftingWings() {
+		int n = 0;
+		for (Wing w : wings) if (w.horizontal()) n++;
+		return n;
+	}
+
+	/**
+	 * Aerodynamic force and torque (local, thrust units) on the wings (3i). Each panel is a flat
+	 * plate: air pushing through it is resisted ({@code drag x |v| x v·n}, along -n), which also
+	 * damps spin and weathervanes a ship with fins at the back. Horizontal panels are cambered:
+	 * forward airspeed squared times {@code lift}, along the panel's up. Every panel acts at
+	 * its own position, so wings ahead of or behind the centre of mass pitch the ship.
+	 *
+	 * @param velocity local velocity (blocks/tick); {@code omega} local angular velocity (rad/tick)
+	 * @param forward  the ship's local forward (unit)
+	 */
+	public double[] aero(Vector3d velocity, Vector3d omega, Vector3d forward, double density, double lift, double drag) {
+		double[] out = new double[6];
+		if (density <= 0 || wings.isEmpty()) return out;
+		for (Wing w : wings) {
+			Vector3d r = new Vector3d(w.position()).sub(centre);
+			Vector3d v = omega.cross(r, new Vector3d()).add(velocity); // the panel's own velocity
+			double speed = v.length();
+			double through = v.dot(w.normal());
+			Vector3d force = new Vector3d(w.normal()).mul(-drag * density * speed * through);
+			if (w.horizontal()) {
+				double airspeed = Math.max(0, v.dot(forward));
+				force.add(0, lift * density * airspeed * airspeed, 0);
+			}
+			Vector3d torque = r.cross(force, new Vector3d());
+			out[0] += force.x; out[1] += force.y; out[2] += force.z;
+			out[3] += torque.x; out[4] += torque.y; out[5] += torque.z;
+		}
+		return out;
+	}
+
 	/** Sum of every thruster's full thrust (an upper bound on any request). */
 	public double totalThrust() {
 		double sum = 0;
@@ -133,17 +180,17 @@ public final class ShipDynamics {
 	 * than tumbling. An axis no thruster can twist simply doesn't turn.
 	 *
 	 * @param up        world-up in the ship's frame (ignored when {@code weight} is 0, e.g. space)
-	 * @param weight    force needed to hover (thrust units), 0 for none
+	 * @param hover     whether to hold altitude at all (false in space, or climbing/diving on purpose)
+	 * @param weight    vertical force needed to hover (thrust units); negative if wings over-lift
 	 * @param torque    wanted torque (local)
 	 * @param push      wanted translation force (local); over-ask for "full thrust"
 	 * @param scale     thrust multiplier for every thruster (power routing, boost)
 	 * @param throttles out: one throttle per thruster in [0, 1]
 	 * @return achieved [force xyz, torque xyz] (local, already scaled)
 	 */
-	public double[] allocate(Vector3d up, double weight, Vector3d torque, Vector3d push, double scale, double[] throttles) {
+	public double[] allocate(Vector3d up, boolean hover, double weight, Vector3d torque, Vector3d push, double scale, double[] throttles) {
 		java.util.Arrays.fill(throttles, 0);
 		if (columns.length == 0 || scale <= 0) return new double[6];
-		boolean hover = weight > 0;
 		Vector3d u = new Vector3d(up).normalize();
 
 		// Constraint rows (functionals of [force, torque]) and their targets.
@@ -241,7 +288,7 @@ public final class ShipDynamics {
 		}
 		boolean[] pinned = new boolean[n];
 		java.util.Arrays.fill(throttles, 0);
-		for (int round = 0; round < 8; round++) {
+		for (int round = 0; round < 24; round++) {
 			double[] target = new double[m];
 			for (int r = 0; r < m; r++) target[r] = want[r] * weights[r];
 			double[][] gram = new double[m][m];
@@ -267,7 +314,35 @@ public final class ShipDynamics {
 					violated = true;
 				}
 			}
-			if (!violated) break;
+			if (violated) continue;
+			// Active-set release: plain CGI can pin a thruster that's actually needed (e.g. a
+			// pitch thruster trimming off-centre retros). If the request still isn't met, free
+			// the pinned thruster whose nudge would help most and solve again.
+			double[] residual = new double[m];
+			for (int r = 0; r < m; r++) {
+				residual[r] = -want[r] * weights[r];
+				for (int k = 0; k < n; k++) residual[r] += effect[k][r] * throttles[k];
+			}
+			double size = 1.0e-9, error = 0;
+			for (int r = 0; r < m; r++) {
+				error += Math.abs(residual[r]);
+				size += Math.abs(want[r] * weights[r]);
+			}
+			if (error <= size * 1.0e-4) break;
+			int best = -1;
+			double bestGain = 1.0e-9;
+			for (int k = 0; k < n; k++) {
+				if (!pinned[k]) continue;
+				double slope = 0; // d(error²)/d(throttle)
+				for (int r = 0; r < m; r++) slope += effect[k][r] * residual[r];
+				double gain = throttles[k] <= 0 ? -slope : throttles[k] >= 1 ? slope : 0;
+				if (gain > bestGain) {
+					bestGain = gain;
+					best = k;
+				}
+			}
+			if (best < 0) break;
+			pinned[best] = false;
 		}
 		for (int k = 0; k < n; k++) throttles[k] = Math.clamp(throttles[k], 0.0, 1.0);
 		double[] achieved = new double[6];

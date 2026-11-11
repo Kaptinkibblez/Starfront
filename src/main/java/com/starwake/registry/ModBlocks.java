@@ -98,6 +98,15 @@ public final class ModBlocks {
 					.sound(SoundType.METAL)
 					.requiresCorrectToolForDrops());
 
+	/** Wing: thin lifting plate (horizontal) or fin (vertical); aerodynamics in ShipDynamics (3i). */
+	public static final Block WING = register("wing", com.starwake.ship.block.WingBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.METAL)
+					.strength(3.0f, 6.0f)
+					.sound(SoundType.METAL)
+					.noOcclusion()
+					.requiresCorrectToolForDrops());
+
 	/** Fuel Tank: stores fuel for the ship's thrusters. */
 	public static final Block FUEL_TANK = register("fuel_tank", FuelTankBlock::new,
 			BlockBehaviour.Properties.of()

@@ -65,7 +65,7 @@ public final class SpaceHud {
 		for (SolarSystem.Entry body : SolarSystem.bodies(minecraft.level.registryAccess())) {
 			Vec3 rel = body.body().position().subtract(eye);
 			double distance = rel.length();
-			int[] screen = project(mvp, forward, rel, w, h);
+			int[] screen = HudProjection.project(mvp, forward, rel, w, h);
 			if (screen == null) continue;
 			boolean selected = body.key().identifier().toString().equals(target);
 			int color = selected ? QT : body.body().star() ? WARN : CYAN;
@@ -82,7 +82,7 @@ public final class SpaceHud {
 		if (quantumMode) {
 			// Nose reticle: put this on the target marker to align.
 			Vec3 nose = ship.worldDirection(ship.forward());
-			int[] n = project(mvp, forward, nose.scale(100), w, h);
+			int[] n = HudProjection.project(mvp, forward, nose.scale(100), w, h);
 			if (n != null) {
 				int c = (ship.quantumState() & ShipEntity.QT_ALIGNED) != 0 ? GOOD : TEXT;
 				graphics.fill(n[0] - 9, n[1], n[0] - 3, n[1] + 1, c);
@@ -94,12 +94,12 @@ public final class SpaceHud {
 		if (quantumMode || travelling) quantumPanel(graphics, font, ship, eye, w);
 	}
 
-	/** Quantum drive panel, under the cockpit panel (left column, like an MFD). */
+	/** Quantum drive panel (top-left MFD). */
 	private static void quantumPanel(GuiGraphicsExtractor graphics, Font font, ShipEntity ship, Vec3 eye, int w) {
 		int state = ship.quantumState();
-		int width = 150, x = 6, y = 122;
-		graphics.fill(x - 3, y - 3, x + width + 3, y + 43, BG);
-		graphics.fill(x - 3, y - 3, x + width + 3, y - 2, QT);
+		int width = 150, x = 8, y = 8; // top-left, an MFD next to the heading tape
+		graphics.fill(x - 4, y - 4, x + width + 4, y + 44, FlightHud.PANEL);
+		FlightHud.corners(graphics, x - 4, y - 4, width + 8, 48, QT);
 
 		SolarSystem.Entry target = null;
 		for (SolarSystem.Entry e : SolarSystem.bodies(ship.level().registryAccess())) {
@@ -154,17 +154,6 @@ public final class SpaceHud {
 			color = GOOD;
 		}
 		graphics.text(font, status, x, y + 33, color);
-	}
-
-	/** Screen position of a camera-relative direction, or null if it's behind the camera. */
-	private static int[] project(Matrix4f mvp, Vector3f forward, Vec3 rel, int w, int h) {
-		Vec3 dir = rel.normalize();
-		if (dir.x * forward.x + dir.y * forward.y + dir.z * forward.z <= 0.05) return null;
-		Vector3f ndc = mvp.transformProject(new Vector3f((float) dir.x * 10, (float) dir.y * 10, (float) dir.z * 10));
-		if (Math.abs(ndc.x) > 1.2f || Math.abs(ndc.y) > 1.2f) return null;
-		int x = Mth.floor((ndc.x * 0.5f + 0.5f) * w);
-		int y = Mth.floor((0.5f - ndc.y * 0.5f) * h);
-		return new int[] {x, y};
 	}
 
 	/** Four corner brackets around (x, y). */

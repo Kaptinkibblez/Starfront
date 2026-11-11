@@ -37,12 +37,34 @@ public final class ShipCommands {
 								.then(Commands.literal("assemble")
 										.then(Commands.argument("helm", BlockPosArgument.blockPos())
 												.executes(ShipCommands::assemble)))
+								.then(Commands.literal("blueprint")
+										.then(Commands.argument("id", net.minecraft.commands.arguments.IdentifierArgument.id())
+												.suggests((c, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggestResource(
+														com.starwake.ship.data.ShipBlueprints.all().keySet(), builder))
+												.then(Commands.argument("pos", BlockPosArgument.blockPos())
+														.executes(ShipCommands::blueprint))))
 								.then(Commands.literal("drift")
 										.then(Commands.argument("velocity", Vec3Argument.vec3(false))
 												.executes(ShipCommands::drift)))
 								.then(Commands.literal("spin")
 										.then(Commands.argument("rates", Vec3Argument.vec3(false))
 												.executes(ShipCommands::spin))))));
+	}
+
+	/** Places a blueprint ship (nose north, min corner at pos) and reports its Helm. */
+	private static int blueprint(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		var id = net.minecraft.commands.arguments.IdentifierArgument.getId(ctx, "id");
+		var blueprint = com.starwake.ship.data.ShipBlueprints.all().get(id);
+		if (blueprint == null) {
+			ctx.getSource().sendFailure(Component.literal("Unknown blueprint " + id));
+			return 0;
+		}
+		BlockPos pos = BlockPosArgument.getLoadedBlockPos(ctx, "pos");
+		BlockPos helm = com.starwake.ship.data.ShipBlueprints.place(ctx.getSource().getLevel(), blueprint, pos);
+		Component name = com.starwake.ship.data.ShipBlueprints.name(id, blueprint);
+		ctx.getSource().sendSuccess(() -> Component.translatable("commands.starwake.ship.blueprint", name,
+				helm == null ? "-" : helm.getX() + " " + helm.getY() + " " + helm.getZ()), true);
+		return 1;
 	}
 
 	/** Makes the nearest unpiloted ship spin (yaw pitch roll, degrees/second). 0 0 0 stops. */

@@ -24,7 +24,7 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 				key(ModBlocks.HULL_PLATING), key(ModBlocks.REGOLITH), key(ModBlocks.FERRITE_ORE));
 		builder(BlockTags.NEEDS_STONE_TOOL).add(key(ModBlocks.HULL_PLATING), key(ModBlocks.FERRITE_ORE));
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(
-				key(ModBlocks.HELM), key(ModBlocks.THRUSTER), key(ModBlocks.MAIN_ENGINE), key(ModBlocks.MANEUVERING_THRUSTER), key(ModBlocks.FUEL_TANK), key(ModBlocks.SEAT),
+				key(ModBlocks.HELM), key(ModBlocks.THRUSTER), key(ModBlocks.MAIN_ENGINE), key(ModBlocks.MANEUVERING_THRUSTER), key(ModBlocks.WING), key(ModBlocks.FUEL_TANK), key(ModBlocks.SEAT),
 				key(ModBlocks.POWER_PLANT), key(ModBlocks.COOLER), key(ModBlocks.SHIELD_GENERATOR), key(ModBlocks.QUANTUM_DRIVE));
 
 		// #starwake:ship_excluded (terrain that never counts as ship) is hand-written JSON in
@@ -36,7 +36,8 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		// treats our terrain as hollow and ores never generate. Every Starwake block is currently
 		// a full solid cube; non-solid blocks added later must opt out here.
 		var motion = builder(BlockTags.BLOCKS_MOTION_NO_LEAVES);
-		ModBlocks.all().forEach(block -> motion.add(key(block)));
+		// Wings are thin plates, not solid cubes, so they stay out.
+		ModBlocks.all().stream().filter(block -> block != ModBlocks.WING).forEach(block -> motion.add(key(block)));
 
 		// Vanilla category tags, so vanilla mechanics treat our blocks like their counterparts.
 		builder(BlockTags.SAND).add(key(ModBlocks.RUST_SAND));     // e.g. cactus/dead bush placement

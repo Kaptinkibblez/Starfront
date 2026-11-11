@@ -30,13 +30,15 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * @param quantumMinDistance shortest jump the drive can calibrate for (blocks)
  * @param quantumStandoff  how far outside the target's atmosphere a jump drops out (blocks)
  * @param quantumAlignDegrees how closely the nose must point at the target to engage
+ * @param wingLift       lift per horizontal wing block per (forward airspeed in blocks/tick)², at air density 1
+ * @param wingDrag       flat-plate force per wing block per (airspeed x normal airspeed), at air density 1
  */
 public record ShipPhysics(double thrustToAccel, double gravityToAccel, double dragAtmosphere,
 		double dragSpace, double maxSpeed, double maxSpeedSpace, double turnRateDegrees, double boostMultiplier,
 		double quantumSpeed, double quantumRamp, double quantumFuelPerMm, double quantumMinDistance,
-		double quantumStandoff, double quantumAlignDegrees) {
-	public static final ShipPhysics DEFAULT = new ShipPhysics(0.05, 0.05, 0.97, 0.998, 2.0, 5.0, 60.0, 1.6,
-			1500, 100, 50, 20_000, 600, 3.0);
+		double quantumStandoff, double quantumAlignDegrees, double wingLift, double wingDrag) {
+	public static final ShipPhysics DEFAULT = new ShipPhysics(0.05, 0.05, 0.985, 0.998, 3.0, 5.0, 60.0, 1.6,
+			1500, 100, 50, 20_000, 600, 3.0, 2.6, 10.0);
 
 	public static final Codec<ShipPhysics> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.DOUBLE.optionalFieldOf("thrust_to_accel", DEFAULT.thrustToAccel).forGetter(ShipPhysics::thrustToAccel),
@@ -52,7 +54,9 @@ public record ShipPhysics(double thrustToAccel, double gravityToAccel, double dr
 			Codec.doubleRange(0, 1.0e6).optionalFieldOf("quantum_fuel_per_mm", DEFAULT.quantumFuelPerMm).forGetter(ShipPhysics::quantumFuelPerMm),
 			Codec.doubleRange(0, 1.0e7).optionalFieldOf("quantum_min_distance", DEFAULT.quantumMinDistance).forGetter(ShipPhysics::quantumMinDistance),
 			Codec.doubleRange(0, 1.0e6).optionalFieldOf("quantum_standoff", DEFAULT.quantumStandoff).forGetter(ShipPhysics::quantumStandoff),
-			Codec.doubleRange(0.1, 45).optionalFieldOf("quantum_align", DEFAULT.quantumAlignDegrees).forGetter(ShipPhysics::quantumAlignDegrees)
+			Codec.doubleRange(0.1, 45).optionalFieldOf("quantum_align", DEFAULT.quantumAlignDegrees).forGetter(ShipPhysics::quantumAlignDegrees),
+			Codec.doubleRange(0, 1000).optionalFieldOf("wing_lift", DEFAULT.wingLift).forGetter(ShipPhysics::wingLift),
+			Codec.doubleRange(0, 1000).optionalFieldOf("wing_drag", DEFAULT.wingDrag).forGetter(ShipPhysics::wingDrag)
 	).apply(i, ShipPhysics::new));
 
 	private static ShipPhysics current = DEFAULT;

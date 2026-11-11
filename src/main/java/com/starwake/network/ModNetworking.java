@@ -41,8 +41,12 @@ public final class ModNetworking {
 		});
 		ServerPlayNetworking.registerGlobalReceiver(ShipQuantumPayload.TYPE, (payload, context) -> {
 			if (context.player().getVehicle() instanceof com.starwake.ship.ShipEntity ship && ship.pilot() == context.player()) {
-				if (payload.engage()) ship.engageQuantum();
-				else ship.toggleQuantumMode();
+				switch (payload.action()) {
+					case ShipQuantumPayload.ACTION_QUANTUM_ENGAGE -> ship.engageQuantum();
+					case ShipQuantumPayload.ACTION_QUANTUM_TOGGLE -> ship.toggleQuantumMode();
+					case ShipQuantumPayload.ACTION_DECOUPLE -> ship.toggleDecoupled();
+					default -> { }
+				}
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(ShipInteractPayload.TYPE,

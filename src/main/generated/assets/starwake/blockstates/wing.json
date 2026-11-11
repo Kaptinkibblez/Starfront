@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "starwake:block/wing",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "starwake:block/wing"
+    },
+    "axis=z": {
+      "model": "starwake:block/wing",
+      "x": 90
+    }
+  }
+}

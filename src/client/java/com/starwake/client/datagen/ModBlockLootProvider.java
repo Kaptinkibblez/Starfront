@@ -21,6 +21,7 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		dropSelf(ModBlocks.HELM);
 		dropSelf(ModBlocks.THRUSTER);
 		dropSelf(ModBlocks.MAIN_ENGINE);
+		dropSelf(ModBlocks.WING);
 		dropSelf(ModBlocks.MANEUVERING_THRUSTER);
 		dropSelf(ModBlocks.FUEL_TANK);
 		dropSelf(ModBlocks.SEAT);
