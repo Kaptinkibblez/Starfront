@@ -1,0 +1,44 @@
+{
+ "name": {
+  "translate": "alloy.starwake.wc_co",
+  "fallback": "Tungsten Carbide (WC-Co)"
+ },
+ "family": "refractory",
+ "base": "W",
+ "ranges": {
+  "C": [
+   5.4,
+   5.8
+  ],
+  "Co": [
+   6,
+   10
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#6c6e75",
+ "tier": 3,
+ "order": 50,
+ "nominal": {
+  "C": 5.6,
+  "Co": 8.0
+ },
+ "properties": {
+  "density": 14.9,
+  "yield_strength": 1500,
+  "tensile_strength": 1600,
+  "elongation": 0.3,
+  "modulus": 600,
+  "hardness": 1500,
+  "solidus": 1320,
+  "service_temp": 800,
+  "conductivity": 8,
+  "corrosion": 6
+ },
+ "condition": "sintered",
+ "note": {
+  "translate": "alloy.starwake.wc_co.note",
+  "fallback": "Cemented carbide: the hardest tooling material."
+ }
+}

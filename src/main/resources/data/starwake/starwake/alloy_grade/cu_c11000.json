@@ -1,0 +1,35 @@
+{
+ "name": {
+  "translate": "alloy.starwake.cu_c11000",
+  "fallback": "C11000 Copper (ETP)"
+ },
+ "family": "copper",
+ "base": "Cu",
+ "ranges": {
+  "O": [
+   0,
+   0.04
+  ]
+ },
+ "max_other": 0.05,
+ "exact": true,
+ "color": "#c9774f",
+ "tier": 1,
+ "order": 41,
+ "nominal": {
+  "O": 0.02
+ },
+ "properties": {
+  "density": 8.94,
+  "yield_strength": 69,
+  "tensile_strength": 220,
+  "elongation": 50,
+  "modulus": 115,
+  "hardness": 50,
+  "solidus": 1065,
+  "service_temp": 200,
+  "conductivity": 101,
+  "corrosion": 6
+ },
+ "condition": "annealed"
+}

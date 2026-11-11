@@ -1,0 +1,50 @@
+{
+ "name": {
+  "translate": "alloy.starwake.aisi_1045",
+  "fallback": "AISI 1045 Medium-Carbon Steel"
+ },
+ "family": "carbon_steel",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   0.43,
+   0.5
+  ],
+  "Mn": [
+   0.6,
+   0.9
+  ],
+  "P": [
+   0,
+   0.04
+  ],
+  "S": [
+   0,
+   0.05
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#a3a4a6",
+ "tier": 1,
+ "order": 5,
+ "nominal": {
+  "C": 0.465,
+  "Mn": 0.75,
+  "P": 0.02,
+  "S": 0.025
+ },
+ "properties": {
+  "density": 7.85,
+  "yield_strength": 450,
+  "tensile_strength": 655,
+  "elongation": 16,
+  "modulus": 205,
+  "hardness": 190,
+  "solidus": 1460,
+  "service_temp": 400,
+  "conductivity": 10,
+  "corrosion": 2
+ },
+ "condition": "normalized"
+}

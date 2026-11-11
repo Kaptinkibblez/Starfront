@@ -1,0 +1,67 @@
+{
+ "element": "Mg",
+ "pure": {
+  "density": 1.74,
+  "yield_strength": 21,
+  "tensile_strength": 90,
+  "elongation": 5,
+  "modulus": 45,
+  "hardness": 30,
+  "solidus": 650,
+  "service_temp": 120,
+  "conductivity": 38,
+  "corrosion": 2
+ },
+ "solutes": {
+  "Al": {
+   "strength": 100,
+   "cap": 10,
+   "ductility": -0.05,
+   "conductivity": 0.6,
+   "corrosion": 0.05,
+   "service": 2,
+   "solidus": 8
+  },
+  "Zn": {
+   "strength": 70,
+   "cap": 6,
+   "ductility": -0.03,
+   "conductivity": 0.3,
+   "corrosion": 0,
+   "service": 0,
+   "solidus": 7
+  },
+  "Mn": {
+   "strength": 40,
+   "cap": 1.5,
+   "ductility": 0.02,
+   "conductivity": 0.3,
+   "corrosion": 0.3,
+   "service": 0.0
+  },
+  "Zr": {
+   "strength": 120,
+   "cap": 0.7,
+   "ductility": -0.1,
+   "conductivity": 0.4,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Y": {
+   "strength": 80,
+   "cap": 6,
+   "ductility": 0.0,
+   "conductivity": 0.5,
+   "corrosion": 0.05,
+   "service": 15
+  },
+  "Nd": {
+   "strength": 90,
+   "cap": 3,
+   "ductility": 0.0,
+   "conductivity": 0.5,
+   "corrosion": 0,
+   "service": 15
+  }
+ }
+}

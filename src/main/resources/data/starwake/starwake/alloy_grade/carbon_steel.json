@@ -1,0 +1,19 @@
+{
+ "name": {
+  "translate": "alloy.starwake.carbon_steel",
+  "fallback": "Carbon Steel"
+ },
+ "family": "carbon_steel",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   0.02,
+   2.1
+  ]
+ },
+ "max_other": 3.0,
+ "exact": false,
+ "color": "#a8a9ab",
+ "tier": 0,
+ "order": 20
+}

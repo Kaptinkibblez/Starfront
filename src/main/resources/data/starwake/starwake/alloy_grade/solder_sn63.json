@@ -1,0 +1,35 @@
+{
+ "name": {
+  "translate": "alloy.starwake.solder_sn63",
+  "fallback": "Sn63/Pb37 Solder"
+ },
+ "family": "solder",
+ "base": "Sn",
+ "ranges": {
+  "Pb": [
+   36.5,
+   37.5
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#b9bcbf",
+ "tier": 1,
+ "order": 55,
+ "nominal": {
+  "Pb": 37.0
+ },
+ "properties": {
+  "density": 8.4,
+  "yield_strength": 27,
+  "tensile_strength": 52,
+  "elongation": 35,
+  "modulus": 32,
+  "hardness": 15,
+  "solidus": 183,
+  "service_temp": 100,
+  "conductivity": 11.5,
+  "corrosion": 6
+ },
+ "condition": "cast"
+}

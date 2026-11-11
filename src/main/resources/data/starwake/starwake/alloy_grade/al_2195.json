@@ -1,0 +1,59 @@
+{
+ "name": {
+  "translate": "alloy.starwake.al_2195",
+  "fallback": "2195 Aluminium-Lithium"
+ },
+ "family": "aluminium",
+ "base": "Al",
+ "ranges": {
+  "Cu": [
+   3.7,
+   4.3
+  ],
+  "Li": [
+   0.8,
+   1.2
+  ],
+  "Mg": [
+   0.25,
+   0.8
+  ],
+  "Ag": [
+   0.25,
+   0.6
+  ],
+  "Zr": [
+   0.08,
+   0.16
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#c6cad0",
+ "tier": 3,
+ "order": 26,
+ "nominal": {
+  "Cu": 4.0,
+  "Li": 1.0,
+  "Mg": 0.525,
+  "Ag": 0.425,
+  "Zr": 0.12
+ },
+ "properties": {
+  "density": 2.71,
+  "yield_strength": 560,
+  "tensile_strength": 595,
+  "elongation": 9,
+  "modulus": 76,
+  "hardness": 170,
+  "solidus": 535,
+  "service_temp": 120,
+  "conductivity": 25,
+  "corrosion": 5
+ },
+ "condition": "T8",
+ "note": {
+  "translate": "alloy.starwake.al_2195.note",
+  "fallback": "Light cryogenic tankage (the Shuttle's super-lightweight tank)."
+ }
+}

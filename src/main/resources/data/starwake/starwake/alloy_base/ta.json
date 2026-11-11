@@ -1,0 +1,33 @@
+{
+ "element": "Ta",
+ "pure": {
+  "density": 16.69,
+  "yield_strength": 165,
+  "tensile_strength": 285,
+  "elongation": 40,
+  "modulus": 186,
+  "hardness": 110,
+  "solidus": 3017,
+  "service_temp": 1500,
+  "conductivity": 13,
+  "corrosion": 10
+ },
+ "solutes": {
+  "W": {
+   "strength": 80,
+   "cap": 10,
+   "ductility": 0.02,
+   "conductivity": 0.4,
+   "corrosion": 0,
+   "service": 20
+  },
+  "Nb": {
+   "strength": 30,
+   "cap": 40,
+   "ductility": 0.0,
+   "conductivity": 0.2,
+   "corrosion": -0.02,
+   "service": 0.0
+  }
+ }
+}

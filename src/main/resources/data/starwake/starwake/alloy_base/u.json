@@ -1,0 +1,33 @@
+{
+ "element": "U",
+ "pure": {
+  "density": 19.1,
+  "yield_strength": 200,
+  "tensile_strength": 400,
+  "elongation": 4,
+  "modulus": 208,
+  "hardness": 200,
+  "solidus": 1132,
+  "service_temp": 400,
+  "conductivity": 3,
+  "corrosion": 1
+ },
+ "solutes": {
+  "Mo": {
+   "strength": 150,
+   "cap": 10,
+   "ductility": 0.05,
+   "conductivity": 0.3,
+   "corrosion": 0.2,
+   "service": 0.0
+  },
+  "Zr": {
+   "strength": 80,
+   "cap": 10,
+   "ductility": 0.05,
+   "conductivity": 0.3,
+   "corrosion": 0.2,
+   "service": 0.0
+  }
+ }
+}

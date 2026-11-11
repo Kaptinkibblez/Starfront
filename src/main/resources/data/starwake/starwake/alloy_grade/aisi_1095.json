@@ -1,0 +1,50 @@
+{
+ "name": {
+  "translate": "alloy.starwake.aisi_1095",
+  "fallback": "AISI 1095 High-Carbon Steel"
+ },
+ "family": "carbon_steel",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   0.9,
+   1.03
+  ],
+  "Mn": [
+   0.3,
+   0.5
+  ],
+  "P": [
+   0,
+   0.04
+  ],
+  "S": [
+   0,
+   0.05
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#9a9b9e",
+ "tier": 2,
+ "order": 6,
+ "nominal": {
+  "C": 0.965,
+  "Mn": 0.4,
+  "P": 0.02,
+  "S": 0.025
+ },
+ "properties": {
+  "density": 7.85,
+  "yield_strength": 525,
+  "tensile_strength": 1015,
+  "elongation": 9.5,
+  "modulus": 205,
+  "hardness": 293,
+  "solidus": 1430,
+  "service_temp": 400,
+  "conductivity": 9,
+  "corrosion": 2
+ },
+ "condition": "normalized"
+}

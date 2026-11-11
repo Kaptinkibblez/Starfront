@@ -1,0 +1,50 @@
+{
+ "name": {
+  "translate": "alloy.starwake.aisi_1020",
+  "fallback": "AISI 1020 Mild Steel"
+ },
+ "family": "carbon_steel",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   0.18,
+   0.23
+  ],
+  "Mn": [
+   0.3,
+   0.6
+  ],
+  "P": [
+   0,
+   0.04
+  ],
+  "S": [
+   0,
+   0.05
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#a9a9aa",
+ "tier": 1,
+ "order": 4,
+ "nominal": {
+  "C": 0.205,
+  "Mn": 0.45,
+  "P": 0.02,
+  "S": 0.025
+ },
+ "properties": {
+  "density": 7.87,
+  "yield_strength": 210,
+  "tensile_strength": 380,
+  "elongation": 25,
+  "modulus": 205,
+  "hardness": 111,
+  "solidus": 1480,
+  "service_temp": 400,
+  "conductivity": 11,
+  "corrosion": 2
+ },
+ "condition": "hot rolled"
+}

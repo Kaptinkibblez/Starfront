@@ -1,0 +1,58 @@
+{
+ "element": "Nb",
+ "pure": {
+  "density": 8.57,
+  "yield_strength": 105,
+  "tensile_strength": 275,
+  "elongation": 30,
+  "modulus": 105,
+  "hardness": 80,
+  "solidus": 2477,
+  "service_temp": 1100,
+  "conductivity": 13,
+  "corrosion": 6
+ },
+ "solutes": {
+  "Hf": {
+   "strength": 50,
+   "cap": 12,
+   "ductility": 0.01,
+   "conductivity": 0.3,
+   "corrosion": 0,
+   "service": 15,
+   "solidus": 5
+  },
+  "Ti": {
+   "strength": 80,
+   "cap": 2,
+   "ductility": 0.02,
+   "conductivity": 0.3,
+   "corrosion": 0,
+   "service": 10
+  },
+  "Zr": {
+   "strength": 120,
+   "cap": 1,
+   "ductility": 0.02,
+   "conductivity": 0.3,
+   "corrosion": 0,
+   "service": 20
+  },
+  "W": {
+   "strength": 70,
+   "cap": 10,
+   "ductility": 0.02,
+   "conductivity": 0.3,
+   "corrosion": 0,
+   "service": 15
+  },
+  "Ta": {
+   "strength": 30,
+   "cap": 10,
+   "ductility": 0.0,
+   "conductivity": 0.2,
+   "corrosion": 0.1,
+   "service": 0.0
+  }
+ }
+}

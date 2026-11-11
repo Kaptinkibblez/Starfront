@@ -1,0 +1,75 @@
+{
+ "name": {
+  "translate": "alloy.starwake.waspaloy",
+  "fallback": "Waspaloy"
+ },
+ "family": "superalloy",
+ "base": "Ni",
+ "ranges": {
+  "Cr": [
+   18,
+   21
+  ],
+  "Co": [
+   12,
+   15
+  ],
+  "Mo": [
+   3.5,
+   5
+  ],
+  "Ti": [
+   2.75,
+   3.25
+  ],
+  "Al": [
+   1.2,
+   1.6
+  ],
+  "Fe": [
+   0,
+   2
+  ],
+  "C": [
+   0.02,
+   0.1
+  ],
+  "B": [
+   0.003,
+   0.01
+  ],
+  "Zr": [
+   0.02,
+   0.08
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#aca9a3",
+ "tier": 3,
+ "order": 36,
+ "nominal": {
+  "Cr": 19.5,
+  "Co": 13.5,
+  "Mo": 4.25,
+  "Ti": 3.0,
+  "Al": 1.4,
+  "Fe": 1.0,
+  "C": 0.06,
+  "B": 0.0065,
+  "Zr": 0.05
+ },
+ "properties": {
+  "density": 8.2,
+  "yield_strength": 795,
+  "tensile_strength": 1275,
+  "elongation": 25,
+  "modulus": 213,
+  "hardness": 380,
+  "solidus": 1330,
+  "service_temp": 870,
+  "conductivity": 1.2,
+  "corrosion": 9
+ },
+ "condition": "aged"
+}

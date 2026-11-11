@@ -1,0 +1,44 @@
+{
+ "name": {
+  "translate": "alloy.starwake.becu_c17200",
+  "fallback": "C17200 Beryllium Copper"
+ },
+ "family": "copper",
+ "base": "Cu",
+ "ranges": {
+  "Be": [
+   1.8,
+   2.0
+  ],
+  "Co": [
+   0.2,
+   0.6
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#c98f5d",
+ "tier": 3,
+ "order": 44,
+ "nominal": {
+  "Be": 1.9,
+  "Co": 0.4
+ },
+ "properties": {
+  "density": 8.25,
+  "yield_strength": 1100,
+  "tensile_strength": 1300,
+  "elongation": 4,
+  "modulus": 128,
+  "hardness": 380,
+  "solidus": 865,
+  "service_temp": 300,
+  "conductivity": 22,
+  "corrosion": 7
+ },
+ "condition": "aged",
+ "note": {
+  "translate": "alloy.starwake.becu_c17200.note",
+  "fallback": "Spark-free, strong and conductive. Beryllium dust is toxic."
+ }
+}

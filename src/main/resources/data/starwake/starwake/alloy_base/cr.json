@@ -1,0 +1,16 @@
+{
+ "element": "Cr",
+ "pure": {
+  "density": 7.19,
+  "yield_strength": 280,
+  "tensile_strength": 410,
+  "elongation": 1,
+  "modulus": 279,
+  "hardness": 200,
+  "solidus": 1907,
+  "service_temp": 900,
+  "conductivity": 13,
+  "corrosion": 9
+ },
+ "solutes": {}
+}

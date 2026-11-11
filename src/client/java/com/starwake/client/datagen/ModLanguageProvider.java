@@ -168,6 +168,29 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("wristcom.contracts.for", "for the %s");
 		builder.add("wristcom.contracts.abandon", "Abandon");
 		builder.add("entity.starwake.hub_npc", "Hub Crew");
+		// Metallurgy (M8a).
+		builder.add("itemGroup.starwake.materials", "Starwake: Materials");
+		for (var form : com.starwake.metal.MetalForm.values()) {
+			String name = form.id.substring(0, 1).toUpperCase() + form.id.substring(1);
+			builder.add("item.starwake.metal_" + form.id, "Metal " + name);
+			builder.add("item.starwake.metal_" + form.id + ".of", "%s " + name);
+		}
+		builder.add("metal.starwake.unknown", "Unknown Metal");
+		builder.add("metal.starwake.off_spec", "Off-spec %s");
+		builder.add("metal.starwake.alloy", "%s Alloy");
+		builder.add("metal.starwake.tooltip.grade", "Certified grade · %s");
+		builder.add("metal.starwake.tooltip.grade_named", "Certified %s · %s");
+		builder.add("metal.starwake.tooltip.off_spec", "Off-spec %s:");
+		builder.add("metal.starwake.tooltip.deviation", "  %s %s%% (spec %s-%s%%)");
+		builder.add("metal.starwake.tooltip.other", "other elements");
+		builder.add("metal.starwake.tooltip.purity", "Purity %s%%");
+		builder.add("metal.starwake.tooltip.estimated", "No grade: estimated properties");
+		builder.add("metal.starwake.tooltip.strength", "%s g/cm³ · Yield %s · UTS %s MPa");
+		builder.add("metal.starwake.tooltip.heat", "Service ≤ %s °C · Solidus %s °C");
+		builder.add("metal.starwake.tooltip.other_props", "Conductivity %s%% IACS · Corrosion %s/10");
+		builder.add("metal.starwake.tooltip.detail", "Elongation %s%% · E %s GPa · %s HV · %s MPa per g/cm³");
+		builder.add("metal.starwake.tooltip.brittle", "Brittle: cracks under shock");
+		builder.add("metal.starwake.tooltip.shift", "Hold Shift for more");
 		builder.add("entity.starwake.hub_npc.guard", "Guard");
 		builder.add("entity.starwake.hub_npc.crew", "Crew");
 		builder.add(com.starwake.registry.ModHubBlocks.STATION_PANEL, "Station Panel");

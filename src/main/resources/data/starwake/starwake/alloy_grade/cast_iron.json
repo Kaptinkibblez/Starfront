@@ -1,0 +1,19 @@
+{
+ "name": {
+  "translate": "alloy.starwake.cast_iron",
+  "fallback": "Cast Iron"
+ },
+ "family": "cast_iron",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   2.1,
+   6.7
+  ]
+ },
+ "max_other": 100.0,
+ "exact": false,
+ "color": "#727070",
+ "tier": 0,
+ "order": 17
+}

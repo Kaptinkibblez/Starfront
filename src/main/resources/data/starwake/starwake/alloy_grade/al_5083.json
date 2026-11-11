@@ -1,0 +1,55 @@
+{
+ "name": {
+  "translate": "alloy.starwake.al_5083",
+  "fallback": "5083 Marine Aluminium"
+ },
+ "family": "aluminium",
+ "base": "Al",
+ "ranges": {
+  "Mg": [
+   4.0,
+   4.9
+  ],
+  "Mn": [
+   0.4,
+   1.0
+  ],
+  "Cr": [
+   0.05,
+   0.25
+  ],
+  "Fe": [
+   0,
+   0.4
+  ],
+  "Si": [
+   0,
+   0.4
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#d2d5d8",
+ "tier": 1,
+ "order": 25,
+ "nominal": {
+  "Mg": 4.45,
+  "Mn": 0.7,
+  "Cr": 0.15,
+  "Fe": 0.2,
+  "Si": 0.2
+ },
+ "properties": {
+  "density": 2.66,
+  "yield_strength": 215,
+  "tensile_strength": 317,
+  "elongation": 16,
+  "modulus": 71,
+  "hardness": 96,
+  "solidus": 574,
+  "service_temp": 150,
+  "conductivity": 29,
+  "corrosion": 9
+ },
+ "condition": "H116"
+}

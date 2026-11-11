@@ -1,0 +1,55 @@
+{
+ "name": {
+  "translate": "alloy.starwake.aisi_4140",
+  "fallback": "AISI 4140 Chromoly Steel"
+ },
+ "family": "alloy_steel",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   0.38,
+   0.43
+  ],
+  "Mn": [
+   0.75,
+   1.0
+  ],
+  "Cr": [
+   0.8,
+   1.1
+  ],
+  "Mo": [
+   0.15,
+   0.25
+  ],
+  "Si": [
+   0.15,
+   0.35
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#9ea2a8",
+ "tier": 2,
+ "order": 7,
+ "nominal": {
+  "C": 0.405,
+  "Mn": 0.875,
+  "Cr": 0.95,
+  "Mo": 0.2,
+  "Si": 0.25
+ },
+ "properties": {
+  "density": 7.85,
+  "yield_strength": 655,
+  "tensile_strength": 1020,
+  "elongation": 17.7,
+  "modulus": 205,
+  "hardness": 302,
+  "solidus": 1416,
+  "service_temp": 480,
+  "conductivity": 8,
+  "corrosion": 3
+ },
+ "condition": "normalized"
+}

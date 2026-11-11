@@ -1,0 +1,33 @@
+{
+ "element": "V",
+ "pure": {
+  "density": 6.0,
+  "yield_strength": 125,
+  "tensile_strength": 220,
+  "elongation": 20,
+  "modulus": 128,
+  "hardness": 70,
+  "solidus": 1910,
+  "service_temp": 500,
+  "conductivity": 7,
+  "corrosion": 6
+ },
+ "solutes": {
+  "Ti": {
+   "strength": 80,
+   "cap": 10,
+   "ductility": 0.02,
+   "conductivity": 0.3,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Cr": {
+   "strength": 70,
+   "cap": 10,
+   "ductility": 0.02,
+   "conductivity": 0.3,
+   "corrosion": 0.0,
+   "service": 0.0
+  }
+ }
+}

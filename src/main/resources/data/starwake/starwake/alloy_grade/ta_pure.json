@@ -1,0 +1,28 @@
+{
+ "name": {
+  "translate": "alloy.starwake.ta_pure",
+  "fallback": "Tantalum"
+ },
+ "family": "refractory",
+ "base": "Ta",
+ "ranges": {},
+ "max_other": 0.1,
+ "exact": true,
+ "color": "#8f8a93",
+ "tier": 3,
+ "order": 53,
+ "nominal": {},
+ "properties": {
+  "density": 16.65,
+  "yield_strength": 165,
+  "tensile_strength": 285,
+  "elongation": 40,
+  "modulus": 186,
+  "hardness": 110,
+  "solidus": 3017,
+  "service_temp": 1500,
+  "conductivity": 13,
+  "corrosion": 10
+ },
+ "condition": "annealed"
+}

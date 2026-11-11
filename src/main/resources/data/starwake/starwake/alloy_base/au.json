@@ -1,0 +1,50 @@
+{
+ "element": "Au",
+ "pure": {
+  "density": 19.3,
+  "yield_strength": 30,
+  "tensile_strength": 120,
+  "elongation": 45,
+  "modulus": 79,
+  "hardness": 25,
+  "solidus": 1064,
+  "service_temp": 400,
+  "conductivity": 73,
+  "corrosion": 10
+ },
+ "solutes": {
+  "Ag": {
+   "strength": 15,
+   "cap": 50,
+   "ductility": 0.0,
+   "conductivity": 0.1,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Cu": {
+   "strength": 30,
+   "cap": 50,
+   "ductility": 0.0,
+   "conductivity": 0.15,
+   "corrosion": -0.03,
+   "service": 0,
+   "solidus": 6
+  },
+  "Pd": {
+   "strength": 20,
+   "cap": 30,
+   "ductility": 0.0,
+   "conductivity": 0.2,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Ni": {
+   "strength": 40,
+   "cap": 15,
+   "ductility": 0.0,
+   "conductivity": 0.3,
+   "corrosion": 0.0,
+   "service": 0.0
+  }
+ }
+}

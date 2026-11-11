@@ -1,0 +1,14 @@
+{
+ "name": {
+  "translate": "alloy.starwake.titanium_alloy",
+  "fallback": "Titanium Alloy"
+ },
+ "family": "titanium",
+ "base": "Ti",
+ "ranges": {},
+ "max_other": 100.0,
+ "exact": false,
+ "color": "#a5a39f",
+ "tier": 0,
+ "order": 31
+}

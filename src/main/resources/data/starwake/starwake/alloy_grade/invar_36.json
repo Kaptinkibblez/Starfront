@@ -1,0 +1,54 @@
+{
+ "name": {
+  "translate": "alloy.starwake.invar_36",
+  "fallback": "Invar 36"
+ },
+ "family": "special",
+ "base": "Fe",
+ "ranges": {
+  "Ni": [
+   35,
+   37
+  ],
+  "Mn": [
+   0,
+   0.5
+  ],
+  "C": [
+   0,
+   0.1
+  ],
+  "Si": [
+   0,
+   0.35
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#b5b6b0",
+ "tier": 3,
+ "order": 16,
+ "nominal": {
+  "Ni": 36.0,
+  "Mn": 0.25,
+  "C": 0.05,
+  "Si": 0.175
+ },
+ "properties": {
+  "density": 8.05,
+  "yield_strength": 276,
+  "tensile_strength": 490,
+  "elongation": 42,
+  "modulus": 141,
+  "hardness": 160,
+  "solidus": 1427,
+  "service_temp": 300,
+  "conductivity": 2,
+  "corrosion": 5
+ },
+ "condition": "annealed",
+ "note": {
+  "translate": "alloy.starwake.invar_36.note",
+  "fallback": "Almost no thermal expansion: precision optics and sensors."
+ }
+}

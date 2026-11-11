@@ -1,0 +1,43 @@
+{
+ "element": "Pb",
+ "pure": {
+  "density": 11.34,
+  "yield_strength": 5,
+  "tensile_strength": 18,
+  "elongation": 50,
+  "modulus": 16,
+  "hardness": 5,
+  "solidus": 327,
+  "service_temp": 100,
+  "conductivity": 8,
+  "corrosion": 8
+ },
+ "solutes": {
+  "Sb": {
+   "strength": 12,
+   "cap": 12,
+   "ductility": 0.05,
+   "conductivity": 0.2,
+   "corrosion": 0,
+   "service": 0,
+   "solidus": 10
+  },
+  "Sn": {
+   "strength": 4,
+   "cap": 60,
+   "ductility": 0.0,
+   "conductivity": 0.05,
+   "corrosion": 0,
+   "service": 0,
+   "solidus": 2
+  },
+  "Ca": {
+   "strength": 40,
+   "cap": 0.1,
+   "ductility": 0.1,
+   "conductivity": 0.2,
+   "corrosion": 0.0,
+   "service": 0.0
+  }
+ }
+}

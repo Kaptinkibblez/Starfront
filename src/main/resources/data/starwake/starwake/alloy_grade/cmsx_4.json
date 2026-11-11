@@ -1,0 +1,79 @@
+{
+ "name": {
+  "translate": "alloy.starwake.cmsx_4",
+  "fallback": "CMSX-4 Single-Crystal Superalloy"
+ },
+ "family": "superalloy",
+ "base": "Ni",
+ "ranges": {
+  "Cr": [
+   6.2,
+   6.8
+  ],
+  "Co": [
+   9.3,
+   10
+  ],
+  "Mo": [
+   0.5,
+   0.7
+  ],
+  "W": [
+   6.2,
+   6.6
+  ],
+  "Ta": [
+   6.3,
+   6.7
+  ],
+  "Al": [
+   5.45,
+   5.75
+  ],
+  "Ti": [
+   0.9,
+   1.1
+  ],
+  "Re": [
+   2.8,
+   3.2
+  ],
+  "Hf": [
+   0.07,
+   0.12
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#a7a39b",
+ "tier": 4,
+ "order": 37,
+ "nominal": {
+  "Cr": 6.5,
+  "Co": 9.65,
+  "Mo": 0.6,
+  "W": 6.4,
+  "Ta": 6.5,
+  "Al": 5.6,
+  "Ti": 1.0,
+  "Re": 3.0,
+  "Hf": 0.095
+ },
+ "properties": {
+  "density": 8.7,
+  "yield_strength": 950,
+  "tensile_strength": 1100,
+  "elongation": 10,
+  "modulus": 130,
+  "hardness": 430,
+  "solidus": 1320,
+  "service_temp": 1150,
+  "conductivity": 1.0,
+  "corrosion": 8
+ },
+ "condition": "single crystal",
+ "note": {
+  "translate": "alloy.starwake.cmsx_4.note",
+  "fallback": "Turbine-blade alloy: needs rhenium and tantalum."
+ }
+}

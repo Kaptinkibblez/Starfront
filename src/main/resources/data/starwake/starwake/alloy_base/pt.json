@@ -1,0 +1,43 @@
+{
+ "element": "Pt",
+ "pure": {
+  "density": 21.45,
+  "yield_strength": 50,
+  "tensile_strength": 145,
+  "elongation": 40,
+  "modulus": 168,
+  "hardness": 40,
+  "solidus": 1768,
+  "service_temp": 1000,
+  "conductivity": 16,
+  "corrosion": 10
+ },
+ "solutes": {
+  "Ir": {
+   "strength": 60,
+   "cap": 30,
+   "ductility": 0.01,
+   "conductivity": 0.4,
+   "corrosion": 0,
+   "service": 15,
+   "solidus": 0
+  },
+  "Rh": {
+   "strength": 50,
+   "cap": 40,
+   "ductility": 0.01,
+   "conductivity": 0.4,
+   "corrosion": 0,
+   "service": 15,
+   "solidus": -5
+  },
+  "Ru": {
+   "strength": 80,
+   "cap": 10,
+   "ductility": 0.02,
+   "conductivity": 0.4,
+   "corrosion": 0.0,
+   "service": 0.0
+  }
+ }
+}

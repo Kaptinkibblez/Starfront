@@ -1,0 +1,59 @@
+{
+ "name": {
+  "translate": "alloy.starwake.nb_c103",
+  "fallback": "C-103 Niobium"
+ },
+ "family": "refractory",
+ "base": "Nb",
+ "ranges": {
+  "Hf": [
+   9,
+   11
+  ],
+  "Ti": [
+   0.7,
+   1.3
+  ],
+  "Zr": [
+   0,
+   0.7
+  ],
+  "W": [
+   0,
+   0.5
+  ],
+  "Ta": [
+   0,
+   0.5
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#9c9ba6",
+ "tier": 3,
+ "order": 52,
+ "nominal": {
+  "Hf": 10.0,
+  "Ti": 1.0,
+  "Zr": 0.35,
+  "W": 0.25,
+  "Ta": 0.25
+ },
+ "properties": {
+  "density": 8.85,
+  "yield_strength": 296,
+  "tensile_strength": 420,
+  "elongation": 26,
+  "modulus": 90,
+  "hardness": 140,
+  "solidus": 2350,
+  "service_temp": 1370,
+  "conductivity": 7,
+  "corrosion": 5
+ },
+ "condition": "recrystallized",
+ "note": {
+  "translate": "alloy.starwake.nb_c103.note",
+  "fallback": "Rocket nozzle extensions (Apollo service module)."
+ }
+}

@@ -1,0 +1,14 @@
+{
+ "name": {
+  "translate": "alloy.starwake.nickel_alloy",
+  "fallback": "Nickel Alloy"
+ },
+ "family": "nickel",
+ "base": "Ni",
+ "ranges": {},
+ "max_other": 100.0,
+ "exact": false,
+ "color": "#b6b2aa",
+ "tier": 0,
+ "order": 38
+}

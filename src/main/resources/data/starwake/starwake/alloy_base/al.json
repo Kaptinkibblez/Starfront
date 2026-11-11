@@ -1,0 +1,109 @@
+{
+ "element": "Al",
+ "pure": {
+  "density": 2.7,
+  "yield_strength": 20,
+  "tensile_strength": 70,
+  "elongation": 50,
+  "modulus": 69,
+  "hardness": 20,
+  "solidus": 660,
+  "service_temp": 150,
+  "conductivity": 64.9,
+  "corrosion": 7
+ },
+ "solutes": {
+  "Cu": {
+   "strength": 110,
+   "cap": 6,
+   "ductility": 0.08,
+   "conductivity": 0.35,
+   "corrosion": -0.6,
+   "service": 3,
+   "solidus": 8
+  },
+  "Mg": {
+   "strength": 90,
+   "cap": 6,
+   "ductility": 0.05,
+   "conductivity": 0.25,
+   "corrosion": 0.1,
+   "service": 2,
+   "solidus": 6
+  },
+  "Zn": {
+   "strength": 70,
+   "cap": 8,
+   "ductility": 0.03,
+   "conductivity": 0.1,
+   "corrosion": -0.2,
+   "service": 0,
+   "solidus": 5
+  },
+  "Si": {
+   "strength": 60,
+   "cap": 12,
+   "ductility": 0.08,
+   "conductivity": 0.4,
+   "corrosion": 0,
+   "service": 0,
+   "solidus": 6
+  },
+  "Mn": {
+   "strength": 50,
+   "cap": 1.5,
+   "ductility": 0.05,
+   "conductivity": 0.6,
+   "corrosion": 0.1,
+   "service": 0.0
+  },
+  "Li": {
+   "strength": 150,
+   "cap": 2.5,
+   "ductility": 0.2,
+   "conductivity": 1.0,
+   "corrosion": -0.2,
+   "service": 0.0
+  },
+  "Fe": {
+   "strength": 30,
+   "cap": 1,
+   "ductility": 0.2,
+   "conductivity": 0.5,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Cr": {
+   "strength": 60,
+   "cap": 0.4,
+   "ductility": 0.1,
+   "conductivity": 1.0,
+   "corrosion": 0.3,
+   "service": 0.0
+  },
+  "Zr": {
+   "strength": 80,
+   "cap": 0.2,
+   "ductility": 0.1,
+   "conductivity": 0.6,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Ag": {
+   "strength": 40,
+   "cap": 1,
+   "ductility": 0.02,
+   "conductivity": 0.1,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Sc": {
+   "strength": 400,
+   "cap": 0.4,
+   "ductility": 0.05,
+   "conductivity": 0.5,
+   "corrosion": 0.0,
+   "service": 0.0
+  }
+ }
+}

@@ -1,0 +1,69 @@
+{
+ "name": {
+  "translate": "alloy.starwake.inconel_718",
+  "fallback": "Inconel 718"
+ },
+ "family": "superalloy",
+ "base": "Ni",
+ "ranges": {
+  "Cr": [
+   17,
+   21
+  ],
+  "Fe": [
+   15,
+   21
+  ],
+  "Nb": [
+   4.75,
+   5.5
+  ],
+  "Mo": [
+   2.8,
+   3.3
+  ],
+  "Ti": [
+   0.65,
+   1.15
+  ],
+  "Al": [
+   0.2,
+   0.8
+  ],
+  "Co": [
+   0,
+   1
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#b0aca4",
+ "tier": 3,
+ "order": 35,
+ "nominal": {
+  "Cr": 19.0,
+  "Fe": 18.0,
+  "Nb": 5.125,
+  "Mo": 3.05,
+  "Ti": 0.9,
+  "Al": 0.5,
+  "Co": 0.5
+ },
+ "properties": {
+  "density": 8.19,
+  "yield_strength": 1035,
+  "tensile_strength": 1240,
+  "elongation": 12,
+  "modulus": 200,
+  "hardness": 400,
+  "solidus": 1260,
+  "service_temp": 700,
+  "conductivity": 1.4,
+  "corrosion": 9
+ },
+ "condition": "aged",
+ "note": {
+  "translate": "alloy.starwake.inconel_718.note",
+  "fallback": "Rocket engine turbomachinery and combustion chambers."
+ }
+}

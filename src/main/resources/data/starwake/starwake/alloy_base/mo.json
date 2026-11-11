@@ -1,0 +1,67 @@
+{
+ "element": "Mo",
+ "pure": {
+  "density": 10.28,
+  "yield_strength": 415,
+  "tensile_strength": 550,
+  "elongation": 10,
+  "modulus": 329,
+  "hardness": 230,
+  "solidus": 2623,
+  "service_temp": 1300,
+  "conductivity": 34,
+  "corrosion": 3
+ },
+ "solutes": {
+  "Ti": {
+   "strength": 350,
+   "cap": 0.6,
+   "ductility": 0.1,
+   "conductivity": 0.6,
+   "corrosion": 0,
+   "service": 50
+  },
+  "Zr": {
+   "strength": 400,
+   "cap": 0.15,
+   "ductility": 0.1,
+   "conductivity": 0.6,
+   "corrosion": 0,
+   "service": 50
+  },
+  "C": {
+   "strength": 400,
+   "cap": 0.05,
+   "ductility": 0.5,
+   "conductivity": 0.5,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Re": {
+   "strength": 80,
+   "cap": 47,
+   "ductility": -0.03,
+   "conductivity": 0.4,
+   "corrosion": 0,
+   "service": 5,
+   "solidus": 10
+  },
+  "W": {
+   "strength": 40,
+   "cap": 50,
+   "ductility": 0.0,
+   "conductivity": 0.3,
+   "corrosion": 0,
+   "service": 5,
+   "solidus": -10
+  },
+  "La": {
+   "strength": 150,
+   "cap": 1,
+   "ductility": 0.0,
+   "conductivity": 0.3,
+   "corrosion": 0,
+   "service": 30
+  }
+ }
+}

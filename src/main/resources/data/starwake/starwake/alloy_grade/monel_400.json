@@ -1,0 +1,45 @@
+{
+ "name": {
+  "translate": "alloy.starwake.monel_400",
+  "fallback": "Monel 400"
+ },
+ "family": "nickel",
+ "base": "Ni",
+ "ranges": {
+  "Cu": [
+   28,
+   34
+  ],
+  "Fe": [
+   0,
+   2.5
+  ],
+  "Mn": [
+   0,
+   2
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#bcb4a6",
+ "tier": 2,
+ "order": 33,
+ "nominal": {
+  "Cu": 31.0,
+  "Fe": 1.25,
+  "Mn": 1.0
+ },
+ "properties": {
+  "density": 8.8,
+  "yield_strength": 240,
+  "tensile_strength": 550,
+  "elongation": 48,
+  "modulus": 179,
+  "hardness": 160,
+  "solidus": 1300,
+  "service_temp": 540,
+  "conductivity": 3.4,
+  "corrosion": 10
+ },
+ "condition": "annealed"
+}

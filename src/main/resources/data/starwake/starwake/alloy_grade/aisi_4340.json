@@ -1,0 +1,60 @@
+{
+ "name": {
+  "translate": "alloy.starwake.aisi_4340",
+  "fallback": "AISI 4340 Nickel-Chromoly Steel"
+ },
+ "family": "alloy_steel",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   0.38,
+   0.43
+  ],
+  "Mn": [
+   0.6,
+   0.8
+  ],
+  "Cr": [
+   0.7,
+   0.9
+  ],
+  "Mo": [
+   0.2,
+   0.3
+  ],
+  "Ni": [
+   1.65,
+   2.0
+  ],
+  "Si": [
+   0.15,
+   0.35
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#989ca3",
+ "tier": 2,
+ "order": 8,
+ "nominal": {
+  "C": 0.405,
+  "Mn": 0.7,
+  "Cr": 0.8,
+  "Mo": 0.25,
+  "Ni": 1.825,
+  "Si": 0.25
+ },
+ "properties": {
+  "density": 7.85,
+  "yield_strength": 862,
+  "tensile_strength": 1282,
+  "elongation": 12.2,
+  "modulus": 205,
+  "hardness": 380,
+  "solidus": 1427,
+  "service_temp": 480,
+  "conductivity": 7,
+  "corrosion": 3
+ },
+ "condition": "normalized"
+}

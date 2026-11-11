@@ -1,0 +1,35 @@
+{
+ "name": {
+  "translate": "alloy.starwake.sterling_silver",
+  "fallback": "Sterling Silver"
+ },
+ "family": "precious",
+ "base": "Ag",
+ "ranges": {
+  "Cu": [
+   7.0,
+   7.8
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#d9dbdd",
+ "tier": 2,
+ "order": 56,
+ "nominal": {
+  "Cu": 7.4
+ },
+ "properties": {
+  "density": 10.36,
+  "yield_strength": 125,
+  "tensile_strength": 270,
+  "elongation": 40,
+  "modulus": 76,
+  "hardness": 65,
+  "solidus": 802,
+  "service_temp": 300,
+  "conductivity": 87,
+  "corrosion": 6
+ },
+ "condition": "annealed"
+}

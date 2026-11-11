@@ -1,0 +1,60 @@
+{
+ "name": {
+  "translate": "alloy.starwake.ss_304",
+  "fallback": "304 Stainless Steel"
+ },
+ "family": "stainless",
+ "base": "Fe",
+ "ranges": {
+  "Cr": [
+   18,
+   20
+  ],
+  "Ni": [
+   8,
+   10.5
+  ],
+  "C": [
+   0,
+   0.08
+  ],
+  "Mn": [
+   0,
+   2
+  ],
+  "Si": [
+   0,
+   0.75
+  ],
+  "N": [
+   0,
+   0.1
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#c8ccd1",
+ "tier": 2,
+ "order": 12,
+ "nominal": {
+  "Cr": 19.0,
+  "Ni": 9.25,
+  "C": 0.04,
+  "Mn": 1.0,
+  "Si": 0.375,
+  "N": 0.05
+ },
+ "properties": {
+  "density": 8.0,
+  "yield_strength": 215,
+  "tensile_strength": 505,
+  "elongation": 70,
+  "modulus": 193,
+  "hardness": 170,
+  "solidus": 1400,
+  "service_temp": 870,
+  "conductivity": 2.5,
+  "corrosion": 8
+ },
+ "condition": "annealed"
+}

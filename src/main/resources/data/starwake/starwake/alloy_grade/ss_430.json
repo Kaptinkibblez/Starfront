@@ -1,0 +1,50 @@
+{
+ "name": {
+  "translate": "alloy.starwake.ss_430",
+  "fallback": "430 Ferritic Stainless Steel"
+ },
+ "family": "stainless",
+ "base": "Fe",
+ "ranges": {
+  "Cr": [
+   16,
+   18
+  ],
+  "C": [
+   0,
+   0.12
+  ],
+  "Mn": [
+   0,
+   1
+  ],
+  "Si": [
+   0,
+   1
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#bfc3c8",
+ "tier": 2,
+ "order": 14,
+ "nominal": {
+  "Cr": 17.0,
+  "C": 0.06,
+  "Mn": 0.5,
+  "Si": 0.5
+ },
+ "properties": {
+  "density": 7.75,
+  "yield_strength": 310,
+  "tensile_strength": 517,
+  "elongation": 30,
+  "modulus": 200,
+  "hardness": 165,
+  "solidus": 1425,
+  "service_temp": 815,
+  "conductivity": 3,
+  "corrosion": 6
+ },
+ "condition": "annealed"
+}

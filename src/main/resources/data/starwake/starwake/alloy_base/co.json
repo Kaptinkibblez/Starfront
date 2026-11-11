@@ -1,0 +1,62 @@
+{
+ "element": "Co",
+ "pure": {
+  "density": 8.9,
+  "yield_strength": 225,
+  "tensile_strength": 255,
+  "elongation": 5,
+  "modulus": 209,
+  "hardness": 140,
+  "solidus": 1495,
+  "service_temp": 700,
+  "conductivity": 27.6,
+  "corrosion": 7
+ },
+ "solutes": {
+  "Cr": {
+   "strength": 60,
+   "cap": 32,
+   "ductility": 0.01,
+   "conductivity": 0.5,
+   "corrosion": 0.08,
+   "service": 6,
+   "solidus": 5,
+   "threshold": 20,
+   "bonus": 2
+  },
+  "W": {
+   "strength": 90,
+   "cap": 15,
+   "ductility": 0.02,
+   "conductivity": 0.4,
+   "corrosion": 0,
+   "service": 12,
+   "solidus": 3
+  },
+  "C": {
+   "strength": 450,
+   "cap": 1.5,
+   "ductility": 0.5,
+   "conductivity": 1.0,
+   "corrosion": 0,
+   "service": 0,
+   "solidus": 40
+  },
+  "Ni": {
+   "strength": 30,
+   "cap": 20,
+   "ductility": -0.02,
+   "conductivity": 0.3,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Mo": {
+   "strength": 80,
+   "cap": 8,
+   "ductility": 0.02,
+   "conductivity": 0.4,
+   "corrosion": 0.05,
+   "service": 10
+  }
+ }
+}

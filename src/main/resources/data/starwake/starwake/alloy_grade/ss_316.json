@@ -1,0 +1,60 @@
+{
+ "name": {
+  "translate": "alloy.starwake.ss_316",
+  "fallback": "316 Stainless Steel"
+ },
+ "family": "stainless",
+ "base": "Fe",
+ "ranges": {
+  "Cr": [
+   16,
+   18
+  ],
+  "Ni": [
+   10,
+   14
+  ],
+  "Mo": [
+   2,
+   3
+  ],
+  "C": [
+   0,
+   0.08
+  ],
+  "Mn": [
+   0,
+   2
+  ],
+  "Si": [
+   0,
+   0.75
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#c4c9cf",
+ "tier": 2,
+ "order": 13,
+ "nominal": {
+  "Cr": 17.0,
+  "Ni": 12.0,
+  "Mo": 2.5,
+  "C": 0.04,
+  "Mn": 1.0,
+  "Si": 0.375
+ },
+ "properties": {
+  "density": 8.0,
+  "yield_strength": 205,
+  "tensile_strength": 515,
+  "elongation": 60,
+  "modulus": 193,
+  "hardness": 170,
+  "solidus": 1375,
+  "service_temp": 870,
+  "conductivity": 2.4,
+  "corrosion": 9
+ },
+ "condition": "annealed"
+}

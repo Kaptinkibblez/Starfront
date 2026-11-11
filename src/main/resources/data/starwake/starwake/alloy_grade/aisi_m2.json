@@ -1,0 +1,59 @@
+{
+ "name": {
+  "translate": "alloy.starwake.aisi_m2",
+  "fallback": "AISI M2 High-Speed Steel"
+ },
+ "family": "tool_steel",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   0.78,
+   1.05
+  ],
+  "W": [
+   5.5,
+   6.75
+  ],
+  "Mo": [
+   4.5,
+   5.5
+  ],
+  "Cr": [
+   3.75,
+   4.5
+  ],
+  "V": [
+   1.75,
+   2.2
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#868a93",
+ "tier": 3,
+ "order": 11,
+ "nominal": {
+  "C": 0.915,
+  "W": 6.125,
+  "Mo": 5.0,
+  "Cr": 4.125,
+  "V": 1.975
+ },
+ "properties": {
+  "density": 8.16,
+  "yield_strength": 2000,
+  "tensile_strength": 2200,
+  "elongation": 1,
+  "modulus": 210,
+  "hardness": 830,
+  "solidus": 1400,
+  "service_temp": 600,
+  "conductivity": 2.3,
+  "corrosion": 3
+ },
+ "condition": "hardened",
+ "note": {
+  "translate": "alloy.starwake.aisi_m2.note",
+  "fallback": "Keeps its hardness red-hot."
+ }
+}

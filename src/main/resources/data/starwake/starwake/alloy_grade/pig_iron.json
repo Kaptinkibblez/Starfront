@@ -1,0 +1,59 @@
+{
+ "name": {
+  "translate": "alloy.starwake.pig_iron",
+  "fallback": "Pig Iron"
+ },
+ "family": "cast_iron",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   3.5,
+   4.7
+  ],
+  "Si": [
+   0.3,
+   1.5
+  ],
+  "Mn": [
+   0,
+   1.5
+  ],
+  "P": [
+   0,
+   0.3
+  ],
+  "S": [
+   0,
+   0.1
+  ]
+ },
+ "max_other": 1.0,
+ "exact": true,
+ "color": "#7d7a77",
+ "tier": 0,
+ "order": 1,
+ "nominal": {
+  "C": 4.1,
+  "Si": 0.9,
+  "Mn": 0.75,
+  "P": 0.15,
+  "S": 0.05
+ },
+ "properties": {
+  "density": 7.0,
+  "yield_strength": 120,
+  "tensile_strength": 150,
+  "elongation": 0.2,
+  "modulus": 100,
+  "hardness": 200,
+  "solidus": 1150,
+  "service_temp": 300,
+  "conductivity": 3,
+  "corrosion": 2
+ },
+ "condition": "as cast",
+ "note": {
+  "translate": "alloy.starwake.pig_iron.note",
+  "fallback": "Blast-furnace iron: brittle, the raw material for steelmaking."
+ }
+}

@@ -1,0 +1,52 @@
+{
+ "element": "Sn",
+ "pure": {
+  "density": 7.29,
+  "yield_strength": 9,
+  "tensile_strength": 15,
+  "elongation": 50,
+  "modulus": 50,
+  "hardness": 5,
+  "solidus": 232,
+  "service_temp": 100,
+  "conductivity": 15.6,
+  "corrosion": 6
+ },
+ "solutes": {
+  "Pb": {
+   "strength": 4,
+   "cap": 40,
+   "ductility": 0.0,
+   "conductivity": 0.05,
+   "corrosion": -0.02,
+   "service": 0,
+   "solidus": 1.3
+  },
+  "Ag": {
+   "strength": 20,
+   "cap": 4,
+   "ductility": 0.0,
+   "conductivity": 0.2,
+   "corrosion": 0,
+   "service": 5,
+   "solidus": 3
+  },
+  "Cu": {
+   "strength": 20,
+   "cap": 1,
+   "ductility": 0.1,
+   "conductivity": 0.2,
+   "corrosion": 0,
+   "service": 5,
+   "solidus": 2
+  },
+  "Sb": {
+   "strength": 15,
+   "cap": 8,
+   "ductility": 0.02,
+   "conductivity": 0.2,
+   "corrosion": 0.0,
+   "service": 0.0
+  }
+ }
+}

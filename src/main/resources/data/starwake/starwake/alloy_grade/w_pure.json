@@ -1,0 +1,32 @@
+{
+ "name": {
+  "translate": "alloy.starwake.w_pure",
+  "fallback": "Tungsten"
+ },
+ "family": "refractory",
+ "base": "W",
+ "ranges": {},
+ "max_other": 0.1,
+ "exact": true,
+ "color": "#8d8f94",
+ "tier": 3,
+ "order": 49,
+ "nominal": {},
+ "properties": {
+  "density": 19.3,
+  "yield_strength": 750,
+  "tensile_strength": 980,
+  "elongation": 2,
+  "modulus": 411,
+  "hardness": 350,
+  "solidus": 3422,
+  "service_temp": 1650,
+  "conductivity": 31,
+  "corrosion": 4
+ },
+ "condition": "wrought",
+ "note": {
+  "translate": "alloy.starwake.w_pure.note",
+  "fallback": "Service limit is in vacuum; burns in hot air."
+ }
+}

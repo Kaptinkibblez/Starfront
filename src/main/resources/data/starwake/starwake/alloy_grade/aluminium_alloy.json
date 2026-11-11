@@ -1,0 +1,14 @@
+{
+ "name": {
+  "translate": "alloy.starwake.aluminium_alloy",
+  "fallback": "Aluminium Alloy"
+ },
+ "family": "aluminium",
+ "base": "Al",
+ "ranges": {},
+ "max_other": 100.0,
+ "exact": false,
+ "color": "#cbced2",
+ "tier": 0,
+ "order": 27
+}

@@ -1,0 +1,50 @@
+{
+ "name": {
+  "translate": "alloy.starwake.ti_grade2",
+  "fallback": "Grade 2 Titanium"
+ },
+ "family": "titanium",
+ "base": "Ti",
+ "ranges": {
+  "O": [
+   0,
+   0.25
+  ],
+  "Fe": [
+   0,
+   0.3
+  ],
+  "C": [
+   0,
+   0.08
+  ],
+  "N": [
+   0,
+   0.03
+  ]
+ },
+ "max_other": 0.4,
+ "exact": true,
+ "color": "#a9a7a3",
+ "tier": 2,
+ "order": 28,
+ "nominal": {
+  "O": 0.125,
+  "Fe": 0.15,
+  "C": 0.04,
+  "N": 0.015
+ },
+ "properties": {
+  "density": 4.51,
+  "yield_strength": 275,
+  "tensile_strength": 345,
+  "elongation": 20,
+  "modulus": 105,
+  "hardness": 145,
+  "solidus": 1665,
+  "service_temp": 315,
+  "conductivity": 3.1,
+  "corrosion": 10
+ },
+ "condition": "annealed"
+}

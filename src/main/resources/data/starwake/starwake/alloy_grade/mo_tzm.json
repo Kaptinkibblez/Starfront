@@ -1,0 +1,45 @@
+{
+ "name": {
+  "translate": "alloy.starwake.mo_tzm",
+  "fallback": "TZM Molybdenum"
+ },
+ "family": "refractory",
+ "base": "Mo",
+ "ranges": {
+  "Ti": [
+   0.4,
+   0.55
+  ],
+  "Zr": [
+   0.06,
+   0.12
+  ],
+  "C": [
+   0.01,
+   0.04
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#9a9ca3",
+ "tier": 3,
+ "order": 51,
+ "nominal": {
+  "Ti": 0.475,
+  "Zr": 0.09,
+  "C": 0.025
+ },
+ "properties": {
+  "density": 10.22,
+  "yield_strength": 860,
+  "tensile_strength": 965,
+  "elongation": 10,
+  "modulus": 320,
+  "hardness": 260,
+  "solidus": 2623,
+  "service_temp": 1400,
+  "conductivity": 31,
+  "corrosion": 3
+ },
+ "condition": "stress relieved"
+}

@@ -1,0 +1,55 @@
+{
+ "name": {
+  "translate": "alloy.starwake.al_1100",
+  "fallback": "1100 Aluminium"
+ },
+ "family": "aluminium",
+ "base": "Al",
+ "ranges": {
+  "Cu": [
+   0.05,
+   0.2
+  ],
+  "Si": [
+   0,
+   0.5
+  ],
+  "Fe": [
+   0,
+   0.5
+  ],
+  "Mn": [
+   0,
+   0.05
+  ],
+  "Zn": [
+   0,
+   0.1
+  ]
+ },
+ "max_other": 0.15,
+ "exact": true,
+ "color": "#d4d7da",
+ "tier": 1,
+ "order": 21,
+ "nominal": {
+  "Cu": 0.125,
+  "Si": 0.25,
+  "Fe": 0.25,
+  "Mn": 0.025,
+  "Zn": 0.05
+ },
+ "properties": {
+  "density": 2.71,
+  "yield_strength": 34,
+  "tensile_strength": 90,
+  "elongation": 35,
+  "modulus": 69,
+  "hardness": 23,
+  "solidus": 643,
+  "service_temp": 150,
+  "conductivity": 59,
+  "corrosion": 7
+ },
+ "condition": "O temper"
+}

@@ -1,0 +1,54 @@
+{
+ "name": {
+  "translate": "alloy.starwake.zircaloy_4",
+  "fallback": "Zircaloy-4"
+ },
+ "family": "zirconium",
+ "base": "Zr",
+ "ranges": {
+  "Sn": [
+   1.2,
+   1.7
+  ],
+  "Fe": [
+   0.18,
+   0.24
+  ],
+  "Cr": [
+   0.07,
+   0.13
+  ],
+  "O": [
+   0.09,
+   0.16
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#a4a6a2",
+ "tier": 3,
+ "order": 54,
+ "nominal": {
+  "Sn": 1.45,
+  "Fe": 0.21,
+  "Cr": 0.1,
+  "O": 0.125
+ },
+ "properties": {
+  "density": 6.56,
+  "yield_strength": 380,
+  "tensile_strength": 520,
+  "elongation": 25,
+  "modulus": 99,
+  "hardness": 180,
+  "solidus": 1850,
+  "service_temp": 400,
+  "conductivity": 2.4,
+  "corrosion": 9
+ },
+ "condition": "annealed",
+ "note": {
+  "translate": "alloy.starwake.zircaloy_4.note",
+  "fallback": "Reactor fuel cladding: barely absorbs neutrons."
+ }
+}

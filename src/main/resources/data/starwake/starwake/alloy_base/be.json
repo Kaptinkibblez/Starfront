@@ -1,0 +1,16 @@
+{
+ "element": "Be",
+ "pure": {
+  "density": 1.85,
+  "yield_strength": 240,
+  "tensile_strength": 370,
+  "elongation": 3,
+  "modulus": 287,
+  "hardness": 120,
+  "solidus": 1287,
+  "service_temp": 600,
+  "conductivity": 43,
+  "corrosion": 5
+ },
+ "solutes": {}
+}

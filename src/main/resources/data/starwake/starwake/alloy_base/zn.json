@@ -1,0 +1,42 @@
+{
+ "element": "Zn",
+ "pure": {
+  "density": 7.14,
+  "yield_strength": 35,
+  "tensile_strength": 120,
+  "elongation": 40,
+  "modulus": 108,
+  "hardness": 30,
+  "solidus": 420,
+  "service_temp": 100,
+  "conductivity": 28,
+  "corrosion": 4
+ },
+ "solutes": {
+  "Al": {
+   "strength": 60,
+   "cap": 27,
+   "ductility": 0.05,
+   "conductivity": 0.2,
+   "corrosion": 0.05,
+   "service": 0,
+   "solidus": 3
+  },
+  "Cu": {
+   "strength": 60,
+   "cap": 3,
+   "ductility": 0.05,
+   "conductivity": 0.2,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Mg": {
+   "strength": 80,
+   "cap": 0.1,
+   "ductility": 0.5,
+   "conductivity": 0.2,
+   "corrosion": 0.0,
+   "service": 0.0
+  }
+ }
+}

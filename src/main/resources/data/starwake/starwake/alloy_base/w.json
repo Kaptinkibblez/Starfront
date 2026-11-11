@@ -1,0 +1,70 @@
+{
+ "element": "W",
+ "pure": {
+  "density": 19.3,
+  "yield_strength": 750,
+  "tensile_strength": 980,
+  "elongation": 2,
+  "modulus": 411,
+  "hardness": 350,
+  "solidus": 3422,
+  "service_temp": 1650,
+  "conductivity": 31,
+  "corrosion": 4
+ },
+ "solutes": {
+  "Re": {
+   "strength": 100,
+   "cap": 26,
+   "ductility": -0.08,
+   "conductivity": 0.6,
+   "corrosion": 0,
+   "service": 10,
+   "solidus": 15
+  },
+  "C": {
+   "strength": 300,
+   "cap": 6,
+   "ductility": 0.3,
+   "conductivity": 1.0,
+   "corrosion": 0,
+   "service": 0,
+   "solidus": 340
+  },
+  "Co": {
+   "strength": 150,
+   "cap": 12,
+   "ductility": 0.0,
+   "conductivity": 0.8,
+   "corrosion": 0.1,
+   "service": -30,
+   "solidus": 150
+  },
+  "Ni": {
+   "strength": 80,
+   "cap": 6,
+   "ductility": -0.2,
+   "conductivity": 0.8,
+   "corrosion": 0,
+   "service": -40,
+   "solidus": 150
+  },
+  "Fe": {
+   "strength": 60,
+   "cap": 4,
+   "ductility": -0.2,
+   "conductivity": 0.8,
+   "corrosion": 0,
+   "service": -40,
+   "solidus": 150
+  },
+  "Th": {
+   "strength": 150,
+   "cap": 2,
+   "ductility": 0.0,
+   "conductivity": 0.5,
+   "corrosion": 0.0,
+   "service": 0.0
+  }
+ }
+}

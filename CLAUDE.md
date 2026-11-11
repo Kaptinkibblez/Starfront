@@ -248,7 +248,27 @@ commit. **Don't start the next milestone until the user confirms the current one
       at the station and handed in at Neolvuia Trading Post pays out; Wristcom Trade/Contracts
       apps; hitting crew costs rep and a guard fights back; outposts build at the surface on
       Neolvuia and Veyra, pressurized inside.)*
-- [ ] **8. Progression.** Fuel, upgrades and crafting chains.
+- [ ] **8. Progression + metallurgy.** User's choices (2026-11-11; "the biggest one yet, the full
+      metallurgical system"): **composition-tracked** metallurgy (ore -> crush -> concentrate ->
+      smelt/reduce -> refine following each mineral's real composition and by-products; alloys
+      carry their composition and get computed properties; real grades recognised by range);
+      machines are **single blocks early, multiblocks later**; an **electric grid powers every
+      machine** (cables, batteries; combustion generator, solar, fission, fusion); parts, armour,
+      tools, weapons and hull plating take **stats from their material plus tier gates**
+      (minimum properties); ship parts come in **Mk I-III** designs; ships burn **real
+      propellants** (LH2/LOX, methalox) and quantum/jump drives burn **fusion fuel** (D + He-3);
+      **vanilla smelting stays** (vanilla iron = plain low-carbon iron in our system);
+      logistics = **cables + pipes + conveyors**; first survival ship in **~3-5 h**; learning
+      through a **Wristcom Codex** app. Built in parts, each with a jar and a **pause for the
+      user's OK**: 8a materials core, 8b power + logistics, 8c ore processing, 8d alloying +
+      forming, 8e ship parts (Mk tiers, fabricator, hull grades), 8f propellants + fusion fuel,
+      8g fission + fusion reactors (synthetic elements), 8h armour/tools/weapons/suit upgrades,
+      8i Codex, recipes for everything, balance, release.
+  - [x] 8a. Materials core: composition component, 47 real alloy grades + family names, base-metal
+        models, off-spec detection, metal ingot/plate/rod/wire/dust tinted by composition,
+        tooltips, `/starwake metal`. *(Verified 2026-11-11: 304, Inconel 718 and Grade 2 Ti
+        certify; low-Ni 304 reads off-spec naming Ni; 2024 without Mn off-spec; arbitrary
+        Fe-Cr-Co estimated as stainless; vanilla iron = AISI 1010; tints and tooltips in game.)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
 
 ---
@@ -640,7 +660,39 @@ normal gravity.
   Hurting one: -25 rep, killing: -150. Hubs near players are restocked every minute.
 - Wristcom: Trade app (credits, standings, the system's hubs), Contracts app (active, abandon).
 
+## How metallurgy works (Milestone 8a)
+
+- **Composition** (`metal/Composition`, component `starwake:composition`): element symbol -> ppm,
+  summing to 1,000,000, largest first (= base), kept to 10 ppm (0.001 wt%). `Composition.mix`
+  melts compositions together by mass; `parse("Fe:72,Cr:18")`; `withBalance(base, wt%)`.
+- **Metal items** (`metal/MetalItems`, `MetalItem`, `MetalForm`): `metal_ingot|plate|rod|wire|dust`;
+  `MetalItems.stack(form, composition, n)` sets the composition and the tint (custom model data
+  colour; item models use the `custom_model_data` tint source). `compositionOf(stack)` also
+  answers for vanilla iron (AISI 1010), copper (C11000), gold, and element ingots/powders (pure).
+  Names come from the analysis ("304 Stainless Steel Plate", "Off-spec 2024 Aluminium Dust").
+- **Grades** (`metal/AlloyGrade`, synced registry `starwake/alloy_grade/*.json`, from
+  `tools/metallurgy.py`): 47 real alloys (carbon/alloy/tool/stainless steels, cast and pig iron,
+  Al 1100/2024/6061/7075/5083/2195, CP Ti and Ti-6Al-4V/6242, nickel/Monel/Inconel 625/718/
+  Waspaloy/CMSX-4, Stellite, coppers/brass/bronze/BeCu/cupronickel, AZ31B, W, WC-Co, TZM, C-103,
+  Ta, Zircaloy-4, solder, sterling) with spec ranges and handbook properties, plus generic
+  family names (`exact: false`). **Base models** (`AlloyBase`, `starwake/alloy_base/*.json`):
+  pure-metal properties and per-solute effects for compositions that match nothing.
+- **Analysis** (`metal/Metallurgy.analyze`, cached): exact grade -> its properties; within 2.5
+  range-widths of a grade -> **off-spec** (penalised properties, density scaled, the tooltip lists
+  the elements outside spec); else estimated from the base model (strength ~ sqrt(wt%), ductility
+  exp loss, conductivity 1/(1+sum k w), corrosion thresholds such as Cr >= 10.5% in iron,
+  embrittlement such as C > 2.1%). `MaterialProperties`: density, yield, UTS, elongation, modulus,
+  HV, solidus, service temperature, %IACS, corrosion 0-10. Bound from the registries on
+  SERVER_STARTED and client JOIN (`client/metal/MetalTooltips`).
+- Tooltips on every metal (grade/off-spec/purity, composition, properties; Shift for more).
+  Creative tab "Starwake: Materials" (every grade in every form). Admin:
+  `/starwake metal give <form> <n> <Fe:72,Cr:18,...>`, `grade <id> [form] [n]`, `info`, `grades`.
+
 ## 26.3 gotchas (learned the hard way)
+
+- Hex colours in data codecs: `ExtraCodecs.STRING_RGB_COLOR` ("#rrggbb"); `RGB_COLOR_CODEC` only
+  takes ints or float triples. A bad entry in a dynamic registry aborts world loading.
+
 
 - **`chain` is `iron_chain`** in 26.x (copper chains were added). Colour/copper block families are
   registered in loops, so grep `Blocks.java` for the family, not the id.

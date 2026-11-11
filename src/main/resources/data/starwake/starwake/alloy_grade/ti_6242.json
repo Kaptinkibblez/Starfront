@@ -1,0 +1,59 @@
+{
+ "name": {
+  "translate": "alloy.starwake.ti_6242",
+  "fallback": "Ti-6Al-2Sn-4Zr-2Mo"
+ },
+ "family": "titanium",
+ "base": "Ti",
+ "ranges": {
+  "Al": [
+   5.5,
+   6.5
+  ],
+  "Sn": [
+   1.8,
+   2.2
+  ],
+  "Zr": [
+   3.6,
+   4.4
+  ],
+  "Mo": [
+   1.8,
+   2.2
+  ],
+  "Si": [
+   0.06,
+   0.1
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#9e9c99",
+ "tier": 3,
+ "order": 30,
+ "nominal": {
+  "Al": 6.0,
+  "Sn": 2.0,
+  "Zr": 4.0,
+  "Mo": 2.0,
+  "Si": 0.08
+ },
+ "properties": {
+  "density": 4.54,
+  "yield_strength": 900,
+  "tensile_strength": 990,
+  "elongation": 15,
+  "modulus": 114,
+  "hardness": 340,
+  "solidus": 1590,
+  "service_temp": 540,
+  "conductivity": 1.0,
+  "corrosion": 9
+ },
+ "condition": "duplex annealed",
+ "note": {
+  "translate": "alloy.starwake.ti_6242.note",
+  "fallback": "High-temperature titanium for engine parts."
+ }
+}

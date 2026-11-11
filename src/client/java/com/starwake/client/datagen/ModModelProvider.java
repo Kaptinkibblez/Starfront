@@ -160,6 +160,14 @@ public final class ModModelProvider extends FabricModelProvider {
 		ModPlanetBlocks.ores().forEach(ore -> generators.generateFlatItem(ore.raw(), ModelTemplates.FLAT_ITEM));
 		generators.generateFlatItem(ModItems.SURVEY_SUIT, ModelTemplates.FLAT_ITEM);
 		generators.generateFlatItem(com.starwake.registry.ModHubBlocks.SEALED_CARGO, ModelTemplates.FLAT_ITEM);
+		// Metal forms (M8a): grey textures tinted by the stack's composition colour (custom model data).
+		for (var item : com.starwake.metal.MetalItems.all()) {
+			var texture = net.minecraft.resources.Identifier.fromNamespaceAndPath("starwake", "item/metal_" + item.form().id);
+			var model = ModelTemplates.FLAT_ITEM.create(item, net.minecraft.client.data.models.model.TextureMapping.layer0(
+					new net.minecraft.client.resources.model.sprite.Material(texture)), generators.modelOutput);
+			generators.itemModelOutput.accept(item, net.minecraft.client.data.models.model.ItemModelUtils.tintedModel(model,
+					new net.minecraft.client.color.item.CustomModelDataSource(0, 0xB0B0B0)));
+		}
 		// Element items: textures/item/element/<name>_<form>.png (tools/periodic_table.py).
 		for (var element : com.starwake.chem.Chemistry.elements()) {
 			if (!element.item().getNamespace().equals("starwake")) continue;

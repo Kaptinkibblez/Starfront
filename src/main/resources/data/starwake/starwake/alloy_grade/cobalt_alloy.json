@@ -1,0 +1,14 @@
+{
+ "name": {
+  "translate": "alloy.starwake.cobalt_alloy",
+  "fallback": "Cobalt Alloy"
+ },
+ "family": "cobalt",
+ "base": "Co",
+ "ranges": {},
+ "max_other": 100.0,
+ "exact": false,
+ "color": "#a6a9b2",
+ "tier": 0,
+ "order": 40
+}

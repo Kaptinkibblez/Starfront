@@ -1,0 +1,23 @@
+{
+ "name": {
+  "translate": "alloy.starwake.stainless",
+  "fallback": "Stainless Steel"
+ },
+ "family": "stainless",
+ "base": "Fe",
+ "ranges": {
+  "Cr": [
+   10.5,
+   30
+  ],
+  "C": [
+   0,
+   1.2
+  ]
+ },
+ "max_other": 100.0,
+ "exact": false,
+ "color": "#c2c6cc",
+ "tier": 0,
+ "order": 18
+}

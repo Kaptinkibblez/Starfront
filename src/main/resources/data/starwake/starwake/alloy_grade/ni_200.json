@@ -1,0 +1,55 @@
+{
+ "name": {
+  "translate": "alloy.starwake.ni_200",
+  "fallback": "Nickel 200"
+ },
+ "family": "nickel",
+ "base": "Ni",
+ "ranges": {
+  "Fe": [
+   0,
+   0.4
+  ],
+  "Mn": [
+   0,
+   0.35
+  ],
+  "Cu": [
+   0,
+   0.25
+  ],
+  "C": [
+   0,
+   0.15
+  ],
+  "Si": [
+   0,
+   0.35
+  ]
+ },
+ "max_other": 0.3,
+ "exact": true,
+ "color": "#c1bdb2",
+ "tier": 2,
+ "order": 32,
+ "nominal": {
+  "Fe": 0.2,
+  "Mn": 0.175,
+  "Cu": 0.125,
+  "C": 0.075,
+  "Si": 0.175
+ },
+ "properties": {
+  "density": 8.89,
+  "yield_strength": 148,
+  "tensile_strength": 462,
+  "elongation": 47,
+  "modulus": 204,
+  "hardness": 120,
+  "solidus": 1435,
+  "service_temp": 600,
+  "conductivity": 22,
+  "corrosion": 9
+ },
+ "condition": "annealed"
+}

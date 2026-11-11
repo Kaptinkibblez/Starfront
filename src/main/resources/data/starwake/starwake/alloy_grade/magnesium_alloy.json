@@ -1,0 +1,14 @@
+{
+ "name": {
+  "translate": "alloy.starwake.magnesium_alloy",
+  "fallback": "Magnesium Alloy"
+ },
+ "family": "magnesium",
+ "base": "Mg",
+ "ranges": {},
+ "max_other": 100.0,
+ "exact": false,
+ "color": "#c0c2be",
+ "tier": 0,
+ "order": 48
+}

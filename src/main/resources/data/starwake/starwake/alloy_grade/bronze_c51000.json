@@ -1,0 +1,50 @@
+{
+ "name": {
+  "translate": "alloy.starwake.bronze_c51000",
+  "fallback": "C51000 Phosphor Bronze"
+ },
+ "family": "copper",
+ "base": "Cu",
+ "ranges": {
+  "Sn": [
+   4.2,
+   5.8
+  ],
+  "P": [
+   0.03,
+   0.35
+  ],
+  "Zn": [
+   0,
+   0.3
+  ],
+  "Fe": [
+   0,
+   0.1
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#b9824a",
+ "tier": 1,
+ "order": 43,
+ "nominal": {
+  "Sn": 5.0,
+  "P": 0.19,
+  "Zn": 0.15,
+  "Fe": 0.05
+ },
+ "properties": {
+  "density": 8.86,
+  "yield_strength": 130,
+  "tensile_strength": 340,
+  "elongation": 55,
+  "modulus": 110,
+  "hardness": 85,
+  "solidus": 950,
+  "service_temp": 250,
+  "conductivity": 15,
+  "corrosion": 7
+ },
+ "condition": "annealed"
+}

@@ -46,6 +46,7 @@ public final class StarwakeMod implements ModInitializer {
 		ModEntities.init();
 		ModItems.init();
 		com.starwake.chem.ElementItems.init();
+		com.starwake.metal.MetalItems.init();
 		ModCreativeTabs.init();
 
 		// Planets: data-driven registry, gravity, travel, and commands.
@@ -54,6 +55,8 @@ public final class StarwakeMod implements ModInitializer {
 		com.starwake.galaxy.StarSystems.init();
 		com.starwake.galaxy.GalaxyCommands.init();
 		net.fabricmc.fabric.api.event.registry.DynamicRegistries.registerSynced(com.starwake.trade.Faction.REGISTRY_KEY, com.starwake.trade.Faction.CODEC);
+		com.starwake.metal.Metallurgy.init();
+		com.starwake.metal.MetalCommands.init();
 		com.starwake.trade.TradeData.init();
 		com.starwake.trade.Economy.init();
 		com.starwake.trade.TradeHubs.init();

@@ -1,0 +1,23 @@
+{
+ "name": {
+  "translate": "alloy.starwake.alloy_steel",
+  "fallback": "Alloy Steel"
+ },
+ "family": "alloy_steel",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   0,
+   2.1
+  ],
+  "Cr": [
+   0,
+   10.5
+  ]
+ },
+ "max_other": 100.0,
+ "exact": false,
+ "color": "#a0a3a8",
+ "tier": 0,
+ "order": 19
+}

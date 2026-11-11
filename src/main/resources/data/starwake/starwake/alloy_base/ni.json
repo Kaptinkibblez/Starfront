@@ -1,0 +1,156 @@
+{
+ "element": "Ni",
+ "pure": {
+  "density": 8.91,
+  "yield_strength": 148,
+  "tensile_strength": 462,
+  "elongation": 47,
+  "modulus": 207,
+  "hardness": 110,
+  "solidus": 1455,
+  "service_temp": 600,
+  "conductivity": 25,
+  "corrosion": 9
+ },
+ "solutes": {
+  "Cr": {
+   "strength": 55,
+   "cap": 25,
+   "ductility": 0.005,
+   "conductivity": 0.5,
+   "corrosion": 0.05,
+   "service": 12,
+   "solidus": 4
+  },
+  "Mo": {
+   "strength": 90,
+   "cap": 12,
+   "ductility": 0.01,
+   "conductivity": 0.5,
+   "corrosion": 0.1,
+   "service": 15,
+   "solidus": 4
+  },
+  "W": {
+   "strength": 80,
+   "cap": 12,
+   "ductility": 0.01,
+   "conductivity": 0.4,
+   "corrosion": 0,
+   "service": 20,
+   "solidus": 3
+  },
+  "Co": {
+   "strength": 30,
+   "cap": 20,
+   "ductility": 0.0,
+   "conductivity": 0.2,
+   "corrosion": 0,
+   "service": 6,
+   "solidus": 1
+  },
+  "Al": {
+   "strength": 220,
+   "cap": 6,
+   "ductility": 0.08,
+   "conductivity": 0.6,
+   "corrosion": 0.05,
+   "service": 40,
+   "solidus": 8
+  },
+  "Ti": {
+   "strength": 200,
+   "cap": 4,
+   "ductility": 0.08,
+   "conductivity": 0.6,
+   "corrosion": 0,
+   "service": 35,
+   "solidus": 10
+  },
+  "Nb": {
+   "strength": 180,
+   "cap": 6,
+   "ductility": 0.06,
+   "conductivity": 0.6,
+   "corrosion": 0,
+   "service": 25,
+   "solidus": 12
+  },
+  "Ta": {
+   "strength": 120,
+   "cap": 8,
+   "ductility": 0.03,
+   "conductivity": 0.4,
+   "corrosion": 0,
+   "service": 25,
+   "solidus": 4
+  },
+  "Re": {
+   "strength": 150,
+   "cap": 6,
+   "ductility": 0.02,
+   "conductivity": 0.4,
+   "corrosion": 0,
+   "service": 45,
+   "solidus": 0
+  },
+  "Hf": {
+   "strength": 100,
+   "cap": 1.5,
+   "ductility": 0.05,
+   "conductivity": 0.4,
+   "corrosion": 0,
+   "service": 20
+  },
+  "Fe": {
+   "strength": 20,
+   "cap": 25,
+   "ductility": 0.005,
+   "conductivity": 0.3,
+   "corrosion": -0.02,
+   "service": 0,
+   "solidus": 2
+  },
+  "Cu": {
+   "strength": 25,
+   "cap": 35,
+   "ductility": 0.0,
+   "conductivity": 0.25,
+   "corrosion": 0.03,
+   "service": 0,
+   "solidus": 4
+  },
+  "C": {
+   "strength": 200,
+   "cap": 0.15,
+   "ductility": 0.8,
+   "conductivity": 1.0,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "B": {
+   "strength": 200,
+   "cap": 0.02,
+   "ductility": 2,
+   "conductivity": 1.0,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Zr": {
+   "strength": 100,
+   "cap": 0.1,
+   "ductility": 0.5,
+   "conductivity": 0.5,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "S": {
+   "strength": 0,
+   "cap": 0.01,
+   "ductility": 40,
+   "conductivity": 1.0,
+   "corrosion": 0.0,
+   "service": 0.0
+  }
+ }
+}

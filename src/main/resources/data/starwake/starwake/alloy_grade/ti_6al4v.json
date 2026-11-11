@@ -1,0 +1,54 @@
+{
+ "name": {
+  "translate": "alloy.starwake.ti_6al4v",
+  "fallback": "Ti-6Al-4V (Grade 5)"
+ },
+ "family": "titanium",
+ "base": "Ti",
+ "ranges": {
+  "Al": [
+   5.5,
+   6.75
+  ],
+  "V": [
+   3.5,
+   4.5
+  ],
+  "Fe": [
+   0,
+   0.3
+  ],
+  "O": [
+   0,
+   0.2
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#a3a19d",
+ "tier": 3,
+ "order": 29,
+ "nominal": {
+  "Al": 6.125,
+  "V": 4.0,
+  "Fe": 0.15,
+  "O": 0.1
+ },
+ "properties": {
+  "density": 4.43,
+  "yield_strength": 880,
+  "tensile_strength": 950,
+  "elongation": 14,
+  "modulus": 114,
+  "hardness": 349,
+  "solidus": 1604,
+  "service_temp": 400,
+  "conductivity": 1.0,
+  "corrosion": 9
+ },
+ "condition": "annealed",
+ "note": {
+  "translate": "alloy.starwake.ti_6al4v.note",
+  "fallback": "The workhorse aerospace titanium."
+ }
+}

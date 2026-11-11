@@ -1,0 +1,45 @@
+{
+ "name": {
+  "translate": "alloy.starwake.cupronickel_7030",
+  "fallback": "C71500 Cupronickel 70/30"
+ },
+ "family": "copper",
+ "base": "Cu",
+ "ranges": {
+  "Ni": [
+   29,
+   33
+  ],
+  "Fe": [
+   0.4,
+   1.0
+  ],
+  "Mn": [
+   0,
+   1
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#b9a99b",
+ "tier": 2,
+ "order": 45,
+ "nominal": {
+  "Ni": 31.0,
+  "Fe": 0.7,
+  "Mn": 0.5
+ },
+ "properties": {
+  "density": 8.94,
+  "yield_strength": 125,
+  "tensile_strength": 380,
+  "elongation": 45,
+  "modulus": 152,
+  "hardness": 85,
+  "solidus": 1170,
+  "service_temp": 300,
+  "conductivity": 4.6,
+  "corrosion": 9
+ },
+ "condition": "annealed"
+}

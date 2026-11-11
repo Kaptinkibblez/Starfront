@@ -1,0 +1,55 @@
+{
+ "name": {
+  "translate": "alloy.starwake.al_6061",
+  "fallback": "6061 Aluminium"
+ },
+ "family": "aluminium",
+ "base": "Al",
+ "ranges": {
+  "Mg": [
+   0.8,
+   1.2
+  ],
+  "Si": [
+   0.4,
+   0.8
+  ],
+  "Cu": [
+   0.15,
+   0.4
+  ],
+  "Cr": [
+   0.04,
+   0.35
+  ],
+  "Fe": [
+   0,
+   0.7
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#d0d3d6",
+ "tier": 1,
+ "order": 23,
+ "nominal": {
+  "Mg": 1.0,
+  "Si": 0.6,
+  "Cu": 0.275,
+  "Cr": 0.195,
+  "Fe": 0.35
+ },
+ "properties": {
+  "density": 2.7,
+  "yield_strength": 276,
+  "tensile_strength": 310,
+  "elongation": 12,
+  "modulus": 69,
+  "hardness": 107,
+  "solidus": 582,
+  "service_temp": 150,
+  "conductivity": 43,
+  "corrosion": 7
+ },
+ "condition": "T6"
+}

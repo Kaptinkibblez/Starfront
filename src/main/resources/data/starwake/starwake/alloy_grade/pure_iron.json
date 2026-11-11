@@ -1,0 +1,45 @@
+{
+ "name": {
+  "translate": "alloy.starwake.pure_iron",
+  "fallback": "Pure Iron"
+ },
+ "family": "iron",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   0,
+   0.02
+  ],
+  "Mn": [
+   0,
+   0.1
+  ],
+  "Si": [
+   0,
+   0.05
+  ]
+ },
+ "max_other": 0.2,
+ "exact": true,
+ "color": "#b9b9b9",
+ "tier": 1,
+ "order": 0,
+ "nominal": {
+  "C": 0.01,
+  "Mn": 0.05,
+  "Si": 0.025
+ },
+ "properties": {
+  "density": 7.87,
+  "yield_strength": 150,
+  "tensile_strength": 280,
+  "elongation": 40,
+  "modulus": 211,
+  "hardness": 70,
+  "solidus": 1538,
+  "service_temp": 400,
+  "conductivity": 17.6,
+  "corrosion": 2
+ },
+ "condition": "annealed"
+}

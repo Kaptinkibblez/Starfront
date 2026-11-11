@@ -1,0 +1,50 @@
+{
+ "name": {
+  "translate": "alloy.starwake.aisi_1010",
+  "fallback": "AISI 1010 Low-Carbon Steel"
+ },
+ "family": "carbon_steel",
+ "base": "Fe",
+ "ranges": {
+  "C": [
+   0.08,
+   0.13
+  ],
+  "Mn": [
+   0.3,
+   0.6
+  ],
+  "P": [
+   0,
+   0.04
+  ],
+  "S": [
+   0,
+   0.05
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#b0b0b0",
+ "tier": 1,
+ "order": 3,
+ "nominal": {
+  "C": 0.105,
+  "Mn": 0.45,
+  "P": 0.02,
+  "S": 0.025
+ },
+ "properties": {
+  "density": 7.87,
+  "yield_strength": 180,
+  "tensile_strength": 325,
+  "elongation": 28,
+  "modulus": 205,
+  "hardness": 95,
+  "solidus": 1495,
+  "service_temp": 400,
+  "conductivity": 12,
+  "corrosion": 2
+ },
+ "condition": "hot rolled"
+}

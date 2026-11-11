@@ -1,0 +1,57 @@
+{
+ "element": "Zr",
+ "pure": {
+  "density": 6.52,
+  "yield_strength": 230,
+  "tensile_strength": 330,
+  "elongation": 32,
+  "modulus": 88,
+  "hardness": 120,
+  "solidus": 1855,
+  "service_temp": 400,
+  "conductivity": 4.1,
+  "corrosion": 9
+ },
+ "solutes": {
+  "Sn": {
+   "strength": 90,
+   "cap": 2,
+   "ductility": 0.02,
+   "conductivity": 0.3,
+   "corrosion": 0.2,
+   "service": 10
+  },
+  "Fe": {
+   "strength": 150,
+   "cap": 0.3,
+   "ductility": 0.1,
+   "conductivity": 0.4,
+   "corrosion": 0.3,
+   "service": 0.0
+  },
+  "Cr": {
+   "strength": 150,
+   "cap": 0.2,
+   "ductility": 0.1,
+   "conductivity": 0.4,
+   "corrosion": 0.3,
+   "service": 0.0
+  },
+  "O": {
+   "strength": 800,
+   "cap": 0.2,
+   "ductility": 2,
+   "conductivity": 0.5,
+   "corrosion": 0.0,
+   "service": 0.0
+  },
+  "Nb": {
+   "strength": 150,
+   "cap": 2.5,
+   "ductility": 0.02,
+   "conductivity": 0.3,
+   "corrosion": 0.1,
+   "service": 10
+  }
+ }
+}

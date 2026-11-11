@@ -1,0 +1,45 @@
+{
+ "name": {
+  "translate": "alloy.starwake.mg_az31b",
+  "fallback": "AZ31B Magnesium"
+ },
+ "family": "magnesium",
+ "base": "Mg",
+ "ranges": {
+  "Al": [
+   2.5,
+   3.5
+  ],
+  "Zn": [
+   0.6,
+   1.4
+  ],
+  "Mn": [
+   0.2,
+   1.0
+  ]
+ },
+ "max_other": 0.6,
+ "exact": true,
+ "color": "#c2c4c0",
+ "tier": 2,
+ "order": 47,
+ "nominal": {
+  "Al": 3.0,
+  "Zn": 1.0,
+  "Mn": 0.6
+ },
+ "properties": {
+  "density": 1.77,
+  "yield_strength": 200,
+  "tensile_strength": 260,
+  "elongation": 15,
+  "modulus": 45,
+  "hardness": 49,
+  "solidus": 566,
+  "service_temp": 120,
+  "conductivity": 18.5,
+  "corrosion": 2
+ },
+ "condition": "H24"
+}

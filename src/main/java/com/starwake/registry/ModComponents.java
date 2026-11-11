@@ -14,6 +14,12 @@ public final class ModComponents {
 			StarwakeMod.id("oxygen"), DataComponentType.<Integer>builder().persistent(ExtraCodecs.NON_NEGATIVE_INT)
 					.networkSynchronized(ByteBufCodecs.VAR_INT).ignoreSwapAnimation().build());
 
+	/** What a piece of metal is made of (M8a metallurgy). */
+	public static final DataComponentType<com.starwake.metal.Composition> COMPOSITION = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			StarwakeMod.id("composition"), DataComponentType.<com.starwake.metal.Composition>builder()
+					.persistent(com.starwake.metal.Composition.CODEC)
+					.networkSynchronized(com.starwake.metal.Composition.STREAM_CODEC).build());
+
 	private ModComponents() {}
 
 	public static void init() {}

@@ -1,0 +1,16 @@
+{
+ "element": "Hf",
+ "pure": {
+  "density": 13.31,
+  "yield_strength": 240,
+  "tensile_strength": 445,
+  "elongation": 23,
+  "modulus": 78,
+  "hardness": 160,
+  "solidus": 2233,
+  "service_temp": 600,
+  "conductivity": 5,
+  "corrosion": 9
+ },
+ "solutes": {}
+}

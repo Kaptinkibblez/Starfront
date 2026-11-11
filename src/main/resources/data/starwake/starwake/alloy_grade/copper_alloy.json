@@ -1,0 +1,14 @@
+{
+ "name": {
+  "translate": "alloy.starwake.copper_alloy",
+  "fallback": "Copper Alloy"
+ },
+ "family": "copper",
+ "base": "Cu",
+ "ranges": {},
+ "max_other": 100.0,
+ "exact": false,
+ "color": "#c68a58",
+ "tier": 0,
+ "order": 46
+}
