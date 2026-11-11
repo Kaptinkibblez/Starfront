@@ -1,0 +1,45 @@
+{
+ "name": {
+  "translate": "hub_economy.starwake.refinery"
+ },
+ "sells": [
+  {
+   "group": "metals",
+   "price": 0.85,
+   "stock": 512
+  },
+  {
+   "group": "precious",
+   "price": 1.0,
+   "stock": 48
+  },
+  {
+   "group": "rare_earths",
+   "price": 1.0,
+   "stock": 96
+  },
+  {
+   "group": "nonmetals",
+   "price": 0.9,
+   "stock": 256
+  }
+ ],
+ "buys": [
+  {
+   "group": "raw_minerals",
+   "price": 1.4,
+   "stock": 768
+  },
+  {
+   "group": "fuel",
+   "price": 1.3,
+   "stock": 256
+  },
+  {
+   "group": "food",
+   "price": 1.2,
+   "stock": 128
+  }
+ ],
+ "outfitter": "starwake:industrial"
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/commodity_terminal_front",
+    "side": "starwake:block/commodity_terminal_side",
+    "top": "starwake:block/station_panel"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": {
+    "translate": "faction.starwake.verdant_institute"
+  },
+  "code": "VRI",
+  "color": "#C27BFF",
+  "uniform": "#3E2E52",
+  "accent": "#E2C8F5",
+  "description": {
+    "translate": "faction.starwake.verdant_institute.description"
+  },
+  "hubs": [
+    {
+      "kind": "outpost",
+      "economy": "research_post",
+      "template": "outpost_research",
+      "archetypes": [
+        "lush",
+        "crystal",
+        "ocean",
+        "toxic"
+      ],
+      "weight": 1.5
+    },
+    {
+      "kind": "station",
+      "economy": "research_station",
+      "template": "station_port",
+      "weight": 0.5
+    }
+  ],
+  "contracts": [
+    "exploration",
+    "mining",
+    "courier"
+  ]
+}

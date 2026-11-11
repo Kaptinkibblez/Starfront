@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "starwake:block/contract_board",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "starwake:block/contract_board"
+    },
+    "facing=south": {
+      "model": "starwake:block/contract_board",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "starwake:block/contract_board",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": {
+    "translate": "faction.starwake.meridian_collective"
+  },
+  "code": "MMC",
+  "color": "#E8A23A",
+  "uniform": "#5A4630",
+  "accent": "#F2C14E",
+  "description": {
+    "translate": "faction.starwake.meridian_collective.description"
+  },
+  "hubs": [
+    {
+      "kind": "outpost",
+      "economy": "mining_camp",
+      "template": "outpost_mining",
+      "archetypes": [
+        "barren",
+        "desert",
+        "volcanic",
+        "frozen"
+      ],
+      "weight": 2.0
+    },
+    {
+      "kind": "station",
+      "economy": "refinery",
+      "template": "station_refinery",
+      "weight": 1.0
+    }
+  ],
+  "contracts": [
+    "mining",
+    "delivery"
+  ]
+}

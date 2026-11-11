@@ -290,5 +290,11 @@
       "#8EC5FF",
       "#A8D8FF"
     ]
-  }
+  },
+  "minerals": [
+    "bauxite",
+    "cassiterite",
+    "copper",
+    "iron"
+  ]
 }

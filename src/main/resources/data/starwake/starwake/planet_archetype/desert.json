@@ -278,5 +278,13 @@
       "#E8B888",
       "#F0C8A0"
     ]
-  }
+  },
+  "minerals": [
+    "bauxite",
+    "cassiterite",
+    "copper",
+    "gold",
+    "iron",
+    "wolframite"
+  ]
 }

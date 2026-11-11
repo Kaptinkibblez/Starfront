@@ -1,0 +1,100 @@
+{
+ "items": [
+  {
+   "item": "starwake:helm",
+   "price": 1500,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:seat",
+   "price": 150,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:fuel_tank",
+   "price": 600,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:thruster",
+   "price": 400,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:maneuvering_thruster",
+   "price": 250,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:main_engine",
+   "price": 2500,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:landing_gear",
+   "price": 300,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:wing",
+   "price": 200,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:power_plant",
+   "price": 2000,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:cooler",
+   "price": 700,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:shield_generator",
+   "price": 2500,
+   "count": 1,
+   "rep": 200
+  },
+  {
+   "item": "starwake:quantum_drive",
+   "price": 4000,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:jump_drive",
+   "price": 12000,
+   "count": 1,
+   "rep": 300
+  },
+  {
+   "item": "starwake:hull_plating",
+   "price": 160,
+   "count": 16,
+   "rep": -100
+  },
+  {
+   "item": "minecraft:glass",
+   "price": 30,
+   "count": 16,
+   "rep": -100
+  },
+  {
+   "item": "starwake:survey_suit",
+   "price": 900,
+   "count": 1,
+   "rep": -100
+  }
+ ]
+}

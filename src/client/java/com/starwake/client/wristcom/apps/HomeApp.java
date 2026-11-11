@@ -40,8 +40,11 @@ public class HomeApp implements WristcomApp {
 		Component air = !hazards.breathable() ? Component.translatable("hud.starwake.env.no_air")
 				: hazards.toxic() ? Component.translatable("hud.starwake.env.toxic", Math.round(hazards.toxicity() * 100))
 				: Component.translatable("hud.starwake.env.breathable");
-		g.text(font, Component.translatable("wristcom.home.environment", air, Math.round(hazards.temperature())), x + 4, y + 54,
-				hazards.any() ? 0xFFFFB347 : WristcomScreen.DIM, false);
+		boolean sheltered = hazards.any() && com.starwake.planet.PlanetHazards.shelter(minecraft.player, hazards)
+				== com.starwake.planet.PlanetHazards.Shelter.CABIN;
+		Component env = Component.translatable("wristcom.home.environment", air, Math.round(hazards.temperature()));
+		if (sheltered) env = env.copy().append("  ").append(Component.translatable("hud.starwake.env.cabin"));
+		g.text(font, env, x + 4, y + 54, hazards.any() && !sheltered ? 0xFFFFB347 : WristcomScreen.DIM, false);
 
 		ShipEntity ship = minecraft.player.getVehicle() instanceof ShipEntity s ? s : ShipLocalMotion.activeShip();
 		Component shipLine = ship == null ? Component.translatable("wristcom.home.no_ship")

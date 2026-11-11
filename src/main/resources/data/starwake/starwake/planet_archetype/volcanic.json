@@ -338,5 +338,14 @@
       "#FF8A4A",
       "#E06A3A"
     ]
-  }
+  },
+  "minerals": [
+    "chromite",
+    "cinnabar",
+    "gold",
+    "ilmenite",
+    "pentlandite",
+    "sulfur",
+    "wolframite"
+  ]
 }

@@ -21,8 +21,8 @@ public final class WristcomApps {
 		register(new ShipApp());
 		register(new com.starwake.client.wristcom.apps.CrewApp());
 		register(new StarmapApp());
-		register(new ComingSoonApp("contracts", "Co", 0xFFFFC857, 7));
-		register(new ComingSoonApp("trade", "Tr", 0xFF7CFFB2, 7));
+		register(new com.starwake.client.wristcom.apps.ContractsApp());
+		register(new com.starwake.client.wristcom.apps.TradeApp());
 		register(new ComingSoonApp("cargo", "Ca", 0xFFFF9F6B, 8));
 		register(new ComingSoonApp("comms", "Cm", 0xFFB59CFF, 9));
 	}

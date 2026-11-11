@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/contract_board_front",
+    "side": "starwake:block/contract_board_side",
+    "top": "starwake:block/station_panel"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": {
+    "translate": "faction.starwake.halcyon_traders"
+  },
+  "code": "HFT",
+  "color": "#5FD08A",
+  "uniform": "#2E4A38",
+  "accent": "#B8E6C8",
+  "description": {
+    "translate": "faction.starwake.halcyon_traders.description"
+  },
+  "hubs": [
+    {
+      "kind": "station",
+      "economy": "trade_port",
+      "template": "station_port",
+      "weight": 1.5
+    },
+    {
+      "kind": "outpost",
+      "economy": "trading_post",
+      "template": "outpost_settlement",
+      "weight": 0.6
+    }
+  ],
+  "contracts": [
+    "delivery",
+    "courier"
+  ]
+}

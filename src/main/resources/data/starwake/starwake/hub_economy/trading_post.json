@@ -1,0 +1,35 @@
+{
+ "name": {
+  "translate": "hub_economy.starwake.trading_post"
+ },
+ "sells": [
+  {
+   "group": "food",
+   "price": 1.0,
+   "stock": 256
+  },
+  {
+   "group": "supplies",
+   "price": 1.0,
+   "stock": 192
+  },
+  {
+   "group": "fuel",
+   "price": 1.0,
+   "stock": 192
+  }
+ ],
+ "buys": [
+  {
+   "group": "raw_minerals",
+   "price": 1.15,
+   "stock": 256
+  },
+  {
+   "group": "samples",
+   "price": 1.15,
+   "stock": 96
+  }
+ ],
+ "outfitter": "starwake:basic"
+}

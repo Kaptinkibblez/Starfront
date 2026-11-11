@@ -20,6 +20,12 @@ public final class ModNetworking {
 		PayloadTypeRegistry.clientboundPlay().register(SystemInfoPayload.TYPE, SystemInfoPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(SystemInfoRequestPayload.TYPE, SystemInfoRequestPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(JumpTargetPayload.TYPE, JumpTargetPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(EconomyPayload.TYPE, EconomyPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(HubListPayload.TYPE, HubListPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(MarketPayload.TYPE, MarketPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ShopPayload.TYPE, ShopPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ContractBoardPayload.TYPE, ContractBoardPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(TradeActionPayload.TYPE, TradeActionPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipConsoleActionPayload.TYPE, ShipConsoleActionPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipInteractPayload.TYPE, ShipInteractPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipControlPayload.TYPE, ShipControlPayload.CODEC);
@@ -58,6 +64,13 @@ public final class ModNetworking {
 					default -> { }
 				}
 			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(TradeActionPayload.TYPE, (payload, context) -> {
+			if (payload.action().equals("abandon")) {
+				context.player().sendOverlayMessage(com.starwake.trade.Contracts.abandon(context.player(), payload.arg()));
+				return;
+			}
+			com.starwake.trade.Terminals.action(context.player(), payload);
 		});
 		ServerPlayNetworking.registerGlobalReceiver(JumpTargetPayload.TYPE, (payload, context) -> {
 			var player = context.player();

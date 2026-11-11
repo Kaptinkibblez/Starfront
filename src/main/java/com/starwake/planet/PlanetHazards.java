@@ -61,6 +61,8 @@ public final class PlanetHazards {
 
 	/** The pressurized ship cabin the player's head is in, if any. */
 	public static boolean inPressurizedCabin(net.minecraft.world.entity.player.Player player) {
+		// Trade hub interiors and station hangars are pressurized too (M7).
+		if (com.starwake.trade.HubZones.isPressurized(player.level(), player.getEyePosition())) return true;
 		for (ShipEntity ship : ShipCollisions.shipsIn(player.level())) {
 			if (ship.getBoundingBox().inflate(2).contains(player.getEyePosition()) && ship.isInPressurizedCabin(player.getEyePosition())) {
 				return true;

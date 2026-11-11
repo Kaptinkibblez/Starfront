@@ -1,0 +1,14 @@
+{
+ "items": {
+  "minecraft:bread": 4,
+  "minecraft:baked_potato": 3,
+  "minecraft:cooked_beef": 7,
+  "minecraft:cooked_chicken": 5,
+  "minecraft:cooked_cod": 4,
+  "minecraft:apple": 3,
+  "minecraft:carrot": 2,
+  "minecraft:golden_carrot": 30,
+  "minecraft:dried_kelp": 1,
+  "minecraft:mushroom_stew": 6
+ }
+}

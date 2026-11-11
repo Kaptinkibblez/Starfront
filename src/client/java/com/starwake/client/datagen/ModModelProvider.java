@@ -40,6 +40,19 @@ public final class ModModelProvider extends FabricModelProvider {
 			generators.createTrivialCube(block);
 		}
 		ModPlanetBlocks.ores().forEach(ore -> generators.createTrivialCube(ore.block()));
+
+		// Trade hubs (M7)
+		for (Block block : new Block[] {com.starwake.registry.ModHubBlocks.STATION_PANEL, com.starwake.registry.ModHubBlocks.STATION_FLOOR,
+				com.starwake.registry.ModHubBlocks.LIGHT_PANEL, com.starwake.registry.ModHubBlocks.LANDING_PAD}) {
+			generators.createTrivialCube(block);
+		}
+		for (Block block : new Block[] {com.starwake.registry.ModHubBlocks.COMMODITY_TERMINAL, com.starwake.registry.ModHubBlocks.OUTFITTER_TERMINAL,
+				com.starwake.registry.ModHubBlocks.CONTRACT_BOARD}) {
+			generators.createHorizontallyRotatedBlock(block, TexturedModel.ORIENTABLE_ONLY_TOP.updateTexture(t -> t
+					.put(TextureSlot.FRONT, TextureMapping.getBlockTexture(block, "_front"))
+					.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side"))
+					.put(TextureSlot.TOP, TextureMapping.getBlockTexture(com.starwake.registry.ModHubBlocks.STATION_PANEL))));
+		}
 		generators.createTrivialBlock(ModPlanetBlocks.MAT_TURF, TexturedModel.CUBE_BOTTOM_TOP.updateTexture(t -> t
 				.put(TextureSlot.TOP, TextureMapping.getBlockTexture(ModPlanetBlocks.MAT_TURF, "_top"))
 				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModPlanetBlocks.MAT_TURF, "_side"))
@@ -146,6 +159,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.generateFlatItem(ModItems.RAW_FERRITE, ModelTemplates.FLAT_ITEM);
 		ModPlanetBlocks.ores().forEach(ore -> generators.generateFlatItem(ore.raw(), ModelTemplates.FLAT_ITEM));
 		generators.generateFlatItem(ModItems.SURVEY_SUIT, ModelTemplates.FLAT_ITEM);
+		generators.generateFlatItem(com.starwake.registry.ModHubBlocks.SEALED_CARGO, ModelTemplates.FLAT_ITEM);
 		// Element items: textures/item/element/<name>_<form>.png (tools/periodic_table.py).
 		for (var element : com.starwake.chem.Chemistry.elements()) {
 			if (!element.item().getNamespace().equals("starwake")) continue;

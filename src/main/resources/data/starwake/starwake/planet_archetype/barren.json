@@ -241,5 +241,12 @@
     "atmosphere": [
       "#000000"
     ]
-  }
+  },
+  "minerals": [
+    "chromite",
+    "ilmenite",
+    "iron",
+    "pentlandite",
+    "wolframite"
+  ]
 }

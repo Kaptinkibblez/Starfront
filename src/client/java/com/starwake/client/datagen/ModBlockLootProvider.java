@@ -32,6 +32,12 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		dropSelf(ModBlocks.SHIELD_GENERATOR);
 		dropSelf(ModBlocks.QUANTUM_DRIVE);
 		dropSelf(ModBlocks.JUMP_DRIVE);
+		for (var block : new net.minecraft.world.level.block.Block[] {com.starwake.registry.ModHubBlocks.STATION_PANEL,
+				com.starwake.registry.ModHubBlocks.STATION_FLOOR, com.starwake.registry.ModHubBlocks.LIGHT_PANEL,
+				com.starwake.registry.ModHubBlocks.LANDING_PAD, com.starwake.registry.ModHubBlocks.COMMODITY_TERMINAL,
+				com.starwake.registry.ModHubBlocks.OUTFITTER_TERMINAL, com.starwake.registry.ModHubBlocks.CONTRACT_BOARD}) {
+			dropSelf(block);
+		}
 		// Vanilla ore behaviour: drops raw ore, affected by Fortune; Silk Touch drops the block.
 		add(ModBlocks.FERRITE_ORE, createOreDrop(ModBlocks.FERRITE_ORE, ModItems.RAW_FERRITE));
 

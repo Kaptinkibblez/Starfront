@@ -1,0 +1,40 @@
+{
+ "items": [
+  {
+   "item": "starwake:survey_suit",
+   "price": 900,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "minecraft:iron_pickaxe",
+   "price": 60,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "minecraft:torch",
+   "price": 20,
+   "count": 16,
+   "rep": -100
+  },
+  {
+   "item": "minecraft:bread",
+   "price": 30,
+   "count": 8,
+   "rep": -100
+  },
+  {
+   "item": "starwake:fuel_tank",
+   "price": 650,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "minecraft:coal_block",
+   "price": 60,
+   "count": 2,
+   "rep": -100
+  }
+ ]
+}

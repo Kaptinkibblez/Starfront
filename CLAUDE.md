@@ -237,7 +237,17 @@ commit. **Don't start the next milestone until the user confirms the current one
       luminosity-scaled orbits (a 1 C desert at 0.2 Mm, a -71 C frozen world at 0.6 Mm around
       a 0.006 L red dwarf); the Starmap shows the current system; the opened system and the
       player in it survive a restart.)*
-- [ ] **7. Trading.** NPCs with factions, pricing and trade GUIs.
+- [x] **7. Trading.** User's choices (2026-11-11): outposts + space stations, digital credits,
+      dynamic commodities + NPC shops, factions with reputation and contracts, trading at
+      terminals (guards and crew NPCs for life, not traders), Solace rich / galaxy sparser, fly
+      into a hangar held by a pressure field; mid-milestone: "builds based off actual high
+      quality builds, no boxes". *(Verified 2026-11-11: the Overworld Trade Port builds on
+      approach (ribbed octagonal hangar with a lit mouth, catwalks, containers, two-deck core with
+      a reactor atrium, quarters, control room, solar wings, dish); buy/sell at the Commodity
+      Terminal moves stock and credits; the Outfitter sells a Seat; a courier contract accepted
+      at the station and handed in at Neolvuia Trading Post pays out; Wristcom Trade/Contracts
+      apps; hitting crew costs rep and a guard fights back; outposts build at the surface on
+      Neolvuia and Veyra, pressurized inside.)*
 - [ ] **8. Progression.** Fuel, upgrades and crafting chains.
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
 
@@ -591,7 +601,53 @@ normal gravity.
 - Known limits: a planet's sky colour comes from its archetype, not its star; a star's light
   doesn't tint its planets yet.
 
+## How trading works (Milestone 7)
+
+- **Factions** (`trade/Faction`, synced registry `data/<ns>/starwake/faction/*.json`): name, code,
+  colours (uniform/accent for NPC skins), the hubs they run (`hubs`: kind, economy, template,
+  archetypes, weight) and contract types. Four: Solace Accord, Meridian Mining Collective,
+  Halcyon Free Traders, Verdant Research Institute.
+- **Credits and reputation** (`trade/Economy`, SavedData `starwake:economy`): per player, 1000 cr
+  to start, rep -1000..1000 per faction (ranks; < -500 hostile: guards attack, terminals refuse).
+  Rep moves price by `1 - rep/10000`. Synced in `EconomyPayload` on join and after changes.
+- **Hubs** (`trade/TradeHubs`): planned deterministically per system (`plan`, cached). Solace:
+  a station 3 km outside the Overworld's atmosphere + up to 3 outposts (Veyra first); other
+  systems: 50% station, outposts on ~1/3 of planets by archetype rules. A hub **builds when a
+  player comes near** (station 700 blocks, outpost 160; outposts at the surface height), spawns
+  its NPCs and registers pressurized zones (`trade/HubZones`, also used by `PlanetHazards`).
+  HUD beacons: `client/hud/HubHud`. `/starwake hub list|place <template>|rebuild`.
+- **Builds** (`tools/hub_templates.py` -> `starwake/hub_template/*.json`): composed procedurally
+  from shaped modules (octagonal hulls with ribs and flared lips, domes, capsules, tubes) and
+  furnished by helpers (terminal kiosks, catwalks, containers, landing pads with markings,
+  planters, tables, bunks, masts, dishes, silos, headframe, solar fields). Palette characters
+  are assigned automatically (any BMP char). `TradeHubs.place` sets blocks, then runs a
+  **shape-update pass** (`Block.updateFromNeighbourShapes`) so panes/bars/walls/stairs connect.
+  Outposts clear terrain only 2 blocks around what they build. Edit the script and re-run;
+  after `processResources` + `/reload`, `/starwake hub rebuild` replaces built hubs.
+- **Markets** (`trade/Markets`, `TradeData`: `commodity/` groups of items with base prices,
+  `hub_economy/` what each hub kind produces/consumes, `shop/` outfitter lists). Element prices
+  follow crustal rarity (`3 + 40·ppm^-0.3`). Unit price = base x mult x 2^(1 - 2·stock/cap),
+  8% spread, rep factor; stock drifts back to equilibrium lazily (tau 6000 ticks; producers
+  ~80% full, consumers ~15%). Mining camps sell their planet's own minerals. Rep +1 per 400 cr.
+- **Contracts** (`trade/Contracts`): 4 offers per hub per day, seeded by (hub, day, slot):
+  delivery, mining quota, courier (`sealed_cargo` tagged with the contract id), exploration
+  (survey a star 3-12 ly away; completes on arrival). Max 3 active; abandon/expire costs 5 rep.
+- **Terminals** (`trade/block/TerminalBlock`: Commodity Terminal, Outfitter, Contract Board) ->
+  `Terminals.open` -> Market/Shop/ContractBoard payloads -> `client/trade/*Screen`; actions come
+  back as `TradeActionPayload` and the server checks the player is inside that hub.
+- **NPCs** (`trade/HubNpcEntity`, `HubNpcs`): guards (iron sword, attack monsters and hostile
+  players, and whoever hurts them) and crew; faction uniforms from `tools/npc_skins.py`.
+  Hurting one: -25 rep, killing: -150. Hubs near players are restocked every minute.
+- Wristcom: Trade app (credits, standings, the system's hubs), Contracts app (active, abandon).
+
 ## 26.3 gotchas (learned the hard way)
+
+- **`chain` is `iron_chain`** in 26.x (copper chains were added). Colour/copper block families are
+  registered in loops, so grep `Blocks.java` for the family, not the id.
+- `Level.setBlock` with `UPDATE_CLIENTS` updates neighbours' shapes but never the placed block's
+  own: bulk placement needs a second `updateFromNeighbourShapes` pass. Avoid falling blocks and
+  unsupported attachables (buttons, torches, grindstones) in templates; that pass removes them.
+
 
 - **Mouse buttons are SDL numbers in screens:** `MouseButtonEvent.button()` is 1 for left and
   3 for right (`InputConstants.MOUSE_BUTTON_LEFT/RIGHT`), not GLFW's 0/1. Key constants are

@@ -1,0 +1,17 @@
+{
+ "items": {
+  "starwake:boron_powder": 23.0,
+  "starwake:carbon_powder": 11.2,
+  "starwake:silicon_powder": 3.9,
+  "starwake:phosphorus_powder": 8.0,
+  "starwake:sulfur_powder": 9.9,
+  "starwake:germanium_powder": 38.4,
+  "starwake:arsenic_powder": 36.5,
+  "starwake:selenium_powder": 101.3,
+  "starwake:bromine_flask": 33.8,
+  "starwake:antimony_powder": 67.8,
+  "starwake:tellurium_powder": 320.7,
+  "starwake:iodine_powder": 53.8,
+  "starwake:mercury_flask": 86.8
+ }
+}

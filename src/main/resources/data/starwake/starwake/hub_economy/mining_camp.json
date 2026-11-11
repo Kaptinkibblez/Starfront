@@ -1,0 +1,36 @@
+{
+ "name": {
+  "translate": "hub_economy.starwake.mining_camp"
+ },
+ "sells": [
+  {
+   "group": "raw_minerals",
+   "price": 0.7,
+   "stock": 512,
+   "local": true
+  },
+  {
+   "group": "nonmetals",
+   "price": 0.9,
+   "stock": 128
+  }
+ ],
+ "buys": [
+  {
+   "group": "food",
+   "price": 1.5,
+   "stock": 128
+  },
+  {
+   "group": "fuel",
+   "price": 1.4,
+   "stock": 128
+  },
+  {
+   "group": "supplies",
+   "price": 1.4,
+   "stock": 128
+  }
+ ],
+ "outfitter": "starwake:industrial"
+}

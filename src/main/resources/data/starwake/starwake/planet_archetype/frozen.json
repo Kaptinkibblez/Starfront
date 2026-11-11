@@ -308,5 +308,12 @@
       "#BFE0FF",
       "#DDF0FF"
     ]
-  }
+  },
+  "minerals": [
+    "cobaltite",
+    "copper",
+    "gold",
+    "iron",
+    "pentlandite"
+  ]
 }

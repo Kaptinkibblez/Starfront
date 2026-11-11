@@ -1,0 +1,35 @@
+{
+  "name": {
+    "translate": "faction.starwake.solace_accord"
+  },
+  "code": "SAC",
+  "color": "#4FA3FF",
+  "uniform": "#2B3F66",
+  "accent": "#C8D8F0",
+  "description": {
+    "translate": "faction.starwake.solace_accord.description"
+  },
+  "hubs": [
+    {
+      "kind": "station",
+      "economy": "trade_port",
+      "template": "station_port",
+      "weight": 2.0
+    },
+    {
+      "kind": "outpost",
+      "economy": "settlement",
+      "template": "outpost_settlement",
+      "archetypes": [
+        "lush",
+        "ocean"
+      ],
+      "weight": 1.0
+    }
+  ],
+  "contracts": [
+    "delivery",
+    "courier",
+    "exploration"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+ "items": [
+  {
+   "item": "starwake:survey_suit",
+   "price": 800,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:quantum_drive",
+   "price": 3800,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:jump_drive",
+   "price": 11000,
+   "count": 1,
+   "rep": 200
+  },
+  {
+   "item": "minecraft:spyglass",
+   "price": 80,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "minecraft:compass",
+   "price": 40,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "minecraft:glass",
+   "price": 25,
+   "count": 16,
+   "rep": -100
+  }
+ ]
+}

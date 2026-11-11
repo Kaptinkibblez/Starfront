@@ -27,6 +27,10 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(
 				key(ModBlocks.HELM), key(ModBlocks.THRUSTER), key(ModBlocks.MAIN_ENGINE), key(ModBlocks.MANEUVERING_THRUSTER), key(ModBlocks.WING), key(ModBlocks.LANDING_GEAR), key(ModBlocks.FUEL_TANK), key(ModBlocks.SEAT),
 				key(ModBlocks.POWER_PLANT), key(ModBlocks.COOLER), key(ModBlocks.SHIELD_GENERATOR), key(ModBlocks.QUANTUM_DRIVE), key(ModBlocks.JUMP_DRIVE));
+		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(key(com.starwake.registry.ModHubBlocks.STATION_PANEL),
+				key(com.starwake.registry.ModHubBlocks.STATION_FLOOR), key(com.starwake.registry.ModHubBlocks.LIGHT_PANEL),
+				key(com.starwake.registry.ModHubBlocks.LANDING_PAD), key(com.starwake.registry.ModHubBlocks.COMMODITY_TERMINAL),
+				key(com.starwake.registry.ModHubBlocks.OUTFITTER_TERMINAL), key(com.starwake.registry.ModHubBlocks.CONTRACT_BOARD));
 
 		// #starwake:ship_excluded (terrain that never counts as ship) is hand-written JSON in
 		// src/main/resources so it can reference vanilla tags and be tweaked without datagen.

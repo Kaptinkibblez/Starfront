@@ -1,0 +1,15 @@
+{
+ "items": {
+  "starwake:hydrogen_canister": 3,
+  "starwake:helium_canister": 30,
+  "starwake:nitrogen_canister": 2,
+  "starwake:oxygen_canister": 2,
+  "starwake:fluorine_canister": 20,
+  "starwake:neon_canister": 40,
+  "starwake:chlorine_canister": 8,
+  "starwake:argon_canister": 8,
+  "starwake:krypton_canister": 60,
+  "starwake:xenon_canister": 120,
+  "starwake:radon_canister": 2640
+ }
+}

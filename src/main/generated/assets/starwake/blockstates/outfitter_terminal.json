@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "starwake:block/outfitter_terminal",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "starwake:block/outfitter_terminal"
+    },
+    "facing=south": {
+      "model": "starwake:block/outfitter_terminal",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "starwake:block/outfitter_terminal",
+      "y": 270
+    }
+  }
+}

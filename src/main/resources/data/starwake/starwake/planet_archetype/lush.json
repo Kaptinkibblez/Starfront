@@ -351,5 +351,14 @@
       "#8EC5FF",
       "#9FE0D0"
     ]
-  }
+  },
+  "minerals": [
+    "bauxite",
+    "cassiterite",
+    "coal",
+    "copper",
+    "gold",
+    "iron",
+    "pentlandite"
+  ]
 }

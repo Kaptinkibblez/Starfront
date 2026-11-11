@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "starwake:block/commodity_terminal"
+  }
+}

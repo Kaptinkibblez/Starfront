@@ -1,0 +1,14 @@
+{
+ "items": {
+  "minecraft:torch": 1,
+  "minecraft:glass": 2,
+  "minecraft:iron_pickaxe": 45,
+  "minecraft:iron_shovel": 25,
+  "minecraft:bucket": 15,
+  "minecraft:water_bucket": 18,
+  "minecraft:ladder": 1,
+  "minecraft:rail": 2,
+  "starwake:hull_plating": 10,
+  "minecraft:redstone": 3
+ }
+}

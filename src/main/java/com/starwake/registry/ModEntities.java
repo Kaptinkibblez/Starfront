@@ -26,7 +26,20 @@ public final class ModEntities {
 					.fireImmune()
 					.build(SHIP_KEY));
 
+	public static final ResourceKey<EntityType<?>> HUB_NPC_KEY = ResourceKey.create(Registries.ENTITY_TYPE, StarwakeMod.id("hub_npc"));
+
+	/** Hub guards and crew (M7). */
+	public static final EntityType<com.starwake.trade.HubNpcEntity> HUB_NPC = Registry.register(BuiltInRegistries.ENTITY_TYPE, HUB_NPC_KEY,
+			EntityType.Builder.<com.starwake.trade.HubNpcEntity>of(com.starwake.trade.HubNpcEntity::new, MobCategory.MISC)
+					.sized(0.6f, 1.95f)
+					.eyeHeight(1.62f)
+					.clientTrackingRange(8)
+					.build(HUB_NPC_KEY));
+
 	private ModEntities() {}
 
-	public static void init() {}
+	public static void init() {
+		net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(HUB_NPC,
+				com.starwake.trade.HubNpcEntity.createAttributes());
+	}
 }

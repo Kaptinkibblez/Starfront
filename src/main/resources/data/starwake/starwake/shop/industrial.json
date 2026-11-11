@@ -1,0 +1,58 @@
+{
+ "items": [
+  {
+   "item": "starwake:hull_plating",
+   "price": 120,
+   "count": 16,
+   "rep": -100
+  },
+  {
+   "item": "starwake:main_engine",
+   "price": 2300,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:thruster",
+   "price": 380,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:power_plant",
+   "price": 1800,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:cooler",
+   "price": 600,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "starwake:fuel_tank",
+   "price": 550,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "minecraft:iron_pickaxe",
+   "price": 50,
+   "count": 1,
+   "rep": -100
+  },
+  {
+   "item": "minecraft:diamond_pickaxe",
+   "price": 900,
+   "count": 1,
+   "rep": 200
+  },
+  {
+   "item": "minecraft:coal",
+   "price": 50,
+   "count": 16,
+   "rep": -100
+  }
+ ]
+}

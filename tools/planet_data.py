@@ -525,6 +525,7 @@ def archetype_json(kind, a):
         "biome_count": range_json(a["biome_count"]),
         "biomes": biomes,
         "colors": a["colors"],
+        "minerals": sorted({f.split("ore_", 1)[1] for b in a["biomes"] for f in b["features"] if "/ore_" in f} - {"magma"}),
     }
 
 

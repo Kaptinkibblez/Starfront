@@ -41,11 +41,12 @@ import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
  * @param biomes        the biome menu: each with a climate point (vanilla multi-noise) and its
  *                      surface material rule
  * @param colors        orbit colours: surface, secondary, atmosphere glow (one of each picked)
+ * @param minerals      the ore minerals its biomes generate (mining camps sell these, M7)
  */
 public record PlanetArchetype(Component name, double weight, Range orbit, Range radius, Environment environment,
 		List<ResourceKey<DimensionType>> dimensionTypes,
 		List<ResourceKey<NoiseGeneratorSettings>> terrain, List<BlockState> stone, List<BlockState> fluid, Range seaLevel,
-		Range biomeCount, List<BiomeOption> biomes, Colors colors) {
+		Range biomeCount, List<BiomeOption> biomes, Colors colors, List<String> minerals) {
 
 	public static final ResourceKey<Registry<PlanetArchetype>> REGISTRY_KEY =
 			ResourceKey.createRegistryKey(StarwakeMod.id("planet_archetype"));
@@ -101,6 +102,7 @@ public record PlanetArchetype(Component name, double weight, Range orbit, Range 
 			Range.CODEC.fieldOf("sea_level").forGetter(PlanetArchetype::seaLevel),
 			Range.CODEC.optionalFieldOf("biome_count", new Range(1, 3)).forGetter(PlanetArchetype::biomeCount),
 			BiomeOption.CODEC.listOf(1, 32).fieldOf("biomes").forGetter(PlanetArchetype::biomes),
-			Colors.CODEC.fieldOf("colors").forGetter(PlanetArchetype::colors)
+			Colors.CODEC.fieldOf("colors").forGetter(PlanetArchetype::colors),
+			Codec.STRING.listOf().optionalFieldOf("minerals", List.of()).forGetter(PlanetArchetype::minerals)
 	).apply(i, PlanetArchetype::new));
 }

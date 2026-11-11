@@ -290,5 +290,13 @@
       "#E8E07A",
       "#D8F07A"
     ]
-  }
+  },
+  "minerals": [
+    "cinnabar",
+    "cobaltite",
+    "copper",
+    "gold",
+    "sulfur",
+    "wolframite"
+  ]
 }

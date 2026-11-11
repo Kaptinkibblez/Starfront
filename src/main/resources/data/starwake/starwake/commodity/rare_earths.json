@@ -1,0 +1,20 @@
+{
+ "items": {
+  "starwake:scandium_ingot": 18.8,
+  "starwake:yttrium_ingot": 17.0,
+  "starwake:lanthanum_ingot": 16.3,
+  "starwake:cerium_ingot": 14.4,
+  "starwake:praseodymium_ingot": 23.6,
+  "starwake:neodymium_ingot": 16.1,
+  "starwake:samarium_ingot": 25.3,
+  "starwake:europium_ingot": 35.5,
+  "starwake:gadolinium_ingot": 26.1,
+  "starwake:terbium_ingot": 40.9,
+  "starwake:dysprosium_ingot": 27.4,
+  "starwake:holmium_ingot": 40.0,
+  "starwake:erbium_ingot": 30.5,
+  "starwake:thulium_ingot": 51.7,
+  "starwake:ytterbium_ingot": 31.2,
+  "starwake:lutetium_ingot": 45.8
+ }
+}
