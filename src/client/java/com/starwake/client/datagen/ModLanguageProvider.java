@@ -54,6 +54,17 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("screen.starwake.power.quantum", "Quantum: %s%%");
 		builder.add("console.starwake.ship.power", "Power %s, cooling %s, engines %s, shield %s");
 		builder.add("hud.starwake.decoupled", "DECOUPLED");
+		builder.add("key.starwake.chase_camera", "Cockpit / Chase Camera");
+		builder.add("subtitles.starwake.ship.engine_loop", "Ship engines roar");
+		builder.add("subtitles.starwake.ship.thruster_loop", "Thrusters hiss");
+		builder.add("subtitles.starwake.ship.rcs_puff", "Maneuvering thruster puffs");
+		builder.add("subtitles.starwake.ship.quantum_spool", "Quantum drive spools");
+		builder.add("subtitles.starwake.ship.quantum_engage", "Quantum drive engages");
+		builder.add("subtitles.starwake.ship.quantum_travel_loop", "Quantum travel hums");
+		builder.add("subtitles.starwake.ship.quantum_exit", "Ship drops out of quantum");
+		builder.add("subtitles.starwake.ship.alarm", "Cockpit alarm");
+		builder.add("subtitles.starwake.ship.gear", "Landing gear moves");
+		builder.add("subtitles.starwake.ship.reentry_loop", "Re-entry roars");
 		builder.add("hud.starwake.gear_up", "GEAR UP");
 		builder.add("key.starwake.gear", "Landing Gear");
 		builder.add("message.starwake.gear.down", "Landing gear down");

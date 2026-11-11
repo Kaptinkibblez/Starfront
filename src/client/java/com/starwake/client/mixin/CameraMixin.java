@@ -39,10 +39,16 @@ abstract class CameraMixin {
 	 */
 	@Inject(method = "alignWithEntity", at = @At("TAIL"))
 	private void starwake$shipEyeHeight(float partialTicks, CallbackInfo ci) {
-		if (((Camera) (Object) this).isDetached()) return;
+		if (((Camera) (Object) this).isDetached()) {
+			// Chase camera (F4): behind the whole ship rather than behind your head.
+			var chase = com.starwake.client.ship.ChaseCamera.position(partialTicks);
+			if (chase != null) setPosition(chase.add(com.starwake.client.ship.ReentryEffects.shake(partialTicks)));
+			return;
+		}
 		var eye = ShipLocalMotion.eyePosition(partialTicks,
 				net.minecraft.util.Mth.lerp(partialTicks, eyeHeightOld, eyeHeight));
-		if (eye != null) setPosition(eye);
+		// Re-entry buffets the hull: shake the view.
+		if (eye != null) setPosition(eye.add(com.starwake.client.ship.ReentryEffects.shake(partialTicks)));
 	}
 
 	@Inject(method = "setRotation", at = @At("TAIL"))

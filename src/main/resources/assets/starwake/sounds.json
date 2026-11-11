@@ -1,0 +1,82 @@
+{
+  "ship.engine_loop": {
+    "subtitle": "subtitles.starwake.ship.engine_loop",
+    "sounds": [
+      {
+        "name": "starwake:ship/engine_loop"
+      }
+    ]
+  },
+  "ship.thruster_loop": {
+    "subtitle": "subtitles.starwake.ship.thruster_loop",
+    "sounds": [
+      {
+        "name": "starwake:ship/thruster_loop"
+      }
+    ]
+  },
+  "ship.rcs_puff": {
+    "subtitle": "subtitles.starwake.ship.rcs_puff",
+    "sounds": [
+      {
+        "name": "starwake:ship/rcs_puff"
+      }
+    ]
+  },
+  "ship.quantum_spool": {
+    "subtitle": "subtitles.starwake.ship.quantum_spool",
+    "sounds": [
+      {
+        "name": "starwake:ship/quantum_spool"
+      }
+    ]
+  },
+  "ship.quantum_engage": {
+    "subtitle": "subtitles.starwake.ship.quantum_engage",
+    "sounds": [
+      {
+        "name": "starwake:ship/quantum_engage"
+      }
+    ]
+  },
+  "ship.quantum_travel_loop": {
+    "subtitle": "subtitles.starwake.ship.quantum_travel_loop",
+    "sounds": [
+      {
+        "name": "starwake:ship/quantum_travel_loop"
+      }
+    ]
+  },
+  "ship.quantum_exit": {
+    "subtitle": "subtitles.starwake.ship.quantum_exit",
+    "sounds": [
+      {
+        "name": "starwake:ship/quantum_exit"
+      }
+    ]
+  },
+  "ship.alarm": {
+    "subtitle": "subtitles.starwake.ship.alarm",
+    "sounds": [
+      {
+        "name": "starwake:ship/alarm"
+      }
+    ]
+  },
+  "ship.gear": {
+    "subtitle": "subtitles.starwake.ship.gear",
+    "sounds": [
+      {
+        "name": "starwake:ship/gear"
+      }
+    ]
+  },
+  "ship.reentry_loop": {
+    "subtitle": "subtitles.starwake.ship.reentry_loop",
+    "sounds": [
+      {
+        "name": "starwake:ship/reentry_loop"
+      }
+    ]
+  }
+}

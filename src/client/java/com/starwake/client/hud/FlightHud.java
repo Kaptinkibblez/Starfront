@@ -83,6 +83,7 @@ public final class FlightHud {
 		}
 		Font font = minecraft.font;
 		int w = graphics.guiWidth(), h = graphics.guiHeight(), cx = w / 2, cy = h / 2;
+		heatHaze(graphics, w, h, com.starwake.client.ship.ReentryEffects.intensity(deltaTracker.getGameTimeDeltaPartialTick(true)));
 		Camera camera = minecraft.gameRenderer.mainCamera();
 		Matrix4f mvp = camera.getViewRotationProjectionMatrix(new Matrix4f());
 		Vector3f look = new Vector3f(camera.forwardVector());
@@ -110,6 +111,21 @@ public final class FlightHud {
 		altitudeTape(graphics, font, cx + 118, cy, piloted, velocity.y, space);
 		systemsStrip(graphics, font, cx, h - 30, piloted, space);
 		alerts(graphics, font, cx, cy + 34, piloted);
+	}
+
+	/** Re-entry: an orange glow creeping in from the screen edges. */
+	private static void heatHaze(GuiGraphicsExtractor g, int w, int h, float intensity) {
+		if (intensity < 0.03f) return;
+		int bands = 8;
+		for (int i = 0; i < bands; i++) {
+			int inset = i * Math.max(4, Math.min(w, h) / 40);
+			int alpha = (int) (intensity * 70 * (1 - i / (float) bands));
+			int color = (alpha << 24) | 0xFF6A1E;
+			g.fill(inset, inset, w - inset, inset + 6, color);
+			g.fill(inset, h - inset - 6, w - inset, h - inset, color);
+			g.fill(inset, inset + 6, inset + 6, h - inset - 6, color);
+			g.fill(w - inset - 6, inset + 6, w - inset, h - inset - 6, color);
+		}
 	}
 
 	// --- centre -------------------------------------------------------------------------------
@@ -254,7 +270,7 @@ public final class FlightHud {
 	}
 
 	/** Distance from the ship's lowest point to the ground below it, or -1 if out of range. */
-	static double heightAboveGround(ShipEntity ship) {
+	public static double heightAboveGround(ShipEntity ship) {
 		var box = ship.getBoundingBox();
 		Vec3 from = new Vec3(ship.getX(), box.minY, ship.getZ());
 		var hit = ship.level().clip(new net.minecraft.world.level.ClipContext(from, from.add(0, -96, 0),

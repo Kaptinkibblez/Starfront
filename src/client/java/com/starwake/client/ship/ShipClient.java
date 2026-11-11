@@ -50,6 +50,9 @@ public final class ShipClient {
 	/** Star Citizen's quantum key: tap to toggle quantum mode, hold to engage. */
 	private static final KeyMapping QUANTUM = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.quantum", InputConstants.KEY_B, CATEGORY));
+	/** Cockpit / chase camera. */
+	private static final KeyMapping CHASE = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.chase_camera", InputConstants.KEY_F4, CATEGORY));
 	/** Landing gear up/down. */
 	private static final KeyMapping GEAR = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.gear", InputConstants.KEY_N, CATEGORY));
@@ -93,6 +96,10 @@ public final class ShipClient {
 				if (client.player != null && client.gui.screen() == null) client.gui.setScreen(new com.starwake.client.wristcom.WristcomScreen());
 			}
 			ThrusterEffects.tick(client);
+			ShipSounds.tick(client);
+			ChaseCamera.tick(client);
+			ReentryEffects.tick(client);
+			while (CHASE.consumeClick()) ChaseCamera.toggle(client);
 			while (SHIP_CONSOLE.consumeClick()) {
 				if (client.player != null && client.player.getVehicle() instanceof ShipEntity ship) {
 					ClientPlayNetworking.send(new ShipConsoleActionPayload(BlockPos.ZERO, ship.getId(),

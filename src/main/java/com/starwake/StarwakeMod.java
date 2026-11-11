@@ -37,6 +37,7 @@ public final class StarwakeMod implements ModInitializer {
 	public void onInitialize() {
 		// Order matters: items reference blocks, and creative tabs reference both.
 		ModBlocks.init();
+		com.starwake.registry.ModSounds.init();
 		ModBlockEntities.init();
 		ModEntities.init();
 		ModItems.init();

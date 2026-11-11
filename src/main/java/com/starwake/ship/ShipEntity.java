@@ -804,7 +804,13 @@ public class ShipEntity extends Entity {
 		if (!SpaceTravel.isSpace(level())) return Component.translatable("message.starwake.course.not_in_space");
 		if (!systems.hasQuantumDrive()) return Component.translatable("message.starwake.quantum.no_drive");
 		if (jump != null) return null;
-		if (!quantumMode) quantumSpool = 0;
+		if (!quantumMode) {
+			quantumSpool = 0;
+			if (level() instanceof ServerLevel serverLevel) {
+				serverLevel.playSound(null, BlockPos.containing(position()), com.starwake.registry.ModSounds.QUANTUM_SPOOL,
+						net.minecraft.sounds.SoundSource.NEUTRAL, 1.2f, 1.0f);
+			}
+		}
 		quantumMode = true;
 		if (target != null) quantumTarget = target;
 		tickQuantum();
@@ -911,7 +917,7 @@ public class ShipEntity extends Entity {
 		entityData.set(QT_INFO, (int) Math.ceil(route.ticks()));
 		setDeltaMovement(Vec3.ZERO);
 		if (level() instanceof ServerLevel serverLevel) {
-			serverLevel.playSound(null, BlockPos.containing(position()), net.minecraft.sounds.SoundEvents.BEACON_ACTIVATE,
+			serverLevel.playSound(null, BlockPos.containing(position()), com.starwake.registry.ModSounds.QUANTUM_ENGAGE,
 					net.minecraft.sounds.SoundSource.NEUTRAL, 2.0f, 0.5f);
 		}
 		player.sendOverlayMessage(Component.translatable("message.starwake.quantum.engaged", target.displayName(),
@@ -928,10 +934,6 @@ public class ShipEntity extends Entity {
 		Vec3 offset = j.to().subtract(j.from()).normalize().scale(travelled).add(j.from().subtract(position()));
 		entityData.set(QT_OFFSET, new Vector3f((float) offset.x, (float) offset.y, (float) offset.z));
 		entityData.set(QT_INFO, (int) Math.ceil(total - jump.elapsed()));
-		if (level() instanceof ServerLevel serverLevel && jump.elapsed() % 60 == 0) {
-			serverLevel.playSound(null, BlockPos.containing(position()), net.minecraft.sounds.SoundEvents.BEACON_AMBIENT,
-					net.minecraft.sounds.SoundSource.NEUTRAL, 1.5f, 0.6f);
-		}
 		if (level() instanceof ServerLevel serverLevel && (int) Math.ceil(total) - jump.elapsed() == 100) {
 			// 5 s out: start loading the drop-out point so the ship arrives into ready chunks.
 			serverLevel.getChunkSource().addTicketWithRadius(net.minecraft.server.level.TicketType.PORTAL,
@@ -949,7 +951,7 @@ public class ShipEntity extends Entity {
 		SpaceTravel.jump(this, arrival);
 		setDeltaMovement(arrival.subtract(j.from()).normalize().scale(0.6)); // a little momentum out of the jump
 		if (level() instanceof ServerLevel serverLevel) {
-			serverLevel.playSound(null, BlockPos.containing(position()), net.minecraft.sounds.SoundEvents.BEACON_DEACTIVATE,
+			serverLevel.playSound(null, BlockPos.containing(position()), com.starwake.registry.ModSounds.QUANTUM_EXIT,
 					net.minecraft.sounds.SoundSource.NEUTRAL, 2.0f, 0.7f);
 		}
 		if (pilot() instanceof ServerPlayer player) {
@@ -1097,8 +1099,8 @@ public class ShipEntity extends Entity {
 		for (ServerPlayer player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(this)) {
 			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
 		}
-		serverLevel.playSound(null, BlockPos.containing(position()), deploy ? net.minecraft.sounds.SoundEvents.PISTON_EXTEND
-				: net.minecraft.sounds.SoundEvents.PISTON_CONTRACT, net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 0.7f);
+		serverLevel.playSound(null, BlockPos.containing(position()), com.starwake.registry.ModSounds.GEAR,
+				net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, deploy ? 1.0f : 0.85f);
 		if (pilot() instanceof ServerPlayer player) {
 			player.sendOverlayMessage(Component.translatable(deploy ? "message.starwake.gear.down" : "message.starwake.gear.up"));
 		}
