@@ -24,6 +24,8 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModItems.RAW_FERRITE, "Raw Ferrite");
 		builder.add(ModBlocks.HELM, "Helm");
 		builder.add(ModBlocks.THRUSTER, "Thruster");
+		builder.add(ModBlocks.MAIN_ENGINE, "Main Engine");
+		builder.add(ModBlocks.MANEUVERING_THRUSTER, "Maneuvering Thruster");
 		builder.add(ModBlocks.FUEL_TANK, "Fuel Tank");
 		builder.add(ModBlocks.SEAT, "Seat");
 		builder.add(ModBlocks.POWER_PLANT, "Power Plant");
@@ -132,10 +134,15 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("preflight.starwake.multiple_helms", "%s Helms found: a ship can only have one");
 		builder.add("preflight.starwake.no_pilot_room", "The Helm needs 2 free blocks above it for the pilot");
 		builder.add("preflight.starwake.no_thrusters", "No thrusters");
-		builder.add("preflight.starwake.lift_low", "Not enough lift: %s vs weight %s at %sg (need %s). Add downward thrusters or lose mass");
+		builder.add("preflight.starwake.lift_low", "Not enough lift: %s vs weight %s at %sg (need %s). Add downward-facing thrusters around the centre of mass, or lose mass");
 		builder.add("preflight.starwake.lift_ok", "Lift %s vs weight %s at %sg (%sx)");
 		builder.add("preflight.starwake.blocked_exhaust", "%s thruster(s) have blocked exhaust and won't fire");
-		builder.add("preflight.starwake.handling", "Thrust: forward %s, reverse %s, left %s, right %s, down %s");
+		builder.add("preflight.starwake.handling", "Accel m/s²: fwd %s, back %s, left %s, right %s, up %s, down %s");
+		builder.add("preflight.starwake.centre_of_mass", "Centre of mass: %s, %s, %s");
+		builder.add("preflight.starwake.lift_unbalanced", "Lift is off-centre: only %s of %s lift is usable without tipping (weight %s). Spread lift thrusters around the centre of mass");
+		builder.add("preflight.starwake.lift_wasted", "%s of lift is spent keeping level: lift thrusters are off-centre");
+		builder.add("preflight.starwake.turning", "Turning °/s²: pitch %s, yaw %s, roll %s");
+		builder.add("preflight.starwake.cant_turn", "Can't %s: no thrusters can twist the ship that way. Put thrusters (maneuvering thrusters are best) far from the centre of mass, facing across the turn");
 		builder.add("preflight.starwake.cant_move", "No thrust for: %s");
 		builder.add("preflight.starwake.no_tanks", "No fuel tanks");
 		builder.add("preflight.starwake.no_fuel", "Fuel tanks are empty (capacity %s). Load fuel into them");

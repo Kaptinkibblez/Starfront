@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/orientable_vertical",
+  "textures": {
+    "front": "starwake:block/main_engine_front",
+    "side": "starwake:block/main_engine_side"
+  }
+}

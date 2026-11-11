@@ -52,7 +52,7 @@ public final class ShipHud {
 		int heading = Math.floorMod((int) Math.round(Math.toDegrees(Math.atan2(nose.x, -nose.z))), 360);
 		int pitch = (int) Math.round(Math.toDegrees(Math.asin(Mth.clamp(nose.y, -1, 1))));
 		int roll = (int) Math.round(Math.toDegrees(Math.atan2(-right.y, up.y)));
-		double speed = ship.lastMove().length() * 20;
+		double speed = ship.recentSpeed() * 20; // m/s, averaged over half a second
 		graphics.text(font, String.format("%5.1f m/s", speed), x, y, TEXT);
 		String where = SpaceTravel.isSpace(ship.level())
 				? "ORBIT " + orbitName(ship).getString()

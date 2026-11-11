@@ -184,6 +184,12 @@ commit. **Don't start the next milestone until the user confirms the current one
         "obstructed" by the Overworld, align, hold-B engage -> ~2.5 min jump with streaks ->
         drop-out 600 m off Veyra -> fly into the sphere -> arrive nose-down over Veyra;
         Veyra -> Overworld via the console route list; save & quit mid-jump resumes it.)*
+  - [x] 3h. Physicalized thrust (user request, 2026-11-11: "a bunch of thrusters on the bottom
+        looks dumb"; chose flight computer + thrusters do the turning + main/maneuvering
+        thrusters). *(Verified 2026-11-11: SC-style layout hovers level, pitches 30 degrees and
+        drifts forward like a helicopter while holding altitude, yaws on maneuvering
+        thrusters, coupled braking via retros; the bottom-thrusters ship can't yaw or strafe
+        and pre-flight says why; exhaust visible per thruster.)*
   - **Scaffolds (user, 2026-11-11):** the 3a-3g systems are deliberate scaffolds. They copy
     Star Citizen's systems and feel ("just copy star citizen's systems", long quantum travel)
     and will be overhauled once every core system exists. Prefer simple, replaceable code.
@@ -321,6 +327,33 @@ normal gravity.
     streaks during quantum travel. `client/hud/SpaceHud`: body markers with km distances,
     nose reticle, quantum panel under the cockpit panel, blue tunnel tint. Console (R) lists
     routes with distance, ETA and fuel.
+- **Physicalized thrust (3h):** `ship/systems/ShipDynamics` is the rigid-body model shared by
+  pre-flight and the flying ship: centre of mass and inertia tensor from every block's mass
+  (ship_stats), and every clear-exhaust thruster as a force at its block centre, pushing away
+  from its nozzle (so it also makes torque about the centre of mass). New blocks: **Main
+  Engine** (200 thrust, 8 t) and **Maneuvering Thruster** (12 thrust, 0.5 t); the Thruster is
+  the medium one. All the same `ThrusterBlock` class; numbers in JSON.
+  - *Flight computer* (`ShipDynamics.allocate`, Star Citizen IFCS style). Each tick the
+    pilot's intent becomes requests, met in priority order, each scaled down by bisection
+    until achievable: (1) hover: lift along world-up = weight minus vertical drift, zero
+    torque; (2) rotation: torque = inertia x (wanted - current angular velocity) x 0.35; (3)
+    translation along the commanded direction (over-asked = full thrust). Only those rows
+    are pinned (vertical lift, three torques, push direction); other force directions are
+    free, so a tilted VTOL ship drifts like a helicopter. The solve is a cascaded generalized
+    inverse (min-norm throttles via a <=6x6 pseudo-inverse; out-of-range thrusters pinned at 0
+    or 1 and the rest re-solved). Coupled mode: uncommanded axes get a braking request
+    (12% of drift per tick), so stopping needs retro/side thrusters.
+  - Rotation is dynamic: angular velocity (ship frame) integrates thruster torque through the
+    inverse inertia, capped at `turn_rate`, with light passive damping (0.985 air, 0.998 space).
+    No thrusters that can twist an axis = that axis doesn't turn. Mouse-aim and roll set the
+    wanted angular velocity; atmospheric auto-level adds a roll request.
+  - Pre-flight: centre of mass (world coords), lift that's usable without tipping (FAIL
+    "off-centre" if raw lift would do but balanced lift won't; WARN when >15% is wasted),
+    balanced acceleration per axis in m/s², turning authority per axis in deg/s² (weaker
+    direction; WARN "can't pitch/yaw/roll").
+  - Throttles sync as a string (`entryIndex:0-9;`) for `client/ship/ThrusterEffects`
+    (flame for engines, smoke for mains, white puffs for maneuvering thrusters).
+  - Test layouts: `build_sc_ship` (mc.sh) vs `build_powered_ship` (all-bottom thrusters).
 - Known limits (Milestone 4/9): no in-flight editing or turning; ships don't collide with
   each other or push mobs; unattended ships in unloaded chunks freeze (expected); the
   per-frame block re-tessellation needs a cached mesh for big ships.
@@ -383,6 +416,11 @@ normal gravity.
 - **Rider offsets:** vanilla subtracts the passenger's own `getVehicleAttachmentPoint` along
   world Y. On a rotated vehicle, add it back and subtract it rotated (`ShipEntity`), or an
   inverted ship seats you in the ceiling.
+- **Control allocation:** projected coordinate descent on a weighted least-squares stalls
+  when thrusters are near-duplicates and the torque weight is high (it reported 41% of lift
+  wasted on a nearly balanced ship). Use a cascaded generalized inverse with priorities.
+- Third-person screenshots of a ship from outside: `/attribute @s minecraft:camera_distance
+  base set 16`, then F5.
 - After a long same-level teleport the client won't render an entity until its chunk arrives;
   ticket the destination ahead of time.
 - **Ship stats are server data**: remote clients don't have them. Anything the client
@@ -442,7 +480,7 @@ environment before they work.
   to the user. CI (`.github/workflows/build.yml`) also uploads the jar as an artifact on every push.
 - Bump `mod_version` in `gradle.properties` per milestone (0.<milestone>.0).
 - Client test harness: `$scratchpad/mc.sh` (`start_client`, `join_world`, `ingame`, `cmd`,
-  `shot`, `rclick`, `save_quit`, `build_powered_ship X Y Z [coolers]`; the older
+  `shot`, `rclick`, `save_quit`, `build_powered_ship X Y Z [coolers]`, `build_sc_ship X Y Z`; the older
   `build_*_ship` helpers have no power plant, so they no longer pass pre-flight). Always `save_quit` before restarting, because a hard kill
   loses everything since the last autosave. Set `/gamerule fall_damage false` in test worlds.
 - In the cloud container, don't block on long waits: start servers and clients in the

@@ -35,7 +35,7 @@ public record ShipPhysics(double thrustToAccel, double gravityToAccel, double dr
 		double dragSpace, double maxSpeed, double maxSpeedSpace, double turnRateDegrees, double boostMultiplier,
 		double quantumSpeed, double quantumRamp, double quantumFuelPerMm, double quantumMinDistance,
 		double quantumStandoff, double quantumAlignDegrees) {
-	public static final ShipPhysics DEFAULT = new ShipPhysics(0.05, 0.05, 0.9, 0.985, 2.0, 5.0, 60.0, 1.6,
+	public static final ShipPhysics DEFAULT = new ShipPhysics(0.05, 0.05, 0.97, 0.998, 2.0, 5.0, 60.0, 1.6,
 			1500, 100, 50, 20_000, 600, 3.0);
 
 	public static final Codec<ShipPhysics> CODEC = RecordCodecBuilder.create(i -> i.group(

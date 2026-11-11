@@ -1,0 +1,9 @@
+{
+  "blocks": [
+    "starwake:main_engine"
+  ],
+  "mass": 8.0,
+  "thrust": 200,
+  "fuel_burn": 0.15,
+  "power_draw": 16
+}

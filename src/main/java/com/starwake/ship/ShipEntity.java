@@ -44,9 +44,11 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import com.starwake.ship.systems.PowerAllocation;
+import com.starwake.ship.systems.ShipDynamics;
 import com.starwake.ship.systems.ShipSystems;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
@@ -99,6 +101,9 @@ public class ShipEntity extends Entity {
 	 */
 	private static final EntityDataAccessor<org.joml.Vector3fc> QT_OFFSET = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.VECTOR3);
 
+	/** Firing thrusters for exhaust effects (see {@link #publishThrottles}). */
+	private static final EntityDataAccessor<String> THROTTLES = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
+
 	/** {@link #quantumState()} bits. */
 	public static final int QT_MODE = 1, QT_TRAVEL = 2, QT_ALIGNED = 4, QT_OBSTRUCTED = 8, QT_NO_FUEL = 16,
 			QT_TOO_CLOSE = 32, QT_NO_TARGET = 64, QT_SPOOLED = 128, QT_NO_DRIVE = 256;
@@ -130,8 +135,14 @@ public class ShipEntity extends Entity {
 
 	// Derived from the structure (recomputed on load; never saved). Keyed by LOCAL direction.
 	private double mass = 1;
-	private final Map<Direction, Double> thrust = new EnumMap<>(Direction.class);
-	private final Map<Direction, Double> burn = new EnumMap<>(Direction.class);
+	/** Rigid-body model: centre of mass, inertia, thrusters (3h). */
+	private ShipDynamics dynamics = new ShipDynamics().finish();
+	/** Structure entry index of each thruster in {@code dynamics} (for the synced throttles). */
+	private int[] thrusterEntries = new int[0];
+	/** Flight computer output, one per thruster (warm start for the next tick). */
+	private double[] throttles = new double[0];
+	/** Angular velocity in the ship's own frame, radians per tick. */
+	private final Vector3d angularVelocity = new Vector3d();
 	private final List<BlockPos> seats = new ArrayList<>();
 	/** Blocks with any exposed face: the hull used for terrain collision. */
 	private final List<BlockPos> hull = new ArrayList<>();
@@ -193,22 +204,19 @@ public class ShipEntity extends Entity {
 		mass = 0;
 		seats.clear();
 		hull.clear();
-		for (Direction d : Direction.values()) {
-			thrust.put(d, 0.0);
-			burn.put(d, 0.0);
-		}
 		if (structure == null) return;
-		for (ShipStructure.Entry entry : structure.entries()) {
+		ShipDynamics model = new ShipDynamics();
+		List<Integer> thrusterIndex = new ArrayList<>();
+		List<ShipStructure.Entry> entries = structure.entries();
+		for (int index = 0; index < entries.size(); index++) {
+			ShipStructure.Entry entry = entries.get(index);
 			BlockState state = entry.state();
-			ShipStats.BlockStats stats = ShipStats.get(state);
-			mass += stats.mass();
-			if (state.getBlock() instanceof ThrusterBlock) {
-				Direction nozzle = state.getValue(ThrusterBlock.FACING);
-				if (structure.get(entry.pos().relative(nozzle)) == null) { // clear exhaust only
-					thrust.merge(nozzle.getOpposite(), stats.thrust(), Double::sum);
-					burn.merge(nozzle.getOpposite(), stats.fuelBurn(), Double::sum);
-				}
-			} else if (state.getBlock() instanceof HelmBlock) {
+			int before = model.thrusterCount();
+			boolean clear = !(state.getBlock() instanceof ThrusterBlock)
+					|| structure.get(entry.pos().relative(state.getValue(ThrusterBlock.FACING))) == null;
+			model.add(entry.pos(), state, clear);
+			if (model.thrusterCount() > before) thrusterIndex.add(index);
+			if (state.getBlock() instanceof HelmBlock) {
 				helmLocal = entry.pos();
 				forward = state.getValue(HelmBlock.FACING);
 			} else if (state.getBlock() instanceof SeatBlock) {
@@ -221,7 +229,10 @@ public class ShipEntity extends Entity {
 				}
 			}
 		}
-		mass = Math.max(mass, 1);
+		dynamics = model.finish();
+		mass = dynamics.mass();
+		thrusterEntries = thrusterIndex.stream().mapToInt(Integer::intValue).toArray();
+		throttles = new double[thrusterEntries.length];
 
 		systems = new ShipSystems();
 		for (ShipStructure.Entry entry : structure.entries()) {
@@ -355,6 +366,7 @@ public class ShipEntity extends Entity {
 		builder.define(QUANTUM, -1f);
 		builder.define(ORBIT, "");
 		builder.define(QT_STATE, 0);
+		builder.define(THROTTLES, "");
 		builder.define(QT_TARGET, "");
 		builder.define(QT_INFO, 0);
 		builder.define(QT_OFFSET, new Vector3f());
@@ -376,6 +388,17 @@ public class ShipEntity extends Entity {
 	public String quantumTargetId() { return entityData.get(QT_TARGET); }
 	public int quantumInfo() { return entityData.get(QT_INFO); }
 	public boolean isQuantumTravelling() { return (quantumState() & QT_TRAVEL) != 0; }
+
+	/** Positions over the last 10 ticks, for a steady speed readout. */
+	private final Vec3[] recentPositions = new Vec3[10];
+
+	/** Average speed over the last half second, in blocks per tick (HUDs). */
+	public double recentSpeed() {
+		Vec3 now = recentPositions[tickCount % recentPositions.length];
+		Vec3 then = recentPositions[(tickCount + 1) % recentPositions.length];
+		if (now == null || then == null) return lastMove.length();
+		return now.distanceTo(then) / (recentPositions.length - 1);
+	}
 
 	/** Client: how far the quantum offset moved in the last tick (travel speed, for effects). */
 	public Vec3 quantumStep() {
@@ -655,6 +678,7 @@ public class ShipEntity extends Entity {
 		lastTickPos = position();
 		prevOrientation.set(lastTickOrientation);
 		lastTickOrientation.set(orientation());
+		recentPositions[tickCount % recentPositions.length] = position();
 		prevQtOffset.set(lastTickQtOffset);
 		lastTickQtOffset.set(entityData.get(QT_OFFSET));
 		if (lastTickQtOffset.lengthSquared() == 0) prevQtOffset.zero(); // arrival: no lerp back
@@ -668,6 +692,9 @@ public class ShipEntity extends Entity {
 		if (jump != null) {
 			// In quantum travel: the hull holds still while the jump plays out.
 			setDeltaMovement(Vec3.ZERO);
+			angularVelocity.zero();
+			java.util.Arrays.fill(throttles, 0);
+			publishThrottles();
 			tickSystems();
 			tickJump(physics);
 			return false;
@@ -685,10 +712,14 @@ public class ShipEntity extends Entity {
 			// Unpiloted ships station-keep: brake to a stop and hold position, free of charge.
 			velocity = velocity.scale(0.8);
 			if (velocity.lengthSqr() < 1.0e-6) velocity = Vec3.ZERO;
+			angularVelocity.mul(0.8);
+			java.util.Arrays.fill(throttles, 0);
+			rotate();
 		} else {
-			steer(pilot, physics);
-			velocity = applyThrust(pilot, velocity, physics);
+			velocity = fly(pilot, velocity, physics);
+			rotate();
 		}
+		publishThrottles();
 
 		double maxSpeed = SpaceTravel.isSpace(level()) ? physics.maxSpeedSpace() : physics.maxSpeed();
 		if (velocity.lengthSqr() > maxSpeed * maxSpeed) {
@@ -908,53 +939,128 @@ public class ShipEntity extends Entity {
 		return null;
 	}
 
+	// =========================================================================================
+	// Flight computer (3h): physicalized thrust, Star Citizen IFCS style
+	// =========================================================================================
+	//
+	// The pilot asks for motion (WASD/Space/Ctrl, hover) and rotation (mouse-aim, Z/C roll).
+	// That becomes a wanted force and torque in the ship's frame; ShipDynamics.allocate picks
+	// a throttle for every thruster; the force and torque they actually produce, from where
+	// they actually are, accelerate the ship. Poorly placed thrusters mean less thrust, slow
+	// or missing rotation axes, or drift: the design decides how the ship flies.
+
+	/** Pilot input -> thruster throttles -> new velocity (angular velocity is updated too). */
+	private Vec3 fly(Player pilot, Vec3 velocity, ShipPhysics physics) {
+		Input input = pilot instanceof ServerPlayer sp ? sp.getLastClientInput() : Input.EMPTY;
+		boolean space = SpaceTravel.isSpace(level());
+		// Ships are weightless in space (space's 0.15g is only for people on EVA near the hull).
+		double gravity = space ? 0 : Planets.gravityOf(level().dimension());
+		// Power routing and boost scale every thruster; no fuel, no thrust.
+		double scale = fuel() > 0 ? systems.engineFactor(allocation) * (input.shift() ? physics.boostMultiplier() : 1.0) : 0;
+		Quaternionfc q = orientation();
+
+		// Wanted push: "as much as you've got" along each commanded axis.
+		Vector3d force = new Vector3d();
+		Direction left = forward.getCounterClockWise();
+		ask(force, forward, input.forward(), scale);
+		ask(force, forward.getOpposite(), input.backward(), scale);
+		ask(force, left, input.left(), scale);
+		ask(force, left.getOpposite(), input.right(), scale);
+		ask(force, Direction.UP, input.jump(), scale);
+		ask(force, Direction.DOWN, input.sprint(), scale);
+		// Coupled mode (Star Citizen's IFCS): on any axis the pilot isn't commanding, the flight
+		// computer fires the opposite thrusters to null the drift. No retros, no braking.
+		double perVelocity = mass / physics.thrustToAccel() * COUPLED_BRAKING; // force per (block/tick)
+		Vector3f v = q.transformInverse(new Vector3f((float) velocity.x, (float) velocity.y, (float) velocity.z));
+		Direction right = forward.getClockWise();
+		Vector3d fwdAxis = new Vector3d(forward.getStepX(), 0, forward.getStepZ());
+		Vector3d rightAxis = new Vector3d(right.getStepX(), 0, right.getStepZ());
+		Vector3d local = new Vector3d(v.x, v.y, v.z);
+		if (!input.forward() && !input.backward()) force.fma(-local.dot(fwdAxis) * perVelocity, fwdAxis);
+		if (!input.left() && !input.right()) force.fma(-local.dot(rightAxis) * perVelocity, rightAxis);
+		boolean hovering = !input.sprint() && !input.jump() && gravity > 0;
+		if (!input.sprint() && !input.jump() && !hovering) force.add(0, -local.y * perVelocity, 0);
+
+		// Hover assist: hold the ship's weight, whatever its attitude (top priority), and null
+		// vertical drift so it holds altitude.
+		Vector3f upLocal = q.transformInverse(new Vector3f(0, 1, 0));
+		double weight = hovering
+				? Math.max(0, mass * gravity * physics.gravityToAccel() / physics.thrustToAccel() - velocity.y * perVelocity) : 0;
+
+		// Wanted torque: steer the angular velocity toward what the pilot asks for.
+		Vector3d alpha = wantedRotation(pilot, physics, space).sub(angularVelocity).mul(0.35);
+		Vector3d torque = dynamics.inertia().transform(alpha, new Vector3d()).div(physics.thrustToAccel());
+
+		double[] achieved = dynamics.allocate(new Vector3d(upLocal.x, upLocal.y, upLocal.z), weight, torque, force, scale, throttles);
+		if (scale > 0) burnFuel(dynamics.burn(throttles) * scale);
+
+		Vector3f f = q.transform(new Vector3f((float) achieved[0], (float) achieved[1], (float) achieved[2]));
+		Vec3 accel = new Vec3(f.x, f.y, f.z).scale(physics.thrustToAccel() / mass).add(0, -gravity * physics.gravityToAccel(), 0);
+		Vector3d spin = dynamics.inverseInertia().transform(new Vector3d(achieved[3], achieved[4], achieved[5]))
+				.mul(physics.thrustToAccel());
+		angularVelocity.add(spin).mul(space ? 0.998 : 0.985); // slight passive damping; the flight computer does the braking
+		double cap = Math.toRadians(physics.turnRateDegrees()) / 20.0 * 1.25;
+		if (angularVelocity.length() > cap) angularVelocity.normalize(cap);
+		return velocity.add(accel).scale(space ? physics.dragSpace() : physics.dragAtmosphere());
+	}
+
+	/** Fraction of uncommanded velocity the flight computer tries to cancel each tick. */
+	private static final double COUPLED_BRAKING = 0.12;
+
+	/** Adds an "everything along this local direction" request when the key is held. */
+	private void ask(Vector3d force, Direction direction, boolean held, double scale) {
+		if (!held) return;
+		double amount = dynamics.rawThrust(direction) * scale;
+		force.add(direction.getStepX() * amount, direction.getStepY() * amount, direction.getStepZ() * amount);
+	}
+
 	/**
-	 * Mouse-aim steering: rotate the ship's nose toward where the pilot is looking, at most
-	 * {@code turnRate} per tick; Z/C roll about the nose. Rotations that would push the hull
-	 * into terrain are refused.
+	 * Mouse-aim: the angular velocity (ship frame, rad/tick) that turns the nose toward where the
+	 * pilot looks, eased near the target and capped at {@code turn_rate}; Z/C roll; in an
+	 * atmosphere the wings ease level when not rolling. Free-look holds attitude.
 	 */
-	private void steer(Player pilot, ShipPhysics physics) {
+	private Vector3d wantedRotation(Player pilot, ShipPhysics physics, boolean space) {
+		double max = Math.toRadians(physics.turnRateDegrees()) / 20.0;
 		boolean rolling = (controls & (CONTROL_ROLL_LEFT | CONTROL_ROLL_RIGHT)) != 0;
 		boolean freeLook = (controls & CONTROL_FREE_LOOK) != 0;
-		if (freeLook && !rolling) return;
-
-		// Agility scales with thrust-to-mass (more engines = nimbler), within 0.5x-2x of base.
-		double totalThrust = thrust.values().stream().mapToDouble(Double::doubleValue).sum();
-		double agility = Mth.clamp(Math.sqrt(totalThrust / mass / 6.0), 0.5, 2.0);
-		float maxStep = (float) Math.toRadians(physics.turnRateDegrees() / 20.0 * agility);
-
-		Quaternionf next = new Quaternionf(orientation());
-		Vec3 nose = worldDirection(forward);
+		Quaternionfc q = orientation();
+		Vector3d nose = new Vector3d(forward.getStepX(), forward.getStepY(), forward.getStepZ());
+		Vector3d want = new Vector3d();
 		if (!freeLook) {
-			Vec3 look = pilot.getViewVector(1.0f);
-			double angle = Math.acos(Mth.clamp(nose.dot(look), -1.0, 1.0));
+			Vec3 lookWorld = pilot.getViewVector(1.0f);
+			Vector3f l = q.transformInverse(new Vector3f((float) lookWorld.x, (float) lookWorld.y, (float) lookWorld.z));
+			Vector3d look = new Vector3d(l.x, l.y, l.z).normalize();
+			double angle = Math.acos(Mth.clamp(nose.dot(look), -1, 1));
 			if (angle > 1.0e-3) {
-				Vec3 axis = nose.cross(look);
-				if (axis.lengthSqr() < 1.0e-8) axis = worldDirection(Direction.UP); // looking straight back
-				float step = (float) Math.min(angle * 0.25, maxStep); // ease in near the target
-				next = new Quaternionf().rotateAxis(step, (float) axis.normalize().x, (float) axis.normalize().y,
-						(float) axis.normalize().z).mul(next);
+				Vector3d axis = nose.cross(look, new Vector3d());
+				if (axis.lengthSquared() < 1.0e-8) axis.set(0, 1, 0); // looking straight back
+				want.add(axis.normalize().mul(Math.min(angle * 0.2, max)));
 			}
 		}
 		if (rolling) {
-			float roll = ((controls & CONTROL_ROLL_RIGHT) != 0 ? 1 : -1) * maxStep;
-			next = new Quaternionf().rotateAxis(roll, (float) nose.x, (float) nose.y, (float) nose.z).mul(next);
-		} else if (!SpaceTravel.isSpace(level())) {
-			// Atmospheric auto-level: mouse-aim turns accumulate roll; ease the wings level unless
-			// the pilot is rolling on purpose. (Off in space for true 6DOF.)
-			Vector3f up = next.transform(new Vector3f(0, 1, 0));
-			Vector3f right = next.transform(new Vector3f(forward.getClockWise().getStepX(), 0, forward.getClockWise().getStepZ()));
-			double bank = Math.atan2(-right.y, up.y);
+			want.add(new Vector3d(nose).mul((controls & CONTROL_ROLL_RIGHT) != 0 ? max : -max));
+		} else if (!space) {
+			// Atmospheric auto-level: ease the wings level unless the pilot is rolling on purpose.
+			Vector3f up = q.transform(new Vector3f(0, 1, 0));
+			Direction right = forward.getClockWise();
+			Vector3f r = q.transform(new Vector3f(right.getStepX(), 0, right.getStepZ()));
+			double bank = Math.atan2(-r.y, up.y);
 			if (Math.abs(bank) > 1.0e-3 && Math.abs(bank) < Math.PI * 0.9) {
-				float correction = (float) Mth.clamp(-bank * 0.1, -maxStep, maxStep);
-				Vector3f n = next.transform(new Vector3f(forward.getStepX(), forward.getStepY(), forward.getStepZ()));
-				next = new Quaternionf().rotateAxis(correction, n.x, n.y, n.z).mul(next);
+				want.add(new Vector3d(nose).mul(Mth.clamp(-bank * 0.1, -max, max)));
 			}
 		}
-		next.normalize();
-		if (next.equals(orientation(), 1.0e-6f)) return;
-		// If the rotation would dig into terrain, try it slightly higher, so a ship resting
-		// on the ground (even upside down) can always roll or pitch itself free.
+		return want;
+	}
+
+	/**
+	 * Integrates the angular velocity. A rotation that would push the hull into terrain is
+	 * retried slightly higher (so a grounded ship can always right itself), else stopped.
+	 */
+	private void rotate() {
+		double angle = angularVelocity.length();
+		if (angle < 1.0e-7) return;
+		Quaternionf next = new Quaternionf(orientation()).rotateAxis((float) angle,
+				(float) (angularVelocity.x / angle), (float) (angularVelocity.y / angle), (float) (angularVelocity.z / angle)).normalize();
 		for (double lift : new double[] {0, 0.5, 1.0}) {
 			Vec3 at = position().add(0, lift, 0);
 			if (!hullCollides(at, next)) {
@@ -963,54 +1069,32 @@ public class ShipEntity extends Entity {
 				return;
 			}
 		}
+		angularVelocity.zero();
 	}
 
-	/**
-	 * Pilot input -> acceleration with fuel burn. W/S/A/D/Space/Ctrl thrust along the ship's
-	 * own axes, using only thrusters facing that way. Hover assist cancels gravity with
-	 * whatever thrust points up (unless Ctrl is held); Shift boosts.
-	 */
-	private Vec3 applyThrust(Player pilot, Vec3 velocity, ShipPhysics physics) {
-		Input input = pilot instanceof ServerPlayer sp ? sp.getLastClientInput() : Input.EMPTY;
-		boolean space = SpaceTravel.isSpace(level());
-		// Ships are weightless in space (space's 0.15g is only for people on EVA near the hull).
-		double gravity = space ? 0 : Planets.gravityOf(level().dimension());
-		// Boost and engine power both scale thrust (and fuel burn).
-		double boost = (input.shift() ? physics.boostMultiplier() : 1.0) * systems.engineFactor(allocation);
-		Vec3 accel = new Vec3(0, -gravity * physics.gravityToAccel(), 0);
-		double fuelUsed = 0;
-
-		if (fuel() > 0) {
-			Direction left = forward.getCounterClockWise();
-			Map<Direction, Boolean> wanted = Map.of(
-					forward, input.forward(), forward.getOpposite(), input.backward(),
-					left, input.left(), left.getOpposite(), input.right(),
-					Direction.UP, input.jump(), Direction.DOWN, input.sprint());
-			for (var entry : wanted.entrySet()) {
-				if (!entry.getValue()) continue;
-				double a = thrust.get(entry.getKey()) * boost / mass * physics.thrustToAccel();
-				accel = accel.add(worldDirection(entry.getKey()).scale(a));
-				fuelUsed += burn.get(entry.getKey()) * boost;
-			}
-
-			// Hover assist: cancel gravity using every thruster that has an upward component.
-			if (!input.sprint() && !input.jump() && gravity > 0) {
-				double capacity = 0, burnPerThrust = 0;
-				for (Direction d : Direction.values()) {
-					double up = Math.max(0, worldDirection(d).y);
-					capacity += thrust.get(d) * up * systems.engineFactor(allocation);
-					burnPerThrust += burn.get(d) * up;
-				}
-				double needed = mass * gravity;
-				double supplied = Math.min(needed, capacity);
-				if (capacity > 0) {
-					accel = accel.add(0, supplied / mass * physics.thrustToAccel(), 0);
-					fuelUsed += burnPerThrust * (supplied / capacity);
-				}
-			}
+	/** Syncs thruster throttles for exhaust effects: "entryIndex:0-9;" for each firing thruster. */
+	private void publishThrottles() {
+		StringBuilder out = new StringBuilder();
+		for (int k = 0; k < throttles.length; k++) {
+			int level = (int) Math.round(throttles[k] * 9);
+			if (level > 0) out.append(thrusterEntries[k]).append(':').append(level).append(';');
 		}
-		if (fuelUsed > 0) burnFuel(fuelUsed);
-		return velocity.add(accel).scale(space ? physics.dragSpace() : physics.dragAtmosphere());
+		entityData.set(THROTTLES, out.toString());
+	}
+
+	/** Client: firing thrusters as (structure entry index, throttle 0..1). */
+	public Map<Integer, Float> firingThrusters() {
+		Map<Integer, Float> result = new HashMap<>();
+		for (String part : entityData.get(THROTTLES).split(";")) {
+			int colon = part.indexOf(':');
+			if (colon > 0) result.put(Integer.parseInt(part.substring(0, colon)), Integer.parseInt(part.substring(colon + 1)) / 9f);
+		}
+		return result;
+	}
+
+	/** The rigid-body model (centre of mass, inertia, thrusters). */
+	public ShipDynamics dynamics() {
+		return dynamics;
 	}
 
 	/** Fractional fuel accumulates so small burns still drain the tank over time. */

@@ -78,6 +78,7 @@ public final class ShipClient {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			sendControls(client);
 			quantumKey(client);
+			ThrusterEffects.tick(client);
 			while (SHIP_CONSOLE.consumeClick()) {
 				if (client.player != null && client.player.getVehicle() instanceof ShipEntity ship) {
 					ClientPlayNetworking.send(new ShipConsoleActionPayload(BlockPos.ZERO, ship.getId(),

@@ -81,6 +81,23 @@ public final class ModBlocks {
 					.sound(SoundType.METAL)
 					.requiresCorrectToolForDrops());
 
+	/** Main Engine: a big, heavy, thirsty thruster for primary propulsion (3h). */
+	public static final Block MAIN_ENGINE = register("main_engine", ThrusterBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.COLOR_GRAY)
+					.strength(5.0f, 8.0f)
+					.sound(SoundType.METAL)
+					.lightLevel(state -> 4)
+					.requiresCorrectToolForDrops());
+
+	/** Maneuvering Thruster: light, low-thrust; place far from the centre of mass to turn the ship (3h). */
+	public static final Block MANEUVERING_THRUSTER = register("maneuvering_thruster", ThrusterBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.METAL)
+					.strength(3.0f, 6.0f)
+					.sound(SoundType.METAL)
+					.requiresCorrectToolForDrops());
+
 	/** Fuel Tank: stores fuel for the ship's thrusters. */
 	public static final Block FUEL_TANK = register("fuel_tank", FuelTankBlock::new,
 			BlockBehaviour.Properties.of()

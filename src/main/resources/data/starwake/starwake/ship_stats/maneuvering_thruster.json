@@ -1,0 +1,9 @@
+{
+  "blocks": [
+    "starwake:maneuvering_thruster"
+  ],
+  "mass": 0.5,
+  "thrust": 12,
+  "fuel_burn": 0.015,
+  "power_draw": 1
+}
