@@ -19,6 +19,7 @@ public final class ModNetworking {
 		PayloadTypeRegistry.serverboundPlay().register(ShipInteractPayload.TYPE, ShipInteractPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipControlPayload.TYPE, ShipControlPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipPowerPayload.TYPE, ShipPowerPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ShipQuantumPayload.TYPE, ShipQuantumPayload.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(ShipConsoleActionPayload.TYPE,
 				(payload, context) -> ShipConsole.handleAction(context.player(), payload));
@@ -36,6 +37,12 @@ public final class ModNetworking {
 			if (context.player().getVehicle() instanceof com.starwake.ship.ShipEntity ship && ship.pilot() == context.player()) {
 				ship.setAllocation(com.starwake.ship.systems.PowerAllocation.fromPercents(
 						payload.engines(), payload.shields(), payload.quantum()));
+			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(ShipQuantumPayload.TYPE, (payload, context) -> {
+			if (context.player().getVehicle() instanceof com.starwake.ship.ShipEntity ship && ship.pilot() == context.player()) {
+				if (payload.engage()) ship.engageQuantum();
+				else ship.toggleQuantumMode();
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(ShipInteractPayload.TYPE,

@@ -255,11 +255,17 @@ public final class ShipLocalMotion {
 	 * mouse-aim steering then chases that look direction.
 	 */
 	private static boolean turnSeated(LocalPlayer player, ShipEntity s, double dx, double dy) {
-		Vec3 lookLocal = rotateToLocal(s, player.getViewVector(1.0f));
+		// No mouse movement, no change: the round trip through the ship frame isn't exact, and
+		// re-applying it every frame made the view (and so a mouse-aimed ship) slowly drift.
+		if (dx == 0 && dy == 0) return true;
+		// Exact trig (Mth.sin/cos are table lookups, too coarse to round-trip every frame).
+		double wy = Math.toRadians(player.getYRot()), wp = Math.toRadians(player.getXRot());
+		Vec3 look = new Vec3(-Math.sin(wy) * Math.cos(wp), -Math.sin(wp), Math.cos(wy) * Math.cos(wp));
+		Vec3 lookLocal = rotateToLocal(s, look);
 		float yaw = (float) Math.toDegrees(Math.atan2(-lookLocal.x, lookLocal.z)) + (float) dx * 0.15f;
 		float pitch = Mth.clamp((float) Math.toDegrees(Math.asin(Mth.clamp(-lookLocal.y, -1, 1))) + (float) dy * 0.15f, -89f, 89f);
-		float y = yaw * Mth.DEG_TO_RAD, p = pitch * Mth.DEG_TO_RAD;
-		Vec3 d = rotateToWorld(s, new Vec3(-Mth.sin(y) * Mth.cos(p), -Mth.sin(p), Mth.cos(y) * Mth.cos(p)));
+		double y = Math.toRadians(yaw), p = Math.toRadians(pitch);
+		Vec3 d = rotateToWorld(s, new Vec3(-Math.sin(y) * Math.cos(p), -Math.sin(p), Math.cos(y) * Math.cos(p)));
 		float oldYaw = player.getYRot(), oldPitch = player.getXRot();
 		float worldYaw = oldYaw + Mth.wrapDegrees((float) Math.toDegrees(Math.atan2(-d.x, d.z)) - oldYaw);
 		float worldPitch = (float) Math.toDegrees(Math.asin(Mth.clamp(-d.y, -1, 1)));

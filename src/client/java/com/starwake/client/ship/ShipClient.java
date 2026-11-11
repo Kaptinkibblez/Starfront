@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.starwake.StarwakeMod;
 import com.starwake.network.ShipConsoleActionPayload;
 import com.starwake.network.ShipControlPayload;
+import com.starwake.network.ShipQuantumPayload;
 import com.starwake.network.ShipInteractPayload;
 import com.starwake.network.ShipStructurePayload;
 import com.starwake.registry.ModEntities;
@@ -46,6 +47,12 @@ public final class ShipClient {
 			new KeyMapping("key.starwake.free_look", InputConstants.KEY_LALT, CATEGORY));
 	private static final KeyMapping LEAVE_SEAT = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.leave_seat", InputConstants.KEY_X, CATEGORY));
+	/** Star Citizen's quantum key: tap to toggle quantum mode, hold to engage. */
+	private static final KeyMapping QUANTUM = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.quantum", InputConstants.KEY_B, CATEGORY));
+	/** Ticks B must be held to engage (0.75 s). */
+	private static final int QUANTUM_HOLD_TICKS = 15;
+	private static int quantumHeld;
 
 	/** Last control bits sent, so we only send changes. */
 	private static int sentControls = -1;
@@ -70,6 +77,7 @@ public final class ShipClient {
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			sendControls(client);
+			quantumKey(client);
 			while (SHIP_CONSOLE.consumeClick()) {
 				if (client.player != null && client.player.getVehicle() instanceof ShipEntity ship) {
 					ClientPlayNetworking.send(new ShipConsoleActionPayload(BlockPos.ZERO, ship.getId(),
@@ -95,6 +103,24 @@ public final class ShipClient {
 		}
 		while (LEAVE_SEAT.consumeClick()) {
 			ClientPlayNetworking.send(new ShipControlPayload(0, true));
+		}
+	}
+
+	/** B: a tap toggles quantum mode; holding past {@link #QUANTUM_HOLD_TICKS} engages once. */
+	private static void quantumKey(Minecraft client) {
+		while (QUANTUM.consumeClick()) { /* edge presses are handled through isDown below */ }
+		boolean piloting = client.player != null && client.player.getVehicle() instanceof ShipEntity ship
+				&& ship.pilot() == client.player;
+		if (!piloting) {
+			quantumHeld = 0;
+			return;
+		}
+		if (QUANTUM.isDown()) {
+			quantumHeld++;
+			if (quantumHeld == QUANTUM_HOLD_TICKS) ClientPlayNetworking.send(new ShipQuantumPayload(true));
+		} else {
+			if (quantumHeld > 0 && quantumHeld < QUANTUM_HOLD_TICKS) ClientPlayNetworking.send(new ShipQuantumPayload(false));
+			quantumHeld = 0;
 		}
 	}
 

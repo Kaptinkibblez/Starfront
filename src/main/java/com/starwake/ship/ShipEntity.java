@@ -87,6 +87,21 @@ public class ShipEntity extends Entity {
 	private static final EntityDataAccessor<Float> QUANTUM = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	/** Orbited planet's dimension id ("" when not in space / unknown). */
 	private static final EntityDataAccessor<String> ORBIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
+	/** Quantum drive state bits ({@code QT_*}). */
+	private static final EntityDataAccessor<Integer> QT_STATE = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
+	/** Selected quantum target (planet registry id, "" for none). */
+	private static final EntityDataAccessor<String> QT_TARGET = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
+	/** Fuel cost of the selected jump (in quantum mode), or ticks left (while travelling). */
+	private static final EntityDataAccessor<Integer> QT_INFO = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
+	/**
+	 * During a jump: how far the ship has "really" travelled from where it sits. The hull
+	 * stays put in the world until the jump ends; the crew see space as if from start + offset.
+	 */
+	private static final EntityDataAccessor<org.joml.Vector3fc> QT_OFFSET = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.VECTOR3);
+
+	/** {@link #quantumState()} bits. */
+	public static final int QT_MODE = 1, QT_TRAVEL = 2, QT_ALIGNED = 4, QT_OBSTRUCTED = 8, QT_NO_FUEL = 16,
+			QT_TOO_CLOSE = 32, QT_NO_TARGET = 64, QT_SPOOLED = 128, QT_NO_DRIVE = 256;
 
 	/** Control bits from {@link com.starwake.network.ShipControlPayload}. */
 	public static final int CONTROL_ROLL_LEFT = 1, CONTROL_ROLL_RIGHT = 2, CONTROL_FREE_LOOK = 4;
@@ -102,9 +117,14 @@ public class ShipEntity extends Entity {
 	private int fuelCapacity;
 	private PowerAllocation allocation = PowerAllocation.DEFAULT;
 	private ShipSystems systems = new ShipSystems();
-	/** Quantum travel being spooled (null if none), and progress in [0, 1]. Not saved. */
+	/** Quantum drive (3g). Mode, target and spool aren't saved; an unfinished jump is resumed. */
+	private boolean quantumMode;
 	private @Nullable ResourceKey<com.starwake.planet.Planet> quantumTarget;
-	private double quantumProgress;
+	private double quantumSpool;
+	private @Nullable QuantumJump jump;
+	/** Client: travel offset at the previous tick, for interpolation. */
+	private final Vector3f prevQtOffset = new Vector3f();
+	private final Vector3f lastTickQtOffset = new Vector3f();
 	private @Nullable ResourceKey<Level> orbiting;
 	private boolean sealed;
 
@@ -334,6 +354,10 @@ public class ShipEntity extends Entity {
 		builder.define(THERMAL, 1f);
 		builder.define(QUANTUM, -1f);
 		builder.define(ORBIT, "");
+		builder.define(QT_STATE, 0);
+		builder.define(QT_TARGET, "");
+		builder.define(QT_INFO, 0);
+		builder.define(QT_OFFSET, new Vector3f());
 	}
 
 	// =========================================================================================
@@ -346,7 +370,23 @@ public class ShipEntity extends Entity {
 	public float shieldMax() { return entityData.get(SHIELD_MAX); }
 	public float engineFactor() { return entityData.get(ENGINE_FACTOR); }
 	public float thermalFactor() { return entityData.get(THERMAL); }
+	/** Quantum spool 0..1, or -1 when the drive isn't in quantum mode. */
 	public float quantumProgress() { return entityData.get(QUANTUM); }
+	public int quantumState() { return entityData.get(QT_STATE); }
+	public String quantumTargetId() { return entityData.get(QT_TARGET); }
+	public int quantumInfo() { return entityData.get(QT_INFO); }
+	public boolean isQuantumTravelling() { return (quantumState() & QT_TRAVEL) != 0; }
+
+	/** Client: how far the quantum offset moved in the last tick (travel speed, for effects). */
+	public Vec3 quantumStep() {
+		return new Vec3(lastTickQtOffset.x - prevQtOffset.x, lastTickQtOffset.y - prevQtOffset.y, lastTickQtOffset.z - prevQtOffset.z);
+	}
+
+	/** Client: the quantum travel offset, interpolated for rendering. */
+	public Vec3 quantumOffset(float partialTick) {
+		Vector3f v = new Vector3f(prevQtOffset).lerp(lastTickQtOffset, partialTick);
+		return new Vec3(v.x, v.y, v.z);
+	}
 	public String orbitId() { return entityData.get(ORBIT); }
 	public int[] powerPercents() {
 		int packed = entityData.get(POWER_SPLIT);
@@ -437,6 +477,11 @@ public class ShipEntity extends Entity {
 	/** Ship-local coordinates of a world point, using the current transform. */
 	public Vec3 toLocal(Vec3 world) {
 		return toLocal(world, position(), orientation());
+	}
+
+	/** World position of a local point if the ship were at {@code position} with {@code rotation}. */
+	public Vec3 toWorldAt(Vec3 local, Vec3 position, Quaternionfc rotation) {
+		return toWorld(local, position, rotation);
 	}
 
 	private Vec3 toWorld(Vec3 local, Vec3 position, Quaternionfc rotation) {
@@ -610,6 +655,9 @@ public class ShipEntity extends Entity {
 		lastTickPos = position();
 		prevOrientation.set(lastTickOrientation);
 		lastTickOrientation.set(orientation());
+		prevQtOffset.set(lastTickQtOffset);
+		lastTickQtOffset.set(entityData.get(QT_OFFSET));
+		if (lastTickQtOffset.lengthSquared() == 0) prevQtOffset.zero(); // arrival: no lerp back
 	}
 
 	/** @return true if the ship was transferred to another dimension (stop ticking it) */
@@ -617,6 +665,13 @@ public class ShipEntity extends Entity {
 		ShipPhysics physics = ShipPhysics.get();
 		Player pilot = pilot();
 		Vec3 velocity = getDeltaMovement();
+		if (jump != null) {
+			// In quantum travel: the hull holds still while the jump plays out.
+			setDeltaMovement(Vec3.ZERO);
+			tickSystems();
+			tickJump(physics);
+			return false;
+		}
 
 		if (pilot == null && spin.lengthSqr() > 0) {
 			Quaternionf next = new Quaternionf(orientation())
@@ -635,8 +690,9 @@ public class ShipEntity extends Entity {
 			velocity = applyThrust(pilot, velocity, physics);
 		}
 
-		if (velocity.lengthSqr() > physics.maxSpeed() * physics.maxSpeed()) {
-			velocity = velocity.normalize().scale(physics.maxSpeed());
+		double maxSpeed = SpaceTravel.isSpace(level()) ? physics.maxSpeedSpace() : physics.maxSpeed();
+		if (velocity.lengthSqr() > maxSpeed * maxSpeed) {
+			velocity = velocity.normalize().scale(maxSpeed);
 		}
 		setDeltaMovement(velocity);
 		if (velocity.lengthSqr() > 0) {
@@ -657,44 +713,195 @@ public class ShipEntity extends Entity {
 			double regen = systems.shieldRegen() * systems.shieldFactor(allocation);
 			entityData.set(SHIELD, (float) Math.min(systems.shieldCapacity(), shield + regen));
 		}
-		if (quantumTarget != null) {
-			if (!SpaceTravel.isSpace(level())) {
-				cancelQuantum(Component.translatable("message.starwake.quantum.aborted"));
-				return;
-			}
-			double rate = systems.quantumFactor(allocation) / Math.max(1.0, systems.quantumSpool() * 20.0);
-			quantumProgress = Math.min(1.0, quantumProgress + rate);
-			entityData.set(QUANTUM, (float) quantumProgress);
-			if (quantumProgress >= 1.0) {
-				var target = quantumTarget;
-				quantumTarget = null;
-				entityData.set(QUANTUM, -1f);
-				Component result = SpaceTravel.completeCourse(this, target);
-				if (pilot() instanceof ServerPlayer player) player.sendOverlayMessage(result);
+		tickQuantum();
+		if (SpaceTravel.isSpace(level()) && tickCount % 20 == 0) {
+			// "Orbiting" = the nearest planet, for the HUD and as the fallback home.
+			com.starwake.galaxy.SolarSystem.nearest(level().registryAccess(), position())
+					.ifPresent(body -> setOrbiting(body.dimension()));
+		}
+	}
+
+	// =========================================================================================
+	// Quantum drive (3g, Star Citizen style)
+	// =========================================================================================
+	//
+	// 1. Quantum mode (B, or "Set course" on the console) arms the drive and starts the spool.
+	// 2. The target is the destination nearest the ship's nose (or the course set on the
+	//    console). Its marker shows on the HUD; the pilot flies the nose onto it.
+	// 3. Engage (hold B) once spooled, aligned, unobstructed and fuelled: the ship accelerates
+	//    to quantum speed along the line to the target, cruises, and drops out just outside its
+	//    atmosphere. Long trips take minutes. Nothing can steer or stop it once committed.
+
+	/** A jump in progress. */
+	private record QuantumJump(ResourceKey<com.starwake.planet.Planet> target, Vec3 from, Vec3 to, int elapsed) {
+		double distance() { return from.distanceTo(to); }
+	}
+
+	/** Arms the quantum drive (and optionally selects a target). Returns why not, or null. */
+	public @Nullable Component enterQuantumMode(@Nullable ResourceKey<com.starwake.planet.Planet> target) {
+		if (!SpaceTravel.isSpace(level())) return Component.translatable("message.starwake.course.not_in_space");
+		if (!systems.hasQuantumDrive()) return Component.translatable("message.starwake.quantum.no_drive");
+		if (jump != null) return null;
+		if (!quantumMode) quantumSpool = 0;
+		quantumMode = true;
+		if (target != null) quantumTarget = target;
+		tickQuantum();
+		return null;
+	}
+
+	public void exitQuantumMode(@Nullable Component reason) {
+		if (jump != null) return; // committed
+		quantumMode = false;
+		quantumTarget = null;
+		quantumSpool = 0;
+		entityData.set(QUANTUM, -1f);
+		entityData.set(QT_STATE, 0);
+		entityData.set(QT_TARGET, "");
+		if (reason != null && pilot() instanceof ServerPlayer player) player.sendOverlayMessage(reason);
+	}
+
+	/** Pilot pressed B: toggle quantum mode. */
+	public void toggleQuantumMode() {
+		if (jump != null) return;
+		if (quantumMode) {
+			exitQuantumMode(Component.translatable("message.starwake.quantum.off"));
+		} else {
+			Component error = enterQuantumMode(null);
+			if (pilot() instanceof ServerPlayer player) {
+				player.sendOverlayMessage(error != null ? error : Component.translatable("message.starwake.quantum.on"));
 			}
 		}
 	}
 
-	/** Starts spooling the quantum drive toward a planet (server). */
-	public @Nullable Component startQuantum(ResourceKey<com.starwake.planet.Planet> target) {
-		if (!systems.hasQuantumDrive()) return Component.translatable("message.starwake.quantum.no_drive");
-		if (systems.quantumFactor(allocation) <= 0) return Component.translatable("message.starwake.quantum.no_power");
-		quantumTarget = target;
-		quantumProgress = 0;
-		entityData.set(QUANTUM, 0f);
-		return null;
+	/** Spools, auto-targets and evaluates the route every tick while in quantum mode. */
+	private void tickQuantum() {
+		if (jump != null || !quantumMode) return;
+		if (!SpaceTravel.isSpace(level()) || pilot() == null || !systems.hasQuantumDrive()) {
+			exitQuantumMode(Component.translatable("message.starwake.quantum.aborted"));
+			return;
+		}
+		ShipPhysics physics = ShipPhysics.get();
+		var access = level().registryAccess();
+		Vec3 nose = worldDirection(forward);
+
+		// Auto-target whatever destination marker the nose is on (within 10 degrees).
+		double bestAngle = Math.toRadians(10);
+		for (var body : com.starwake.galaxy.SolarSystem.bodies(access)) {
+			if (!body.enterable()) continue;
+			Vec3 to = body.body().position().subtract(position());
+			double angle = Math.acos(Mth.clamp(nose.dot(to.normalize()), -1, 1));
+			if (angle < bestAngle) {
+				bestAngle = angle;
+				quantumTarget = body.key();
+			}
+		}
+
+		double rate = systems.quantumFactor(allocation) / Math.max(1.0, systems.quantumSpool() * 20.0);
+		boolean wasSpooled = quantumSpool >= 1;
+		quantumSpool = Math.min(1.0, quantumSpool + rate);
+		if (!wasSpooled && quantumSpool >= 1 && level() instanceof ServerLevel serverLevel) {
+			serverLevel.playSound(null, BlockPos.containing(position()), net.minecraft.sounds.SoundEvents.BEACON_POWER_SELECT,
+					net.minecraft.sounds.SoundSource.NEUTRAL, 1.0f, 1.4f);
+		}
+		entityData.set(QUANTUM, (float) quantumSpool);
+
+		int state = QT_MODE | (quantumSpool >= 1 ? QT_SPOOLED : 0);
+		var target = quantumTarget == null ? null : com.starwake.galaxy.SolarSystem.get(access, quantumTarget).orElse(null);
+		if (target == null) {
+			state |= QT_NO_TARGET;
+			entityData.set(QT_TARGET, "");
+			entityData.set(QT_INFO, 0);
+		} else {
+			SpaceTravel.Route route = SpaceTravel.route(this, target);
+			Vec3 dir = route.arrival().subtract(position()).normalize();
+			if (Math.acos(Mth.clamp(nose.dot(dir), -1, 1)) < Math.toRadians(physics.quantumAlignDegrees())) state |= QT_ALIGNED;
+			if (route.obstruction() != null) state |= QT_OBSTRUCTED;
+			if (route.tooClose()) state |= QT_TOO_CLOSE;
+			if (fuel() < route.fuel()) state |= QT_NO_FUEL;
+			entityData.set(QT_TARGET, target.key().identifier().toString());
+			entityData.set(QT_INFO, route.fuel());
+		}
+		entityData.set(QT_STATE, state);
 	}
 
-	private void cancelQuantum(Component reason) {
-		quantumTarget = null;
+	/** Pilot held B: jump if everything checks out, else say what's missing. */
+	public void engageQuantum() {
+		if (jump != null || !quantumMode || !(pilot() instanceof ServerPlayer player)) return;
+		tickQuantum();
+		int state = quantumState();
+		String problem = (state & QT_NO_TARGET) != 0 ? "no_target"
+				: (state & QT_SPOOLED) == 0 ? "not_spooled"
+				: (state & QT_TOO_CLOSE) != 0 ? "too_close"
+				: (state & QT_OBSTRUCTED) != 0 ? "obstructed"
+				: (state & QT_NO_FUEL) != 0 ? "no_fuel"
+				: (state & QT_ALIGNED) == 0 ? "not_aligned" : null;
+		if (problem != null) {
+			player.sendOverlayMessage(Component.translatable("message.starwake.quantum." + problem));
+			return;
+		}
+		var target = com.starwake.galaxy.SolarSystem.get(level().registryAccess(), quantumTarget).orElseThrow();
+		SpaceTravel.Route route = SpaceTravel.route(this, target);
+		useFuel(route.fuel());
+		jump = new QuantumJump(target.key(), position(), route.arrival(), 0);
+		quantumMode = false;
 		entityData.set(QUANTUM, -1f);
-		if (pilot() instanceof ServerPlayer player) player.sendOverlayMessage(reason);
+		entityData.set(QT_STATE, QT_TRAVEL);
+		entityData.set(QT_INFO, (int) Math.ceil(route.ticks()));
+		setDeltaMovement(Vec3.ZERO);
+		if (level() instanceof ServerLevel serverLevel) {
+			serverLevel.playSound(null, BlockPos.containing(position()), net.minecraft.sounds.SoundEvents.BEACON_ACTIVATE,
+					net.minecraft.sounds.SoundSource.NEUTRAL, 2.0f, 0.5f);
+		}
+		player.sendOverlayMessage(Component.translatable("message.starwake.quantum.engaged", target.displayName(),
+				com.starwake.galaxy.SolarSystem.formatTime(route.ticks())));
+	}
+
+	/** Advances a jump in progress; at the end, moves the ship to the drop-out point. */
+	private void tickJump(ShipPhysics physics) {
+		QuantumJump j = jump;
+		jump = new QuantumJump(j.target(), j.from(), j.to(), j.elapsed() + 1);
+		double distance = j.distance();
+		double total = com.starwake.galaxy.SolarSystem.travelTicks(distance, physics.quantumSpeed(), physics.quantumRamp());
+		double travelled = com.starwake.galaxy.SolarSystem.travelled(distance, physics.quantumSpeed(), physics.quantumRamp(), jump.elapsed());
+		Vec3 offset = j.to().subtract(j.from()).normalize().scale(travelled).add(j.from().subtract(position()));
+		entityData.set(QT_OFFSET, new Vector3f((float) offset.x, (float) offset.y, (float) offset.z));
+		entityData.set(QT_INFO, (int) Math.ceil(total - jump.elapsed()));
+		if (level() instanceof ServerLevel serverLevel && jump.elapsed() % 60 == 0) {
+			serverLevel.playSound(null, BlockPos.containing(position()), net.minecraft.sounds.SoundEvents.BEACON_AMBIENT,
+					net.minecraft.sounds.SoundSource.NEUTRAL, 1.5f, 0.6f);
+		}
+		if (level() instanceof ServerLevel serverLevel && (int) Math.ceil(total) - jump.elapsed() == 100) {
+			// 5 s out: start loading the drop-out point so the ship arrives into ready chunks.
+			serverLevel.getChunkSource().addTicketWithRadius(net.minecraft.server.level.TicketType.PORTAL,
+					net.minecraft.world.level.ChunkPos.containing(BlockPos.containing(j.to())), 3);
+		}
+		if (jump.elapsed() < total) return;
+
+		// Drop out.
+		jump = null;
+		entityData.set(QT_STATE, 0);
+		entityData.set(QT_TARGET, "");
+		entityData.set(QT_OFFSET, new Vector3f());
+		Vec3 arrival = j.to();
+		com.starwake.galaxy.SolarSystem.get(level().registryAccess(), j.target()).ifPresent(t -> setOrbiting(t.dimension()));
+		SpaceTravel.jump(this, arrival);
+		setDeltaMovement(arrival.subtract(j.from()).normalize().scale(0.6)); // a little momentum out of the jump
+		if (level() instanceof ServerLevel serverLevel) {
+			serverLevel.playSound(null, BlockPos.containing(position()), net.minecraft.sounds.SoundEvents.BEACON_DEACTIVATE,
+					net.minecraft.sounds.SoundSource.NEUTRAL, 2.0f, 0.7f);
+		}
+		if (pilot() instanceof ServerPlayer player) {
+			player.sendOverlayMessage(Component.translatable("message.starwake.quantum.arrived",
+					SpaceTravel.planetName(level(), orbiting)));
+		}
 	}
 
 	/** The passenger sitting at the Helm, if any. */
 	public @Nullable Player pilot() {
 		for (Entity passenger : getPassengers()) {
-			if (passenger instanceof Player player && helmLocal.equals(seatOf.get(player.getUUID()))) {
+			// seatOf(...) reads the synced copy on clients: the client's own map can be stale when
+			// passengers arrive before the structure (e.g. after loading a save).
+			if (passenger instanceof Player player && helmLocal.equals(seatOf(player))) {
 				return player;
 			}
 		}
@@ -766,7 +973,8 @@ public class ShipEntity extends Entity {
 	private Vec3 applyThrust(Player pilot, Vec3 velocity, ShipPhysics physics) {
 		Input input = pilot instanceof ServerPlayer sp ? sp.getLastClientInput() : Input.EMPTY;
 		boolean space = SpaceTravel.isSpace(level());
-		double gravity = Planets.gravityOf(level().dimension());
+		// Ships are weightless in space (space's 0.15g is only for people on EVA near the hull).
+		double gravity = space ? 0 : Planets.gravityOf(level().dimension());
 		// Boost and engine power both scale thrust (and fuel burn).
 		double boost = (input.shift() ? physics.boostMultiplier() : 1.0) * systems.engineFactor(allocation);
 		Vec3 accel = new Vec3(0, -gravity * physics.gravityToAccel(), 0);
@@ -1013,7 +1221,11 @@ public class ShipEntity extends Entity {
 	protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
 		BlockPos seat = seatOf(passenger);
 		Vec3 point = toWorld(seatPoint(seat == null ? helmLocal : seat)).subtract(position());
-		return point;
+		// Vanilla then subtracts the rider's own attachment offset along *world* Y. Swap that for
+		// the same offset along the ship's up, or a rider in an inverted ship sits in the ceiling.
+		Vec3 own = passenger.getVehicleAttachmentPoint(this);
+		Vector3f rotated = orientation().transform(new Vector3f((float) own.x, (float) own.y, (float) own.z));
+		return point.add(own).subtract(rotated.x, rotated.y, rotated.z);
 	}
 
 	@Override
@@ -1078,6 +1290,16 @@ public class ShipEntity extends Entity {
 		}
 		lastTickOrientation.set(orientation());
 		prevOrientation.set(orientation());
+		// A jump in progress resumes where it was (target, start, drop-out point, ticks so far).
+		input.read("quantum_target", ResourceKey.codec(com.starwake.planet.Planets.REGISTRY_KEY)).ifPresent(target -> {
+			var from = input.read("quantum_from", Vec3.CODEC);
+			var to = input.read("quantum_to", Vec3.CODEC);
+			if (from.isPresent() && to.isPresent()) {
+				jump = new QuantumJump(target, from.get(), to.get(), input.getIntOr("quantum_elapsed", 0));
+				entityData.set(QT_STATE, QT_TRAVEL);
+				entityData.set(QT_TARGET, target.identifier().toString());
+			}
+		});
 	}
 
 	@Override
@@ -1090,6 +1312,12 @@ public class ShipEntity extends Entity {
 		output.store("orientation", ExtraCodecs.QUATERNIONF, orientation());
 		if (orbiting != null) {
 			output.store("orbiting", Level.RESOURCE_KEY_CODEC, orbiting);
+		}
+		if (jump != null) {
+			output.store("quantum_target", ResourceKey.codec(com.starwake.planet.Planets.REGISTRY_KEY), jump.target());
+			output.store("quantum_from", Vec3.CODEC, jump.from());
+			output.store("quantum_to", Vec3.CODEC, jump.to());
+			output.putInt("quantum_elapsed", jump.elapsed());
 		}
 		if (structure != null) {
 			output.store("structure", ShipStructure.CODEC, structure);

@@ -81,10 +81,8 @@ public final class ShipHud {
 			graphics.text(font, String.format("OVERHEAT  plants %d%%", Math.round(ship.thermalFactor() * 100)), x, line, 0xFFFF6A4D);
 			line += 10;
 		}
-		float quantum = ship.quantumProgress();
-		if (quantum >= 0) {
-			graphics.text(font, Component.translatable("hud.starwake.qt", Math.round(quantum * 100)), x, line, 0xFFC27BFF);
-			graphics.fill(x + 50, line + 2, x + 50 + (int) ((WIDTH - 50) * quantum), line + 6, 0xFFC27BFF);
+		if (ship.isQuantumTravelling()) {
+			graphics.text(font, Component.translatable("hud.starwake.qt.short"), x, line, 0xFFC27BFF);
 			line += 10;
 		}
 		if (!piloting) {

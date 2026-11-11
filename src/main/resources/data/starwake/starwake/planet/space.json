@@ -4,5 +4,16 @@
   },
   "dimension": "starwake:space",
   "gravity": 0.15,
-  "destination": false
+  "destination": false,
+  "body": {
+    "name": {
+      "translate": "star.starwake.solace"
+    },
+    "position": [0, 0, 0],
+    "radius": 40000,
+    "color": "#FFF1C8",
+    "secondary_color": "#FFD27A",
+    "atmosphere_color": "#FFB347",
+    "star": true
+  }
 }

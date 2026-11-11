@@ -14,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
-import com.starwake.ship.data.ShipPhysics;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -42,7 +41,8 @@ public final class ShipConsole {
 	public static void openShip(ServerPlayer player, ShipEntity ship) {
 		List<Integer> status = new ArrayList<>();
 		List<Component> lines = new ArrayList<>();
-		double gravity = Planets.gravityOf(ship.level().dimension());
+		// Ships are weightless in space (see ShipEntity.applyThrust).
+		double gravity = SpaceTravel.isSpace(ship.level()) ? 0 : Planets.gravityOf(ship.level().dimension());
 		add(status, lines, PreflightReport.Status.INFO, Component.translatable("console.starwake.ship.mass",
 				ship.structure() == null ? 0 : ship.structure().entries().size(), String.format("%.1f", ship.mass()),
 				String.format("%.2f", gravity)));
@@ -61,11 +61,21 @@ public final class ShipConsole {
 		List<Identifier> destinations = new ArrayList<>();
 		List<Component> destinationNames = new ArrayList<>();
 		if (inSpace) {
-			add(status, lines, PreflightReport.Status.INFO, Component.translatable("console.starwake.ship.orbiting",
-					SpaceTravel.planetName(ship.level(), ship.orbiting()), ShipPhysics.get().courseFuelCost()));
-			for (var planet : SpaceTravel.destinations(ship)) {
-				destinations.add(planet.key().identifier());
-				destinationNames.add(planet.value().name());
+			add(status, lines, PreflightReport.Status.INFO, Component.translatable("console.starwake.ship.near",
+					SpaceTravel.planetName(ship.level(), ship.orbiting())));
+			// Quantum routes, nearest first: distance, travel time and fuel, like a nav computer.
+			for (SpaceTravel.Route route : SpaceTravel.destinations(ship)) {
+				var problem = route.tooClose() ? "too_close" : route.obstruction() != null ? "obstructed"
+						: route.fuel() > ship.fuel() ? "no_fuel" : null;
+				add(status, lines, problem == null ? PreflightReport.Status.PASS : PreflightReport.Status.WARN,
+						Component.translatable("console.starwake.ship.route", route.target().displayName(),
+								com.starwake.galaxy.SolarSystem.formatDistance(route.distance()),
+								com.starwake.galaxy.SolarSystem.formatTime(route.ticks()), route.fuel(),
+								problem == null ? Component.empty() : Component.translatable("console.starwake.ship.route." + problem)));
+				if (!route.tooClose()) {
+					destinations.add(route.target().key().identifier());
+					destinationNames.add(route.target().displayName());
+				}
 			}
 		} else {
 			add(status, lines, PreflightReport.Status.INFO, Component.translatable("console.starwake.ship.to_space",
@@ -110,7 +120,7 @@ public final class ShipConsole {
 					openShip(player, ship);
 				} else if (payload.action() == ShipConsoleActionPayload.Action.SET_COURSE) {
 					Component error = SpaceTravel.setCourse(ship, ResourceKey.create(Planets.REGISTRY_KEY, payload.target()));
-					player.sendOverlayMessage(error != null ? error : Component.translatable("message.starwake.quantum.spooling"));
+					player.sendOverlayMessage(error != null ? error : Component.translatable("message.starwake.quantum.course"));
 					openShip(player, ship);
 				} else {
 					Component error = ShipAssembler.disassemble(ship);

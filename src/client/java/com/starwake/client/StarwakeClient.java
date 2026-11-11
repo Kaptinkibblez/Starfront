@@ -16,6 +16,8 @@ public final class StarwakeClient implements ClientModInitializer {
 		ModClientNetworking.init();
 		ShipClient.init();
 		ShipHud.init();
+		com.starwake.client.hud.SpaceHud.init();
+		com.starwake.client.space.SpaceRenderer.init();
 		StarwakeMod.LOGGER.info("Starwake client initialized");
 	}
 }

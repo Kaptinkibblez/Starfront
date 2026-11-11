@@ -2,6 +2,8 @@ package com.starwake.planet;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.starwake.galaxy.Body;
+import java.util.Optional;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceKey;
@@ -18,12 +20,15 @@ import net.minecraft.world.level.Level;
  * @param dimension the dimension the planet's surface lives in
  * @param gravity     gravity relative to the Overworld (1.0 = normal, 0.5 = half)
  * @param destination whether ships can set a course here (false for space itself)
+ * @param body        where the planet sits in space and how it looks from orbit (3g). Space's
+ *                    own entry uses this for the system's star.
  */
-public record Planet(Component name, ResourceKey<Level> dimension, double gravity, boolean destination) {
+public record Planet(Component name, ResourceKey<Level> dimension, double gravity, boolean destination, Optional<Body> body) {
 	public static final Codec<Planet> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ComponentSerialization.CODEC.fieldOf("name").forGetter(Planet::name),
 			Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(Planet::dimension),
 			Codec.doubleRange(0.05, 4.0).optionalFieldOf("gravity", 1.0).forGetter(Planet::gravity),
-			Codec.BOOL.optionalFieldOf("destination", true).forGetter(Planet::destination)
+			Codec.BOOL.optionalFieldOf("destination", true).forGetter(Planet::destination),
+			Body.CODEC.optionalFieldOf("body").forGetter(Planet::body)
 	).apply(instance, Planet::new));
 }

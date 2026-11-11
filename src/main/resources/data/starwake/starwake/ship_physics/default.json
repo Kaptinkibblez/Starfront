@@ -4,7 +4,13 @@
   "drag_atmosphere": 0.9,
   "drag_space": 0.985,
   "max_speed": 2.0,
+  "max_speed_space": 5.0,
   "turn_rate": 60.0,
   "boost_multiplier": 1.6,
-  "course_fuel_cost": 150
+  "quantum_speed": 1500,
+  "quantum_ramp": 100,
+  "quantum_fuel_per_mm": 50,
+  "quantum_min_distance": 20000,
+  "quantum_standoff": 600,
+  "quantum_align": 3.0
 }

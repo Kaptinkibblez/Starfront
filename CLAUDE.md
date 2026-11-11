@@ -49,7 +49,7 @@ com.starwake
 ├── planet/                 planet definitions, dimensions, gravity, atmosphere
 ├── worldgen/               procedural terrain, biomes, and ore features
 ├── ship/                   ship entity, launch sequence, interior pocket dimension
-├── galaxy/                 seeded star systems, galaxy coordinates, travel
+├── galaxy/                 star system layout (Body, SolarSystem); seeded systems in M6
 ├── trade/                  factions, NPCs, price model, trade menus
 ├── progression/            fuel, upgrades, crafting chains
 ├── network/                custom payloads (C2S/S2C), one record per packet
@@ -178,8 +178,15 @@ commit. **Don't start the next milestone until the user confirms the current one
         overheating/underpowered/shield/quantum checks; power triangle sliders re-route
         live; cockpit HUD; quantum spool then arrival in Veyra orbit; shields absorbing
         crash impacts, with the excess hurting crew.)*
-  - [ ] 3g. Space as a real place: planets rendered as spheres in space, enter by flying
-        into them, quantum travel between them.
+  - [x] 3g. Space as a real place: planets rendered as spheres in space, enter by flying
+        into them, quantum travel between them. *(Verified 2026-11-11: Overworld -> orbit
+        (ship emerges pointing away from the planet) -> quantum mode, auto-target, spool,
+        "obstructed" by the Overworld, align, hold-B engage -> ~2.5 min jump with streaks ->
+        drop-out 600 m off Veyra -> fly into the sphere -> arrive nose-down over Veyra;
+        Veyra -> Overworld via the console route list; save & quit mid-jump resumes it.)*
+  - **Scaffolds (user, 2026-11-11):** the 3a-3g systems are deliberate scaffolds. They copy
+    Star Citizen's systems and feel ("just copy star citizen's systems", long quantum travel)
+    and will be overhauled once every core system exists. Prefer simple, replaceable code.
 - [ ] **4. Ship editing.** Place and break blocks on assembled ships (turning moved to 3d).
 - [ ] **5. Procedural planets.** Terrain, biomes and ores seeded by galaxy
       coordinates (decision B).
@@ -196,7 +203,7 @@ A planet is a set of JSON files. Copy Veyra's and rename them to add one:
 
 | File | Controls |
 |---|---|
-| `data/starwake/starwake/planet/<id>.json` | Starwake's planet registry: display name, dimension, `gravity` (multiplier) |
+| `data/starwake/starwake/planet/<id>.json` | Starwake's planet registry: display name, dimension, `gravity` (multiplier), and `body`: where it sits in space (position, radius, atmosphere, world_radius, colours; see 3g) |
 | `data/starwake/dimension/<id>.json` | Chunk generator, noise settings and biome source |
 | `data/starwake/dimension_type/<id>.json` | Sky/fog/cloud colours, ambient particles, music, bed rules, height (vanilla *environment attributes*) |
 | `data/starwake/world_clock/<id>.json` + `timeline/<id>_day.json` | Day length and the sky's day/night curve (sun angle, star brightness, sunset colour) |
@@ -241,7 +248,7 @@ normal gravity.
 - Interaction: ships are not pickable. `MinecraftMixin` raycasts ships at the start of every
   right-click (ship space, `BlockGetter.traverseBlocks`) and sends `ShipInteractPayload`.
 - Admin/testing: `/starwake ship assemble <helmPos>` and `/starwake ship drift <x y z>`.
-- **Space (3c):** `ship/SpaceTravel`. A sealed ship above `maxY + 32` teleports (vanilla
+- **Space (3c; superseded by 3g below):** `ship/SpaceTravel`. A sealed ship above `maxY + 32` teleports (vanilla
   `Entity.teleport` carries the pilot; walkers aboard are moved with their offsets) to
   `starwake:space` at Y 192, orbiting that planet. Below Y 16 in space it re-enters the
   orbited planet at `maxY + 8`. "Set course" (console in space) costs
@@ -288,6 +295,32 @@ normal gravity.
   `ShipPowerPayload`; pilot only). `client/hud/ShipHud` (Fabric `HudElementRegistry`,
   top-left) shows speed, alt/orbit, HDG/PIT/ROL, fuel/shield bars, power split, engine
   %, overheat and QT spool, all from synced entity data (ship stats are server-only data).
+- **Space as a real place (3g):** `galaxy/SolarSystem` + `galaxy/Body` (planet JSON `body`).
+  Space is real block coordinates (1 block = 1 m): star Solace at the origin, Overworld at
+  x = -1.8M, Veyra ~4M blocks away. `starwake:space` is a slab, Y -512..512 (skybox `none`).
+  - *Leaving a planet* (sealed, above build limit + 32): the flat planet maps onto its sphere
+    (longitude = X / world_radius, latitude = Z / world_radius, clamped to the slab). The ship
+    appears 96 blocks outside the atmosphere radius, rotated by the local (east, up, north)
+    frame, so it points away from the planet. Velocity and everyone's view rotate too.
+  - *Entering*: any ship whose pivot crosses a planet's `atmosphere` radius lands above the
+    matching X/Z at build limit + 8, rotated back (diving in = arriving nose-down). Ships are
+    weightless in space (no hover burn); space speed cap is `max_speed_space`.
+  - *Quantum drive* (ShipEntity "Quantum drive" section): B taps toggle quantum mode, the
+    destination nearest the nose (within 10 degrees) or the console route becomes the target, the drive
+    spools (Quantum power), and holding B engages once spooled + aligned (`quantum_align`) +
+    unobstructed (segment vs every other body's sphere) + fuelled (`quantum_fuel_per_mm`) +
+    far enough (`quantum_min_distance`). The hull stays put during the jump; a synced
+    `QT_OFFSET` says how far it "really" is, and the client draws space from there. A
+    trapezoid speed profile (`quantum_speed`, `quantum_ramp`) ends `quantum_standoff` outside
+    the target's atmosphere, then `SpaceTravel.jump` teleports ship + crew. Chunks at the
+    drop-out are ticketed 5 s early. A jump in progress is saved and resumes.
+  - Client: `client/space/SpaceRenderer` (LevelRenderEvents.COLLECT_SUBMITS ->
+    `submitCustomGeometry(RenderTypes.debugQuads())`): bodies are scaled toward the camera
+    (`k = min(1, reach/distance)`) so direction and apparent size are exact; front hemisphere
+    only, lit from the star; limb glow ring; far bodies become dots; a fixed starfield that
+    streaks during quantum travel. `client/hud/SpaceHud`: body markers with km distances,
+    nose reticle, quantum panel under the cockpit panel, blue tunnel tint. Console (R) lists
+    routes with distance, ETA and fuel.
 - Known limits (Milestone 4/9): no in-flight editing or turning; ships don't collide with
   each other or push mobs; unattended ships in unloaded chunks freeze (expected); the
   per-frame block re-tessellation needs a cached mesh for big ships.
@@ -337,6 +370,21 @@ normal gravity.
 - `/data get entity <rider> Pos` shows the *vehicle's* position (vanilla saves riders at the
   vehicle). Log `passenger.position()` to see where a rider really is.
 - PoseStack rotation is `poseStack.rotate(Quaternionfc)` (not `mulPose`).
+- **Depth is reversed-Z** in 26.x (`DepthStencilState.DEFAULT` = GREATER_THAN_OR_EQUAL, depth
+  cleared to 0). The camera far plane is `max(renderDistance*4, cloudRange*16)` blocks.
+  Custom world geometry: `LevelRenderEvents.COLLECT_SUBMITS` ->
+  `context.submitNodeCollector().submitCustomGeometry(poseStack, renderType, (pose, buffer) -> ...)`,
+  in camera-relative coordinates (the pose stack starts at identity). `RenderTypes.debugQuads()`
+  is position+colour, translucent, no depth write, sorted on upload.
+- **World -> screen for HUDs:** `camera.getViewRotationProjectionMatrix(m).transformProject(relative)`
+  gives NDC (y up); check `dot(dir, camera.forwardVector()) > 0` first.
+- **Don't round-trip a look through yaw/pitch every frame with `Mth.sin/cos`** (lookup
+  tables): the error accumulates into a visible drift. Skip zero mouse deltas, use `Math`.
+- **Rider offsets:** vanilla subtracts the passenger's own `getVehicleAttachmentPoint` along
+  world Y. On a rotated vehicle, add it back and subtract it rotated (`ShipEntity`), or an
+  inverted ship seats you in the ceiling.
+- After a long same-level teleport the client won't render an entity until its chunk arrives;
+  ticket the destination ahead of time.
 - **Ship stats are server data**: remote clients don't have them. Anything the client
   shows must be synced (entity data) or sent in a payload.
 - When packing several percents into one int, give each value 3 digits (100 needs 3).

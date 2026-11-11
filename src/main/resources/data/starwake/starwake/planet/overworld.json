@@ -3,5 +3,14 @@
     "translate": "planet.starwake.overworld"
   },
   "dimension": "minecraft:overworld",
-  "gravity": 1.0
+  "gravity": 1.0,
+  "body": {
+    "position": [-1800000, 0, 0],
+    "radius": 4000,
+    "atmosphere": 4600,
+    "world_radius": 20000,
+    "color": "#2F64A8",
+    "secondary_color": "#4E8A3A",
+    "atmosphere_color": "#8EC5FF"
+  }
 }

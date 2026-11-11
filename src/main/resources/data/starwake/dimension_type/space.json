@@ -6,8 +6,8 @@
     "minecraft:visual/cloud_color": "#00000000",
     "minecraft:visual/star_brightness": 1.0,
     "minecraft:visual/sky_light_factor": 1.0,
-    "minecraft:visual/fog_start_distance": 1024.0,
-    "minecraft:visual/fog_end_distance": 2048.0,
+    "minecraft:visual/fog_start_distance": 4096.0,
+    "minecraft:visual/fog_end_distance": 8192.0,
     "minecraft:gameplay/bed_rule": {
       "can_set_spawn": "never",
       "can_sleep": "never",
@@ -27,12 +27,12 @@
   "has_ender_dragon_fight": false,
   "has_fixed_time": true,
   "has_skylight": true,
-  "height": 384,
+  "height": 1024,
   "infiniburn": "#minecraft:infiniburn_end",
-  "logical_height": 384,
-  "min_y": 0,
+  "logical_height": 1024,
+  "min_y": -512,
   "monster_spawn_block_light_limit": 0,
   "monster_spawn_light_level": 0,
-  "skybox": "overworld",
+  "skybox": "none",
   "timelines": []
 }
