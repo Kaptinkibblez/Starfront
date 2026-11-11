@@ -96,6 +96,7 @@ public final class ShipClient {
 				if (client.player != null && client.gui.screen() == null) client.gui.setScreen(new com.starwake.client.wristcom.WristcomScreen());
 			}
 			ThrusterEffects.tick(client);
+			facePilotForward(client);
 			ShipSounds.tick(client);
 			ChaseCamera.tick(client);
 			ReentryEffects.tick(client);
@@ -126,6 +127,29 @@ public final class ShipClient {
 		while (LEAVE_SEAT.consumeClick()) {
 			ClientPlayNetworking.send(new ShipControlPayload(0, true));
 		}
+	}
+
+	private static int pilotOf = -1;
+
+	/**
+	 * The moment you become a ship's pilot, look along its nose (mouse-aim steers toward your
+	 * view, so the downward look you had while clicking the Helm would pitch the ship). The
+	 * server does the same; doing it here too avoids a race between that and the seat packet.
+	 */
+	private static void facePilotForward(Minecraft client) {
+		ShipEntity ship = client.player != null && client.player.getVehicle() instanceof ShipEntity s && s.pilot() == client.player ? s : null;
+		int id = ship == null ? -1 : ship.getId();
+		if (ship != null && id != pilotOf) {
+			var nose = ship.worldDirection(ship.forward());
+			float yaw = (float) Math.toDegrees(Math.atan2(-nose.x, nose.z));
+			float pitch = (float) Math.toDegrees(-Math.asin(Math.clamp(nose.y, -1, 1)));
+			client.player.setYRot(yaw);
+			client.player.setXRot(pitch);
+			client.player.yRotO = yaw;
+			client.player.xRotO = pitch;
+			client.player.setYHeadRot(yaw);
+		}
+		pilotOf = id;
 	}
 
 	/** N: landing gear (pilot only). */
@@ -201,7 +225,8 @@ public final class ShipClient {
 			BlockHitResult local = BlockGetter.traverseBlocks(from, to, ship, (s, pos) -> {
 				BlockState state = s.structure().get(pos);
 				if (state == null) return null;
-				return state.getShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).clip(from, to, pos);
+				// traverseBlocks reuses a mutable position: hand the hit an immutable copy.
+				return state.getShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).clip(from, to, pos.immutable());
 			}, s -> null);
 			if (local != null) {
 				double distanceSqr = local.getLocation().distanceToSqr(from);

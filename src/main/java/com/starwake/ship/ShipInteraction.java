@@ -75,6 +75,18 @@ public final class ShipInteraction {
 			return;
 		}
 
+		boolean helm = state.getBlock() instanceof HelmBlock;
+		// Ownership: the Helm needs owner/crew (an ownerless ship is claimed by its first pilot);
+		// everything else is open unless the owner locked the ship. Fuelling is always allowed.
+		if (helm && !ship.canPilot(player)) {
+			player.sendOverlayMessage(Component.translatable("message.starwake.ship.not_yours", ship.ownerName()));
+			return;
+		}
+		if (!helm && !(state.getBlock() instanceof FuelTankBlock) && !ship.canUse(player)) {
+			player.sendOverlayMessage(Component.translatable("message.starwake.ship.locked", ship.ownerName()));
+			return;
+		}
+		if (helm && ship.owner() == null) ship.setOwner(player);
 		if (state.getBlock() instanceof HelmBlock || state.getBlock() instanceof com.starwake.ship.block.SeatBlock) {
 			if (!ship.seat(player, payload.local())) {
 				player.sendOverlayMessage(Component.translatable("message.starwake.helm_taken"));

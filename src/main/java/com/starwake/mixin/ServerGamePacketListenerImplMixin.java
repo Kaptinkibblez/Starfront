@@ -24,6 +24,30 @@ import org.spongepowered.asm.mixin.injection.At;
  */
 @Mixin(ServerGamePacketListenerImpl.class)
 abstract class ServerGamePacketListenerImplMixin {
+	@org.spongepowered.asm.mixin.Shadow public net.minecraft.server.level.ServerPlayer player;
+
+	/**
+	 * Players aboard a moving ship are carried by it on their own client, so their moves can be
+	 * far bigger than their own velocity predicts: skip the "moved too quickly" check near ships
+	 * (as singleplayer hosts already are). The ship's own speed cap still bounds it.
+	 */
+	@org.spongepowered.asm.mixin.injection.Inject(method = "shouldCheckPlayerMovement", at = @At("HEAD"), cancellable = true)
+	private void starwake$noSpeedCheckAboard(boolean isFallFlying,
+			org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
+		if (ShipCollisions.isNearShip(player.level(), player.getBoundingBox().inflate(4.0))) cir.setReturnValue(false);
+	}
+
+	/**
+	 * Dedicated servers kick players who "float" (no blocks around them) for too long. Standing
+	 * on or walking inside a ship is standing on blocks the world doesn't know about, so near a
+	 * ship nobody counts as floating (3j multiplayer fix; singleplayer never runs this check).
+	 */
+	@org.spongepowered.asm.mixin.injection.Inject(method = "noBlocksAround", at = @At("HEAD"), cancellable = true)
+	private void starwake$shipsAreGround(net.minecraft.world.entity.Entity entity,
+			org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
+		if (ShipCollisions.isNearShip(entity.level(), entity.getBoundingBox().inflate(2.0))) cir.setReturnValue(false);
+	}
+
 	@WrapOperation(method = "handlePlayerPositionChange", at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/server/level/ServerPlayer;move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V"))
 	private void starwake$trustMovesNearShips(ServerPlayer player, MoverType type, Vec3 delta, Operation<Void> original) {

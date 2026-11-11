@@ -20,6 +20,7 @@ public final class ModNetworking {
 		PayloadTypeRegistry.serverboundPlay().register(ShipControlPayload.TYPE, ShipControlPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipPowerPayload.TYPE, ShipPowerPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipQuantumPayload.TYPE, ShipQuantumPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ShipCrewPayload.TYPE, ShipCrewPayload.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(ShipConsoleActionPayload.TYPE,
 				(payload, context) -> ShipConsole.handleAction(context.player(), payload));
@@ -48,6 +49,29 @@ public final class ModNetworking {
 					case ShipQuantumPayload.ACTION_GEAR -> ship.toggleGear();
 					default -> { }
 				}
+			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(ShipCrewPayload.TYPE, (payload, context) -> {
+			var player = context.player();
+			if (!(player.level().getEntity(payload.shipId()) instanceof com.starwake.ship.ShipEntity ship)) return;
+			if (!ship.isOwner(player) || player.distanceToSqr(ship) > 48 * 48) {
+				player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.starwake.ship.owner_only"));
+				return;
+			}
+			switch (payload.action()) {
+				case ShipCrewPayload.ADD -> {
+					var target = player.level().getServer().getPlayerList().getPlayerByName(payload.name());
+					if (target == null) {
+						player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.starwake.ship.crew_unknown", payload.name()));
+					} else {
+						ship.addCrew(target);
+						player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.starwake.ship.crew_added", target.getGameProfile().name()));
+					}
+				}
+				case ShipCrewPayload.REMOVE -> ship.removeCrew(payload.name());
+				case ShipCrewPayload.LOCK -> ship.setLocked(true);
+				case ShipCrewPayload.UNLOCK -> ship.setLocked(false);
+				default -> { }
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(ShipInteractPayload.TYPE,

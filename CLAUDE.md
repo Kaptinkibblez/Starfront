@@ -196,6 +196,15 @@ commit. **Don't start the next milestone until the user confirms the current one
         pre-flight and flies; wings carry ~40% of its weight at 28 m/s; DCPL holds speed in
         space; HUD tapes/ladder/markers/systems strip; Wristcom Home/Ship/Starmap work and
         Starmap plots a quantum route.)*
+  - [x] 3j. Polish pass (user: "smooth out the rest of this milestone"; chose all of): ship
+        sounds, F4 chase camera, landing gear, re-entry effects, ship-ship collision, cached
+        ship meshes, multiplayer pass with ownership/crew/lock; Helm console merged into the
+        Wristcom; orbit-exit settle; small HUD fixes. *(Verified 2026-11-11 on a dedicated
+        server with two clients: owner/crew/lock rules, crew flying with another player
+        walking aboard at 40 m/s (no kicks or rubber-banding), crew removal unseats the
+        pilot; gear landings soft, belly landings damage; ships stop against and carry each
+        other; meshes render correctly. Audio is untested here: the container has no sound
+        device.)*
   - **Scaffolds (user, 2026-11-11):** the 3a-3g systems are deliberate scaffolds. They copy
     Star Citizen's systems and feel ("just copy star citizen's systems", long quantum travel)
     and will be overhauled once every core system exists. Prefer simple, replaceable code.
@@ -388,9 +397,39 @@ normal gravity.
     flight-mode toggle), Starmap (system map fitted to the bodies, distances, "Plot QT"
     buttons that send SET_COURSE when piloting in space). Placeholders reserve Contracts and
     Trade (M7), Cargo (M8), Comms (M9).
-- Known limits (Milestone 4/9): no in-flight editing or turning; ships don't collide with
-  each other or push mobs; unattended ships in unloaded chunks freeze (expected); the
-  per-frame block re-tessellation needs a cached mesh for big ships.
+- **3j polish:**
+  - *Ship console = Wristcom Ship app.* Helm use / R send `ShipConsolePayload`, which the
+    client stores (`wristcom/ShipReports`) and shows in `ShipApp` (scrollable pre-flight or
+    status report, Re-scan, Assemble/Disassemble, quantum routes, power, flight mode). The old
+    `ShipConsoleScreen` is gone.
+  - *Landing gear* (`LandingGearBlock`, DEPLOYED; N via `ShipQuantumPayload.ACTION_GEAR`):
+    deployed struts reach half a block below their block (hull collision now uses each
+    block's real shape bounds). Touchdowns: <= 0.3 b/t on deployed gear with the ship upright;
+    otherwise belly limit 0.08 b/t and 5x shield damage. Disassembly needs gear down (if any).
+    Coupled Ctrl = controlled 5 m/s descent; decoupled Ctrl = cut lift. HUD: AGL, GEAR, alert.
+  - *Sounds* (`registry/ModSounds`, `client/ship/ShipSounds`; audio from
+    `tools/synth_sounds.py`, original and procedural): engine/thruster loops per ship that
+    follow synced throttles, RCS puffs, quantum spool/engage/travel/exit, gear, re-entry
+    roar, pilot alarms (low fuel, overheat, shields down, gear up on approach).
+  - *Chase camera* (F4, `client/ship/ChaseCamera`): vanilla THIRD_PERSON_BACK with the camera
+    moved behind the whole ship in `CameraMixin`; survives atmosphere transfers.
+  - *Re-entry* (`client/ship/ReentryEffects`): intensity from speed near an atmosphere edge
+    plus a burst on every crossing; plasma particles, heat haze (FlightHud), camera shake.
+  - *Ship-ship collision*: `clip`/`hullCollides` also test nearby ships' block boxes
+    (`collectShapes`). Ships resting on a moving ship (`restsOn`) are carried and turned with it.
+  - *Cached meshes* (`client/ship/ShipMesh`): vanilla `ModelBlockRenderer.tesselateBlock` runs
+    once per structure into stored quads per layer; each frame replays them via
+    `submitCustomGeometry` (moving-block render types) with per-block world light.
+  - *Ownership* (`ShipEntity` "Ownership" section; `ShipCrewPayload`; Wristcom `CrewApp`):
+    assembler owns the ship (ownerless ships are claimed by their first pilot). Owner + crew
+    may pilot/disassemble; locked ships refuse strangers doors, seats and storage. Removing
+    crew or locking unseats people who no longer qualify. Admin: `/starwake ship owner|crew`.
+  - *Multiplayer fixes*: `ServerGamePacketListenerImplMixin` also exempts players near ships
+    from the floating kick (`noBlocksAround`) and the "moved too quickly" check. A new pilot's
+    view snaps to the nose (server `forceSetRotation` + client `facePilotForward`). The ship
+    raycast used a mutable position (clicks hit the wrong block): fixed with `immutable()`.
+- Known limits (Milestone 4/9): no in-flight editing; ships don't push mobs or other ships
+  (they stop against them); unattended ships in unloaded chunks freeze (expected).
 
 ## 26.3 gotchas (learned the hard way)
 
@@ -460,6 +499,10 @@ normal gravity.
   wasted on a nearly balanced ship). Use a cascaded generalized inverse with priorities.
 - Third-person screenshots of a ship from outside: `/attribute @s minecraft:camera_distance
   base set 16`, then F5.
+- **traverseBlocks hands your callback a mutable BlockPos.** Anything kept beyond the call
+  (e.g. a BlockHitResult) must use `pos.immutable()`.
+- **Dedicated servers only:** "floating too long" kicks and "moved too quickly" checks don't
+  run for singleplayer hosts, so ship bugs there only show up in multiplayer tests.
 - After a long same-level teleport the client won't render an entity until its chunk arrives;
   ticket the destination ahead of time.
 - **Ship stats are server data**: remote clients don't have them. Anything the client
@@ -522,5 +565,12 @@ environment before they work.
   `shot`, `rclick`, `save_quit`, `build_powered_ship X Y Z [coolers]`, `build_sc_ship X Y Z`; the older
   `build_*_ship` helpers have no power plant, so they no longer pass pre-flight). Always `save_quit` before restarting, because a hard kill
   loses everything since the last autosave. Set `/gamerule fall_damage false` in test worlds.
+- Multiplayer tests: `$scratchpad/mp.sh` (`start_server`, `srv "cmd"`, `start_mp_client NAME
+  DISPLAY GAMEDIR`, then `DISPLAY=:N xdotool ...`): a dedicated server plus clients launched
+  straight from the captured java command line (`client_cmd.txt`) with `--username` and
+  `--quickPlayMultiplayer localhost`, each on its own Xvfb display. `op` players only after
+  they've joined once; the server has a whitelist (`whitelist off`).
+- `run/options.txt`: keep `lang:en_us` and `realmsNotifications:false`; dismiss the offline
+  Realms popup with Escape, never by clicking near 638,515 (the language button).
 - In the cloud container, don't block on long waits: start servers and clients in the
   background and poll with short, bounded loops.

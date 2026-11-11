@@ -19,6 +19,7 @@ public final class WristcomApps {
 	public static void init() {
 		register(new HomeApp());
 		register(new ShipApp());
+		register(new com.starwake.client.wristcom.apps.CrewApp());
 		register(new StarmapApp());
 		register(new ComingSoonApp("contracts", "Co", 0xFFFFC857, 7));
 		register(new ComingSoonApp("trade", "Tr", 0xFF7CFFB2, 7));

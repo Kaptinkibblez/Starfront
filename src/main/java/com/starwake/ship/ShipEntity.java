@@ -104,6 +104,7 @@ public class ShipEntity extends Entity {
 	/** Firing thrusters for exhaust effects (see {@link #publishThrottles}). */
 	private static final EntityDataAccessor<String> THROTTLES = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
 
+	private static final EntityDataAccessor<String> ACCESS = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
 	private static final EntityDataAccessor<Boolean> DECOUPLED = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Float> WING_LIFT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 
@@ -380,6 +381,7 @@ public class ShipEntity extends Entity {
 		builder.define(QT_STATE, 0);
 		builder.define(THROTTLES, "");
 		builder.define(DECOUPLED, false);
+		builder.define(ACCESS, "\n0\n");
 		builder.define(WING_LIFT, 0f);
 		builder.define(QT_TARGET, "");
 		builder.define(QT_INFO, 0);
@@ -709,6 +711,7 @@ public class ShipEntity extends Entity {
 	/** @return true if the ship was transferred to another dimension (stop ticking it) */
 	private boolean serverTick() {
 		ShipPhysics physics = ShipPhysics.get();
+		shipRiders = findShipRiders();
 		Player pilot = pilot();
 		Vec3 velocity = getDeltaMovement();
 		if (jump != null) {
@@ -1055,6 +1058,92 @@ public class ShipEntity extends Entity {
 		return velocity.add(accel).scale(space ? physics.dragSpace() : physics.dragAtmosphere());
 	}
 
+	// =========================================================================================
+	// Ownership (3j): owner + crew may pilot and disassemble; a locked ship keeps strangers
+	// out of doors, seats and storage. Ships with no owner are claimed by their first pilot.
+	// =========================================================================================
+
+	private @Nullable UUID owner;
+	private String ownerName = "";
+	private final Map<UUID, String> crew = new java.util.LinkedHashMap<>();
+	private boolean locked;
+
+	public @Nullable UUID owner() { return owner; }
+
+	/** Sets the owner (assembly, admin command, or the first pilot of an ownerless ship). */
+	public void setOwner(@Nullable Player player) {
+		owner = player == null ? null : player.getUUID();
+		ownerName = player == null ? "" : player.getGameProfile().name();
+		crew.remove(owner);
+		publishAccess();
+	}
+
+	public boolean isOwner(Player player) {
+		return owner != null && owner.equals(player.getUUID());
+	}
+
+	/** Owner, crew, or anyone at all on an ownerless ship. */
+	public boolean canPilot(Player player) {
+		return owner == null || owner.equals(player.getUUID()) || crew.containsKey(player.getUUID());
+	}
+
+	/** Doors, seats and storage: everyone, unless the ship is locked. */
+	public boolean canUse(Player player) {
+		return !locked || canPilot(player);
+	}
+
+	public void addCrew(Player player) {
+		if (!player.getUUID().equals(owner)) crew.put(player.getUUID(), player.getGameProfile().name());
+		publishAccess();
+	}
+
+	/** Removes a crew member by name (case-insensitive). Returns false if they weren't crew. */
+	public boolean removeCrew(String name) {
+		boolean removed = crew.values().removeIf(n -> n.equalsIgnoreCase(name));
+		publishAccess();
+		// Someone no longer allowed to fly loses the Helm (they can still ride unless locked).
+		if (pilot() instanceof Player pilot && !canPilot(pilot)) {
+			pilot.stopRiding();
+			if (pilot instanceof ServerPlayer player) {
+				player.sendOverlayMessage(Component.translatable("message.starwake.ship.not_yours", ownerName));
+			}
+		}
+		return removed;
+	}
+
+	public void setLocked(boolean locked) {
+		this.locked = locked;
+		publishAccess();
+		// Locking out strangers also clears them from seats.
+		if (locked) {
+			for (Entity passenger : List.copyOf(getPassengers())) {
+				if (passenger instanceof Player player && !canPilot(player)) player.stopRiding();
+			}
+		}
+	}
+
+	/** Synced access summary: owner name, locked flag, crew names (for the Wristcom Crew app). */
+	private void publishAccess() {
+		if (level() == null || level().isClientSide()) return;
+		entityData.set(ACCESS, ownerName + "\n" + (locked ? "1" : "0") + "\n" + String.join(",", crew.values()));
+	}
+
+	/** Client: owner name ("" if none). */
+	public String ownerName() {
+		return entityData.get(ACCESS).split("\n", -1)[0];
+	}
+
+	public boolean isLocked() {
+		String[] parts = entityData.get(ACCESS).split("\n", -1);
+		return parts.length > 1 && parts[1].equals("1");
+	}
+
+	public List<String> crewNames() {
+		String[] parts = entityData.get(ACCESS).split("\n", -1);
+		if (parts.length < 3 || parts[2].isEmpty()) return List.of();
+		return List.of(parts[2].split(","));
+	}
+
 	/** Number of landing gear blocks aboard (both sides: computed from the structure). */
 	public int gearCount() {
 		return gear.size();
@@ -1245,6 +1334,8 @@ public class ShipEntity extends Entity {
 
 	/** Moves axis by axis, clipping each against terrain using the hull blocks' world boxes. */
 	private void moveWithCollision(Vec3 velocity) {
+		// Other ships this move could touch (3j: ships collide, and can land on each other).
+		neighbours = nearbyShips(getBoundingBox().expandTowards(velocity).inflate(1.0));
 		double dy = clip(Direction.Axis.Y, velocity.y);
 		grounded = velocity.y < 0 && dy > velocity.y;
 		setPos(getX(), getY() + dy, getZ());
@@ -1308,17 +1399,80 @@ public class ShipEntity extends Entity {
 				distance = shape.collide(axis, box, distance);
 				if (distance == 0) return 0;
 			}
+			if (!neighbours.isEmpty()) {
+				List<VoxelShape> shapes = new ArrayList<>();
+				for (ShipEntity other : neighbours) other.collectShapes(swept, shapes);
+				for (VoxelShape shape : shapes) {
+					distance = shape.collide(axis, box, distance);
+					if (distance == 0) return 0;
+				}
+			}
 		}
 		return distance;
+	}
+
+	/** A ship resting on this one: its pivot in our local frame, and its rotation relative to ours. */
+	private record ShipRider(ShipEntity ship, Vec3 local, Quaternionf relative) {}
+
+	private List<ShipRider> shipRiders = List.of();
+
+	/** Ships whose hull rests on ours right now (checked before we move). */
+	private List<ShipRider> findShipRiders() {
+		List<ShipEntity> near = nearbyShips(getBoundingBox().inflate(0.5));
+		if (near.isEmpty()) return List.of();
+		List<ShipRider> riders = new ArrayList<>();
+		for (ShipEntity other : near) {
+			if (other.restsOn(this)) {
+				Quaternionf relative = new Quaternionf(orientation()).conjugate().mul(other.orientation());
+				riders.add(new ShipRider(other, toLocal(other.position()), relative));
+			}
+		}
+		return riders;
+	}
+
+	/** True if some of this ship's hull sits on {@code carrier}'s blocks (within a few cm). */
+	private boolean restsOn(ShipEntity carrier) {
+		boolean aligned = isAxisAligned();
+		List<VoxelShape> shapes = new ArrayList<>();
+		for (AABB local : hull) {
+			AABB box = worldBox(local, aligned ? 1.0 : 0.9);
+			AABB below = new AABB(box.minX, box.minY - 0.1, box.minZ, box.maxX, box.minY + 0.05, box.maxZ);
+			shapes.clear();
+			carrier.collectShapes(below, shapes);
+			for (VoxelShape shape : shapes) if (shape.bounds().intersects(below)) return true;
+		}
+		return false;
+	}
+
+	/** Ships near this one during the current move (empty most of the time). */
+	private List<ShipEntity> neighbours = List.of();
+
+	private List<ShipEntity> nearbyShips(AABB area) {
+		List<ShipEntity> found = null;
+		for (ShipEntity other : ShipCollisions.shipsIn(level())) {
+			if (other == this || other.structure() == null || !other.getBoundingBox().intersects(area)) continue;
+			if (found == null) found = new ArrayList<>();
+			found.add(other);
+		}
+		return found == null ? List.of() : found;
 	}
 
 	/** Would the hull overlap terrain at this pose? (Used to refuse rotations into the ground.) */
 	private boolean hullCollides(Vec3 position, Quaternionfc rotation) {
 		boolean aligned = isAxisAligned(rotation);
+		List<ShipEntity> others = nearbyShips(getBoundingBox().move(position.subtract(position())).inflate(2.0));
+		List<VoxelShape> shipShapes = new ArrayList<>();
 		for (AABB local : hull) {
 			AABB box = worldBox(local, aligned ? 1.0 : 0.9, position, rotation).deflate(0.05);
 			for (VoxelShape shape : level().getBlockCollisions(null, box)) {
 				if (!shape.isEmpty() && shape.bounds().intersects(box)) return true;
+			}
+			if (!others.isEmpty()) {
+				shipShapes.clear();
+				for (ShipEntity other : others) other.collectShapes(box, shipShapes);
+				for (VoxelShape shape : shipShapes) {
+					if (shape.bounds().intersects(box)) return true;
+				}
 			}
 		}
 		return false;
@@ -1333,6 +1487,12 @@ public class ShipEntity extends Entity {
 	private void carryEntities() {
 		Vec3 oldPos = lastTickPos;
 		Quaternionfc oldRot = lastTickOrientation;
+		// Ships parked on this one (a fighter on a carrier) ride along, turning with it.
+		for (ShipRider rider : shipRiders) {
+			if (rider.ship().isRemoved() || rider.ship().getDeltaMovement().y > 0.05) continue; // taking off
+			rider.ship().setPos(toWorld(rider.local(), position(), orientation()));
+			rider.ship().setOrientation(new Quaternionf(orientation()).mul(rider.relative()).normalize());
+		}
 		AABB zone = getBoundingBox().expandTowards(movementThisTick().reverse()).inflate(1.0);
 		for (Entity entity : level().getEntities(this, zone, e -> !(e instanceof Player) && !e.isPassenger() && !(e instanceof ShipEntity))) {
 			Vec3 local = toLocal(entity.position(), oldPos, oldRot);
@@ -1403,6 +1563,14 @@ public class ShipEntity extends Entity {
 		if (player.getVehicle() != this && !player.startRiding(this)) {
 			seatOf.remove(player.getUUID());
 			return false;
+		}
+		if (seatLocal.equals(helmLocal) && player instanceof ServerPlayer serverPlayer) {
+			// A new pilot faces along the nose: mouse-aim steers toward your view, so keeping the
+			// look you sat down with (usually down at the Helm) would pitch the ship at once.
+			Vec3 nose = worldDirection(forward);
+			float yaw = (float) Math.toDegrees(Math.atan2(-nose.x, nose.z));
+			float pitch = (float) Math.toDegrees(-Math.asin(Mth.clamp(nose.y, -1, 1)));
+			serverPlayer.forceSetRotation(yaw, false, pitch, false);
 		}
 		publishSeats();
 		return true;
@@ -1509,6 +1677,14 @@ public class ShipEntity extends Entity {
 		entityData.set(FUEL, input.getIntOr("fuel", 0));
 		orbiting = input.read("orbiting", Level.RESOURCE_KEY_CODEC).orElse(null);
 		decoupled = input.getBooleanOr("decoupled", false);
+		owner = input.read("owner", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
+		ownerName = input.getStringOr("owner_name", "");
+		locked = input.getBooleanOr("locked", false);
+		crew.clear();
+		for (var member : input.childrenListOrEmpty("crew")) {
+			member.read("uuid", net.minecraft.core.UUIDUtil.CODEC).ifPresent(uuid -> crew.put(uuid, member.getStringOr("name", "?")));
+		}
+		publishAccess();
 		entityData.set(DECOUPLED, decoupled);
 		input.read("orientation", ExtraCodecs.QUATERNIONF).ifPresent(q -> entityData.set(ORIENTATION, new Quaternionf(q)));
 		int frame = input.getIntOr("frame", 1);
@@ -1540,6 +1716,17 @@ public class ShipEntity extends Entity {
 		output.putDouble("shield", entityData.get(SHIELD));
 		output.store("orientation", ExtraCodecs.QUATERNIONF, orientation());
 		output.putBoolean("decoupled", decoupled);
+		if (owner != null) {
+			output.store("owner", net.minecraft.core.UUIDUtil.CODEC, owner);
+			output.putString("owner_name", ownerName);
+		}
+		output.putBoolean("locked", locked);
+		var crewList = output.childrenList("crew");
+		crew.forEach((uuid, name) -> {
+			var member = crewList.addChild();
+			member.store("uuid", net.minecraft.core.UUIDUtil.CODEC, uuid);
+			member.putString("name", name);
+		});
 		if (orbiting != null) {
 			output.store("orbiting", Level.RESOURCE_KEY_CODEC, orbiting);
 		}

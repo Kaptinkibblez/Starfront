@@ -40,6 +40,22 @@ public class WristcomScreen extends Screen {
 		return screen;
 	}
 
+	private int refreshIn = -1;
+
+	/** Rebuilds the widgets a moment from now (after the server applied a change and synced it). */
+	public void refreshSoon() {
+		refreshIn = 6;
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		if (refreshIn > 0 && --refreshIn == 0) {
+			refreshIn = -1;
+			rebuildWidgets();
+		}
+	}
+
 	/** Rebuilds the current app's widgets (new data arrived). */
 	public void refresh() {
 		rebuildWidgets();
@@ -74,11 +90,13 @@ public class WristcomScreen extends Screen {
 	protected void init() {
 		if (openedAt == 0) openedAt = System.currentTimeMillis();
 		int x = panelX(), y = panelY();
+		// App tiles: as many as fit, spaced to the panel's height.
+		int spacing = Math.max(16, Math.min(24, (panelH() - 40) / Math.max(1, apps.size())));
 		for (int i = 0; i < apps.size(); i++) {
 			int index = i;
 			WristcomApp app = apps.get(i);
 			addRenderableWidget(Button.builder(Component.literal(app.glyph() + "  ").append(app.title()), b -> open(index))
-					.bounds(x + 6, y + 24 + i * 24, BAR - 12, 20).build()).active = i != current;
+					.bounds(x + 6, y + 24 + i * spacing, BAR - 12, spacing - 3).build()).active = i != current;
 		}
 		int cx = x + BAR + 6, cy = y + 24, cw = panelW() - BAR - 12, ch = panelH() - 34;
 		currentApp().init(this, cx, cy, cw, ch);

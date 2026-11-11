@@ -91,6 +91,7 @@ public final class ShipAssembler {
 			ship.setOrbiting(net.minecraft.world.level.Level.OVERWORLD); // built in orbit: default to home
 		}
 		level.addFreshEntity(ship);
+		if (pilot != null) ship.setOwner(pilot); // whoever assembles a ship owns it
 		if (pilot != null) {
 			ship.seat(pilot, helm.subtract(min));
 			pilot.sendOverlayMessage(Component.translatable("message.starwake.assembled", entries.size()));

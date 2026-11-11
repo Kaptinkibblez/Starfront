@@ -43,12 +43,48 @@ public final class ShipCommands {
 														com.starwake.ship.data.ShipBlueprints.all().keySet(), builder))
 												.then(Commands.argument("pos", BlockPosArgument.blockPos())
 														.executes(ShipCommands::blueprint))))
+								.then(Commands.literal("owner")
+										.then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+												.executes(ShipCommands::owner)))
+								.then(Commands.literal("crew")
+										.then(Commands.literal("add").then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+												.executes(ctx -> crew(ctx, true))))
+										.then(Commands.literal("remove").then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+												.executes(ctx -> crew(ctx, false)))))
 								.then(Commands.literal("drift")
 										.then(Commands.argument("velocity", Vec3Argument.vec3(false))
 												.executes(ShipCommands::drift)))
 								.then(Commands.literal("spin")
 										.then(Commands.argument("rates", Vec3Argument.vec3(false))
 												.executes(ShipCommands::spin))))));
+	}
+
+	/** Admin: makes a player the owner of the nearest ship. */
+	private static int owner(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		var player = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
+		ShipEntity ship = nearest(ctx.getSource());
+		if (ship == null) {
+			ctx.getSource().sendFailure(Component.translatable("commands.starwake.ship.none_nearby"));
+			return 0;
+		}
+		ship.setOwner(player);
+		ctx.getSource().sendSuccess(() -> Component.literal("Ship " + ship.getId() + " now belongs to " + player.getGameProfile().name()), true);
+		return 1;
+	}
+
+	/** Admin: adds or removes crew on the nearest ship. */
+	private static int crew(CommandContext<CommandSourceStack> ctx, boolean add) throws CommandSyntaxException {
+		var player = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
+		ShipEntity ship = nearest(ctx.getSource());
+		if (ship == null) {
+			ctx.getSource().sendFailure(Component.translatable("commands.starwake.ship.none_nearby"));
+			return 0;
+		}
+		if (add) ship.addCrew(player);
+		else ship.removeCrew(player.getGameProfile().name());
+		ctx.getSource().sendSuccess(() -> Component.literal((add ? "Added " : "Removed ") + player.getGameProfile().name()
+				+ " as crew of ship " + ship.getId()), true);
+		return 1;
 	}
 
 	/** Places a blueprint ship (nose north, min corner at pos) and reports its Helm. */
