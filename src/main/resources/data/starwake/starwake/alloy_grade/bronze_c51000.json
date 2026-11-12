@@ -46,5 +46,14 @@
   "conductivity": 15,
   "corrosion": 7
  },
- "condition": "annealed"
+ "condition": "annealed",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 130,
+   "tensile_strength": 340,
+   "elongation": 55,
+   "hardness": 85
+  }
+ },
+ "reference_state": "annealed"
 }

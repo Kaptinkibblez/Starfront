@@ -31,5 +31,14 @@
   "conductivity": 11.5,
   "corrosion": 6
  },
- "condition": "cast"
+ "condition": "cast",
+ "tempers": {
+  "as_cast": {
+   "yield_strength": 27,
+   "tensile_strength": 52,
+   "elongation": 35,
+   "hardness": 15
+  }
+ },
+ "reference_state": "as_cast"
 }

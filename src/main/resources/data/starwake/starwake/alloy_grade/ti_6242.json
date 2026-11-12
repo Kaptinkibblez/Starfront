@@ -52,6 +52,25 @@
   "corrosion": 9
  },
  "condition": "duplex annealed",
+ "tempers": {
+  "aged": {
+   "yield_strength": 1000,
+   "tensile_strength": 1100,
+   "elongation": 12,
+   "hardness": 360
+  },
+  "annealed": {
+   "yield_strength": 900,
+   "tensile_strength": 990,
+   "elongation": 15,
+   "hardness": 340
+  }
+ },
+ "reference_state": "annealed",
+ "treatment": {
+  "solution": 970,
+  "age": 595
+ },
  "note": {
   "translate": "alloy.starwake.ti_6242.note",
   "fallback": "High-temperature titanium for engine parts."

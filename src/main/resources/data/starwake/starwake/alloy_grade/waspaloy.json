@@ -71,5 +71,24 @@
   "conductivity": 1.2,
   "corrosion": 9
  },
- "condition": "aged"
+ "condition": "aged",
+ "tempers": {
+  "solution": {
+   "yield_strength": 520,
+   "tensile_strength": 1000,
+   "elongation": 35,
+   "hardness": 260
+  },
+  "aged": {
+   "yield_strength": 795,
+   "tensile_strength": 1275,
+   "elongation": 25,
+   "hardness": 380
+  }
+ },
+ "reference_state": "aged",
+ "treatment": {
+  "solution": 1080,
+  "age": 760
+ }
 }

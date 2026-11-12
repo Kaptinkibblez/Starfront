@@ -52,6 +52,15 @@
   "corrosion": 2
  },
  "condition": "as cast",
+ "tempers": {
+  "as_cast": {
+   "yield_strength": 120,
+   "tensile_strength": 150,
+   "elongation": 0.2,
+   "hardness": 200
+  }
+ },
+ "reference_state": "as_cast",
  "note": {
   "translate": "alloy.starwake.pig_iron.note",
   "fallback": "Blast-furnace iron: brittle, the raw material for steelmaking."

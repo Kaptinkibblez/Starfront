@@ -27,7 +27,17 @@ import net.minecraft.util.ExtraCodecs;
  */
 public record AlloyGrade(Component name, String family, String base, Map<String, Range> ranges, double maxOther, boolean exact,
 		Map<String, Double> nominal, Optional<MaterialProperties> properties, Optional<String> condition, int color, int tier, int order,
-		Optional<Component> note) {
+		Optional<Component> note, Map<String, TemperProps> tempers, String referenceState, Map<String, Integer> treatment) {
+	/** Handbook strength in one temper (M8d-2): MPa, MPa, %, HV. */
+	public record TemperProps(double yieldStrength, double tensileStrength, double elongation, double hardness) {
+		public static final Codec<TemperProps> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.DOUBLE.fieldOf("yield_strength").forGetter(TemperProps::yieldStrength),
+				Codec.DOUBLE.fieldOf("tensile_strength").forGetter(TemperProps::tensileStrength),
+				Codec.DOUBLE.fieldOf("elongation").forGetter(TemperProps::elongation),
+				Codec.DOUBLE.fieldOf("hardness").forGetter(TemperProps::hardness)
+		).apply(i, TemperProps::new));
+	}
+
 	public static final ResourceKey<Registry<AlloyGrade>> REGISTRY_KEY = ResourceKey.createRegistryKey(StarwakeMod.id("alloy_grade"));
 
 	public static final Codec<AlloyGrade> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -43,7 +53,10 @@ public record AlloyGrade(Component name, String family, String base, Map<String,
 			ExtraCodecs.STRING_RGB_COLOR.optionalFieldOf("color", 0xB0B0B0).xmap(c -> c & 0xFFFFFF, c -> c).forGetter(AlloyGrade::color),
 			Codec.INT.optionalFieldOf("tier", 1).forGetter(AlloyGrade::tier),
 			Codec.INT.optionalFieldOf("order", 0).forGetter(AlloyGrade::order),
-			ComponentSerialization.CODEC.optionalFieldOf("note").forGetter(AlloyGrade::note)
+			ComponentSerialization.CODEC.optionalFieldOf("note").forGetter(AlloyGrade::note),
+			Codec.unboundedMap(Codec.STRING, TemperProps.CODEC).optionalFieldOf("tempers", Map.of()).forGetter(AlloyGrade::tempers),
+			Codec.STRING.optionalFieldOf("reference_state", "annealed").forGetter(AlloyGrade::referenceState),
+			Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("treatment", Map.of()).forGetter(AlloyGrade::treatment)
 	).apply(i, AlloyGrade::new));
 
 	/** The composition at the middle of the spec. */

@@ -51,5 +51,14 @@
   "conductivity": 3,
   "corrosion": 3
  },
- "condition": "as cast"
+ "condition": "as cast",
+ "tempers": {
+  "as_cast": {
+   "yield_strength": 180,
+   "tensile_strength": 250,
+   "elongation": 0.5,
+   "hardness": 200
+  }
+ },
+ "reference_state": "as_cast"
 }

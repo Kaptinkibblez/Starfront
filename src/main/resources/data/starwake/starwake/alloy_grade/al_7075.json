@@ -56,5 +56,30 @@
   "conductivity": 33,
   "corrosion": 4
  },
- "condition": "T6"
+ "condition": "T6",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 103,
+   "tensile_strength": 228,
+   "elongation": 17,
+   "hardness": 60
+  },
+  "solution": {
+   "yield_strength": 145,
+   "tensile_strength": 275,
+   "elongation": 20,
+   "hardness": 80
+  },
+  "aged": {
+   "yield_strength": 503,
+   "tensile_strength": 572,
+   "elongation": 11,
+   "hardness": 175
+  }
+ },
+ "reference_state": "aged",
+ "treatment": {
+  "solution": 480,
+  "age": 120
+ }
 }

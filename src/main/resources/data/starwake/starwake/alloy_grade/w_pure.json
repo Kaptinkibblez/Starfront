@@ -25,6 +25,21 @@
   "corrosion": 4
  },
  "condition": "wrought",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 550,
+   "tensile_strength": 620,
+   "elongation": 2,
+   "hardness": 360
+  },
+  "stress_relieved": {
+   "yield_strength": 750,
+   "tensile_strength": 980,
+   "elongation": 2,
+   "hardness": 350
+  }
+ },
+ "reference_state": "stress_relieved",
  "note": {
   "translate": "alloy.starwake.w_pure.note",
   "fallback": "Service limit is in vacuum; burns in hot air."

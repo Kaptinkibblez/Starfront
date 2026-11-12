@@ -367,6 +367,22 @@ commit. **Don't start the next milestone until the user confirms the current one
         air picks up O 0.50%/N 0.20%, in vacuum stays 100% Ti; tungsten refused as too refractory;
         W + coke + Co powders sintered into 19 WC-Co ingots; slab mould taps a 10 kg slab; the screen's
         assistant asks for +0.424 kg Cr, +0.382 kg Ni and blowing 0.022 kg C to reach mid-spec 304.)*
+  - **8d-2 decisions (user, 2026-11-12):** **handbook + rules** (real temper tables per grade where
+    they exist, physical rules by family otherwise); **passes + cold work** (each pass adds real
+    reduction; cracking past the material's limit unless annealed between); **hot/cold mode on the
+    mills** (hot mode reheats the piece itself, no hardening or cracking; hot-worked steel ~
+    normalised); **hardenability** (Heat Treatment Furnace programs; steel hardness from carbon and
+    Grossmann hardenability against section size and quench medium).
+  - [x] 8d-2. Tempers (component `starwake:temper`), handbook temper tables per grade, cold work + crack
+        limit, Grossmann hardenability, tempering, ageing; Rolling Mill, Wire Drawer, Extrusion Press,
+        Forging Press (hot/cold mode, one pass per cycle), Heat Treatment Furnace (9 programs); 10 kg
+        forgings. *(Verified 2026-11-12 on a dedicated server + client: 6061 solution -> T4 145/241 MPa, aged
+        at 175 C -> T6 276/310, at 300 C over-aged 204/250; 304 one cold pass -> 26% CW, 633/833 MPa, 50% ->
+        63% CW 936/1019, annealed back to 215/505; 1045 slab cold rolled cracks on the third pass (59% >
+        56%), hot rolled -> 10 plates ~normalised 450/655; 1045 plate water quench 667 HV; oil-quenched
+        billets: 1045 213 HV vs 4140 526 HV (hardenability); 4140 at 600 HV tempered at 540 C -> 312 HV,
+        1028 MPa; Cu rod drawn to 2 wires 75% CW 374 MPa; 4140 billet hot forged; 6061 billet hot extruded
+        into 20 rods; screens show strain, mode, program and setpoint.)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
   - **User notes for M9 (2026-11-12):** conveyors move items the wrong way; ship flight is buggy
     all around (overhaul it); hub NPCs (guards/crew) add little value: **remove them**.
@@ -1055,6 +1071,47 @@ normal gravity.
 - **Sintering Press** (`metal/SinterPressBlockEntity`, 30 kW, 3 MJ/kg): blends everything in its four
   powder slots (metal dust, element powders, coke as carbon) once they've been unchanged for 2 s,
   drops H/O/N, and makes 1 kg "sintered" ingots (W, Mo, WC-Co, TZM).
+
+## How forming and heat treatment work (Milestone 8d-2)
+
+- **Temper** (`metal/Tempers.Temper`, component `starwake:temper`): state (annealed, as_cast, sintered,
+  hot_worked, cold_worked, stress_relieved, normalized, quenched, tempered, solution, aged, cracked),
+  cold work since the last anneal (thickness reduction 0..1), treatment temperature, current HV,
+  forming progress (true strain done on a route) and the as-quenched HV (re-tempering starts from it).
+  No component = the grade's **reference** temper (its handbook `properties`, e.g. 6061 = T6); the
+  8d-1 `starwake:condition` string is still read as a legacy state. `Tempers.properties(stack)` is what
+  tooltips (and later parts) use.
+- **Data** (`tools/metallurgy.py`): every exact grade JSON has `tempers` (state -> yield, UTS,
+  elongation, HV from handbooks), `reference_state` and `treatment` (program -> C).
+  `starwake/heat_treatment/default.json`: program temperatures per family (fractions of the solidus in
+  `default`), quench severities (water 1, oil 0.35, air 0.02), section sizes per form (inches),
+  Grossmann multiplying factors per element, carbon ideal diameter, work-hardening factor per family,
+  quench-crack carbon limits. `starwake/forming/<machine>.json`: `pass_strain` and routes {from, to,
+  strain}. Both are server reload listeners.
+- **Rules:** table entry for the state if the grade has one (scaled by the off-spec penalty), else
+  physics: cold work UTS = uts0 (1 + 0.6 h (1 - e^-3cw)), yield -> 0.95 UTS, elongation e^-5cw; crack
+  limit 0.25 + 1.2% per % annealed elongation (max 0.9; < 5% elongation = elongation/100). Steel
+  (Fe base, 0.2-2.1% C, Ni < 6%) quench: D_I = 0.42 sqrt(C) x product(1 + f wt%), critical D = D_I (1 -
+  e^(-1.4 H^0.6)), HRC = 35 + 50 C (max 66) -> HV, martensite share (D / section)^1.5 between normalised
+  and full hardness; water quench cracks C >= 0.5%, oil quench C >= 0.9% in sections >= 2 in. Temper:
+  HV falls toward annealed by ((T - 150) / 550)^0.9; UTS = 3.3 HV, yield 0.88 UTS (0.75 as quenched).
+  Ageing only for grades with an `aged` temper: within 60 C of the grade's age temperature = peak,
+  colder = under-aged, hotter = over-aged toward annealed. Hot-worked steel = normalised.
+- **Forming machines** (`metal/FormingBlockEntity`, one BE for `rolling_mill`, `wire_drawer`,
+  `extrusion_press`, `forging_press`; slots input / piece / output): one piece at a time, one pass per
+  cycle; energy per pass = 2 x flow stress x strain x volume (hot flow stress 15% of UTS), min 1 s; hot
+  mode (screen button, NBT `hot`) first reheats the piece to 0.75 x solidus (K) at 650 J/kg/K. A pass
+  that cracks it ejects it as `cracked` scrap; a finished route splits the mass into the target form
+  (slab -> 10 plates, billet -> 20 rods, rod -> 2 wires). Half-formed pieces keep their progress, so
+  you can take one out, anneal it and put it back.
+- **Heat Treatment Furnace** (`metal/HeatTreatFurnaceBlockEntity`, 250 kW, limit 1250 C): a whole stack
+  per batch; programs (`Tempers.Program`: anneal, normalise, harden water/oil/air, temper, solution,
+  age, stress relieve) cycle with < >, the setpoint (temper/age) with - +; other programs use the
+  grade's temperature. Energy 650 J/kg/K x (T - 25) x 1.2. Changing the program mid-batch replans it.
+  Tests: `/data merge block ... {program:5,setpoint:540}`, `{hot:1b}`; read results with
+  `/starwake metal info <pos> <slot>` (prints temper + properties).
+- Screens: `client/metal/MetalworkScreen` (data slots reuse the TANKS block: mode/strain/route/hot T,
+  or program/setpoint/furnace T). `MetalForm.FORGING` (10 kg).
 
 ## 26.3 gotchas (learned the hard way)
 

@@ -32,11 +32,15 @@ public final class MetalTooltips {
 		if (composition.isEmpty()) return;
 		Composition c = composition.get();
 		Metallurgy.Analysis a = Metallurgy.analyze(c);
-		MaterialProperties p = a.properties();
+		com.starwake.metal.Tempers.Temper temper = com.starwake.metal.Tempers.of(stack);
+		MaterialProperties p = com.starwake.metal.Tempers.properties(a, temper, MetalItems.formOf(stack).orElse(com.starwake.metal.MetalForm.INGOT));
+		String gradeCondition = !temper.state().isEmpty() || a.grade() == null ? "" : a.grade().condition().orElse("");
 		switch (a.kind()) {
 			case GRADE -> lines.add((stack.getItem() instanceof com.starwake.metal.MetalItem
-					? Component.translatable("metal.starwake.tooltip.grade", a.grade() == null ? "" : a.grade().condition().orElse(""))
-					: Component.translatable("metal.starwake.tooltip.grade_named", a.name(), a.grade() == null ? "" : a.grade().condition().orElse("")))
+					? (gradeCondition.isEmpty() ? Component.translatable("metal.starwake.tooltip.grade_plain")
+							: Component.translatable("metal.starwake.tooltip.grade", gradeCondition))
+					: (gradeCondition.isEmpty() ? Component.translatable("metal.starwake.tooltip.grade_named_plain", a.name())
+							: Component.translatable("metal.starwake.tooltip.grade_named", a.name(), gradeCondition)))
 					.withColor(GOOD));
 			case OFF_SPEC -> {
 				lines.add(Component.translatable("metal.starwake.tooltip.off_spec", a.grade().name()).withColor(WARN));
@@ -52,10 +56,13 @@ public final class MetalTooltips {
 		}
 		String comp = c.format(5) + (c.parts().size() > 5 ? " · +" + (c.parts().size() - 5) : "");
 		lines.add(Component.literal(comp).withColor(COMP));
-		String condition = stack.get(com.starwake.registry.ModComponents.CONDITION);
+		Component condition = com.starwake.metal.Tempers.describe(temper);
 		if (condition != null) {
-			lines.add(Component.translatable("metal.starwake.tooltip.condition", Component.translatable("metal.starwake.condition." + condition))
-					.withColor(DIM));
+			lines.add(Component.translatable("metal.starwake.tooltip.condition", condition)
+					.withColor(temper.state().equals("cracked") ? WARN : DIM));
+		}
+		if (temper.progress() > 0) {
+			lines.add(Component.translatable("metal.starwake.tooltip.forming", String.format("%.2f", temper.progress())).withColor(DIM));
 		}
 		lines.add(Component.translatable("metal.starwake.tooltip.strength", String.format("%.2f", p.density()),
 				Math.round(p.yieldStrength()), Math.round(p.tensileStrength())).withColor(TEXT));

@@ -160,6 +160,22 @@ def casting():
     return im
 
 
+def forging():
+    """10 kg closed-die forging (M8d-2): a flanged shaft with a hub, grain-flow streaks."""
+    im = img()
+    for y in range(6, 11):
+        for x in range(1, 15):
+            put(im, x, y, 205 - abs(y - 8) * 12 + (y == 7) * 25 + ((x + y) % 4 == 0) * 6)
+    for y in range(3, 14):
+        for x in range(5, 9):
+            put(im, x, y, 190 - abs(y - 8) * 6 + (x == 6) * 30)
+    for y in range(4, 13):
+        for x in range(12, 15):
+            put(im, x, y, 180 - abs(y - 8) * 5 + (x == 12) * 25)
+    outline(im)
+    return im
+
+
 def mould(kind):
     """Graphite moulds (M8d): dark block with the cavity shape in lighter grey (not tinted)."""
     im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
@@ -186,11 +202,11 @@ def mould(kind):
 def main():
     os.makedirs(OUT, exist_ok=True)
     for name, fn in (("ingot", ingot), ("plate", plate), ("rod", rod), ("wire", wire), ("dust", dust), ("billet", billet), ("slab", slab),
-                     ("casting", casting)):
+                     ("casting", casting), ("forging", forging)):
         fn().save(os.path.join(OUT, f"metal_{name}.png"))
     for kind in ("billet", "slab", "casting"):
         mould(kind).save(os.path.join(OUT, f"{kind}_mould.png"))
-    print("8 metal textures + 3 moulds")
+    print("9 metal textures + 3 moulds")
 
 
 if __name__ == "__main__":

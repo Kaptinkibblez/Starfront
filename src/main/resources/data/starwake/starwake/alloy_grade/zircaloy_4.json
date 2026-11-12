@@ -47,6 +47,15 @@
   "corrosion": 9
  },
  "condition": "annealed",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 380,
+   "tensile_strength": 520,
+   "elongation": 25,
+   "hardness": 180
+  }
+ },
+ "reference_state": "annealed",
  "note": {
   "translate": "alloy.starwake.zircaloy_4.note",
   "fallback": "Reactor fuel cladding: barely absorbs neutrons."

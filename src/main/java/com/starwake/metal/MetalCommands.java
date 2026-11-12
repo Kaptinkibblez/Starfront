@@ -52,7 +52,9 @@ public final class MetalCommands {
 												.then(Commands.argument("count", IntegerArgumentType.integer(1, 64))
 														.executes(ctx -> grade(ctx, StringArgumentType.getString(ctx, "form"),
 																IntegerArgumentType.getInteger(ctx, "count")))))))
-						.then(Commands.literal("info").executes(MetalCommands::info))
+						.then(Commands.literal("info").executes(MetalCommands::info)
+								.then(Commands.argument("pos", net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos())
+										.then(Commands.argument("slot", IntegerArgumentType.integer(0, 64)).executes(MetalCommands::infoAt))))
 						.then(Commands.literal("grades").executes(MetalCommands::grades)))));
 	}
 
@@ -102,7 +104,37 @@ public final class MetalCommands {
 			return 0;
 		}
 		report(ctx.getSource(), c.get());
+		reportTemper(ctx.getSource(), player.getMainHandItem());
 		return 1;
+	}
+
+	/** {@code info <pos> <slot>}: a metal item in a container (headless tests). */
+	private static int infoAt(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		var pos = net.minecraft.commands.arguments.coordinates.BlockPosArgument.getLoadedBlockPos(ctx, "pos");
+		int slot = IntegerArgumentType.getInteger(ctx, "slot");
+		if (!(ctx.getSource().getLevel().getBlockEntity(pos) instanceof net.minecraft.world.Container container) || slot >= container.getContainerSize()) {
+			ctx.getSource().sendFailure(Component.literal("No container slot there"));
+			return 0;
+		}
+		ItemStack stack = container.getItem(slot);
+		var c = MetalItems.compositionOf(stack);
+		if (c.isEmpty()) {
+			ctx.getSource().sendFailure(Component.literal("Not a metal: " + stack));
+			return 0;
+		}
+		ctx.getSource().sendSuccess(() -> Component.literal(stack.getCount() + " x " + MetalItems.formOf(stack).map(f -> f.id).orElse("?")), false);
+		report(ctx.getSource(), c.get());
+		reportTemper(ctx.getSource(), stack);
+		return 1;
+	}
+
+	/** The item's temper and the properties it gives. */
+	public static void reportTemper(CommandSourceStack source, ItemStack stack) {
+		Tempers.Temper t = Tempers.of(stack);
+		MaterialProperties p = Tempers.properties(stack);
+		source.sendSuccess(() -> Component.literal(String.format("temper %s cw=%.3f T=%d HV=%.0f quenched=%.0f progress=%.2f -> yield %.0f MPa, UTS %.0f MPa, elongation %.1f%%, HV %.0f",
+				t.state().isEmpty() ? "(reference)" : t.state(), t.coldWork(), t.temperature(), t.hardness(), t.quenched(), t.progress(),
+				p.yieldStrength(), p.tensileStrength(), p.elongation(), p.hardness())), false);
 	}
 
 	private static int grades(CommandContext<CommandSourceStack> ctx) {

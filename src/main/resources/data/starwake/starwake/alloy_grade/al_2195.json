@@ -52,6 +52,31 @@
   "corrosion": 5
  },
  "condition": "T8",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 110,
+   "tensile_strength": 220,
+   "elongation": 15,
+   "hardness": 60
+  },
+  "solution": {
+   "yield_strength": 270,
+   "tensile_strength": 400,
+   "elongation": 14,
+   "hardness": 110
+  },
+  "aged": {
+   "yield_strength": 560,
+   "tensile_strength": 595,
+   "elongation": 9,
+   "hardness": 170
+  }
+ },
+ "reference_state": "aged",
+ "treatment": {
+  "solution": 505,
+  "age": 150
+ },
  "note": {
   "translate": "alloy.starwake.al_2195.note",
   "fallback": "Light cryogenic tankage (the Shuttle's super-lightweight tank)."

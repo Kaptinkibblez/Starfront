@@ -41,5 +41,20 @@
   "conductivity": 31,
   "corrosion": 3
  },
- "condition": "stress relieved"
+ "condition": "stress relieved",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 550,
+   "tensile_strength": 685,
+   "elongation": 20,
+   "hardness": 220
+  },
+  "stress_relieved": {
+   "yield_strength": 860,
+   "tensile_strength": 965,
+   "elongation": 10,
+   "hardness": 260
+  }
+ },
+ "reference_state": "stress_relieved"
 }

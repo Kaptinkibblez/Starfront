@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/wire_drawer_front",
+    "side": "starwake:block/wire_drawer_side",
+    "top": "starwake:block/wire_drawer_top"
+  }
+}

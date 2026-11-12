@@ -57,6 +57,31 @@
   "corrosion": 3
  },
  "condition": "T3",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 76,
+   "tensile_strength": 186,
+   "elongation": 20,
+   "hardness": 47
+  },
+  "solution": {
+   "yield_strength": 324,
+   "tensile_strength": 469,
+   "elongation": 19,
+   "hardness": 130
+  },
+  "aged": {
+   "yield_strength": 345,
+   "tensile_strength": 483,
+   "elongation": 18,
+   "hardness": 137
+  }
+ },
+ "reference_state": "aged",
+ "treatment": {
+  "solution": 495,
+  "age": 190
+ },
  "note": {
   "translate": "alloy.starwake.al_2024.note",
   "fallback": "Classic aircraft skin alloy."

@@ -41,5 +41,20 @@
   "conductivity": 18.5,
   "corrosion": 2
  },
- "condition": "H24"
+ "condition": "H24",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 150,
+   "tensile_strength": 255,
+   "elongation": 21,
+   "hardness": 49
+  },
+  "cold_worked": {
+   "yield_strength": 200,
+   "tensile_strength": 260,
+   "elongation": 15,
+   "hardness": 49
+  }
+ },
+ "reference_state": "cold_worked"
 }

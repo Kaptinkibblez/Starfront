@@ -229,7 +229,7 @@ public class MeltFurnaceBlockEntity extends MachineBlockEntity {
 			if (melt.mass() >= form.kg - 1e-9 && (out.isEmpty() || out.getCount() < out.getMaxStackSize())) {
 				Composition c = melt.tap(form.kg);
 				ItemStack made = MetalItems.stack(form, c, 1);
-				made.set(com.starwake.registry.ModComponents.CONDITION, "as_cast");
+				Tempers.set(made, Tempers.Temper.of("as_cast"));
 				if (out.isEmpty()) items.set(OUTPUT, made);
 				else if (ItemStack.isSameItemSameComponents(out, made)) out.grow(1);
 				else melt.add(c, form.kg, false); // different metal than the last tap: pour it back
@@ -299,7 +299,7 @@ public class MeltFurnaceBlockEntity extends MachineBlockEntity {
 			// The bath freezes into a skull: drop it as as-cast ingots.
 			while (melt.mass() >= 1) {
 				ItemStack skull = MetalItems.stack(MetalForm.INGOT, melt.tap(1), 1);
-				skull.set(com.starwake.registry.ModComponents.CONDITION, "as_cast");
+				Tempers.set(skull, Tempers.Temper.of("as_cast"));
 				net.minecraft.world.Containers.dropItemStack(server, pos.getX(), pos.getY(), pos.getZ(), skull);
 			}
 		}

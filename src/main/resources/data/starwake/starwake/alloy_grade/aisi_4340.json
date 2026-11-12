@@ -56,5 +56,23 @@
   "conductivity": 7,
   "corrosion": 3
  },
- "condition": "normalized"
+ "condition": "normalized",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 472,
+   "tensile_strength": 745,
+   "elongation": 22,
+   "hardness": 228
+  },
+  "normalized": {
+   "yield_strength": 862,
+   "tensile_strength": 1282,
+   "elongation": 12.2,
+   "hardness": 380
+  }
+ },
+ "reference_state": "normalized",
+ "treatment": {
+  "harden": 830
+ }
 }

@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "starwake:item/metal_forging",
+    "tints": [
+      {
+        "type": "minecraft:custom_model_data",
+        "default": 11579568
+      }
+    ]
+  }
+}

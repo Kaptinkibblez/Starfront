@@ -51,5 +51,20 @@
   "conductivity": 29,
   "corrosion": 9
  },
- "condition": "H116"
+ "condition": "H116",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 145,
+   "tensile_strength": 290,
+   "elongation": 22,
+   "hardness": 75
+  },
+  "cold_worked": {
+   "yield_strength": 215,
+   "tensile_strength": 317,
+   "elongation": 16,
+   "hardness": 96
+  }
+ },
+ "reference_state": "cold_worked"
 }

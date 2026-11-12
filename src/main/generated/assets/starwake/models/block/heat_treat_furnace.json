@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/heat_treat_furnace_front",
+    "side": "starwake:block/heat_treat_furnace_side",
+    "top": "starwake:block/heat_treat_furnace_top"
+  }
+}

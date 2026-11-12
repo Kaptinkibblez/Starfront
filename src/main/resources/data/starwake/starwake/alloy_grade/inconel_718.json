@@ -62,6 +62,25 @@
   "corrosion": 9
  },
  "condition": "aged",
+ "tempers": {
+  "solution": {
+   "yield_strength": 380,
+   "tensile_strength": 880,
+   "elongation": 50,
+   "hardness": 200
+  },
+  "aged": {
+   "yield_strength": 1035,
+   "tensile_strength": 1240,
+   "elongation": 12,
+   "hardness": 400
+  }
+ },
+ "reference_state": "aged",
+ "treatment": {
+  "solution": 980,
+  "age": 720
+ },
  "note": {
   "translate": "alloy.starwake.inconel_718.note",
   "fallback": "Rocket engine turbomachinery and combustion chambers."

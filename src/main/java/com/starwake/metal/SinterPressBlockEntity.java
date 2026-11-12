@@ -123,7 +123,7 @@ public class SinterPressBlockEntity extends MachineBlockEntity {
 					for (double v : batch.values()) total += v;
 					int n = (int) Math.floor(total + 1e-6);
 					ItemStack made = MetalItems.stack(MetalForm.INGOT, Composition.of(batch), Math.max(1, Math.min(64, n)));
-					made.set(ModComponents.CONDITION, "sintered");
+					Tempers.set(made, Tempers.Temper.of("sintered"));
 					items.set(4, made);
 					batch = null;
 					energyNeeded = energyDone = 0;

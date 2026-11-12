@@ -47,6 +47,31 @@
   "corrosion": 9
  },
  "condition": "annealed",
+ "tempers": {
+  "solution": {
+   "yield_strength": 900,
+   "tensile_strength": 960,
+   "elongation": 14,
+   "hardness": 340
+  },
+  "aged": {
+   "yield_strength": 1100,
+   "tensile_strength": 1170,
+   "elongation": 10,
+   "hardness": 380
+  },
+  "annealed": {
+   "yield_strength": 880,
+   "tensile_strength": 950,
+   "elongation": 14,
+   "hardness": 349
+  }
+ },
+ "reference_state": "annealed",
+ "treatment": {
+  "solution": 955,
+  "age": 540
+ },
  "note": {
   "translate": "alloy.starwake.ti_6al4v.note",
   "fallback": "The workhorse aerospace titanium."

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": "minecraft:iron_block",
+    "C": "starwake:copper_cable",
+    "I": "minecraft:iron_ingot",
+    "P": "minecraft:piston",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "IPI",
+    "CBC",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:extrusion_press"
+  }
+}

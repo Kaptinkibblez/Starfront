@@ -52,6 +52,15 @@
   "corrosion": 5
  },
  "condition": "recrystallized",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 296,
+   "tensile_strength": 420,
+   "elongation": 26,
+   "hardness": 140
+  }
+ },
+ "reference_state": "annealed",
  "note": {
   "translate": "alloy.starwake.nb_c103.note",
   "fallback": "Rocket nozzle extensions (Apollo service module)."

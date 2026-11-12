@@ -57,6 +57,25 @@
   "corrosion": 4
  },
  "condition": "aged",
+ "tempers": {
+  "solution": {
+   "yield_strength": 790,
+   "tensile_strength": 1000,
+   "elongation": 17,
+   "hardness": 320
+  },
+  "aged": {
+   "yield_strength": 2000,
+   "tensile_strength": 2050,
+   "elongation": 7,
+   "hardness": 540
+  }
+ },
+ "reference_state": "aged",
+ "treatment": {
+  "solution": 820,
+  "age": 480
+ },
  "note": {
   "translate": "alloy.starwake.maraging_300.note",
   "fallback": "Ultra-high-strength steel for rocket casings."

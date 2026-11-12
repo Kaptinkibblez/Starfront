@@ -72,6 +72,15 @@
   "corrosion": 8
  },
  "condition": "single crystal",
+ "tempers": {
+  "as_cast": {
+   "yield_strength": 950,
+   "tensile_strength": 1100,
+   "elongation": 10,
+   "hardness": 430
+  }
+ },
+ "reference_state": "as_cast",
  "note": {
   "translate": "alloy.starwake.cmsx_4.note",
   "fallback": "Turbine-blade alloy: needs rhenium and tantalum."

@@ -31,6 +31,8 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		MenuScreens.register(com.starwake.registry.ModMetalworks.INDUCTION_MENU, com.starwake.client.metal.MeltFurnaceScreen::new);
 		MenuScreens.register(com.starwake.registry.ModMetalworks.VACUUM_ARC_MENU, com.starwake.client.metal.MeltFurnaceScreen::new);
 		MenuScreens.register(com.starwake.registry.ModMetalworks.SINTER_PRESS_MENU, MachineScreen::new);
+		for (var m : com.starwake.registry.ModMetalworks.formingMenus()) MenuScreens.register(m, com.starwake.client.metal.MetalworkScreen::new);
+		MenuScreens.register(com.starwake.registry.ModMetalworks.HEAT_TREAT_MENU, com.starwake.client.metal.MetalworkScreen::new);
 		com.starwake.client.metal.MeltFurnaceScreen.registerReceiver();
 		for (var p : com.starwake.process.ProcessMachineBlockEntity.Process.values()) {
 			MenuScreens.register(com.starwake.registry.ModProcess.menu(p), MachineScreen::new);

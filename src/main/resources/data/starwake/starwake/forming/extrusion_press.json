@@ -1,0 +1,15 @@
+{
+ "pass_strain": 3.0,
+ "routes": [
+  {
+   "from": "billet",
+   "to": "rod",
+   "strain": 3.0
+  },
+  {
+   "from": "ingot",
+   "to": "rod",
+   "strain": 1.5
+  }
+ ]
+}

@@ -1,0 +1,15 @@
+{
+ "pass_strain": 0.25,
+ "routes": [
+  {
+   "from": "rod",
+   "to": "wire",
+   "strain": 1.4
+  },
+  {
+   "from": "wire",
+   "to": "wire",
+   "strain": 0.25
+  }
+ ]
+}

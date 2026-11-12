@@ -61,5 +61,30 @@
   "conductivity": 2.5,
   "corrosion": 7
  },
- "condition": "aged H900"
+ "condition": "aged H900",
+ "tempers": {
+  "solution": {
+   "yield_strength": 1000,
+   "tensile_strength": 1100,
+   "elongation": 12,
+   "hardness": 360
+  },
+  "annealed": {
+   "yield_strength": 1000,
+   "tensile_strength": 1100,
+   "elongation": 12,
+   "hardness": 360
+  },
+  "aged": {
+   "yield_strength": 1170,
+   "tensile_strength": 1310,
+   "elongation": 10,
+   "hardness": 420
+  }
+ },
+ "reference_state": "aged",
+ "treatment": {
+  "solution": 1040,
+  "age": 480
+ }
 }

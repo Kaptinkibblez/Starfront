@@ -286,6 +286,92 @@ BASE = {
 }
 
 
+# --- Tempers (M8d-2) ------------------------------------------------------------------------------
+# Handbook [yield MPa, UTS MPa, elongation %, HV] per state, where the grade's own condition isn't the
+# one listed. States: annealed (fully soft), normalized (steels), solution (solution treated,
+# quenched: T4 / condition A / TB00), aged (peak aged: T6, H900, STA...). The grade's own condition
+# fills whichever of these it is. Cold work, hot work, quench + temper, casting and sintering follow
+# rules in Java (metal/Tempers) from these.
+TEMPERS = {
+    "aisi_1010": {"annealed": [180, 325, 28, 95], "normalized": [205, 365, 26, 105]},
+    "aisi_1020": {"annealed": [295, 395, 36, 111], "normalized": [345, 440, 36, 131]},
+    "aisi_1045": {"annealed": [310, 565, 26, 170]},
+    "aisi_1095": {"annealed": [380, 655, 13, 200]},
+    "aisi_4140": {"annealed": [417, 655, 26, 207]},
+    "aisi_4340": {"annealed": [472, 745, 22, 228]},
+    "maraging_300": {"solution": [790, 1000, 17, 320]},
+    "aisi_d2": {"annealed": [350, 770, 18, 230]},
+    "aisi_m2": {"annealed": [360, 850, 15, 240]},
+    "ss_17_4ph": {"solution": [1000, 1100, 12, 360], "annealed": [1000, 1100, 12, 360]},
+    "al_2024": {"annealed": [76, 186, 20, 47], "solution": [324, 469, 19, 130]},
+    "al_6061": {"annealed": [55, 124, 25, 30], "solution": [145, 241, 22, 65]},
+    "al_7075": {"annealed": [103, 228, 17, 60], "solution": [145, 275, 20, 80]},
+    "al_5083": {"annealed": [145, 290, 22, 75]},
+    "al_2195": {"annealed": [110, 220, 15, 60], "solution": [270, 400, 14, 110]},
+    "ti_6al4v": {"solution": [900, 960, 14, 340], "aged": [1100, 1170, 10, 380]},
+    "ti_6242": {"aged": [1000, 1100, 12, 360]},
+    "inconel_718": {"solution": [380, 880, 50, 200]},
+    "waspaloy": {"solution": [520, 1000, 35, 260]},
+    "becu_c17200": {"solution": [195, 480, 45, 110]},
+    "mg_az31b": {"annealed": [150, 255, 21, 49]},
+    "mo_tzm": {"annealed": [550, 685, 20, 220]},
+    "w_pure": {"annealed": [550, 620, 2, 360]},
+}
+# Which state the grade's own handbook properties describe.
+CONDITION_STATE = {"annealed": "annealed", "O temper": "annealed", "recrystallized": "annealed", "duplex annealed": "annealed",
+                   "normalized": "normalized", "hot rolled": "hot_worked", "aged": "aged", "T6": "aged", "T8": "aged", "T3": "aged",
+                   "aged H900": "aged", "hardened": "tempered", "as cast": "as_cast", "cast": "as_cast", "sintered": "sintered",
+                   "H116": "cold_worked", "H24": "cold_worked", "stress relieved": "stress_relieved", "wrought": "stress_relieved",
+                   "single crystal": "as_cast"}
+# Grade-specific treatment temperatures (C), where they differ from the family defaults.
+TREATMENT = {
+    "al_2024": {"solution": 495, "age": 190}, "al_6061": {"solution": 530, "age": 175}, "al_7075": {"solution": 480, "age": 120},
+    "al_2195": {"solution": 505, "age": 150}, "ti_6al4v": {"solution": 955, "age": 540}, "ti_6242": {"solution": 970, "age": 595},
+    "inconel_718": {"solution": 980, "age": 720}, "waspaloy": {"solution": 1080, "age": 760}, "becu_c17200": {"solution": 790, "age": 315},
+    "maraging_300": {"solution": 820, "age": 480}, "ss_17_4ph": {"solution": 1040, "age": 480},
+    "aisi_d2": {"harden": 1010}, "aisi_m2": {"harden": 1200}, "aisi_1095": {"harden": 800}, "aisi_1045": {"harden": 845},
+    "aisi_4140": {"harden": 850}, "aisi_4340": {"harden": 830},
+}
+
+
+# Heat treatment rules (M8d-2): family program temperatures (C), quench severities (Grossmann H,
+# 1/inch), the section each metal form represents (inches), hardenability multiplying factors per wt%
+# (ASTM A255), work-hardening factors per family and the cold-work limit rule.
+HEAT_TREATMENT = {
+    "temperatures": {
+        "default": {"anneal": 0.45, "normalize": 0.5, "harden": 0.5, "solution": 0.55, "age": 0.3, "stress_relieve": 0.3},
+        "carbon_steel": {"anneal": 830, "normalize": 870, "harden": 845, "stress_relieve": 600},
+        "alloy_steel": {"anneal": 845, "normalize": 870, "harden": 845, "solution": 820, "age": 480, "stress_relieve": 600},
+        "tool_steel": {"anneal": 870, "normalize": 900, "harden": 1010, "stress_relieve": 650},
+        "stainless": {"anneal": 1050, "normalize": 1050, "harden": 1000, "solution": 1040, "age": 480, "stress_relieve": 400},
+        "iron": {"anneal": 800, "normalize": 870, "harden": 845, "stress_relieve": 550},
+        "aluminium": {"anneal": 415, "solution": 530, "age": 175, "stress_relieve": 345},
+        "titanium": {"anneal": 730, "solution": 955, "age": 540, "stress_relieve": 540},
+        "nickel": {"anneal": 870, "solution": 1000, "age": 700, "stress_relieve": 600},
+        "superalloy": {"anneal": 1000, "solution": 1050, "age": 720, "stress_relieve": 650},
+        "copper": {"anneal": 500, "solution": 790, "age": 315, "stress_relieve": 250},
+        "magnesium": {"anneal": 345, "solution": 415, "age": 175, "stress_relieve": 150},
+        "refractory": {"anneal": 1400, "stress_relieve": 1000},
+    },
+    "severity": {"water": 1.0, "oil": 0.35, "air": 0.02},
+    "section": {"wire": 0.08, "rod": 0.5, "plate": 0.25, "ingot": 2.0, "billet": 4.0, "slab": 4.0, "casting": 3.0, "forging": 3.0, "dust": 0.05},
+    "hardenability": {"Mn": 3.333, "Si": 0.7, "Ni": 0.363, "Cr": 2.16, "Mo": 3.0, "V": 1.73, "Cu": 0.365},
+    "carbon_ideal_diameter": 0.42,
+    "work_hardening": {"stainless": 2.0, "carbon_steel": 1.1, "alloy_steel": 1.1, "tool_steel": 1.0, "iron": 1.1, "aluminium": 0.9,
+                       "copper": 1.3, "nickel": 1.5, "superalloy": 1.5, "titanium": 0.6, "refractory": 0.8, "magnesium": 0.6,
+                       "default": 1.0},
+    "water_crack_carbon": 0.5,
+    "oil_crack_carbon": 0.9,
+}
+# Forming routes (M8d-2): which form becomes which, the true strain the route needs, strain per pass.
+FORMING = {
+    "rolling_mill": {"pass_strain": 0.3, "routes": [["slab", "plate", 3.0], ["ingot", "plate", 1.2], ["plate", "plate", 0.3]]},
+    "wire_drawer": {"pass_strain": 0.25, "routes": [["rod", "wire", 1.4], ["wire", "wire", 0.25]]},
+    "extrusion_press": {"pass_strain": 3.0, "routes": [["billet", "rod", 3.0], ["ingot", "rod", 1.5]]},
+    "forging_press": {"pass_strain": 0.4, "routes": [["billet", "forging", 1.6], ["casting", "forging", 1.2]]},
+}
+
+
 def nominal(g):
     if g["nominal"]:
         return g["nominal"]
@@ -305,6 +391,16 @@ def main():
             data["nominal"] = nominal(g)
             data["properties"] = g["properties"]
             data["condition"] = g["condition"]
+            state = CONDITION_STATE.get(g["condition"], "annealed")
+            p = g["properties"]
+            tempers = {k: {"yield_strength": v[0], "tensile_strength": v[1], "elongation": v[2], "hardness": v[3]}
+                       for k, v in TEMPERS.get(g["id"], {}).items()}
+            tempers.setdefault(state, {"yield_strength": p["yield_strength"], "tensile_strength": p["tensile_strength"],
+                                       "elongation": p["elongation"], "hardness": p["hardness"]})
+            data["tempers"] = tempers
+            data["reference_state"] = state
+            if g["id"] in TREATMENT:
+                data["treatment"] = TREATMENT[g["id"]]
         if g["note"]:
             data["note"] = {"translate": f"alloy.starwake.{g['id']}.note", "fallback": g["note"]}
         with open(os.path.join(GRADES, g["id"] + ".json"), "w") as f:
@@ -313,6 +409,14 @@ def main():
         data = {"element": sym, "pure": pure, "solutes": solutes}
         with open(os.path.join(BASES, sym.lower() + ".json"), "w") as f:
             json.dump(data, f, indent=1)
+    root = os.path.dirname(GRADES)
+    os.makedirs(os.path.join(root, "heat_treatment"), exist_ok=True)
+    with open(os.path.join(root, "heat_treatment", "default.json"), "w") as f:
+        json.dump(HEAT_TREATMENT, f, indent=1)
+    os.makedirs(os.path.join(root, "forming"), exist_ok=True)
+    for k, v in FORMING.items():
+        with open(os.path.join(root, "forming", k + ".json"), "w") as f:
+            json.dump({"pass_strain": v["pass_strain"], "routes": [{"from": a, "to": b, "strain": c} for a, b, c in v["routes"]]}, f, indent=1)
     print(f"{sum(1 for g in G if g['exact'])} grades, {sum(1 for g in G if not g['exact'])} families, {len(BASE)} base models")
 
 

@@ -1,0 +1,15 @@
+{
+ "pass_strain": 0.4,
+ "routes": [
+  {
+   "from": "billet",
+   "to": "forging",
+   "strain": 1.6
+  },
+  {
+   "from": "casting",
+   "to": "forging",
+   "strain": 1.2
+  }
+ ]
+}

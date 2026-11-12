@@ -52,6 +52,24 @@
   "corrosion": 3
  },
  "condition": "hardened",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 360,
+   "tensile_strength": 850,
+   "elongation": 15,
+   "hardness": 240
+  },
+  "tempered": {
+   "yield_strength": 2000,
+   "tensile_strength": 2200,
+   "elongation": 1,
+   "hardness": 830
+  }
+ },
+ "reference_state": "tempered",
+ "treatment": {
+  "harden": 1200
+ },
  "note": {
   "translate": "alloy.starwake.aisi_m2.note",
   "fallback": "Keeps its hardness red-hot."

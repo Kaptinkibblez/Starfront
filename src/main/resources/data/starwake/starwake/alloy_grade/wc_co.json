@@ -37,6 +37,15 @@
   "corrosion": 6
  },
  "condition": "sintered",
+ "tempers": {
+  "sintered": {
+   "yield_strength": 1500,
+   "tensile_strength": 1600,
+   "elongation": 0.3,
+   "hardness": 1500
+  }
+ },
+ "reference_state": "sintered",
  "note": {
   "translate": "alloy.starwake.wc_co.note",
   "fallback": "Cemented carbide: the hardest tooling material."

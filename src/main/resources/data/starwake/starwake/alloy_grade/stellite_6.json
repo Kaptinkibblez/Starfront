@@ -67,6 +67,15 @@
   "corrosion": 9
  },
  "condition": "cast",
+ "tempers": {
+  "as_cast": {
+   "yield_strength": 540,
+   "tensile_strength": 900,
+   "elongation": 1,
+   "hardness": 420
+  }
+ },
+ "reference_state": "as_cast",
  "note": {
   "translate": "alloy.starwake.stellite_6.note",
   "fallback": "Wear- and heat-resistant hardfacing."

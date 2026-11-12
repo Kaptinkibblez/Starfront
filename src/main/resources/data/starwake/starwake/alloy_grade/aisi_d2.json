@@ -56,5 +56,23 @@
   "conductivity": 2.5,
   "corrosion": 5
  },
- "condition": "hardened"
+ "condition": "hardened",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 350,
+   "tensile_strength": 770,
+   "elongation": 18,
+   "hardness": 230
+  },
+  "tempered": {
+   "yield_strength": 1650,
+   "tensile_strength": 1900,
+   "elongation": 1,
+   "hardness": 700
+  }
+ },
+ "reference_state": "tempered",
+ "treatment": {
+  "harden": 1010
+ }
 }

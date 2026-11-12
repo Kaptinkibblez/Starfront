@@ -51,5 +51,14 @@
   "conductivity": 59,
   "corrosion": 7
  },
- "condition": "O temper"
+ "condition": "O temper",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 34,
+   "tensile_strength": 90,
+   "elongation": 35,
+   "hardness": 23
+  }
+ },
+ "reference_state": "annealed"
 }

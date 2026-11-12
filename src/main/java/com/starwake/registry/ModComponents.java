@@ -42,6 +42,11 @@ public final class ModComponents {
 			StarwakeMod.id("condition"), DataComponentType.<String>builder().persistent(com.mojang.serialization.Codec.STRING)
 					.networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 
+	/** A metal item's temper (M8d-2): state, cold work, treatment temperature, quench hardness, forming progress. */
+	public static final DataComponentType<com.starwake.metal.Tempers.Temper> TEMPER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			StarwakeMod.id("temper"), DataComponentType.<com.starwake.metal.Tempers.Temper>builder().persistent(com.starwake.metal.Tempers.Temper.CODEC)
+					.networkSynchronized(com.starwake.metal.Tempers.Temper.STREAM_CODEC).build());
+
 	private ModComponents() {}
 
 	public static void init() {}

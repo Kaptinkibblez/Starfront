@@ -46,5 +46,26 @@
   "conductivity": 12,
   "corrosion": 2
  },
- "condition": "hot rolled"
+ "condition": "hot rolled",
+ "tempers": {
+  "annealed": {
+   "yield_strength": 180,
+   "tensile_strength": 325,
+   "elongation": 28,
+   "hardness": 95
+  },
+  "normalized": {
+   "yield_strength": 205,
+   "tensile_strength": 365,
+   "elongation": 26,
+   "hardness": 105
+  },
+  "hot_worked": {
+   "yield_strength": 180,
+   "tensile_strength": 325,
+   "elongation": 28,
+   "hardness": 95
+  }
+ },
+ "reference_state": "hot_worked"
 }

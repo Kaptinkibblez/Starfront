@@ -1,0 +1,20 @@
+{
+ "pass_strain": 0.3,
+ "routes": [
+  {
+   "from": "slab",
+   "to": "plate",
+   "strain": 3.0
+  },
+  {
+   "from": "ingot",
+   "to": "plate",
+   "strain": 1.2
+  },
+  {
+   "from": "plate",
+   "to": "plate",
+   "strain": 0.3
+  }
+ ]
+}

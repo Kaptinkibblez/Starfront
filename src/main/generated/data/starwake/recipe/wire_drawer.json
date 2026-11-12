@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "starwake:copper_cable",
+    "D": "minecraft:diamond",
+    "G": "minecraft:grindstone",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "IDI",
+    "CGC",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:wire_drawer"
+  }
+}

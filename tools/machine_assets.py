@@ -356,6 +356,50 @@ def process_textures():
     front("vacuum_arc_furnace", "#5a5e68", vacuum_arc_furnace)
     front("sinter_press", "#646056", sinter_press)
 
+    # M8d-2: rolling mill (two work rolls), wire drawer (die + capstan), extrusion press (ram, container,
+    # die with a rod coming out), forging press (frame, ram, anvil), heat treatment furnace (box + door).
+    def rolling_mill(im, on):
+        rect(im, 2, 2, 13, 13, "#3a3e46")
+        for cy in (5, 10):
+            rect(im, 3, cy - 2, 12, cy + 1, "#b8c0ca")
+            rect(im, 3, cy - 2, 12, cy - 2, "#e0e6ee")
+        rect(im, 1, 7, 14, 7, "#ff8a3a" if on else "#7a7e86")
+
+    def wire_drawer(im, on):
+        rect(im, 2, 6, 5, 9, "#9aa4b0")
+        rect(im, 6, 7, 14, 7, "#d8a060" if on else "#8a7a60")
+        for y in range(3, 13):
+            for x in range(8, 15):
+                if (x - 11) ** 2 + (y - 8) ** 2 <= 9:
+                    im.putpixel((x, y), hexrgb("#6a7280") + (255,))
+        rect(im, 11, 8, 11, 8, "#2a2e36")
+
+    def extrusion_press(im, on):
+        rect(im, 1, 6, 4, 9, "#9aa4b0")
+        rect(im, 5, 4, 10, 11, "#4a4e56")
+        rect(im, 6, 6, 9, 9, "#ff8a3a" if on else "#5a5e66")
+        rect(im, 11, 7, 14, 8, "#d8dee6")
+
+    def forging_press(im, on):
+        rect(im, 2, 1, 13, 2, "#4a4e56")
+        rect(im, 2, 1, 3, 14, "#4a4e56")
+        rect(im, 12, 1, 13, 14, "#4a4e56")
+        rect(im, 5, 3, 10, 7, "#9aa4b0")
+        rect(im, 5, 9, 10, 10, "#ff7a2a" if on else "#6a6e76")
+        rect(im, 4, 11, 11, 14, "#5a5e66")
+
+    def heat_treat_furnace(im, on):
+        rect(im, 2, 2, 13, 13, "#5a4e46")
+        rect(im, 4, 4, 11, 11, "#ffb03a" if on else "#2a2420")
+        rect(im, 4, 4, 11, 4, "#8a7a6a")
+        rect(im, 6, 13, 9, 14, "#3a3e46")
+
+    front("rolling_mill", "#5e6670", rolling_mill)
+    front("wire_drawer", "#5e6266", wire_drawer)
+    front("extrusion_press", "#606068", extrusion_press)
+    front("forging_press", "#5c6068", forging_press)
+    front("heat_treat_furnace", "#665a52", heat_treat_furnace)
+
 
 def bulk_textures():
     """Bulk materials (tinted by their main species): crushed ore, concentrate, tailings, calcine,
