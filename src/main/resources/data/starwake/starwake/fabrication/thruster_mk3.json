@@ -1,0 +1,33 @@
+{
+ "output": "starwake:thruster_mk3",
+ "count": 1,
+ "order": 103,
+ "energy": 20000,
+ "inputs": [
+  {
+   "item": "starwake:combustion_chamber",
+   "count": 1,
+   "min": {
+    "service": 950
+   }
+  },
+  {
+   "item": "starwake:nozzle",
+   "count": 1,
+   "min": {
+    "service": 1300
+   }
+  },
+  {
+   "item": "starwake:turbopump",
+   "count": 1,
+   "min": {
+    "yield": 1000
+   }
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 2
+  }
+ ]
+}

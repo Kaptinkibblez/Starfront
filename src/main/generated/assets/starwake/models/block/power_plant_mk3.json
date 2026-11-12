@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "starwake:block/power_plant_mk3_top",
+    "side": "starwake:block/power_plant_mk3_side"
+  }
+}

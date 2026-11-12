@@ -1,0 +1,9 @@
+{
+  "blocks": [
+    "starwake:shield_generator_mk2"
+  ],
+  "mass": 1.7,
+  "power_draw": 6.8,
+  "shield_capacity": 150.0,
+  "shield_regen": 0.75
+}

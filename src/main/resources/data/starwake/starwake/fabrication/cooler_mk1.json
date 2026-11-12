@@ -1,0 +1,16 @@
+{
+ "output": "starwake:cooler",
+ "count": 1,
+ "order": 113,
+ "energy": 4000,
+ "inputs": [
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 2
+  },
+  {
+   "item": "starwake:pressure_vessel",
+   "count": 1
+  }
+ ]
+}

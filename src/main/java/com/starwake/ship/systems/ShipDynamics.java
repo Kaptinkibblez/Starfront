@@ -58,8 +58,12 @@ public final class ShipDynamics {
 
 	/** Adds one block whose mass is scaled by its material ({@code massFactor}, M8e-1). */
 	public void add(BlockPos pos, BlockState state, boolean clearExhaust, double massFactor) {
-		ShipStats.BlockStats stats = ShipStats.get(state);
-		double m = stats.mass() * massFactor;
+		add(pos, state, clearExhaust, massFactor, ShipStats.get(state));
+	}
+
+	/** Adds one block with explicit stats (a part's quality bonus, M8e-2); mass = JSON mass x massFactor. */
+	public void add(BlockPos pos, BlockState state, boolean clearExhaust, double massFactor, ShipStats.BlockStats stats) {
+		double m = ShipStats.get(state).mass() * massFactor;
 		double x = pos.getX() + 0.5, y = pos.getY() + 0.5, z = pos.getZ() + 0.5;
 		mass += m;
 		weightedPos.add(x * m, y * m, z * m);

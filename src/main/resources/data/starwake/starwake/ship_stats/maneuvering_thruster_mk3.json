@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    "starwake:maneuvering_thruster_mk3"
+  ],
+  "mass": 0.36,
+  "thrust": 26.4,
+  "fuel_burn": 0.0108,
+  "power_draw": 0.72,
+  "heat_limit": 1820,
+  "armor": 6.6
+}

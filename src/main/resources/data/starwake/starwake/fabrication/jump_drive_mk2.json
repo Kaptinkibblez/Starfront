@@ -1,0 +1,33 @@
+{
+ "output": "starwake:jump_drive_mk2",
+ "count": 1,
+ "order": 123,
+ "energy": 9000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 6,
+   "min": {
+    "conductivity": 98
+   }
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 4
+  },
+  {
+   "item": "starwake:structural_frame",
+   "count": 2,
+   "min": {
+    "yield": 400
+   }
+  },
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 2,
+   "min": {
+    "conductivity": 60
+   }
+  }
+ ]
+}

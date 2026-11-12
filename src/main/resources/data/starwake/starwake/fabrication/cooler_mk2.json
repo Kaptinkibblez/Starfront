@@ -1,0 +1,23 @@
+{
+ "output": "starwake:cooler_mk2",
+ "count": 1,
+ "order": 114,
+ "energy": 9000,
+ "inputs": [
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 3,
+   "min": {
+    "conductivity": 60
+   }
+  },
+  {
+   "item": "starwake:pressure_vessel",
+   "count": 1
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 1
+  }
+ ]
+}

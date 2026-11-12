@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "starwake:block/quantum_drive_mk3_top",
+    "side": "starwake:block/quantum_drive_mk3_side"
+  }
+}

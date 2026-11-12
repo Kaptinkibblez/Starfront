@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 public final class ModBlockEntities {
 	public static final BlockEntityType<FuelTankBlockEntity> FUEL_TANK = Registry.register(
 			BuiltInRegistries.BLOCK_ENTITY_TYPE, StarwakeMod.id("fuel_tank"),
-			FabricBlockEntityTypeBuilder.create(FuelTankBlockEntity::new, ModBlocks.FUEL_TANK).build());
+			FabricBlockEntityTypeBuilder.create(FuelTankBlockEntity::new, ModShipParts.fuelTanks()).build());
 
 	private ModBlockEntities() {}
 

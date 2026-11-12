@@ -1,0 +1,16 @@
+{
+ "output": "starwake:shield_generator",
+ "count": 1,
+ "order": 116,
+ "energy": 4000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 2
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 1
+  }
+ ]
+}

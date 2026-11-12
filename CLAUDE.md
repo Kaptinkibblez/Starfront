@@ -408,6 +408,18 @@ commit. **Don't start the next milestone until the user confirms the current one
         6.6 t vs 15.5 t plain; a ship dropped at 60 m/s from near the sky's top burned off its 5 exposed 6061
         plates at 449 C (steel survived) and the ground impact tore off its 6 lowest blocks (engines, belly
         thrusters) after the hull soaked 46.)*
+  - **Overnight run (user, 2026-11-12: "go ahead and finish the rest, I'm going to bed").** The remaining parts
+    (8e-2 to 8i) were built without the usual clarifying questions; Claude took the recommended option at
+    each decision point and records it in each part's entry below. Revisit any of them on request.
+  - [x] 8e-2. Mk II/III blocks for all ten functional parts (`<id>_mk2/_mk3`, `registry/ModShipParts`), stats
+        from `tools/ship_parts.py` (Mk II: output x1.5, mass/burn/draw/spool x0.85; Mk III: x2.2 / x0.72),
+        Fabricator blueprints for Mk I-III with gates on the components' alloys, per-part quality bonus (+0.4
+        and -0.3 per 1.0 of quality over the design, max +20% / -15%), tier textures, drops keep material and
+        quality. Defaults chosen overnight: Mk I parts stay craftable (provisional recipes) and also
+        fabricable; drives' Mk III use today's fuel until 8f. *(Verified 2026-11-12 on a dedicated server:
+        test ship lift 2.44x weight with Mk I mains, 6.51x with Mk III, 8.67x with Mk III at quality 1.5 (mass
+        255.5 -> 246.5 -> 243.1 t); a Thruster Mk II fabricated from a 718 chamber, Inconel 625 nozzle, 718
+        turbopump and a control board (quality 1.0 = the weakest component); a 718 nozzle refused (950 C gate).)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
   - **User notes for M9 (2026-11-12):** conveyors move items the wrong way; ship flight is buggy
     all around (overhaul it); hub NPCs (guards/crew) add little value: **remove them**.
@@ -1179,6 +1191,23 @@ normal gravity.
   the impact; each block soaks up to its armour and breaks (dropped, keeping its alloy) if its share is larger;
   the hull soaks at most `crumple` (50%), the rest hurts the crew as before. Logged on the server.
 
+## How Mk tiers work (Milestone 8e-2)
+
+- `registry/ModShipParts`: `Part` enum (thruster, main_engine, maneuvering_thruster, power_plant, cooler,
+  shield_generator, quantum_drive, jump_drive, fuel_tank, landing_gear) -> blocks for Mk I (the original ids)
+  and Mk II/III (`_mk2`, `_mk3`, same classes, properties copied). `get(part, mk)`, `tierOf(block)`.
+- Every part is now an `EntityBlock`: `ThrusterBlock`, `LandingGearBlock` and `ship/block/ShipComponentBlock`
+  (power plant, cooler, shield, quantum, jump) use `MaterialBlockEntity`; fuel tanks keep their own BE. Item
+  components (composition, temper, quality) stay on the BE and in assembled ships' NBT.
+- `ShipMaterials.withQuality(stats, q)`: thrust, power, cooling, shields, jump range, fuel capacity x (1 + 0.4 b);
+  mass, fuel burn, power draw, heat, spool times x (1 - 0.3 b), b = q - 1 in 0..0.5. `rate(state, material,
+  quality)` returns these stats in `Rating.stats`; `ShipDynamics.add(..., stats)` and `ShipSystems.add(...,
+  stats)` use them (pre-flight from world BEs, the flying ship from saved NBT); fuel capacity too.
+- Data: `tools/ship_parts.py` writes `ship_stats/<part>_mk2|mk3.json` from the Mk I file and
+  `fabrication/<part>_mk1..3.json` (components gated by what they're made of: nozzle service >= 700/950/1300 C,
+  chamber >= 700/950 C, turbopump yield >= 800/1000 MPa, coils >= 98/100% IACS, tanks >= 400/800 MPa...).
+  `tools/mk_textures.py` derives the tier textures (gold band = Mk II, darker + two cyan bands = Mk III).
+
 ## 26.3 gotchas (learned the hard way)
 
 - **`Component.translatable(key, fallback)` treats the second argument as a format arg**, not a
@@ -1382,6 +1411,8 @@ dependency host must be added to the environment before it works.
   `shot`, `rclick`, `save_quit`, `build_powered_ship X Y Z [coolers]`, `build_sc_ship X Y Z`; the older
   `build_*_ship` helpers have no power plant, so they no longer pass pre-flight). Always `save_quit` before restarting, because a hard kill
   loses everything since the last autosave. Set `/gamerule fall_damage false` in test worlds.
+- `srv` writes to a FIFO: with no server reading it, a plain `echo > fifo` blocks forever (it hung several test
+  runs). `mp.sh`'s `srv` now checks the FIFO exists and wraps the write in `timeout 5`.
 - Multiplayer tests: `$scratchpad/mp.sh` (`start_server`, `srv "cmd"`, `start_mp_client NAME
   DISPLAY GAMEDIR`, then `DISPLAY=:N xdotool ...`): a dedicated server plus clients launched
   straight from the captured java command line (`client_cmd.txt`) with `--username` and

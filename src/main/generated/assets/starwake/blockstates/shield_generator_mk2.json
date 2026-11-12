@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "starwake:block/shield_generator_mk2"
+    }
+  }
+}

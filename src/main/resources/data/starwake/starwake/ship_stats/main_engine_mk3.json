@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    "starwake:main_engine_mk3"
+  ],
+  "mass": 5.76,
+  "thrust": 440.0,
+  "fuel_burn": 0.108,
+  "power_draw": 11.52,
+  "heat_limit": 1820,
+  "armor": 22.0
+}

@@ -79,12 +79,14 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 		for (BlockPos pos : ship) {
 			BlockState state = level.getBlockState(pos);
 			ShipStats.BlockStats stats = ShipStats.get(state);
-			double massFactor = com.starwake.ship.data.ShipMaterials.rate(state,
-					com.starwake.ship.data.ShipMaterials.of(level.getBlockEntity(pos))).massFactor();
+			var be = level.getBlockEntity(pos);
+			var rating = com.starwake.ship.data.ShipMaterials.rate(state, com.starwake.ship.data.ShipMaterials.of(be),
+					com.starwake.ship.data.ShipMaterials.quality(be));
+			double massFactor = rating.massFactor();
 			mass += stats.mass() * massFactor;
 			boolean clear = !(state.getBlock() instanceof ThrusterBlock) || !ship.contains(pos.relative(state.getValue(ThrusterBlock.FACING)));
-			systems.add(state, clear);
-			dynamics.add(pos, state, clear, massFactor);
+			systems.add(state, clear, rating.stats());
+			dynamics.add(pos, state, clear, massFactor, rating.stats());
 			if (state.is(ModBlocks.HELM)) {
 				helms++;
 			} else if (state.getBlock() instanceof ThrusterBlock) {
@@ -219,7 +221,7 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 		}
 
 		// Landing gear (3j).
-		long gear = ship.stream().filter(p -> level.getBlockState(p).is(ModBlocks.LANDING_GEAR)).count();
+		long gear = ship.stream().filter(p -> level.getBlockState(p).getBlock() instanceof com.starwake.ship.block.LandingGearBlock).count();
 		lines.add(gear > 0 ? new Line(Status.PASS, Component.translatable("preflight.starwake.gear", gear))
 				: new Line(Status.WARN, Component.translatable("preflight.starwake.no_gear")));
 

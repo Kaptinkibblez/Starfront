@@ -1,0 +1,24 @@
+{
+ "output": "starwake:jump_drive",
+ "count": 1,
+ "order": 122,
+ "energy": 4000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 4
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 3
+  },
+  {
+   "item": "starwake:structural_frame",
+   "count": 2
+  },
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 1
+  }
+ ]
+}

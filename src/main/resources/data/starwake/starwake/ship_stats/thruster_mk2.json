@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    "starwake:thruster_mk2"
+  ],
+  "mass": 1.7,
+  "thrust": 60.0,
+  "fuel_burn": 0.0425,
+  "power_draw": 3.4,
+  "heat_limit": 1610,
+  "armor": 9.0
+}

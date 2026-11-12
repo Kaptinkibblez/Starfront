@@ -16,15 +16,11 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 
 	@Override
 	public void generate() {
-		// Hull plating keeps its alloy (M8e-1): copy the material components from the block entity.
-		add(ModBlocks.HULL_PLATING, net.minecraft.world.level.storage.loot.LootTable.lootTable().withPool(applyExplosionCondition(ModBlocks.HULL_PLATING,
-				net.minecraft.world.level.storage.loot.LootPool.lootPool().setRolls(net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders.exactly(1))
-						.add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(ModBlocks.HULL_PLATING)
-								.apply(net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction
-										.copyComponentsFromBlockEntity(net.minecraft.world.level.storage.loot.parameters.LootContextParams.BLOCK_ENTITY)
-										.include(com.starwake.registry.ModComponents.COMPOSITION)
-										.include(com.starwake.registry.ModComponents.TEMPER)
-										.include(com.starwake.registry.ModComponents.QUALITY))))));
+		// Hull plating keeps its alloy (M8e-1); every Mk tier of every ship part keeps its material and quality (M8e-2).
+		materialDrop(ModBlocks.HULL_PLATING);
+		for (var part : com.starwake.registry.ModShipParts.Part.values()) {
+			for (int mk = 1; mk <= 3; mk++) materialDrop(com.starwake.registry.ModShipParts.get(part, mk));
+		}
 		com.starwake.registry.ModFabrication.blocks().forEach(this::dropSelf);
 		com.starwake.registry.ModMachines.all().forEach(this::dropSelf);
 		com.starwake.registry.ModProcess.blocks().forEach(this::dropSelf);
@@ -32,18 +28,8 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		dropSelf(ModBlocks.REGOLITH);
 		dropSelf(ModBlocks.RUST_SAND);
 		dropSelf(ModBlocks.HELM);
-		dropSelf(ModBlocks.THRUSTER);
-		dropSelf(ModBlocks.MAIN_ENGINE);
 		dropSelf(ModBlocks.WING);
-		dropSelf(ModBlocks.LANDING_GEAR);
-		dropSelf(ModBlocks.MANEUVERING_THRUSTER);
-		dropSelf(ModBlocks.FUEL_TANK);
 		dropSelf(ModBlocks.SEAT);
-		dropSelf(ModBlocks.POWER_PLANT);
-		dropSelf(ModBlocks.COOLER);
-		dropSelf(ModBlocks.SHIELD_GENERATOR);
-		dropSelf(ModBlocks.QUANTUM_DRIVE);
-		dropSelf(ModBlocks.JUMP_DRIVE);
 		for (var block : new net.minecraft.world.level.block.Block[] {com.starwake.registry.ModHubBlocks.STATION_PANEL,
 				com.starwake.registry.ModHubBlocks.STATION_FLOOR, com.starwake.registry.ModHubBlocks.LIGHT_PANEL,
 				com.starwake.registry.ModHubBlocks.LANDING_PAD, com.starwake.registry.ModHubBlocks.COMMODITY_TERMINAL,
@@ -65,5 +51,17 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		add(ModPlanetBlocks.TUFT_GRASS, createShearsOrSilkTouchOnlyDrop(ModPlanetBlocks.TUFT_GRASS));
 		dropSelf(ModPlanetBlocks.PUFFBALL);
 		ModPlanetBlocks.ores().forEach(ore -> add(ore.block(), createOreDrop(ore.block(), ore.raw())));
+	}
+
+	/** Drops itself with the block entity's material components (composition, temper, quality). */
+	private void materialDrop(net.minecraft.world.level.block.Block block) {
+		add(block, net.minecraft.world.level.storage.loot.LootTable.lootTable().withPool(applyExplosionCondition(block,
+				net.minecraft.world.level.storage.loot.LootPool.lootPool().setRolls(net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders.exactly(1))
+						.add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(block)
+								.apply(net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction
+										.copyComponentsFromBlockEntity(net.minecraft.world.level.storage.loot.parameters.LootContextParams.BLOCK_ENTITY)
+										.include(com.starwake.registry.ModComponents.COMPOSITION)
+										.include(com.starwake.registry.ModComponents.TEMPER)
+										.include(com.starwake.registry.ModComponents.QUALITY))))));
 	}
 }

@@ -1,0 +1,12 @@
+{
+ "output": "starwake:fuel_tank",
+ "count": 1,
+ "order": 125,
+ "energy": 4000,
+ "inputs": [
+  {
+   "item": "starwake:pressure_vessel",
+   "count": 2
+  }
+ ]
+}

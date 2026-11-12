@@ -1,0 +1,19 @@
+{
+ "output": "starwake:fuel_tank_mk2",
+ "count": 1,
+ "order": 126,
+ "energy": 9000,
+ "inputs": [
+  {
+   "item": "starwake:pressure_vessel",
+   "count": 2,
+   "min": {
+    "yield": 400
+   }
+  },
+  {
+   "item": "starwake:structural_frame",
+   "count": 1
+  }
+ ]
+}

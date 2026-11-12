@@ -27,6 +27,8 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(
 				key(ModBlocks.HELM), key(ModBlocks.THRUSTER), key(ModBlocks.MAIN_ENGINE), key(ModBlocks.MANEUVERING_THRUSTER), key(ModBlocks.WING), key(ModBlocks.LANDING_GEAR), key(ModBlocks.FUEL_TANK), key(ModBlocks.SEAT),
 				key(ModBlocks.POWER_PLANT), key(ModBlocks.COOLER), key(ModBlocks.SHIELD_GENERATOR), key(ModBlocks.QUANTUM_DRIVE), key(ModBlocks.JUMP_DRIVE));
+		var upgrades = builder(BlockTags.MINEABLE_WITH_PICKAXE);
+		com.starwake.registry.ModShipParts.upgrades().forEach(block -> upgrades.add(key(block)));
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(key(com.starwake.registry.ModHubBlocks.STATION_PANEL),
 				key(com.starwake.registry.ModHubBlocks.STATION_FLOOR), key(com.starwake.registry.ModHubBlocks.LIGHT_PANEL),
 				key(com.starwake.registry.ModHubBlocks.LANDING_PAD), key(com.starwake.registry.ModHubBlocks.COMMODITY_TERMINAL),
@@ -74,7 +76,7 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		// Wings and landing gear aren't solid cubes, so they stay out.
 		var thin = java.util.Set.of(com.starwake.registry.ModMachines.COPPER_CABLE, com.starwake.registry.ModMachines.ALUMINIUM_CABLE,
 				com.starwake.registry.ModMachines.FLUID_PIPE, com.starwake.registry.ModMachines.CONVEYOR, com.starwake.registry.ModMachines.SOLAR_PANEL);
-		ModBlocks.all().stream().filter(block -> block != ModBlocks.WING && block != ModBlocks.LANDING_GEAR && !thin.contains(block)
+		ModBlocks.all().stream().filter(block -> block != ModBlocks.WING && !(block instanceof com.starwake.ship.block.LandingGearBlock) && !thin.contains(block)
 				&& !ModPlanetBlocks.nonSolid().contains(block)).forEach(block -> motion.add(key(block)));
 		builder(BlockTags.SAND).add(key(ModPlanetBlocks.FINE_REGOLITH), key(ModPlanetBlocks.VOLCANIC_ASH));
 

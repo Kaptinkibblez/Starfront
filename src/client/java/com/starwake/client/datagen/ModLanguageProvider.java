@@ -495,6 +495,13 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModBlocks.SHIELD_GENERATOR, "Shield Generator");
 		builder.add(ModBlocks.QUANTUM_DRIVE, "Quantum Drive");
 		builder.add(ModBlocks.JUMP_DRIVE, "Jump Drive");
+		java.util.Map<String, String> partNames = java.util.Map.of("thruster", "Thruster", "main_engine", "Main Engine",
+				"maneuvering_thruster", "Maneuvering Thruster", "power_plant", "Power Plant", "cooler", "Cooler", "shield_generator",
+				"Shield Generator", "quantum_drive", "Quantum Drive", "jump_drive", "Jump Drive", "fuel_tank", "Fuel Tank", "landing_gear", "Landing Gear");
+		for (var part : com.starwake.registry.ModShipParts.Part.values()) {
+			builder.add(com.starwake.registry.ModShipParts.get(part, 2), partNames.get(part.id) + " Mk II");
+			builder.add(com.starwake.registry.ModShipParts.get(part, 3), partNames.get(part.id) + " Mk III");
+		}
 		// Pre-flight: components
 		builder.add("preflight.starwake.no_power", "No power plant: nothing to run the engines");
 		builder.add("preflight.starwake.power", "Power: %s plant(s), %s output");

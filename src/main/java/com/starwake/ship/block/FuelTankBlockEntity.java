@@ -22,7 +22,9 @@ public class FuelTankBlockEntity extends BlockEntity {
 	}
 
 	public int capacity() {
-		return ShipStats.get(getBlockState()).fuelCapacity();
+		// M8e-2: a better-made tank holds more.
+		return com.starwake.ship.data.ShipMaterials.withQuality(ShipStats.get(getBlockState()), com.starwake.ship.data.ShipMaterials.quality(this))
+				.fuelCapacity();
 	}
 
 	/**

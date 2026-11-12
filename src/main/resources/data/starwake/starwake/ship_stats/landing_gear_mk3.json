@@ -1,0 +1,8 @@
+{
+  "blocks": [
+    "starwake:landing_gear_mk3"
+  ],
+  "mass": 0.72,
+  "heat_limit": 1170,
+  "armor": 22.0
+}

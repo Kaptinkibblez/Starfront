@@ -38,6 +38,7 @@ public final class StarwakeMod implements ModInitializer {
 		// Order matters: items reference blocks, and creative tabs reference both.
 		com.starwake.registry.ModComponents.init();
 		ModBlocks.init();
+		com.starwake.registry.ModShipParts.init();
 		com.starwake.registry.ModPlanetBlocks.init();
 		com.starwake.registry.ModHubBlocks.init();
 		com.starwake.registry.ModMachines.init();

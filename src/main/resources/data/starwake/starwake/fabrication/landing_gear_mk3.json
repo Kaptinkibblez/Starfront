@@ -1,0 +1,23 @@
+{
+ "output": "starwake:landing_gear_mk3",
+ "count": 1,
+ "order": 130,
+ "energy": 20000,
+ "inputs": [
+  {
+   "item": "starwake:structural_frame",
+   "count": 1,
+   "min": {
+    "yield": 900
+   }
+  },
+  {
+   "form": "forging",
+   "count": 1,
+   "main": true,
+   "min": {
+    "yield": 1100
+   }
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "starwake:block/cooler_mk2_top",
+    "side": "starwake:block/cooler_mk2_side"
+  }
+}

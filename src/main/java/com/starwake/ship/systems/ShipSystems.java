@@ -34,7 +34,11 @@ public final class ShipSystems {
 
 	/** Adds one block. {@code clearExhaust} only matters for thrusters. */
 	public void add(BlockState state, boolean clearExhaust) {
-		ShipStats.BlockStats stats = ShipStats.get(state);
+		add(state, clearExhaust, ShipStats.get(state));
+	}
+
+	/** Adds a component with explicit stats (a part's quality bonus, M8e-2). */
+	public void add(BlockState state, boolean clearExhaust, ShipStats.BlockStats stats) {
 		if (stats.powerOutput() > 0) {
 			powerOutput += stats.powerOutput();
 			if (stats.heat() > 0) powerPlants++;

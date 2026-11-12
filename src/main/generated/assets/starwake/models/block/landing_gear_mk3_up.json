@@ -1,0 +1,7 @@
+{
+  "parent": "starwake:block/template_gear_up",
+  "textures": {
+    "side": "starwake:block/landing_gear_mk3_side",
+    "top": "starwake:block/landing_gear_mk3_top"
+  }
+}

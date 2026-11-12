@@ -1,0 +1,26 @@
+{
+ "output": "starwake:maneuvering_thruster_mk3",
+ "count": 1,
+ "order": 109,
+ "energy": 20000,
+ "inputs": [
+  {
+   "item": "starwake:nozzle",
+   "count": 1,
+   "min": {
+    "service": 1150
+   }
+  },
+  {
+   "item": "starwake:pressure_vessel",
+   "count": 1,
+   "min": {
+    "yield": 800
+   }
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 2
+  }
+ ]
+}

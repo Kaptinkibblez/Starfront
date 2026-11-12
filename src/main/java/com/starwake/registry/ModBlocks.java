@@ -146,7 +146,7 @@ public final class ModBlocks {
 	public static final Block JUMP_DRIVE = component("jump_drive", MapColor.COLOR_ORANGE, 8);
 
 	private static Block component(String name, MapColor color, int light) {
-		return register(name, Block::new, BlockBehaviour.Properties.of()
+		return register(name, com.starwake.ship.block.ShipComponentBlock::new, BlockBehaviour.Properties.of()
 				.mapColor(color)
 				.strength(4.0f, 6.0f)
 				.sound(SoundType.METAL)

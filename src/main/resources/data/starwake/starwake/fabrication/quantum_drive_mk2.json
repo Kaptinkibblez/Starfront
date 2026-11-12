@@ -1,0 +1,26 @@
+{
+ "output": "starwake:quantum_drive_mk2",
+ "count": 1,
+ "order": 120,
+ "energy": 9000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 4,
+   "min": {
+    "conductivity": 98
+   }
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 3
+  },
+  {
+   "item": "starwake:structural_frame",
+   "count": 1,
+   "min": {
+    "yield": 400
+   }
+  }
+ ]
+}

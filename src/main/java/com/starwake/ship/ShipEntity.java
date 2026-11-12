@@ -252,9 +252,9 @@ public class ShipEntity extends Entity {
 			int before = model.thrusterCount();
 			boolean clear = !(state.getBlock() instanceof ThrusterBlock)
 					|| structure.get(entry.pos().relative(state.getValue(ThrusterBlock.FACING))) == null;
-			ShipMaterials.Rating rating = ShipMaterials.rate(state, ShipMaterials.of(entry.blockEntity()));
+			ShipMaterials.Rating rating = ShipMaterials.rate(state, ShipMaterials.of(entry.blockEntity()), ShipMaterials.quality(entry.blockEntity()));
 			ratings.put(entry.pos(), rating);
-			model.add(entry.pos(), state, clear, rating.massFactor());
+			model.add(entry.pos(), state, clear, rating.massFactor(), rating.stats());
 			if (model.thrusterCount() > before) thrusterIndex.add(index);
 			if (state.getBlock() instanceof com.starwake.ship.block.LandingGearBlock) gear.add(entry.pos());
 			if (state.getBlock() instanceof HelmBlock) {
@@ -280,7 +280,8 @@ public class ShipEntity extends Entity {
 		for (ShipStructure.Entry entry : structure.entries()) {
 			boolean clear = !(entry.state().getBlock() instanceof ThrusterBlock)
 					|| structure.get(entry.pos().relative(entry.state().getValue(ThrusterBlock.FACING))) == null;
-			systems.add(entry.state(), clear);
+			ShipMaterials.Rating rating = ratings.get(entry.pos());
+			systems.add(entry.state(), clear, rating == null ? ShipStats.get(entry.state()) : rating.stats());
 		}
 		publishSystems();
 	}
@@ -385,7 +386,9 @@ public class ShipEntity extends Entity {
 		containers.keySet().removeIf(pos -> next.get(pos) == null);
 		setStructure(next);
 		int capacity = 0;
-		for (ShipStructure.Entry entry : next.entries()) capacity += ShipStats.get(entry.state()).fuelCapacity();
+		for (ShipStructure.Entry entry : next.entries()) {
+			capacity += ShipMaterials.withQuality(ShipStats.get(entry.state()), ShipMaterials.quality(entry.blockEntity())).fuelCapacity();
+		}
 		fuelCapacity = capacity;
 		entityData.set(FUEL_CAPACITY, capacity);
 		if (fuel() > capacity) entityData.set(FUEL, capacity);

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "starwake:block/shield_generator_mk3_top",
+    "side": "starwake:block/shield_generator_mk3_side"
+  }
+}

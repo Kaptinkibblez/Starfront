@@ -1,0 +1,40 @@
+{
+ "output": "starwake:main_engine_mk3",
+ "count": 1,
+ "order": 106,
+ "energy": 20000,
+ "inputs": [
+  {
+   "item": "starwake:combustion_chamber",
+   "count": 2,
+   "min": {
+    "service": 950
+   }
+  },
+  {
+   "item": "starwake:nozzle",
+   "count": 2,
+   "min": {
+    "service": 1300
+   }
+  },
+  {
+   "item": "starwake:turbopump",
+   "count": 2,
+   "min": {
+    "yield": 1000
+   }
+  },
+  {
+   "item": "starwake:structural_frame",
+   "count": 1,
+   "min": {
+    "yield": 800
+   }
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 3
+  }
+ ]
+}

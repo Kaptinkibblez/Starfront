@@ -1,0 +1,24 @@
+{
+ "output": "starwake:power_plant",
+ "count": 1,
+ "order": 110,
+ "energy": 4000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 1
+  },
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 1
+  },
+  {
+   "item": "starwake:pressure_vessel",
+   "count": 1
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 1
+  }
+ ]
+}

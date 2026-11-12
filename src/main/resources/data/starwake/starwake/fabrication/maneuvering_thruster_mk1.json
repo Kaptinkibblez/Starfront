@@ -1,0 +1,16 @@
+{
+ "output": "starwake:maneuvering_thruster",
+ "count": 1,
+ "order": 107,
+ "energy": 4000,
+ "inputs": [
+  {
+   "item": "starwake:nozzle",
+   "count": 1
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 1
+  }
+ ]
+}

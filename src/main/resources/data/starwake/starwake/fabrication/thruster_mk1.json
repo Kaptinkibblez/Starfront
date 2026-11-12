@@ -1,0 +1,20 @@
+{
+ "output": "starwake:thruster",
+ "count": 1,
+ "order": 101,
+ "energy": 4000,
+ "inputs": [
+  {
+   "item": "starwake:combustion_chamber",
+   "count": 1
+  },
+  {
+   "item": "starwake:nozzle",
+   "count": 1
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 1
+  }
+ ]
+}

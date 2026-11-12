@@ -1,0 +1,33 @@
+{
+ "output": "starwake:power_plant_mk2",
+ "count": 1,
+ "order": 111,
+ "energy": 9000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 2,
+   "min": {
+    "conductivity": 98
+   }
+  },
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 2,
+   "min": {
+    "conductivity": 60
+   }
+  },
+  {
+   "item": "starwake:pressure_vessel",
+   "count": 1,
+   "min": {
+    "service": 400
+   }
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 2
+  }
+ ]
+}

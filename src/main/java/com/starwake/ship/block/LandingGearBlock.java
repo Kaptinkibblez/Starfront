@@ -16,7 +16,13 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * the ground. Retracted: a flush hatch. The ship toggles every gear block at once (N), and
  * touchdowns are only soft with the gear down (see ShipEntity.onImpact).
  */
-public class LandingGearBlock extends Block {
+public class LandingGearBlock extends Block implements net.minecraft.world.level.block.EntityBlock {
+	/** M8e-2: remembers the part's material and quality (see {@link com.starwake.fab.MaterialBlockEntity}). */
+	@Override
+	public net.minecraft.world.level.block.entity.@org.jspecify.annotations.Nullable BlockEntity newBlockEntity(net.minecraft.core.BlockPos pos, BlockState state) {
+		return new com.starwake.fab.MaterialBlockEntity(pos, state);
+	}
+
 	public static final BooleanProperty DEPLOYED = BooleanProperty.create("deployed");
 	private static final VoxelShape DOWN = Shapes.or(Block.box(6, -8, 6, 10, 16, 10), Block.box(3, -8, 3, 13, -6, 13));
 	private static final VoxelShape UP = Block.box(2, 12, 2, 14, 16, 14);

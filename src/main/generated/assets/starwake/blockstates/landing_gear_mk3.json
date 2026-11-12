@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "deployed=false": {
+      "model": "starwake:block/landing_gear_mk3_up"
+    },
+    "deployed=true": {
+      "model": "starwake:block/landing_gear_mk3_down"
+    }
+  }
+}

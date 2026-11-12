@@ -119,6 +119,12 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.createTrivialBlock(ModBlocks.SHIELD_GENERATOR, TexturedModel.COLUMN);
 		generators.createTrivialBlock(ModBlocks.QUANTUM_DRIVE, TexturedModel.COLUMN);
 		generators.createTrivialBlock(ModBlocks.JUMP_DRIVE, TexturedModel.COLUMN);
+		// Mk II / III parts (M8e-2): same shapes, their own textures (tools/mk_textures.py).
+		for (var block : com.starwake.registry.ModShipParts.upgrades()) {
+			if (block instanceof com.starwake.ship.block.ThrusterBlock) createNozzleBlock(generators, block);
+			else if (block instanceof com.starwake.ship.block.LandingGearBlock) createLandingGear(generators, block);
+			else generators.createTrivialBlock(block, TexturedModel.COLUMN);
+		}
 	}
 
 	/**

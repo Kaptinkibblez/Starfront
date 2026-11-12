@@ -1,0 +1,20 @@
+{
+ "output": "starwake:quantum_drive",
+ "count": 1,
+ "order": 119,
+ "energy": 4000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 2
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 2
+  },
+  {
+   "item": "starwake:structural_frame",
+   "count": 1
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "modifier": {
+            "type": "minecraft:copy_components",
+            "include": [
+              "starwake:composition",
+              "starwake:temper",
+              "starwake:quality"
+            ],
+            "source": "block_entity"
+          },
+          "name": "starwake:landing_gear_mk3"
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

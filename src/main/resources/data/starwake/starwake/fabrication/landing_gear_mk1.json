@@ -1,0 +1,17 @@
+{
+ "output": "starwake:landing_gear",
+ "count": 1,
+ "order": 128,
+ "energy": 4000,
+ "inputs": [
+  {
+   "item": "starwake:structural_frame",
+   "count": 1
+  },
+  {
+   "form": "forging",
+   "count": 1,
+   "main": true
+  }
+ ]
+}

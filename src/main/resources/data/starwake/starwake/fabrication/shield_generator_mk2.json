@@ -1,0 +1,23 @@
+{
+ "output": "starwake:shield_generator_mk2",
+ "count": 1,
+ "order": 117,
+ "energy": 9000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 3,
+   "min": {
+    "conductivity": 98
+   }
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 2
+  },
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 1
+  }
+ ]
+}

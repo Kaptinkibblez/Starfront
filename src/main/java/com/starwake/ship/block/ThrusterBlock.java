@@ -15,7 +15,13 @@ import net.minecraft.world.level.block.state.StateDefinition;
  * Thrust and fuel burn come from ship_stats JSON, not this class, so tiers are just new blocks
  * plus a JSON entry.
  */
-public class ThrusterBlock extends DirectionalBlock {
+public class ThrusterBlock extends DirectionalBlock implements net.minecraft.world.level.block.EntityBlock {
+	/** M8e-2: remembers the part's material and quality (see {@link com.starwake.fab.MaterialBlockEntity}). */
+	@Override
+	public net.minecraft.world.level.block.entity.@org.jspecify.annotations.Nullable BlockEntity newBlockEntity(net.minecraft.core.BlockPos pos, BlockState state) {
+		return new com.starwake.fab.MaterialBlockEntity(pos, state);
+	}
+
 	public ThrusterBlock(Properties properties) {
 		super(properties);
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.DOWN));

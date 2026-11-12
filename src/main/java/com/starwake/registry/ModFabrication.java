@@ -44,7 +44,7 @@ public final class ModFabrication {
 	public static final BlockEntityType<FabricatorBlockEntity> FABRICATOR_BE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
 			StarwakeMod.id("fabricator"), FabricBlockEntityTypeBuilder.create(FabricatorBlockEntity::new, FABRICATOR).build());
 	public static final BlockEntityType<MaterialBlockEntity> MATERIAL_BE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
-			StarwakeMod.id("material"), FabricBlockEntityTypeBuilder.create(MaterialBlockEntity::new, ModBlocks.HULL_PLATING).build());
+			StarwakeMod.id("material"), FabricBlockEntityTypeBuilder.create(MaterialBlockEntity::new, materialBlocks()).build());
 
 	public static final MenuType<MachineMenu> CRYSTAL_PULLER_MENU = menu("crystal_puller", SemiconductorBlockEntity.PULLER);
 	public static final MenuType<MachineMenu> CLEAN_FAB_MENU = menu("clean_fab", SemiconductorBlockEntity.FAB);
@@ -64,6 +64,13 @@ public final class ModFabrication {
 	public static final Item CONTROL_BOARD = component("control_board");
 
 	private ModFabrication() {}
+
+	/** Hull plating plus every tier of every ship part except fuel tanks (M8e-2). */
+	private static Block[] materialBlocks() {
+		java.util.List<Block> blocks = new java.util.ArrayList<>(java.util.List.of(ModBlocks.HULL_PLATING));
+		blocks.addAll(java.util.List.of(ModShipParts.materialBlocks()));
+		return blocks.toArray(Block[]::new);
+	}
 
 	public static void init() {
 		DynamicRegistries.registerSynced(Blueprint.REGISTRY_KEY, Blueprint.CODEC);
