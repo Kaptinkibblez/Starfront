@@ -496,6 +496,8 @@ commit. **Don't start the next milestone until the user confirms the current one
       hull flush with a small bounce, diagonal push slides along the wall; forced drop lands and settles without
       jitter; parked ships sleep; prediction matches the server exactly in singleplayer.)* Details in "How ships
       work after M9" below.
+    - **Next (user, 2026-11-13):** the rest of ships (building/editing aboard, cockpit HUD, Kestrel, block-entity
+      rendering aboard, rain through hulls, observer smoothing), audit -> ask -> fix; still one jar at the end.
 
 ---
 
