@@ -838,7 +838,9 @@
   "density": 1.98,
   "melting": 770,
   "boiling": 1420,
-  "flags": [],
+  "flags": [
+   "soluble"
+  ],
   "toxicity": 0.0,
   "color": "#e8c8c8"
  },
@@ -850,7 +852,9 @@
   "density": 2.16,
   "melting": 801,
   "boiling": 1465,
-  "flags": [],
+  "flags": [
+   "soluble"
+  ],
   "toxicity": 0.0,
   "color": "#efefef"
  },
@@ -874,7 +878,9 @@
   "density": 2.26,
   "melting": 308,
   "boiling": 380,
-  "flags": [],
+  "flags": [
+   "soluble"
+  ],
   "toxicity": 0.0,
   "color": "#efefef"
  },
@@ -1045,6 +1051,311 @@
   "color": "#1e1a16"
  },
  {
+  "id": "H2SO4",
+  "name": "Sulfuric acid",
+  "formula": "H2SO4",
+  "kind": "sulfate",
+  "density": 1.83,
+  "melting": 10,
+  "boiling": 337,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#e8e0c8"
+ },
+ {
+  "id": "SO3",
+  "name": "Sulfur trioxide",
+  "formula": "SO3",
+  "kind": "gas",
+  "density": 0.0036,
+  "melting": 17,
+  "boiling": 45,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.7,
+  "color": "#efefe0"
+ },
+ {
+  "id": "HCl",
+  "name": "Hydrogen chloride",
+  "formula": "HCl",
+  "kind": "gas",
+  "density": 0.0015,
+  "melting": -114,
+  "boiling": -85,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#d8f0d8"
+ },
+ {
+  "id": "HF",
+  "name": "Hydrogen fluoride",
+  "formula": "HF",
+  "kind": "gas",
+  "density": 0.0012,
+  "melting": -83,
+  "boiling": 20,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.9,
+  "color": "#e8f8e8"
+ },
+ {
+  "id": "Cl2",
+  "name": "Chlorine",
+  "formula": "Cl2",
+  "kind": "gas",
+  "density": 0.0032,
+  "melting": -101,
+  "boiling": -34,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.9,
+  "color": "#b8e858"
+ },
+ {
+  "id": "NaOH",
+  "name": "Sodium hydroxide",
+  "formula": "NaOH",
+  "kind": "oxide",
+  "density": 2.13,
+  "melting": 318,
+  "boiling": 1388,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.4,
+  "color": "#f0f0f0"
+ },
+ {
+  "id": "KOH",
+  "name": "Potassium hydroxide",
+  "formula": "KOH",
+  "kind": "oxide",
+  "density": 2.04,
+  "melting": 406,
+  "boiling": 1327,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.4,
+  "color": "#f0f0f0"
+ },
+ {
+  "id": "NaAl(OH)4",
+  "name": "Sodium aluminate",
+  "formula": "NaAl(OH)4",
+  "kind": "oxide",
+  "density": 1.5,
+  "melting": 1650,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#efefe8"
+ },
+ {
+  "id": "Na3AlF6",
+  "name": "Cryolite",
+  "formula": "Na3AlF6",
+  "kind": "halide",
+  "density": 2.95,
+  "melting": 1012,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8e8f0"
+ },
+ {
+  "id": "CaSO4",
+  "name": "Anhydrite",
+  "formula": "CaSO4",
+  "kind": "sulfate",
+  "density": 2.97,
+  "melting": 1460,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efece4"
+ },
+ {
+  "id": "CuSO4",
+  "name": "Copper sulfate",
+  "formula": "CuSO4",
+  "kind": "sulfate",
+  "density": 3.6,
+  "melting": 590,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#2a6aff"
+ },
+ {
+  "id": "CuO",
+  "name": "Tenorite",
+  "formula": "CuO",
+  "kind": "oxide",
+  "density": 6.31,
+  "melting": 1326,
+  "boiling": 2000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#1e1e1e"
+ },
+ {
+  "id": "ZnSO4",
+  "name": "Zinc sulfate",
+  "formula": "ZnSO4",
+  "kind": "sulfate",
+  "density": 3.54,
+  "melting": 680,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#efefef"
+ },
+ {
+  "id": "NiSO4",
+  "name": "Nickel sulfate",
+  "formula": "NiSO4",
+  "kind": "sulfate",
+  "density": 3.68,
+  "melting": 840,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#3aa84a"
+ },
+ {
+  "id": "FeSO4",
+  "name": "Iron(II) sulfate",
+  "formula": "FeSO4",
+  "kind": "sulfate",
+  "density": 3.65,
+  "melting": 680,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#8ac8a0"
+ },
+ {
+  "id": "CoSO4",
+  "name": "Cobalt sulfate",
+  "formula": "CoSO4",
+  "kind": "sulfate",
+  "density": 3.71,
+  "melting": 735,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#c83a6a"
+ },
+ {
+  "id": "Na2SO4",
+  "name": "Sodium sulfate",
+  "formula": "Na2SO4",
+  "kind": "sulfate",
+  "density": 2.66,
+  "melting": 884,
+  "boiling": 1429,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "PbSO4",
+  "name": "Anglesite",
+  "formula": "PbSO4",
+  "kind": "sulfate",
+  "density": 6.29,
+  "melting": 1087,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8e8e8"
+ },
+ {
+  "id": "TiCl4",
+  "name": "Titanium tetrachloride",
+  "formula": "TiCl4",
+  "kind": "halide",
+  "density": 1.73,
+  "melting": -24,
+  "boiling": 136,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#e8e8a8"
+ },
+ {
+  "id": "MgCl2",
+  "name": "Magnesium chloride",
+  "formula": "MgCl2",
+  "kind": "halide",
+  "density": 2.32,
+  "melting": 714,
+  "boiling": 1412,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f0f0f0"
+ },
+ {
+  "id": "FeCl2",
+  "name": "Iron(II) chloride",
+  "formula": "FeCl2",
+  "kind": "halide",
+  "density": 3.16,
+  "melting": 677,
+  "boiling": 1023,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#a8c87a"
+ },
+ {
+  "id": "V2O5",
+  "name": "Vanadium pentoxide",
+  "formula": "V2O5",
+  "kind": "oxide",
+  "density": 3.36,
+  "melting": 690,
+  "boiling": 1750,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#c88a2a"
+ },
+ {
   "id": "H",
   "name": "Hydrogen",
   "formula": "H",
@@ -1078,7 +1389,8 @@
   "boiling": 1342,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8c8c0"
+  "color": "#c8c8c0",
+  "potential": -3.04
  },
  {
   "id": "Be",
@@ -1092,7 +1404,8 @@
    "toxic"
   ],
   "toxicity": 0.6,
-  "color": "#a8b0a8"
+  "color": "#a8b0a8",
+  "potential": -1.85
  },
  {
   "id": "B",
@@ -1166,7 +1479,8 @@
   "boiling": 883,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#d0d0c8"
+  "color": "#d0d0c8",
+  "potential": -2.71
  },
  {
   "id": "Mg",
@@ -1178,7 +1492,8 @@
   "boiling": 1091,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c0c4c8"
+  "color": "#c0c4c8",
+  "potential": -2.37
  },
  {
   "id": "Al",
@@ -1190,7 +1505,8 @@
   "boiling": 2470,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#d0d4d8"
+  "color": "#d0d4d8",
+  "potential": -1.66
  },
  {
   "id": "Si",
@@ -1264,7 +1580,8 @@
   "boiling": 759,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8c8c0"
+  "color": "#c8c8c0",
+  "potential": -2.93
  },
  {
   "id": "Ca",
@@ -1276,7 +1593,8 @@
   "boiling": 1484,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#d8d8d0"
+  "color": "#d8d8d0",
+  "potential": -2.87
  },
  {
   "id": "Sc",
@@ -1288,7 +1606,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8c8c0"
+  "color": "#c8c8c0",
+  "potential": -2.08
  },
  {
   "id": "Ti",
@@ -1300,7 +1619,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a8a8b0"
+  "color": "#a8a8b0",
+  "potential": -1.63
  },
  {
   "id": "V",
@@ -1312,7 +1632,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a0a8b0"
+  "color": "#a0a8b0",
+  "potential": -1.18
  },
  {
   "id": "Cr",
@@ -1324,7 +1645,8 @@
   "boiling": 2671,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#b8c0c8"
+  "color": "#b8c0c8",
+  "potential": -0.74
  },
  {
   "id": "Mn",
@@ -1336,7 +1658,8 @@
   "boiling": 2061,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a8a098"
+  "color": "#a8a098",
+  "potential": -1.18
  },
  {
   "id": "Fe",
@@ -1348,7 +1671,8 @@
   "boiling": 2861,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#b0aca8"
+  "color": "#b0aca8",
+  "potential": -0.44
  },
  {
   "id": "Co",
@@ -1360,7 +1684,8 @@
   "boiling": 2927,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a8a8b8"
+  "color": "#a8a8b8",
+  "potential": -0.28
  },
  {
   "id": "Ni",
@@ -1372,7 +1697,8 @@
   "boiling": 2913,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c0b8a0"
+  "color": "#c0b8a0",
+  "potential": -0.25
  },
  {
   "id": "Cu",
@@ -1384,7 +1710,8 @@
   "boiling": 2562,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8783a"
+  "color": "#c8783a",
+  "potential": 0.34
  },
  {
   "id": "Zn",
@@ -1396,7 +1723,8 @@
   "boiling": 907,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#b8c0c8"
+  "color": "#b8c0c8",
+  "potential": -0.76
  },
  {
   "id": "Ga",
@@ -1408,7 +1736,8 @@
   "boiling": 2400,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8ccd4"
+  "color": "#c8ccd4",
+  "potential": -0.53
  },
  {
   "id": "Ge",
@@ -1434,7 +1763,8 @@
    "toxic"
   ],
   "toxicity": 0.8,
-  "color": "#7a7a80"
+  "color": "#7a7a80",
+  "potential": 0.25
  },
  {
   "id": "Se",
@@ -1498,7 +1828,8 @@
   "boiling": 1377,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#d0ccc0"
+  "color": "#d0ccc0",
+  "potential": -2.89
  },
  {
   "id": "Y",
@@ -1510,7 +1841,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c0c0c8"
+  "color": "#c0c0c8",
+  "potential": -2.37
  },
  {
   "id": "Zr",
@@ -1522,7 +1854,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#b8b8b0"
+  "color": "#b8b8b0",
+  "potential": -1.45
  },
  {
   "id": "Nb",
@@ -1534,7 +1867,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a8a8b8"
+  "color": "#a8a8b8",
+  "potential": -1.1
  },
  {
   "id": "Mo",
@@ -1546,7 +1880,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a0a0a8"
+  "color": "#a0a0a8",
+  "potential": -0.2
  },
  {
   "id": "Tc",
@@ -1570,7 +1905,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#b0b0b8"
+  "color": "#b0b0b8",
+  "potential": 0.45
  },
  {
   "id": "Rh",
@@ -1582,7 +1918,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8c8d0"
+  "color": "#c8c8d0",
+  "potential": 0.76
  },
  {
   "id": "Pd",
@@ -1594,7 +1931,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c0c0c0"
+  "color": "#c0c0c0",
+  "potential": 0.95
  },
  {
   "id": "Ag",
@@ -1606,7 +1944,8 @@
   "boiling": 2162,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#d8d8e0"
+  "color": "#d8d8e0",
+  "potential": 0.8
  },
  {
   "id": "Cd",
@@ -1620,7 +1959,8 @@
    "toxic"
   ],
   "toxicity": 0.7,
-  "color": "#b8b8c0"
+  "color": "#b8b8c0",
+  "potential": -0.4
  },
  {
   "id": "In",
@@ -1632,7 +1972,8 @@
   "boiling": 2072,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c0c0c8"
+  "color": "#c0c0c8",
+  "potential": -0.34
  },
  {
   "id": "Sn",
@@ -1644,7 +1985,8 @@
   "boiling": 2602,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8c8c8"
+  "color": "#c8c8c8",
+  "potential": -0.14
  },
  {
   "id": "Sb",
@@ -1656,7 +1998,8 @@
   "boiling": 1587,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a0a0a8"
+  "color": "#a0a0a8",
+  "potential": 0.15
  },
  {
   "id": "Te",
@@ -1668,7 +2011,8 @@
   "boiling": 988,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#9898a0"
+  "color": "#9898a0",
+  "potential": 0.53
  },
  {
   "id": "I",
@@ -1716,7 +2060,8 @@
   "boiling": 1845,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8c8c0"
+  "color": "#c8c8c0",
+  "potential": -2.91
  },
  {
   "id": "La",
@@ -1728,7 +2073,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8c8c0"
+  "color": "#c8c8c0",
+  "potential": -2.38
  },
  {
   "id": "Ce",
@@ -1740,7 +2086,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c0c0b8"
+  "color": "#c0c0b8",
+  "potential": -2.34
  },
  {
   "id": "Pr",
@@ -1764,7 +2111,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c0c0c8"
+  "color": "#c0c0c8",
+  "potential": -2.32
  },
  {
   "id": "Pm",
@@ -1908,7 +2256,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#b0b0b8"
+  "color": "#b0b0b8",
+  "potential": -1.55
  },
  {
   "id": "Ta",
@@ -1932,7 +2281,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a0a0a0"
+  "color": "#a0a0a0",
+  "potential": -0.12
  },
  {
   "id": "Re",
@@ -1944,7 +2294,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a8a8b0"
+  "color": "#a8a8b0",
+  "potential": 0.3
  },
  {
   "id": "Os",
@@ -1956,7 +2307,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a8b0c0"
+  "color": "#a8b0c0",
+  "potential": 0.85
  },
  {
   "id": "Ir",
@@ -1968,7 +2320,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c0c8d0"
+  "color": "#c0c8d0",
+  "potential": 1.16
  },
  {
   "id": "Pt",
@@ -1980,7 +2333,8 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#d0d0d8"
+  "color": "#d0d0d8",
+  "potential": 1.18
  },
  {
   "id": "Au",
@@ -1992,7 +2346,8 @@
   "boiling": 2856,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#e8c040"
+  "color": "#e8c040",
+  "potential": 1.5
  },
  {
   "id": "Hg",
@@ -2006,7 +2361,8 @@
    "toxic"
   ],
   "toxicity": 0.9,
-  "color": "#c8c8d0"
+  "color": "#c8c8d0",
+  "potential": 0.85
  },
  {
   "id": "Tl",
@@ -2020,7 +2376,8 @@
    "toxic"
   ],
   "toxicity": 0.9,
-  "color": "#a8a8b0"
+  "color": "#a8a8b0",
+  "potential": -0.34
  },
  {
   "id": "Pb",
@@ -2034,7 +2391,8 @@
    "toxic"
   ],
   "toxicity": 0.3,
-  "color": "#7a7a88"
+  "color": "#7a7a88",
+  "potential": -0.13
  },
  {
   "id": "Bi",
@@ -2046,7 +2404,8 @@
   "boiling": 1564,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#d0a8c0"
+  "color": "#d0a8c0",
+  "potential": 0.31
  },
  {
   "id": "Po",
@@ -2138,7 +2497,8 @@
    "toxic"
   ],
   "toxicity": 0.3,
-  "color": "#909098"
+  "color": "#909098",
+  "potential": -1.9
  },
  {
   "id": "Pa",
@@ -2164,7 +2524,8 @@
    "toxic"
   ],
   "toxicity": 0.4,
-  "color": "#8a9080"
+  "color": "#8a9080",
+  "potential": -1.8
  },
  {
   "id": "Np",

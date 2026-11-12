@@ -1,0 +1,10 @@
+{
+ "machine": "chlorinator",
+ "equation": "TiO2 + 2 C + 2 Cl2 -> TiCl4 + 2 CO",
+ "priority": 10,
+ "draw": [
+  "C",
+  "Cl2"
+ ],
+ "note": "Titanium tetrachloride distils off and is condensed."
+}

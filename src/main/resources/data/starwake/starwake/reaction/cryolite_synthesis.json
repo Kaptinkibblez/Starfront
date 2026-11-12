@@ -1,0 +1,10 @@
+{
+ "machine": "reactor",
+ "equation": "Al(OH)3 + 6 HF + 3 NaOH -> Na3AlF6 + 6 H2O",
+ "priority": 31,
+ "draw": [
+  "HF",
+  "NaOH"
+ ],
+ "note": "Synthetic cryolite for the aluminium bath."
+}

@@ -1,0 +1,9 @@
+{
+ "machine": "leach",
+ "equation": "Al(OH)3 + NaOH -> NaAl(OH)4",
+ "priority": 20,
+ "draw": [
+  "NaOH"
+ ],
+ "note": "Bayer process: caustic soda dissolves alumina; iron and titania stay as red mud."
+}

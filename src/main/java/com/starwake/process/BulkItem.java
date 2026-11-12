@@ -19,7 +19,7 @@ import net.minecraft.world.item.component.CustomModelData;
 public class BulkItem extends Item {
 	public enum Kind {
 		CRUSHED_ORE("crushed_ore"), CONCENTRATE("concentrate"), TAILINGS("tailings"), CALCINE("calcine"), MATTE("matte"), SLAG("slag"),
-		FLUE_DUST("flue_dust"), CHAR("coke");
+		FLUE_DUST("flue_dust"), CHAR("coke"), RESIDUE("residue"), CRYSTALS("crystals"), SLIMES("slimes");
 
 		public final String id;
 

@@ -68,12 +68,12 @@ public class ChemicalFluid extends Fluid {
 
 	@Override
 	public boolean isSource(FluidState fluidState) {
-		return false;
+		return true; // Fabric's FluidVariant only accepts still (source) fluids
 	}
 
 	@Override
 	public int getAmount(FluidState fluidState) {
-		return 0;
+		return 8;
 	}
 
 	@Override

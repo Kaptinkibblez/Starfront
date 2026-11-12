@@ -32,7 +32,12 @@ public final class Species {
 	public enum Kind { METAL, ELEMENT, SULFIDE, OXIDE, SILICATE, CARBONATE, SULFATE, PHOSPHATE, HALIDE, GAS, ORGANIC, CARBON, WATER }
 
 	public record Info(String id, String name, String formula, Kind kind, double density, double melting, double boiling, Set<String> flags,
-			double toxicity, int color, Map<String, Double> elements, double molarMass, int index) {
+			double toxicity, int color, Map<String, Double> elements, double molarMass, int index, double potential) {
+		/** Dissolves into aqueous solutions. */
+		public boolean soluble() {
+			return flags.contains("soluble") || kind == Kind.WATER;
+		}
+
 		public Component displayName() {
 			return Component.translatable("species.starwake." + id.toLowerCase().replaceAll("[^a-z0-9]", "_"), name);
 		}
@@ -96,7 +101,7 @@ public final class Species {
 			Info info = new Info(o.get("id").getAsString(), o.get("name").getAsString(), formula, Kind.valueOf(o.get("kind").getAsString().toUpperCase()),
 					o.get("density").getAsDouble(), o.get("melting").getAsDouble(), o.get("boiling").getAsDouble(), Set.copyOf(flags),
 					o.get("toxicity").getAsDouble(), Integer.parseInt(o.get("color").getAsString().substring(1), 16), Map.copyOf(fractions), molar,
-					out.size());
+					out.size(), o.has("potential") ? o.get("potential").getAsDouble() : Double.NaN);
 			out.add(info);
 			map.put(info.id(), info);
 		}

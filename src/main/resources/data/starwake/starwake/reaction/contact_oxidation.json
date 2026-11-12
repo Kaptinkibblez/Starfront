@@ -1,0 +1,10 @@
+{
+ "machine": "reactor",
+ "equation": "2 SO2 + O2 -> 2 SO3",
+ "priority": 10,
+ "draw": [
+  "O2"
+ ],
+ "catalyst": "V",
+ "note": "Contact process: needs a vanadium catalyst."
+}

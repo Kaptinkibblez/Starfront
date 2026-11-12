@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "H2 + Cl2 -> 2 HCl",
+ "priority": 20,
+ "draw": [
+  "Cl2"
+ ],
+ "note": "Burning hydrogen in chlorine."
+}

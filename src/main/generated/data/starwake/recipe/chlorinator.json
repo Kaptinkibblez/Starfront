@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": "minecraft:bricks",
+    "C": "starwake:copper_cable",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "BBB",
+    "ICI",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:chlorinator"
+  }
+}

@@ -287,6 +287,22 @@ commit. **Don't start the next milestone until the user confirms the current one
         solar panels charging a battery; buckets fill a tank; a pipe with an extract side moved
         5 buckets into a second tank. Action-bar readouts (solar, battery, tank, pipe) can't be
         seen in the headless client: even `/title actionbar` doesn't render there.)*
+  - **8c-2 decisions (user, 2026-11-12):** solutions are **real mixtures** (one fluid carrying its
+    composition; tanks and pipes mix by mass); **real electrolysis energy** (electrons x Faraday x
+    cell voltage); **all single-block machines** (no potline multiblocks); water from **pumps on
+    water sources** (plus an atmospheric condenser on breathable worlds).
+  - [x] 8c-2. Wet chemistry and electrochemistry: Water Pump, Atmospheric Condenser, Chemical
+        Reactor (catalyst slot), Leach Tank, Evaporator, Crystallizer, Electrolysis Cell (electrowinning,
+        molten-salt cells, electrorefining), Chlorinator, Kroll Reactor; mixing Fluid Tanks; residue,
+        crystals and anode slimes. *(Verified 2026-11-12 on a dedicated server: SO2 + water over a
+        vanadium catalyst -> 3.06 kg H2SO4 per 2 kg SO2; brine -> NaOH + Cl2 + H2 at 1.44 MJ per cycle;
+        bauxite -> crusher -> caustic leach (red mud: Fe2O3 46%, SiO2 31%) -> pipe -> crystallizer
+        (gibbsite, NaOH regenerated) -> roaster (alumina) -> Hall-Heroult cell with cryolite + carbon
+        (0.528 kg Al per kg alumina, 23.8 MJ); titania slag + coal + Cl2 -> TiCl4 -> Kroll + Mg ->
+        0.757 kg Ti per 3 kg TiCl4 + MgCl2; zinc calcine + acid -> ZnSO4 -> electrowinning (~2.7
+        kWh/kg Zn, acid regenerated); impure copper anodes -> 100% Cu cathode, Ag/Au/Pb slimes, Ni
+        in the bleed; brine evaporated to salt; pump and condenser fill tanks; charges wait for
+        their reagents instead of passing through unreacted.)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
 
 ---
@@ -796,8 +812,62 @@ normal gravity.
   tar; zinc calcine + coke -> condensed zinc (Zn 98.95%, Cd 1.05%); breaking a roaster with 6 kg SO2
   gassed the tester.
 
+## How wet chemistry works (Milestone 8c-2)
+
+- **Solutions are mixtures.** A `ChemicalTank` in mixture mode (`mixed()`) shows pipes one fluid:
+  `Chemicals.mixture(amounts)` = a pure species variant when there's one, else `starwake:chemical`
+  with an ASSAY component (named "Solution (main species)"). Inserting a mixture splits it by mass
+  fraction; extracting takes a proportional slice. Machine liquid outlets are mixture tanks; inlets
+  accept anything (pure or mixed) and keep species separately. **Fluid Tanks** hold a mixing
+  ChemicalTank for water and chemicals plus a plain `SingleFluidStorage` for anything else (lava,
+  other mods); old 8b saves move water/chemicals into the mixing tank on load. Using a tank with an
+  empty hand shows the composition (top 4 species).
+- **`ProcessMachineBlockEntity.Process`** now carries a `Mode` (CRUSH, SEPARATE, PYRO, DRY, WET,
+  EVAPORATE, ELECTRO), `charge` (0 none, 1 required, 2 optional = inlet-fed), a `catalyst` slot,
+  `reagents`, outputs and `inletFeed` (kg sliced from the inlet each cycle). Slot order:
+  charge, catalyst, reagents, outputs (`chargeSlot()`, `catalystSlot()`, `firstReagent()`,
+  `firstOutput()`).
+- **Cycle:** `start()` peeks the feed (one charge item + an inlet slice); chemistry machines (WET,
+  DRY except the coke oven, ELECTRO except refining) only start if `ProcessEngine.canReact` says a
+  reaction can run (catalyst present, reactants in the pool or drawable), so charges wait for their
+  reagents. Then the feed is taken and the products are computed up front and held as **pending**
+  (saved in NBT) until the cycle's energy is delivered: max(time from `speed`, the reactions'
+  electrical energy) for ELECTRO, 0.8 MJ per kg of water for EVAPORATE. Progress = energy done /
+  needed; a weak grid just makes it slower.
+- **Electrolysis energy** = moles of reaction x electrons x 96485 x cell voltage (`electrons`,
+  `voltage` in reaction JSON): Hall-Heroult 12 e at 4.2 V (~12.5 kWh/kg Al), chlor-alkali 2 e at
+  3.5 V, zinc 4 e per 2 Zn at 3.3 V. **Electrorefining** (a metal item as the charge, needs an acid
+  sulfate electrolyte in the inlet): the base metal plates out pure, nobler elements (higher
+  `potential` in species.json) plus Pb/Sn/Se/Te go to anode slimes, less noble ones dissolve into
+  the liquid outlet; 0.3 V x 2 F per mole. An idle cell with metal sulfate in the inlet electrowins it.
+- **Catalysts** (`catalyst` in reaction JSON) must be in the catalyst slot and are never used up:
+  a species id or an element symbol found in the slot item's material (vanadium for the contact
+  process, cryolite crystals for Hall-Heroult, KOH for the alkaline electrolyser).
+- **Routing:** WET/ELECTRO use `routeWet` (25 C: water + soluble species -> liquid, gases -> gas
+  unless soluble and there's more water, metals -> METAL in cells, other solids -> PRIMARY);
+  EVAPORATE: water -> liquid (condensate), dissolved solids -> crystals; the Chlorinator and Kroll
+  reactor use the dry route at their temperature, and the Kroll reactor moves metals to METAL.
+- **Machines** (`machine/<id>.json`): Reactor 8 kW (charge optional, catalyst), Leach Tank 3 kW,
+  Evaporator 40 kW (2 kg/cycle), Crystallizer 2 kW, Electrolysis Cell 60 kW (charge, catalyst,
+  reagent; metal + slimes), Chlorinator 10 kW (950 C; charge + carbon, Cl2 inlet; TiCl4 to the
+  liquid outlet), Kroll Reactor 15 kW (TiCl4 inlet + Mg reagent; Ti sponge ingot + MgCl2 crystals).
+  `logistics/WaterSourceBlockEntity`: Water Pump (1.5 kW, 2 kg/s from a water source beside or
+  below, not consumed), Atmospheric Condenser (6 kW, 0.004 kg/s = 1.5 MJ/kg, breathable worlds
+  above 0 C only); both push into neighbouring fluid storage. New bulk kinds: residue, crystals,
+  anode slimes.
+- **Titanium route:** ilmenite + coal in the smelter -> pig iron + titania slag; slag + coal + Cl2 ->
+  TiCl4; Kroll with Mg -> Ti + MgCl2; MgCl2 -> electrolysis -> Mg + Cl2 (both recycled).
+- Testing headless: `pause-when-empty-seconds=-1` in `run/server.properties`, `/forceload`, fill
+  machines with `/item replace ... with <item>[starwake:assay={...}]` (ppb) and `/data merge block
+  ... {inlet:{SO2:162000L}}` (droplets, 81000 per kg), `/tick sprint`, then `/data get block`.
+
 ## 26.3 gotchas (learned the hard way)
 
+- **Fabric's `FluidVariant.of` rejects non-source fluids** ("Cannot convert flowing fluid"): a
+  custom non-placeable fluid must return `isSource = true`.
+- An enum constant's constructor arguments must not call the *enclosing* class's static methods if
+  that class has static `EnumMap`s of the enum: the outer class initialises mid-enum-init and
+  `EnumMap` throws on a null key universe. Put such helpers inside the enum.
 - **`/item replace ... from block ...` copies** the slot (doesn't move it): clear the source in tests.
 - The Friends List screen opens on the `friends` key (O): a test that types before chat opens can
   trigger it. `run/options.txt` unbinds `key_key.friends` and `key_key.socialInteractions`.

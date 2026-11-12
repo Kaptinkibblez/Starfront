@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/water_pump_front",
+    "side": "starwake:block/water_pump_side",
+    "top": "starwake:block/water_pump_top"
+  }
+}

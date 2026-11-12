@@ -1,0 +1,10 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 NiSO4 + 2 H2O -> 2 Ni + O2 + 2 H2SO4",
+ "priority": 32,
+ "draw": [
+  "H2O"
+ ],
+ "electrons": 4,
+ "voltage": 3.0
+}

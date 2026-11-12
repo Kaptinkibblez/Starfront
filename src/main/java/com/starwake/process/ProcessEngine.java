@@ -56,7 +56,26 @@ public final class ProcessEngine {
 	private ProcessEngine() {}
 
 	public static void react(String machine, Map<String, Double> pool, Supply supply) {
+		react(machine, pool, supply, c -> true);
+	}
+
+	/**
+	 * Runs a machine's reactions; reactions with a catalyst only run if {@code catalyst} says it's
+	 * present. Returns the electrical energy the reactions need (J; electrolysis).
+	 */
+	/** Whether any of a machine's reactions can run on this pool (catalyst present, reactants available). */
+	public static boolean canReact(String machine, Map<String, Double> pool, Supply supply, java.util.function.Predicate<String> catalyst) {
 		for (Reactions.Reaction r : Reactions.forMachine(machine)) {
+			if (r.catalyst().isPresent() && !catalyst.test(r.catalyst().get())) continue;
+			if (extent(r, pool, supply) > EPS) return true;
+		}
+		return false;
+	}
+
+	public static double react(String machine, Map<String, Double> pool, Supply supply, java.util.function.Predicate<String> catalyst) {
+		double energy = 0;
+		for (Reactions.Reaction r : Reactions.forMachine(machine)) {
+			if (r.catalyst().isPresent() && !catalyst.test(r.catalyst().get())) continue;
 			double extent = extent(r, pool, supply);
 			if (extent <= EPS) continue;
 			for (Reactions.Term t : r.reactants()) {
@@ -68,7 +87,81 @@ public final class ProcessEngine {
 			if (extent <= EPS) continue;
 			for (Reactions.Term t : r.reactants()) add(pool, t.species(), -extent * t.kgPerMole());
 			for (Reactions.Term t : r.products()) add(pool, t.species(), extent * t.kgPerMole());
+			energy += extent * r.joulesPerMole();
 		}
+		return energy;
+	}
+
+	/**
+	 * Wet routing (products at ~25 C): water and soluble species form the solution (LIQUID);
+	 * room-temperature gases -> GAS; other room-temperature liquids (TiCl4, acids) -> LIQUID; metals
+	 * (electrolysis cathodes) -> METAL when the machine has one; other solids -> PRIMARY.
+	 */
+	public static Map<Out, Map<String, Double>> routeWet(Map<String, Double> pool, boolean metalOut) {
+		Map<Out, Map<String, Double>> out = new EnumMap<>(Out.class);
+		for (var e : pool.entrySet()) {
+			Species.Info s = Species.get(e.getKey()).orElse(null);
+			if (s == null || e.getValue() <= 0) continue;
+			Out o;
+			if (s.kind() == Species.Kind.GAS || s.gasAtRoom()) o = s.soluble() && pool.getOrDefault("H2O", 0.0) > e.getValue() ? Out.LIQUID : Out.GAS;
+			else if (s.soluble() || s.liquidAtRoom()) o = Out.LIQUID;
+			else if (metalOut && s.metallic()) o = Out.METAL;
+			else o = Out.PRIMARY;
+			out.computeIfAbsent(o, k -> new HashMap<>()).merge(s.id(), e.getValue(), Double::sum);
+		}
+		return out;
+	}
+
+	/** Energy to evaporate water, J/kg (a triple-effect evaporator: about a third of the latent heat). */
+	public static final double EVAPORATION_J_PER_KG = 0.8e6;
+
+	/** Evaporator: water -> condensate (LIQUID), gases -> GAS, everything dissolved crystallises -> PRIMARY. */
+	public static Map<Out, Map<String, Double>> evaporate(Map<String, Double> pool) {
+		Map<Out, Map<String, Double>> out = new EnumMap<>(Out.class);
+		for (var e : pool.entrySet()) {
+			Species.Info s = Species.get(e.getKey()).orElse(null);
+			if (s == null || e.getValue() <= 0) continue;
+			Out o = s.kind() == Species.Kind.WATER ? Out.LIQUID : s.gasAtRoom() || s.kind() == Species.Kind.GAS ? Out.GAS : Out.PRIMARY;
+			out.computeIfAbsent(o, k -> new HashMap<>()).merge(s.id(), e.getValue(), Double::sum);
+		}
+		return out;
+	}
+
+	/** Cell voltage for electrorefining (V). */
+	public static final double REFINING_VOLTAGE = 0.3;
+
+	/**
+	 * Electrorefining an impure metal anode: the base metal plates out pure (METAL); elements nobler
+	 * than it (higher standard potential: gold, silver, platinum metals, selenium, tellurium) and
+	 * those with insoluble sulfates (lead, tin) fall as anode slimes (PRIMARY); less noble ones
+	 * dissolve into the electrolyte (LIQUID bleed). Returns the energy needed in {@code energy[0]}.
+	 */
+	public static Map<Out, Map<String, Double>> electrorefine(Map<String, Double> pool, double[] energy) {
+		Map<Out, Map<String, Double>> out = new EnumMap<>(Out.class);
+		String base = null;
+		double most = 0;
+		for (var e : pool.entrySet()) {
+			if (e.getValue() > most) {
+				most = e.getValue();
+				base = e.getKey();
+			}
+		}
+		if (base == null) return out;
+		Species.Info b = Species.require(base);
+		double baseE = Double.isNaN(b.potential()) ? 0 : b.potential();
+		for (var e : pool.entrySet()) {
+			Species.Info s = Species.get(e.getKey()).orElse(null);
+			if (s == null) continue;
+			Out o;
+			if (s.id().equals(base)) o = Out.METAL;
+			else if (java.util.Set.of("Pb", "Sn", "Se", "Te", "S", "O", "C", "Si").contains(s.id())
+					|| !Double.isNaN(s.potential()) && s.potential() > baseE) o = Out.PRIMARY;
+			else o = Out.LIQUID;
+			out.computeIfAbsent(o, k -> new HashMap<>()).merge(s.id(), e.getValue(), Double::sum);
+		}
+		// Two electrons per atom for copper/nickel/zinc-type refining.
+		energy[0] = most / (b.molarMass() / 1000) * 2 * Reactions.Reaction.FARADAY * REFINING_VOLTAGE;
+		return out;
 	}
 
 	private static double extent(Reactions.Reaction r, Map<String, Double> pool, Supply supply) {

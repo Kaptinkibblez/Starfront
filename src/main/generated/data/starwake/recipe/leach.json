@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": "minecraft:cauldron",
+    "C": "starwake:copper_cable",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "I I",
+    "ICI",
+    "IBI"
+  ],
+  "result": {
+    "id": "starwake:leach"
+  }
+}

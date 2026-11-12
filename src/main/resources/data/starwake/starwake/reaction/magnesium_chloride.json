@@ -1,0 +1,8 @@
+{
+ "machine": "electrolysis",
+ "equation": "MgCl2 -> Mg + Cl2",
+ "priority": 11,
+ "electrons": 2,
+ "voltage": 3.2,
+ "note": "Molten magnesium chloride (Dow / Kroll recycle)."
+}

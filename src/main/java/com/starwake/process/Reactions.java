@@ -35,16 +35,30 @@ public final class Reactions {
 		}
 	}
 
+	/**
+	 * A parsed reaction. Electrolysis reactions carry electrons and a cell voltage: energy per mole of
+	 * reaction = electrons x Faraday x voltage. A catalyst must be present but isn't consumed.
+	 */
 	public record Reaction(Identifier id, String machine, int priority, List<Term> reactants, List<Term> products, List<String> draw,
-			Optional<String> note, String equation) {}
+			Optional<String> note, String equation, int electrons, double voltage, Optional<String> catalyst) {
+		public static final double FARADAY = 96485.33;
 
-	record Raw(String machine, String equation, int priority, List<String> draw, Optional<String> note) {
+		public double joulesPerMole() {
+			return electrons * FARADAY * voltage;
+		}
+	}
+
+	record Raw(String machine, String equation, int priority, List<String> draw, Optional<String> note, int electrons, double voltage,
+			Optional<String> catalyst) {
 		static final Codec<Raw> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("machine").forGetter(Raw::machine),
 				Codec.STRING.fieldOf("equation").forGetter(Raw::equation),
 				Codec.INT.optionalFieldOf("priority", 50).forGetter(Raw::priority),
 				Codec.STRING.listOf().optionalFieldOf("draw", List.of()).forGetter(Raw::draw),
-				Codec.STRING.optionalFieldOf("note").forGetter(Raw::note)
+				Codec.STRING.optionalFieldOf("note").forGetter(Raw::note),
+				Codec.INT.optionalFieldOf("electrons", 0).forGetter(Raw::electrons),
+				Codec.DOUBLE.optionalFieldOf("voltage", 0.0).forGetter(Raw::voltage),
+				Codec.STRING.optionalFieldOf("catalyst").forGetter(Raw::catalyst)
 		).apply(i, Raw::new));
 	}
 
@@ -128,7 +142,8 @@ public final class Reactions {
 			for (var e : balance.entrySet()) {
 				if (Math.abs(e.getValue()) > 1e-6) throw new IllegalArgumentException("unbalanced " + e.getKey() + " by " + e.getValue());
 			}
-			return Optional.of(new Reaction(id, raw.machine(), raw.priority(), left, right, raw.draw(), raw.note(), raw.equation()));
+			return Optional.of(new Reaction(id, raw.machine(), raw.priority(), left, right, raw.draw(), raw.note(), raw.equation(), raw.electrons(),
+					raw.voltage(), raw.catalyst()));
 		} catch (RuntimeException e) {
 			StarwakeMod.LOGGER.error("Bad reaction {}: {}", id, e.getMessage());
 			return Optional.empty();

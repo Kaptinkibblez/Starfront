@@ -1,0 +1,6 @@
+{
+ "machine": "crystallizer",
+ "equation": "NaAl(OH)4 -> Al(OH)3 + NaOH",
+ "priority": 10,
+ "note": "Seeded cooling precipitates gibbsite; the caustic liquor is recycled."
+}

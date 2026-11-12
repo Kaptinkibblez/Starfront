@@ -1,0 +1,11 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 KCl + 2 H2O -> 2 KOH + H2 + Cl2",
+ "priority": 21,
+ "draw": [
+  "H2O"
+ ],
+ "electrons": 2,
+ "voltage": 3.5,
+ "note": "Potash brine: chlorine, hydrogen and caustic potash."
+}

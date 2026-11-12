@@ -1,0 +1,10 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 ZnSO4 + 2 H2O -> 2 Zn + O2 + 2 H2SO4",
+ "priority": 31,
+ "draw": [
+  "H2O"
+ ],
+ "electrons": 4,
+ "voltage": 3.3
+}

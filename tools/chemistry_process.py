@@ -37,6 +37,16 @@ def sp(id, name, kind, density, mp, bp, flags=(), toxicity=0.0, color="#8a8a8a",
                     "boiling": bp, "flags": list(flags), "toxicity": toxicity, "color": color})
 
 
+# Standard electrode potentials E0 (V, M^n+/M): in electrorefining, nobler elements than the metal
+# being refined fall to the anode slimes; less noble ones dissolve into the electrolyte.
+POTENTIAL = {"Au": 1.50, "Pt": 1.18, "Ir": 1.16, "Pd": 0.95, "Hg": 0.85, "Os": 0.85, "Ag": 0.80, "Rh": 0.76, "Te": 0.53,
+             "Ru": 0.45, "Cu": 0.34, "Bi": 0.31, "As": 0.25, "Re": 0.30, "Sb": 0.15, "W": -0.12, "Pb": -0.13, "Sn": -0.14,
+             "Mo": -0.20, "Ni": -0.25, "Co": -0.28, "In": -0.34, "Tl": -0.34, "Cd": -0.40, "Fe": -0.44, "Ga": -0.53,
+             "Cr": -0.74, "Zn": -0.76, "V": -1.18, "Mn": -1.18, "Nb": -1.10, "Zr": -1.45, "Ti": -1.63, "Hf": -1.55,
+             "Al": -1.66, "Be": -1.85, "U": -1.80, "Th": -1.90, "Sc": -2.08, "Y": -2.37, "Mg": -2.37, "La": -2.38,
+             "Ce": -2.34, "Nd": -2.32, "Na": -2.71, "Ca": -2.87, "Sr": -2.89, "Ba": -2.91, "K": -2.93, "Li": -3.04}
+
+
 # Gangue and fluxes
 sp("SiO2", "Quartz", "oxide", 2.65, 1713, 2950, color="#d8d4cc")
 sp("Al2O3", "Alumina", "oxide", 3.95, 2072, 2977, color="#e8e4e0")
@@ -107,10 +117,10 @@ sp("BaSO4", "Barite", "sulfate", 4.48, 1580, 9999, color="#e8e0d8")
 sp("SrSO4", "Celestine", "sulfate", 3.96, 1605, 9999, color="#c8d8e8")
 sp("CaF2", "Fluorite", "halide", 3.18, 1418, 2533, color="#8a5ac8")
 sp("Ca5(PO4)3F", "Fluorapatite", "phosphate", 3.19, 1660, 9999, color="#5a8a7a")
-sp("KCl", "Sylvite", "halide", 1.98, 770, 1420, color="#e8c8c8")
-sp("NaCl", "Halite", "halide", 2.16, 801, 1465, color="#efefef")
+sp("KCl", "Sylvite", "halide", 1.98, 770, 1420, flags=["soluble"], color="#e8c8c8")
+sp("NaCl", "Halite", "halide", 2.16, 801, 1465, flags=["soluble"], color="#efefef")
 sp("Na2B4O7(H2O)10", "Borax", "sulfate", 1.71, 75, 9999, color="#efefef")
-sp("NaNO3", "Nitratine", "sulfate", 2.26, 308, 380, color="#efefef")
+sp("NaNO3", "Nitratine", "sulfate", 2.26, 308, 380, flags=["soluble"], color="#efefef")
 sp("CaSO4(H2O)2", "Gypsum", "sulfate", 2.32, 150, 9999, color="#f2f0ea")
 # Gases and vapours (room-temperature gases go to gas outlets)
 sp("O2", "Oxygen", "gas", 0.0014, -218, -183, color="#a8d8ff")
@@ -126,6 +136,30 @@ sp("C", "Carbon", "carbon", 2.0, 3550, 4027, flags=["floats"], color="#2a2a2a")
 sp("C6H10O5", "Cellulose", "organic", 1.5, 260, 9999, color="#a8885a")
 sp("C10H16", "Pine oil", "organic", 0.86, -64, 155, color="#d8b84a")
 sp("C10H8", "Coal tar", "organic", 1.14, 80, 218, flags=["toxic"], toxicity=0.2, color="#1e1a16")
+
+# --- Wet chemistry and electrochemistry (M8c-2). "soluble" species dissolve into solutions. ---
+sp("H2SO4", "Sulfuric acid", "sulfate", 1.83, 10, 337, flags=["soluble", "toxic"], toxicity=0.6, color="#e8e0c8")
+sp("SO3", "Sulfur trioxide", "gas", 0.0036, 17, 45, flags=["toxic"], toxicity=0.7, color="#efefe0")
+sp("HCl", "Hydrogen chloride", "gas", 0.0015, -114, -85, flags=["soluble", "toxic"], toxicity=0.6, color="#d8f0d8")
+sp("HF", "Hydrogen fluoride", "gas", 0.0012, -83, 20, flags=["soluble", "toxic"], toxicity=0.9, color="#e8f8e8")
+sp("Cl2", "Chlorine", "gas", 0.0032, -101, -34, flags=["toxic"], toxicity=0.9, color="#b8e858")
+sp("NaOH", "Sodium hydroxide", "oxide", 2.13, 318, 1388, flags=["soluble", "toxic"], toxicity=0.4, color="#f0f0f0")
+sp("KOH", "Potassium hydroxide", "oxide", 2.04, 406, 1327, flags=["soluble", "toxic"], toxicity=0.4, color="#f0f0f0")
+sp("NaAl(OH)4", "Sodium aluminate", "oxide", 1.5, 1650, 9999, flags=["soluble"], color="#efefe8")
+sp("Na3AlF6", "Cryolite", "halide", 2.95, 1012, 9999, color="#e8e8f0")
+sp("CaSO4", "Anhydrite", "sulfate", 2.97, 1460, 9999, color="#efece4")
+sp("CuSO4", "Copper sulfate", "sulfate", 3.6, 590, 9999, flags=["soluble"], color="#2a6aff")
+sp("CuO", "Tenorite", "oxide", 6.31, 1326, 2000, color="#1e1e1e")
+sp("ZnSO4", "Zinc sulfate", "sulfate", 3.54, 680, 9999, flags=["soluble"], color="#efefef")
+sp("NiSO4", "Nickel sulfate", "sulfate", 3.68, 840, 9999, flags=["soluble"], color="#3aa84a")
+sp("FeSO4", "Iron(II) sulfate", "sulfate", 3.65, 680, 9999, flags=["soluble"], color="#8ac8a0")
+sp("CoSO4", "Cobalt sulfate", "sulfate", 3.71, 735, 9999, flags=["soluble"], color="#c83a6a")
+sp("Na2SO4", "Sodium sulfate", "sulfate", 2.66, 884, 1429, flags=["soluble"], color="#f2f2f2")
+sp("PbSO4", "Anglesite", "sulfate", 6.29, 1087, 9999, color="#e8e8e8")
+sp("TiCl4", "Titanium tetrachloride", "halide", 1.73, -24, 136, flags=["toxic"], toxicity=0.6, color="#e8e8a8")
+sp("MgCl2", "Magnesium chloride", "halide", 2.32, 714, 1412, flags=["soluble"], color="#f0f0f0")
+sp("FeCl2", "Iron(II) chloride", "halide", 3.16, 677, 1023, flags=["soluble"], color="#a8c87a")
+sp("V2O5", "Vanadium pentoxide", "oxide", 3.36, 690, 1750, flags=["toxic"], toxicity=0.3, color="#c88a2a")
 
 KNOWN = {s["id"] for s in SPECIES}
 
@@ -147,6 +181,8 @@ for sym, e in ELEMENTS.items():
     bp = BOILING.get(sym, 3000)
     flags = ["toxic"] if sym in TOXIC else []
     sp(sym, e["name"].capitalize(), kind, e["density"], mp, bp, flags=flags, toxicity=TOXIC.get(sym, 0.0), color=e["color"])
+    if sym in POTENTIAL:
+        SPECIES[-1]["potential"] = POTENTIAL[sym]
 
 # --- Formula check (mirrors the Java parser) -------------------------------------------------------
 TOKEN = re.compile(r"([A-Z][a-z]?|\(|\)|\d+(?:\.\d+)?)")
@@ -246,6 +282,10 @@ ORES = {
     "starwake:raw_nitratine": ore({"NaNO3": 1.0}, 0.75, {"I": 600, "K": 10000}),
     "minecraft:cinnabar": ore({"HgS": 1.0}, 0.7, {"Se": 200, "Sb": 500}),
     "minecraft:sulfur": ore({"S": 1.0}, 0.9, {"Se": 300, "Te": 50}, gangue={"CaSO4(H2O)2": 0.7, "CaCO3": 0.3}),
+    "starwake:halite": ore({"NaCl": 0.95, "KCl": 0.03, "CaSO4(H2O)2": 0.02}, 0.95, {"Br": 300, "I": 20}, gangue={"SiO2": 1.0}, mass=1.0),
+    "minecraft:ice": {"mass": 1.0, "assay": {"H2O": 1.0}},
+    "minecraft:packed_ice": {"mass": 1.0, "assay": {"H2O": 1.0}},
+    "minecraft:blue_ice": {"mass": 1.0, "assay": {"H2O": 1.0}},
     # Fuels, fluxes and feedstocks (1 kg items).
     "minecraft:coal": {"mass": 1.0, "assay": {"C": 0.78, "CH4": 0.07, "C10H8": 0.04, "H2O": 0.05, "S": 0.01, "SiO2": 0.03, "Al2O3": 0.02}},
     "minecraft:charcoal": {"mass": 1.0, "assay": {"C": 0.9, "H2O": 0.04, "CaCO3": 0.03, "KAlSi3O8": 0.03}},
@@ -265,9 +305,12 @@ ORES = {
 REACTIONS = []
 
 
-def rx(machine, name, equation, priority, note=None, draw=None):
-    """draw: reactants the machine may feed from its reagent slots, inlet tank or the air (O2)."""
-    REACTIONS.append({"name": name, "machine": machine, "equation": equation, "priority": priority, "draw": draw, "note": note})
+def rx(machine, name, equation, priority, note=None, draw=None, electrons=None, voltage=None, catalyst=None):
+    """draw: reactants the machine may feed from its reagent slots, inlet tank or the air (O2).
+    electrons/voltage: electrolysis; energy per mole of reaction = electrons x Faraday x voltage.
+    catalyst: an element or species that must be present in the catalyst slot (not consumed)."""
+    REACTIONS.append({"name": name, "machine": machine, "equation": equation, "priority": priority, "draw": draw,
+                      "electrons": electrons, "voltage": voltage, "catalyst": catalyst, "note": note})
 
 
 # Roaster (650 C, air): sulfides to oxides + SO2, carbonates calcine, cinnabar gives mercury vapour.
@@ -318,6 +361,49 @@ rx("converter", "slag_converter", "2 FeO + SiO2 -> Fe2SiO4", 11, draw=["O2"])
 rx("converter", "blow_nickel_sulfide", "2 NiS + 3 O2 -> 2 NiO + 2 SO2", 12, draw=["O2"])
 rx("converter", "blow_copper_sulfide", "Cu2S + O2 -> 2 Cu + SO2", 20, "Copper blow: blister copper (~98.5% Cu) with gold and silver.", draw=["O2"])
 rx("converter", "reduce_nickel_oxide_converter", "NiO + C -> Ni + CO", 21, draw=["C"])
+
+# Chemical reactor (acids, fluorides, cryolite). Process temperatures vary; products are cooled.
+rx("reactor", "contact_oxidation", "2 SO2 + O2 -> 2 SO3", 10, "Contact process: needs a vanadium catalyst.", draw=["O2"], catalyst="V")
+rx("reactor", "acid_absorption", "SO3 + H2O -> H2SO4", 11, "Sulfur trioxide absorbed in water: sulfuric acid.", draw=["H2O"])
+rx("reactor", "hydrogen_chloride", "H2 + Cl2 -> 2 HCl", 20, "Burning hydrogen in chlorine.", draw=["Cl2"])
+rx("reactor", "hydrofluoric_acid", "CaF2 + H2SO4 -> CaSO4 + 2 HF", 30, "Fluorspar + sulfuric acid: hydrogen fluoride (very toxic).", draw=["H2SO4"])
+rx("reactor", "cryolite_synthesis", "Al(OH)3 + 6 HF + 3 NaOH -> Na3AlF6 + 6 H2O", 31, "Synthetic cryolite for the aluminium bath.",
+   draw=["HF", "NaOH"])
+# Leach tank (25-150 C): dissolves the valuable part, leaves residue.
+rx("leach", "leach_chalcocite", "Cu2S + 2 H2SO4 + O2 -> 2 CuSO4 + S + 2 H2O", 10, "Oxidative acid leach of chalcocite.", draw=["H2SO4", "O2"])
+rx("leach", "leach_tenorite", "CuO + H2SO4 -> CuSO4 + H2O", 11, draw=["H2SO4"])
+rx("leach", "leach_zincite", "ZnO + H2SO4 -> ZnSO4 + H2O", 12, "Roasted zinc calcine dissolves for electrowinning.", draw=["H2SO4"])
+rx("leach", "leach_bunsenite", "NiO + H2SO4 -> NiSO4 + H2O", 13, draw=["H2SO4"])
+rx("leach", "leach_cobalt_oxide", "CoO + H2SO4 -> CoSO4 + H2O", 14, draw=["H2SO4"])
+rx("leach", "bayer_gibbsite", "Al(OH)3 + NaOH -> NaAl(OH)4", 20, "Bayer process: caustic soda dissolves alumina; iron and titania stay as red mud.",
+   draw=["NaOH"])
+rx("leach", "bayer_boehmite", "AlO(OH) + NaOH + H2O -> NaAl(OH)4", 21, draw=["NaOH", "H2O"])
+# Crystallizer (cooling/seeding precipitation).
+rx("crystallizer", "bayer_precipitation", "NaAl(OH)4 -> Al(OH)3 + NaOH", 10, "Seeded cooling precipitates gibbsite; the caustic liquor is recycled.")
+# Electrolysis cell. Energy = electrons x 96485 C/mol x voltage per mole of reaction.
+rx("electrolysis", "hall_heroult", "2 Al2O3 + 3 C -> 4 Al + 3 CO2", 10, "Alumina dissolved in molten cryolite (960 C); carbon anodes burn away.",
+   draw=["C"], electrons=12, voltage=4.2, catalyst="Na3AlF6")
+rx("electrolysis", "magnesium_chloride", "MgCl2 -> Mg + Cl2", 11, "Molten magnesium chloride (Dow / Kroll recycle).", electrons=2, voltage=3.2)
+rx("electrolysis", "chlor_alkali", "2 NaCl + 2 H2O -> 2 NaOH + H2 + Cl2", 20, "Brine electrolysis: chlorine, hydrogen and caustic soda.",
+   draw=["H2O"], electrons=2, voltage=3.5)
+rx("electrolysis", "chlor_potash", "2 KCl + 2 H2O -> 2 KOH + H2 + Cl2", 21, "Potash brine: chlorine, hydrogen and caustic potash.",
+   draw=["H2O"], electrons=2, voltage=3.5)
+rx("electrolysis", "electrowin_copper", "2 CuSO4 + 2 H2O -> 2 Cu + O2 + 2 H2SO4", 30, "Copper electrowinning; the acid is regenerated.",
+   draw=["H2O"], electrons=4, voltage=2.0)
+rx("electrolysis", "electrowin_zinc", "2 ZnSO4 + 2 H2O -> 2 Zn + O2 + 2 H2SO4", 31, draw=["H2O"], electrons=4, voltage=3.3)
+rx("electrolysis", "electrowin_nickel", "2 NiSO4 + 2 H2O -> 2 Ni + O2 + 2 H2SO4", 32, draw=["H2O"], electrons=4, voltage=3.0)
+rx("electrolysis", "electrowin_cobalt", "2 CoSO4 + 2 H2O -> 2 Co + O2 + 2 H2SO4", 33, draw=["H2O"], electrons=4, voltage=3.0)
+rx("electrolysis", "water_electrolysis", "2 H2O -> 2 H2 + O2", 90, "Alkaline electrolyser: needs caustic potash electrolyte.",
+   electrons=4, voltage=2.0, catalyst="KOH")
+# Chlorinator (1000 C fluidised bed).
+rx("chlorinator", "chlorinate_rutile", "TiO2 + 2 C + 2 Cl2 -> TiCl4 + 2 CO", 10, "Titanium tetrachloride distils off and is condensed.",
+   draw=["C", "Cl2"])
+rx("chlorinator", "chlorinate_magnesia", "MgO + C + Cl2 -> MgCl2 + CO", 11, draw=["C", "Cl2"])
+rx("chlorinator", "chlorinate_wustite", "FeO + C + Cl2 -> FeCl2 + CO", 12, draw=["C", "Cl2"])
+rx("chlorinator", "flare_chlorinator", "2 CO + O2 -> 2 CO2", 90, draw=["O2"])
+# Kroll reactor (850 C, argon).
+rx("kroll", "kroll_titanium", "TiCl4 + 2 Mg -> Ti + 2 MgCl2", 10, "Magnesium reduces TiCl4 to titanium sponge; MgCl2 goes back to the cell.",
+   draw=["Mg"])
 
 # Missing species used by reactions.
 sp("Sb2O3", "Senarmontite", "oxide", 5.2, 656, 1425, flags=["toxic"], toxicity=0.3, color="#efefef")

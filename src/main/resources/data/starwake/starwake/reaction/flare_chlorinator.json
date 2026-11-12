@@ -1,0 +1,8 @@
+{
+ "machine": "chlorinator",
+ "equation": "2 CO + O2 -> 2 CO2",
+ "priority": 90,
+ "draw": [
+  "O2"
+ ]
+}

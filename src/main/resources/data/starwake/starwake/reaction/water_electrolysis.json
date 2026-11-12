@@ -1,0 +1,9 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 H2O -> 2 H2 + O2",
+ "priority": 90,
+ "electrons": 4,
+ "voltage": 2.0,
+ "catalyst": "KOH",
+ "note": "Alkaline electrolyser: needs caustic potash electrolyte."
+}

@@ -1,0 +1,12 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 Al2O3 + 3 C -> 4 Al + 3 CO2",
+ "priority": 10,
+ "draw": [
+  "C"
+ ],
+ "electrons": 12,
+ "voltage": 4.2,
+ "catalyst": "Na3AlF6",
+ "note": "Alumina dissolved in molten cryolite (960 C); carbon anodes burn away."
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": "minecraft:bucket",
+    "C": "starwake:copper_cable",
+    "I": "minecraft:iron_bars",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "III",
+    "CBC",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:atmospheric_condenser"
+  }
+}

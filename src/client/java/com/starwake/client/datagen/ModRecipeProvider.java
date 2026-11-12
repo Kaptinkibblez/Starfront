@@ -59,6 +59,20 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				machine(com.starwake.process.ProcessMachineBlockEntity.Process.COKE_OVEN, "BBB", "BFB", "BBB", Items.BRICKS);
 				machine(com.starwake.process.ProcessMachineBlockEntity.Process.SMELTER, "BBB", "BCB", "IRI", Items.NETHER_BRICKS);
 				machine(com.starwake.process.ProcessMachineBlockEntity.Process.CONVERTER, "I I", "ICI", "BRB", Items.NETHER_BRICKS);
+				// M8c-2 wet chemistry.
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.REACTOR, "IGI", "ICI", "IRI", Items.CAULDRON);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.LEACH, "I I", "ICI", "IBI", Items.CAULDRON);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.EVAPORATOR, "GGG", "ICI", "IFI", Items.CAULDRON);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.CRYSTALLIZER, "IGI", "GBG", "IRI", Items.CAULDRON);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.ELECTROLYSIS, "CRC", "IBI", "III", Items.CAULDRON);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.CHLORINATOR, "BBB", "ICI", "IRI", Items.BRICKS);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.KROLL, "III", "BCB", "BRB", Items.BRICKS);
+				shaped(RecipeCategory.REDSTONE, ModMachines.WATER_PUMP).pattern("IPI").pattern("CBC").pattern("IRI")
+						.define('I', Items.IRON_INGOT).define('P', Items.PISTON).define('C', ModMachines.COPPER_CABLE).define('B', Items.BUCKET)
+						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				shaped(RecipeCategory.REDSTONE, ModMachines.ATMOSPHERIC_CONDENSER).pattern("III").pattern("CBC").pattern("IRI")
+						.define('I', Items.IRON_BARS).define('C', ModMachines.COPPER_CABLE).define('B', Items.BUCKET)
+						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 			}
 
 			private void machine(com.starwake.process.ProcessMachineBlockEntity.Process p, String a, String b, String c,

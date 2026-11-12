@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/kroll_front",
+    "side": "starwake:block/kroll_side",
+    "top": "starwake:block/kroll_top"
+  }
+}

@@ -56,6 +56,8 @@ public final class ModModelProvider extends FabricModelProvider {
 		// Power and logistics (M8b). Element models are hand-shaped (tools/machine_assets.py).
 		generators.createFurnace(com.starwake.registry.ModMachines.COMBUSTION_GENERATOR, TexturedModel.ORIENTABLE_ONLY_TOP);
 		generators.createFurnace(com.starwake.registry.ModMachines.ELECTRIC_FURNACE, TexturedModel.ORIENTABLE_ONLY_TOP);
+		generators.createFurnace(com.starwake.registry.ModMachines.WATER_PUMP, TexturedModel.ORIENTABLE_ONLY_TOP);
+		generators.createFurnace(com.starwake.registry.ModMachines.ATMOSPHERIC_CONDENSER, TexturedModel.ORIENTABLE_ONLY_TOP);
 		generators.createTrivialBlock(com.starwake.registry.ModMachines.BATTERY, TexturedModel.COLUMN);
 		com.starwake.registry.ModProcess.blocks().forEach(b -> generators.createFurnace(b, TexturedModel.ORIENTABLE_ONLY_TOP));
 		simpleModelBlock(generators, com.starwake.registry.ModMachines.SOLAR_PANEL, "solar_panel", "solar_panel");

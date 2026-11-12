@@ -1,0 +1,9 @@
+{
+ "machine": "kroll",
+ "equation": "TiCl4 + 2 Mg -> Ti + 2 MgCl2",
+ "priority": 10,
+ "draw": [
+  "Mg"
+ ],
+ "note": "Magnesium reduces TiCl4 to titanium sponge; MgCl2 goes back to the cell."
+}

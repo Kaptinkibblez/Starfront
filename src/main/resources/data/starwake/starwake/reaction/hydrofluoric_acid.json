@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "CaF2 + H2SO4 -> CaSO4 + 2 HF",
+ "priority": 30,
+ "draw": [
+  "H2SO4"
+ ],
+ "note": "Fluorspar + sulfuric acid: hydrogen fluoride (very toxic)."
+}

@@ -1,0 +1,9 @@
+{
+ "machine": "leach",
+ "equation": "AlO(OH) + NaOH + H2O -> NaAl(OH)4",
+ "priority": 21,
+ "draw": [
+  "NaOH",
+  "H2O"
+ ]
+}

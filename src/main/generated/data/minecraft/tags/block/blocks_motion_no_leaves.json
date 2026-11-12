@@ -69,6 +69,8 @@
     "starwake:electric_furnace",
     "starwake:battery",
     "starwake:fluid_tank",
+    "starwake:water_pump",
+    "starwake:atmospheric_condenser",
     "starwake:crusher",
     "starwake:flotation",
     "starwake:magnetic",
@@ -76,6 +78,13 @@
     "starwake:roaster",
     "starwake:coke_oven",
     "starwake:smelter",
-    "starwake:converter"
+    "starwake:converter",
+    "starwake:reactor",
+    "starwake:leach",
+    "starwake:evaporator",
+    "starwake:crystallizer",
+    "starwake:electrolysis",
+    "starwake:chlorinator",
+    "starwake:kroll"
   ]
 }

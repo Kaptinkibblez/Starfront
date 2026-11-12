@@ -6,6 +6,7 @@ import com.starwake.logistics.FluidPipeBlock;
 import com.starwake.logistics.FluidPipeBlockEntity;
 import com.starwake.logistics.FluidTankBlock;
 import com.starwake.logistics.FluidTankBlockEntity;
+import com.starwake.logistics.WaterSourceBlockEntity;
 import com.starwake.machine.CableBlock;
 import com.starwake.machine.CombustionGeneratorBlockEntity;
 import com.starwake.machine.ElectricFurnaceBlockEntity;
@@ -44,6 +45,10 @@ public final class ModMachines {
 	public static final Block ALUMINIUM_CABLE = ModBlocks.register("aluminium_cable", p -> new CableBlock(6, p), cable());
 	public static final Block FLUID_PIPE = ModBlocks.register("fluid_pipe", FluidPipeBlock::new, cable());
 	public static final Block FLUID_TANK = ModBlocks.register("fluid_tank", FluidTankBlock::new, machine().noOcclusion());
+	public static final Block WATER_PUMP = ModBlocks.register("water_pump",
+			p -> new MachineBlock(WaterSourceBlockEntity::new, () -> ModMachines.WATER_SOURCE_BE, p), machine());
+	public static final Block ATMOSPHERIC_CONDENSER = ModBlocks.register("atmospheric_condenser",
+			p -> new MachineBlock(WaterSourceBlockEntity::new, () -> ModMachines.WATER_SOURCE_BE, p), machine());
 	public static final Block CONVEYOR = ModBlocks.register("conveyor", ConveyorBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY).strength(1.5f, 4.0f).sound(SoundType.METAL).noOcclusion());
 
@@ -60,6 +65,13 @@ public final class ModMachines {
 	public static final BlockEntityType<FluidTankBlockEntity> FLUID_TANK_BE =
 			be("fluid_tank", FabricBlockEntityTypeBuilder.create(FluidTankBlockEntity::new, FLUID_TANK).build());
 
+	public static final BlockEntityType<WaterSourceBlockEntity> WATER_SOURCE_BE =
+			be("water_source", FabricBlockEntityTypeBuilder.create(WaterSourceBlockEntity::new, WATER_PUMP, ATMOSPHERIC_CONDENSER).build());
+
+	public static final MenuType<MachineMenu> WATER_PUMP_MENU = menu("water_pump",
+			(id, inv) -> new MachineMenu(ModMachines.WATER_PUMP_MENU, WaterSourceBlockEntity.LAYOUT, id, inv));
+	public static final MenuType<MachineMenu> CONDENSER_MENU = menu("atmospheric_condenser",
+			(id, inv) -> new MachineMenu(ModMachines.CONDENSER_MENU, WaterSourceBlockEntity.LAYOUT, id, inv));
 	public static final MenuType<MachineMenu> COMBUSTION_GENERATOR_MENU = menu("combustion_generator",
 			(id, inv) -> new MachineMenu(ModMachines.COMBUSTION_GENERATOR_MENU, CombustionGeneratorBlockEntity.LAYOUT, id, inv));
 	public static final MenuType<MachineMenu> ELECTRIC_FURNACE_MENU = menu("electric_furnace",
@@ -69,10 +81,12 @@ public final class ModMachines {
 
 	public static void init() {
 		FluidStorage.SIDED.registerForBlockEntity((tank, side) -> tank.storage(), FLUID_TANK_BE);
+		FluidStorage.SIDED.registerForBlockEntity((be, side) -> be.fluidStorage(), WATER_SOURCE_BE);
 	}
 
 	public static List<Block> all() {
-		return List.of(COMBUSTION_GENERATOR, ELECTRIC_FURNACE, SOLAR_PANEL, BATTERY, COPPER_CABLE, ALUMINIUM_CABLE, FLUID_PIPE, FLUID_TANK, CONVEYOR);
+		return List.of(COMBUSTION_GENERATOR, ELECTRIC_FURNACE, SOLAR_PANEL, BATTERY, COPPER_CABLE, ALUMINIUM_CABLE, FLUID_PIPE, FLUID_TANK, CONVEYOR, WATER_PUMP,
+				ATMOSPHERIC_CONDENSER);
 	}
 
 	private static BlockBehaviour.Properties machine() {

@@ -29,7 +29,7 @@ public interface EnergyNode {
 	}
 
 	/** J/tick for kilowatts. */
-	static long perTick(double kw) {
+	public static long perTick(double kw) {
 		return Math.round(kw * 1000 / 20.0);
 	}
 

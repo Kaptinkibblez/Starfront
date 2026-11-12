@@ -178,6 +178,8 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(com.starwake.registry.ModMachines.FLUID_PIPE, "Fluid Pipe");
 		builder.add(com.starwake.registry.ModMachines.FLUID_TANK, "Fluid Tank");
 		builder.add(com.starwake.registry.ModMachines.CONVEYOR, "Conveyor Belt");
+		builder.add(com.starwake.registry.ModMachines.WATER_PUMP, "Water Pump");
+		builder.add(com.starwake.registry.ModMachines.ATMOSPHERIC_CONDENSER, "Atmospheric Condenser");
 		builder.add("message.starwake.grid", "Grid: %s kW supply · %s kW demand · %s machines, %s cables");
 		builder.add("message.starwake.solar", "Solar %s kW (sun %s%%, starlight %s×)");
 		builder.add("message.starwake.battery", "Battery %s / %s kWh (%s%%)");
@@ -195,15 +197,28 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("screen.starwake.machine.grid", "Grid: %s kW in · %s kW use");
 		builder.add("screen.starwake.machine.no_power", "No power");
 		// Process chemistry (M8c-1).
-		java.util.Map<String, String> machines = java.util.Map.of("crusher", "Jaw Crusher", "flotation", "Flotation Cell", "magnetic", "Magnetic Separator",
-				"gravity", "Shaking Table", "roaster", "Roasting Kiln", "coke_oven", "Coke Oven", "smelter", "Electric Smelter", "converter", "Converter");
+		java.util.Map<String, String> machines = java.util.Map.ofEntries(java.util.Map.entry("crusher", "Jaw Crusher"),
+				java.util.Map.entry("flotation", "Flotation Cell"), java.util.Map.entry("magnetic", "Magnetic Separator"),
+				java.util.Map.entry("gravity", "Shaking Table"), java.util.Map.entry("roaster", "Roasting Kiln"), java.util.Map.entry("coke_oven", "Coke Oven"),
+				java.util.Map.entry("smelter", "Electric Smelter"), java.util.Map.entry("converter", "Converter"),
+				java.util.Map.entry("reactor", "Chemical Reactor"), java.util.Map.entry("leach", "Leach Tank"), java.util.Map.entry("evaporator", "Evaporator"),
+				java.util.Map.entry("crystallizer", "Crystallizer"), java.util.Map.entry("electrolysis", "Electrolysis Cell"),
+				java.util.Map.entry("chlorinator", "Chlorinator"), java.util.Map.entry("kroll", "Kroll Reactor"));
 		for (var p : com.starwake.process.ProcessMachineBlockEntity.Process.values()) {
 			builder.add(com.starwake.registry.ModProcess.block(p), machines.get(p.machine));
 		}
-		java.util.Map<String, String[]> bulk = java.util.Map.of("crushed_ore", new String[] {"Crushed Ore", "Crushed %s Ore"},
-				"concentrate", new String[] {"Concentrate", "%s Concentrate"}, "tailings", new String[] {"Tailings", "%s Tailings"},
-				"calcine", new String[] {"Calcine", "%s Calcine"}, "matte", new String[] {"Matte", "%s Matte"}, "slag", new String[] {"Slag", "%s Slag"},
-				"flue_dust", new String[] {"Flue Dust", "%s Flue Dust"}, "coke", new String[] {"Coke", "Coke"});
+		java.util.Map<String, String[]> bulk = new java.util.LinkedHashMap<>();
+		bulk.put("crushed_ore", new String[] {"Crushed Ore", "Crushed %s Ore"});
+		bulk.put("concentrate", new String[] {"Concentrate", "%s Concentrate"});
+		bulk.put("tailings", new String[] {"Tailings", "%s Tailings"});
+		bulk.put("calcine", new String[] {"Calcine", "%s Calcine"});
+		bulk.put("matte", new String[] {"Matte", "%s Matte"});
+		bulk.put("slag", new String[] {"Slag", "%s Slag"});
+		bulk.put("flue_dust", new String[] {"Flue Dust", "%s Flue Dust"});
+		bulk.put("coke", new String[] {"Coke", "Coke"});
+		bulk.put("residue", new String[] {"Residue", "%s Residue"});
+		bulk.put("crystals", new String[] {"Crystals", "%s Crystals"});
+		bulk.put("slimes", new String[] {"Anode Slimes", "%s Anode Slimes"});
 		bulk.forEach((k, v) -> {
 			builder.add("item.starwake.bulk_" + k, v[0]);
 			builder.add("item.starwake.bulk_" + k + ".of", v[1]);

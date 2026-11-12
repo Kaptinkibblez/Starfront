@@ -1,0 +1,11 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 CuSO4 + 2 H2O -> 2 Cu + O2 + 2 H2SO4",
+ "priority": 30,
+ "draw": [
+  "H2O"
+ ],
+ "electrons": 4,
+ "voltage": 2.0,
+ "note": "Copper electrowinning; the acid is regenerated."
+}

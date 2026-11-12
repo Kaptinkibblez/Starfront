@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/evaporator_front_on",
+    "side": "starwake:block/evaporator_side",
+    "top": "starwake:block/evaporator_top"
+  }
+}

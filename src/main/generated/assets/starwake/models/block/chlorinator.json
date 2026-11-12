@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/chlorinator_front",
+    "side": "starwake:block/chlorinator_side",
+    "top": "starwake:block/chlorinator_top"
+  }
+}

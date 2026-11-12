@@ -2,6 +2,7 @@ package com.starwake.process;
 
 import com.mojang.serialization.Codec;
 import com.starwake.StarwakeMod;
+import java.util.Map;
 import java.util.Optional;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -33,6 +34,11 @@ public final class Chemicals {
 		FluidVariantAttributes.register(FLUID, new FluidVariantAttributeHandler() {
 			@Override
 			public Component getName(FluidVariant variant) {
+				Assay assay = variant.getComponents().get(com.starwake.registry.ModComponents.ASSAY);
+				if (assay != null) {
+					String main = assay.parts().stream().map(Assay.Part::species).filter(s -> !s.equals("H2O")).findFirst().orElse("H2O");
+					return Component.translatable("fluid.starwake.solution", Species.get(main).map(Species.Info::displayName).orElse(Component.literal(main)));
+				}
 				return speciesOf(variant).flatMap(Species::get).map(Species.Info::displayName)
 						.orElse(Component.translatable("fluid.starwake.chemical"));
 			}
@@ -47,6 +53,25 @@ public final class Chemicals {
 	public static FluidVariant variant(String species) {
 		if (species.equals("H2O")) return FluidVariant.of(Fluids.WATER);
 		return FluidVariant.of(FLUID, DataComponentPatch.builder().set(SPECIES, species).build());
+	}
+
+	/** A fluid for a mixture: a pure species when there is only one, else a solution carrying its assay. */
+	public static FluidVariant mixture(Map<String, Long> amounts) {
+		java.util.Map<String, Double> m = new java.util.HashMap<>();
+		amounts.forEach((k, v) -> { if (v > 0) m.put(k, v.doubleValue()); });
+		if (m.size() == 1) return variant(m.keySet().iterator().next());
+		return FluidVariant.of(FLUID, DataComponentPatch.builder().set(com.starwake.registry.ModComponents.ASSAY, Assay.of(m)).build());
+	}
+
+	/** Mass fractions of species in a fluid: pure species, a solution's assay, or water. Empty if not chemical. */
+	public static Map<String, Double> contents(FluidVariant variant) {
+		Assay assay = variant.isOf(FLUID) ? variant.getComponents().get(com.starwake.registry.ModComponents.ASSAY) : null;
+		if (assay != null) {
+			java.util.Map<String, Double> m = new java.util.LinkedHashMap<>();
+			assay.parts().forEach(p -> m.put(p.species(), p.fraction()));
+			return m;
+		}
+		return speciesOf(variant).map(s -> Map.of(s, 1.0)).orElse(Map.of());
 	}
 
 	public static Optional<String> speciesOf(FluidVariant variant) {

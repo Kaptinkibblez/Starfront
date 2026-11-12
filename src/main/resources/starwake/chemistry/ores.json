@@ -504,6 +504,35 @@
    "Te": 5e-05
   }
  },
+ "starwake:halite": {
+  "mass": 1.0,
+  "assay": {
+   "NaCl": 0.9025,
+   "KCl": 0.0285,
+   "CaSO4(H2O)2": 0.019,
+   "SiO2": 0.04968,
+   "Br": 0.0003,
+   "I": 2e-05
+  }
+ },
+ "minecraft:ice": {
+  "mass": 1.0,
+  "assay": {
+   "H2O": 1.0
+  }
+ },
+ "minecraft:packed_ice": {
+  "mass": 1.0,
+  "assay": {
+   "H2O": 1.0
+  }
+ },
+ "minecraft:blue_ice": {
+  "mass": 1.0,
+  "assay": {
+   "H2O": 1.0
+  }
+ },
  "minecraft:coal": {
   "mass": 1.0,
   "assay": {

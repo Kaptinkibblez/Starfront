@@ -1,0 +1,10 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 CoSO4 + 2 H2O -> 2 Co + O2 + 2 H2SO4",
+ "priority": 33,
+ "draw": [
+  "H2O"
+ ],
+ "electrons": 4,
+ "voltage": 3.0
+}

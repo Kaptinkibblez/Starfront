@@ -1,0 +1,10 @@
+{
+ "machine": "leach",
+ "equation": "Cu2S + 2 H2SO4 + O2 -> 2 CuSO4 + S + 2 H2O",
+ "priority": 10,
+ "draw": [
+  "H2SO4",
+  "O2"
+ ],
+ "note": "Oxidative acid leach of chalcocite."
+}

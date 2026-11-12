@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "NiO + H2SO4 -> NiSO4 + H2O",
+ "priority": 13,
+ "draw": [
+  "H2SO4"
+ ]
+}

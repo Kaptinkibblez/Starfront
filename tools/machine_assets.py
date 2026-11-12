@@ -237,6 +237,72 @@ def process_textures():
     front("smelter", "#6a6460", smelter)
     front("converter", "#5a5e68", converter)
 
+    # M8c-2: wet chemistry, electrochemistry, water.
+    def reactor(im, on):
+        rect(im, 4, 2, 11, 13, "#3a4a3e")
+        rect(im, 5, 4, 10, 12, "#7ac87a" if on else "#2e3a30")
+        rect(im, 7, 2, 8, 6, "#c8c8c8")
+        rect(im, 5, 8, 10, 8, "#c8c8c8")
+
+    def leach(im, on):
+        rect(im, 2, 4, 13, 12, "#4a4440")
+        rect(im, 3, 6, 12, 11, "#5aa0c8" if on else "#2e4450")
+        rect(im, 7, 2, 8, 9, "#b0b0b0")
+        rect(im, 5, 9, 10, 9, "#b0b0b0")
+
+    def evaporator(im, on):
+        rect(im, 3, 6, 12, 12, "#5a5450")
+        rect(im, 4, 9, 11, 11, "#a8d8f0" if on else "#3a4a54")
+        if on:
+            for x, y in ((5, 3), (8, 2), (10, 4), (6, 6)):
+                rect(im, x, y, x, y, "#e8f4ff")
+
+    def crystallizer(im, on):
+        rect(im, 3, 3, 12, 12, "#2e3a44")
+        for x, y in ((5, 9), (7, 6), (9, 10), (10, 7), (6, 11)):
+            rect(im, x, y, x + 1, y + 1, "#f0f0ff" if on else "#8a9aa8")
+
+    def electrolysis(im, on):
+        rect(im, 2, 4, 13, 13, "#3a3a44")
+        rect(im, 3, 6, 12, 12, "#4a7ab0" if on else "#2a3444")
+        rect(im, 4, 2, 5, 11, "#c87a3a")
+        rect(im, 10, 2, 11, 11, "#9a9aa4")
+        if on:
+            rect(im, 7, 5, 8, 5, "#ffff80")
+
+    def chlorinator(im, on):
+        rect(im, 4, 2, 11, 13, "#4a4a3a")
+        rect(im, 5, 4, 10, 12, "#c8d84a" if on else "#3a3e2a")
+        rect(im, 5, 2, 10, 3, "#8a8a7a")
+
+    def kroll(im, on):
+        rect(im, 4, 3, 11, 13, "#6a5a54")
+        rect(im, 5, 5, 10, 12, "#ff8a3a" if on else "#3a2e2a")
+        rect(im, 4, 2, 11, 3, "#4a4a4e")
+        rect(im, 7, 1, 8, 2, "#9a9aa0")
+
+    def water_pump(im, on):
+        rect(im, 3, 4, 12, 12, "#3a4450")
+        rect(im, 5, 6, 10, 10, "#3a7ac8" if on else "#2a3a50")
+        rect(im, 7, 2, 8, 6, "#9aa4b0")
+
+    def atmospheric_condenser(im, on):
+        for y in range(3, 13, 2):
+            rect(im, 3, y, 12, y, "#b0b8c0")
+        if on:
+            for x, y in ((5, 12), (8, 13), (10, 12)):
+                rect(im, x, y, x, y, "#60b0ff")
+
+    front("reactor", "#5a6460", reactor)
+    front("leach", "#5e6066", leach)
+    front("evaporator", "#6a6660", evaporator)
+    front("crystallizer", "#5a6470", crystallizer)
+    front("electrolysis", "#5a5a66", electrolysis)
+    front("chlorinator", "#646456", chlorinator)
+    front("kroll", "#6a605a", kroll)
+    front("water_pump", "#566270", water_pump)
+    front("atmospheric_condenser", "#646e78", atmospheric_condenser)
+
 
 def bulk_textures():
     """Bulk materials (tinted by their main species): crushed ore, concentrate, tailings, calcine,
@@ -267,9 +333,23 @@ def bulk_textures():
                         im.putpixel((x, y), (max(0, min(255, v)),) * 3 + (255,))
         return im
 
+    def crystals(seed):
+        r = random.Random(seed)
+        im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        for _ in range(7):
+            cx, cy, h = r.randint(3, 12), r.randint(8, 14), r.randint(3, 6)
+            for y in range(cy - h, cy + 1):
+                w = 1 if y < cy - h + 2 else 2
+                for x in range(cx - w + 1, cx + w):
+                    if 0 <= x < 16 and 0 <= y < 16:
+                        v = 240 - (cy - y) * 4 + (20 if x == cx else 0) + r.randint(-10, 5)
+                        im.putpixel((x, y), (max(0, min(255, v)),) * 3 + (255,))
+        return im
+
     images = {"crushed_ore": lumps(1, 9, 2), "concentrate": pile(2, False, 12), "tailings": pile(3, True, 25, 190),
               "calcine": lumps(4, 14, 1, 225), "matte": lumps(5, 3, 4, 170), "slag": lumps(6, 4, 3, 150),
-              "flue_dust": pile(7, False, 6, 235), "coke": lumps(8, 7, 2, 120)}
+              "flue_dust": pile(7, False, 6, 235), "coke": lumps(8, 7, 2, 120),
+              "residue": pile(9, True, 18, 180), "crystals": crystals(10), "slimes": pile(11, False, 20, 160)}
     for name, im in images.items():
         im.save(os.path.join(out, f"bulk_{name}.png"))
 

@@ -1,0 +1,11 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 NaCl + 2 H2O -> 2 NaOH + H2 + Cl2",
+ "priority": 20,
+ "draw": [
+  "H2O"
+ ],
+ "electrons": 2,
+ "voltage": 3.5,
+ "note": "Brine electrolysis: chlorine, hydrogen and caustic soda."
+}

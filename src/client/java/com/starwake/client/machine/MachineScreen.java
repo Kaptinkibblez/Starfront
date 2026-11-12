@@ -25,6 +25,8 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 	public static void register() {
 		MenuScreens.register(ModMachines.COMBUSTION_GENERATOR_MENU, MachineScreen::new);
 		MenuScreens.register(ModMachines.ELECTRIC_FURNACE_MENU, MachineScreen::new);
+		MenuScreens.register(ModMachines.WATER_PUMP_MENU, MachineScreen::new);
+		MenuScreens.register(ModMachines.CONDENSER_MENU, MachineScreen::new);
 		for (var p : com.starwake.process.ProcessMachineBlockEntity.Process.values()) {
 			MenuScreens.register(com.starwake.registry.ModProcess.menu(p), MachineScreen::new);
 		}

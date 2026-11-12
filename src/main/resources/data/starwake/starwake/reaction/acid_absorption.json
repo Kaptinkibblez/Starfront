@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "SO3 + H2O -> H2SO4",
+ "priority": 11,
+ "draw": [
+  "H2O"
+ ],
+ "note": "Sulfur trioxide absorbed in water: sulfuric acid."
+}

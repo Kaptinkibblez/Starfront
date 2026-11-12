@@ -45,10 +45,19 @@ public class FluidTankBlock extends Block implements EntityBlock {
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 		if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FluidTankBlockEntity tank) {
-			var s = tank.storage();
-			Component fluid = s.isResourceBlank() ? Component.translatable("message.starwake.tank.empty_fluid") : FluidVariantAttributes.getName(s.getResource());
-			player.sendOverlayMessage(Component.translatable("message.starwake.tank", fluid,
-					String.format("%.2f", s.getAmount() / (double) FluidConstants.BUCKET), String.format("%.0f", s.getCapacity() / (double) FluidConstants.BUCKET)));
+			var r = tank.resource();
+			Component fluid = r.isBlank() ? Component.translatable("message.starwake.tank.empty_fluid") : FluidVariantAttributes.getName(r);
+			Component msg = Component.translatable("message.starwake.tank", fluid,
+					String.format("%.2f", tank.amount() / (double) FluidConstants.BUCKET), String.format("%.0f", tank.capacity() / (double) FluidConstants.BUCKET));
+			var mix = tank.chemicals();
+			if (mix.contents().size() > 1) {
+				StringBuilder parts = new StringBuilder(" -");
+				mix.contents().entrySet().stream().sorted((a, b) -> Long.compare(b.getValue(), a.getValue())).limit(4).forEach(e ->
+						parts.append(String.format(" %s %.1f%%", com.starwake.process.Species.get(e.getKey()).map(i -> i.formula()).orElse(e.getKey()),
+								100.0 * e.getValue() / mix.total())));
+				msg = msg.copy().append(parts.toString());
+			}
+			player.sendOverlayMessage(msg);
 		}
 		return InteractionResult.SUCCESS;
 	}
@@ -60,7 +69,7 @@ public class FluidTankBlock extends Block implements EntityBlock {
 
 	@Override
 	protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
-		return level.getBlockEntity(pos) instanceof FluidTankBlockEntity tank && tank.storage().getCapacity() > 0
-				? (int) (15 * tank.storage().getAmount() / tank.storage().getCapacity()) : 0;
+		return level.getBlockEntity(pos) instanceof FluidTankBlockEntity tank && tank.capacity() > 0
+				? (int) (15 * tank.amount() / tank.capacity()) : 0;
 	}
 }
