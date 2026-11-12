@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -47,6 +48,19 @@ public final class ShipClient {
 			new KeyMapping("key.starwake.free_look", InputConstants.KEY_LALT, CATEGORY));
 	private static final KeyMapping LEAVE_SEAT = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.leave_seat", InputConstants.KEY_X, CATEGORY));
+	/** M9: mouse-aim <-> joystick steering. */
+	private static final KeyMapping STEERING = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.steering_mode", InputConstants.KEY_K, CATEGORY));
+
+	/** True while the free-look key is held (joystick mode lets the view move then). */
+	public static boolean freeLookDown() {
+		return FREE_LOOK.isDown();
+	}
+
+	/** Whether the local player is piloting a ship. */
+	public static boolean piloting(Minecraft client) {
+		return client.player != null && client.player.getVehicle() instanceof ShipEntity ship && ship.pilot() == client.player;
+	}
 	/** Star Citizen's quantum key: tap to toggle quantum mode, hold to engage. */
 	private static final KeyMapping QUANTUM = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.quantum", InputConstants.KEY_B, CATEGORY));
@@ -108,6 +122,9 @@ public final class ShipClient {
 			}
 			ThrusterEffects.tick(client);
 			facePilotForward(client);
+			seatHint(client);
+			while (STEERING.consumeClick()) FlightControls.toggle(client);
+			if (piloting(client)) FlightControls.lockView(client, (ShipEntity) client.player.getVehicle(), FREE_LOOK.isDown());
 			ShipSounds.tick(client);
 			ChaseCamera.tick(client);
 			ReentryEffects.tick(client);
@@ -128,12 +145,17 @@ public final class ShipClient {
 			while (LEAVE_SEAT.consumeClick()) { /* discard */ }
 			return;
 		}
+		boolean stick = FlightControls.joystick() && piloting(client);
 		int controls = (ROLL_LEFT.isDown() ? ShipEntity.CONTROL_ROLL_LEFT : 0)
 				| (ROLL_RIGHT.isDown() ? ShipEntity.CONTROL_ROLL_RIGHT : 0)
-				| (FREE_LOOK.isDown() ? ShipEntity.CONTROL_FREE_LOOK : 0);
-		if (controls != sentControls) {
-			ClientPlayNetworking.send(new ShipControlPayload(controls, false));
+				| (FREE_LOOK.isDown() ? ShipEntity.CONTROL_FREE_LOOK : 0)
+				| (stick ? ShipEntity.CONTROL_JOYSTICK : 0);
+		float sx = stick ? FlightControls.sentX() : 0, sy = stick ? FlightControls.sentY() : 0;
+		if (controls != sentControls || Math.abs(sx - sentX) > 0.01f || Math.abs(sy - sentY) > 0.01f) {
+			ClientPlayNetworking.send(new ShipControlPayload(controls, false, sx, sy));
 			sentControls = controls;
+			sentX = sx;
+			sentY = sy;
 		}
 		while (LEAVE_SEAT.consumeClick()) {
 			ClientPlayNetworking.send(new ShipControlPayload(0, true));
@@ -141,6 +163,22 @@ public final class ShipClient {
 	}
 
 	private static int pilotOf = -1;
+	private static float sentX, sentY;
+	private static int seatedOn = -1, seatedTicks;
+
+	/** M9: replaces vanilla's "Press Shift to dismount" (Shift is boost aboard) with our own seat hint. */
+	private static void seatHint(Minecraft client) {
+		int id = client.player != null && client.player.getVehicle() instanceof ShipEntity s ? s.getId() : -1;
+		// Wait a few ticks after mounting: the seat assignment (pilot or crew) arrives separately.
+		seatedTicks = id == seatedOn ? seatedTicks + 1 : 0;
+		if (id != -1 && seatedTicks == 3) {
+			boolean pilot = piloting(client);
+			FlightControls.centre();
+			client.gui.hud.setOverlayMessage(Component.translatable(pilot ? "message.starwake.seat.pilot" : "message.starwake.seat.crew",
+					LEAVE_SEAT.getTranslatedKeyMessage(), STEERING.getTranslatedKeyMessage(), WRISTCOM.getTranslatedKeyMessage()), false);
+		}
+		seatedOn = id;
+	}
 
 	/**
 	 * The moment you become a ship's pilot, look along its nose (mouse-aim steers toward your

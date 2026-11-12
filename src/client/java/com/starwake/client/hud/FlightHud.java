@@ -105,6 +105,7 @@ public final class FlightHud {
 		int tapeHalf = Mth.clamp(Math.round(h * 0.18f), 28, 70);
 		pitchLadder(graphics, font, cx, cy, pitch, roll, space, tapeHalf, tapeOffset - 48);
 		reticle(graphics, cx, cy);
+		if (com.starwake.client.ship.FlightControls.joystick()) stickGauge(graphics, cx, cy, Mth.clamp(Math.round(h * 0.12f), 24, 48));
 		int[] n = HudProjection.project(mvp, look, nose, w, h);
 		if (n != null) noseMarker(graphics, n[0], n[1]);
 		if (speed > 0.5) {
@@ -116,6 +117,26 @@ public final class FlightHud {
 		altitudeTape(graphics, font, cx + tapeOffset, cy, tapeHalf, piloted, velocity.y, space);
 		systemsStrip(graphics, font, cx, h - 26, Math.min(w - 16, 300), piloted, space);
 		alerts(graphics, font, cx, 34, piloted);
+	}
+
+	/** Joystick mode (M9): a ring around the reticle with the stick's deflection as a dot (dead zone dimmed). */
+	private static void stickGauge(GuiGraphicsExtractor g, int cx, int cy, int radius) {
+		for (int k = 0; k < 48; k++) {
+			double a = k * Math.PI * 2 / 48;
+			int x = cx + (int) Math.round(Math.cos(a) * radius), y = cy + (int) Math.round(Math.sin(a) * radius);
+			g.fill(x, y, x + 1, y + 1, k % 6 == 0 ? HOLO : HOLO_DIM);
+		}
+		float sx = com.starwake.client.ship.FlightControls.rawX(), sy = com.starwake.client.ship.FlightControls.rawY();
+		int x = cx + Math.round(sx * radius), y = cy + Math.round(sy * radius);
+		boolean live = com.starwake.client.ship.FlightControls.sentX() != 0 || com.starwake.client.ship.FlightControls.sentY() != 0;
+		if (live) {
+			// A line from the centre shows which way and how hard the ship is being turned.
+			int steps = Math.max(Math.abs(x - cx), Math.abs(y - cy));
+			for (int i = 3; i < steps; i += 2) {
+				g.fill(cx + (x - cx) * i / steps, cy + (y - cy) * i / steps, cx + (x - cx) * i / steps + 1, cy + (y - cy) * i / steps + 1, HOLO_DIM);
+			}
+		}
+		g.fill(x - 2, y - 2, x + 3, y + 3, live ? WHITE : HOLO_DIM);
 	}
 
 	/** Re-entry: an orange glow creeping in from the screen edges. */

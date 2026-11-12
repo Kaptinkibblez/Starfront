@@ -43,6 +43,7 @@ public final class ModNetworking {
 					context.player().stopRiding();
 				} else if (ship.pilot() == context.player()) {
 					ship.setControls(payload.controls());
+					ship.setStick(payload.stickX(), payload.stickY());
 				}
 			}
 		});

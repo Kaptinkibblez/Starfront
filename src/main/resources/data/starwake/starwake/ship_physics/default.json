@@ -1,10 +1,10 @@
 {
   "thrust_to_accel": 0.05,
   "gravity_to_accel": 0.05,
-  "drag_atmosphere": 0.985,
+  "drag_atmosphere": 0.992,
   "drag_space": 0.998,
-  "max_speed": 3.0,
-  "max_speed_space": 5.0,
+  "max_speed": 5.0,
+  "max_speed_space": 12.5,
   "turn_rate": 60.0,
   "boost_multiplier": 1.6,
   "quantum_speed": 1500,

@@ -131,7 +131,10 @@ public class ShipEntity extends Entity {
 			QT_TOO_CLOSE = 32, QT_NO_TARGET = 64, QT_SPOOLED = 128, QT_NO_DRIVE = 256;
 
 	/** Control bits from {@link com.starwake.network.ShipControlPayload}. */
-	public static final int CONTROL_ROLL_LEFT = 1, CONTROL_ROLL_RIGHT = 2, CONTROL_FREE_LOOK = 4;
+	public static final int CONTROL_ROLL_LEFT = 1, CONTROL_ROLL_RIGHT = 2, CONTROL_FREE_LOOK = 4, CONTROL_JOYSTICK = 8;
+
+	/** Height of the pilot's seat above the Helm block's base (M9: raised so the eye clears the dash). */
+	public static final double HELM_SEAT_HEIGHT = 1.4;
 
 	/** Save-format version: 2 = position is the pivot (1/absent = position was the min corner). */
 	private static final int FRAME_VERSION = 2;
@@ -566,6 +569,14 @@ public class ShipEntity extends Entity {
 	public void setSpin(Vec3 spin) { this.spin = spin; }
 	public void setControls(int controls) { this.controls = controls; }
 
+	/** Joystick steering (M9): the pilot's virtual stick, -1..1 (x = yaw right, y = pitch down). */
+	private float stickX, stickY;
+
+	public void setStick(float x, float y) {
+		stickX = Mth.clamp(x, -1, 1);
+		stickY = Mth.clamp(y, -1, 1);
+	}
+
 	public int fusion() {
 		return entityData.get(FUSION);
 	}
@@ -880,9 +891,7 @@ public class ShipEntity extends Entity {
 		if (pilot == null && drift.lengthSqr() > 0) {
 			velocity = drift;
 		} else if (pilot == null) {
-			// Unpiloted ships station-keep: brake to a stop and hold position, free of charge.
-			velocity = velocity.scale(0.8);
-			if (velocity.lengthSqr() < 1.0e-6) velocity = Vec3.ZERO;
+			velocity = unpiloted(velocity, physics);
 			angularVelocity.mul(0.8);
 			java.util.Arrays.fill(throttles, 0);
 			rotate();
@@ -901,7 +910,14 @@ public class ShipEntity extends Entity {
 				angularVelocity.mul(0.9);
 			}
 		}
-		double maxSpeed = SpaceTravel.isSpace(level()) ? physics.maxSpeedSpace() : physics.maxSpeed();
+		if (tickCount % 5 == 0) measureClearance();
+		double maxSpeed = (SpaceTravel.isSpace(level()) ? physics.maxSpeedSpace() : physics.maxSpeed())
+				* (pilot != null && boosting ? BOOST_SPEED : 1.0);
+		if (tickCount % 10 == 0 && velocity.lengthSqr() > 1.0 && level() instanceof ServerLevel ahead) {
+			// Fast ships: start loading the terrain ~3 s ahead so it's there when they arrive.
+			ahead.getChunkSource().addTicketWithRadius(net.minecraft.server.level.TicketType.PORTAL,
+					net.minecraft.world.level.ChunkPos.containing(BlockPos.containing(position().add(velocity.scale(60)))), 2);
+		}
 		if (velocity.lengthSqr() > maxSpeed * maxSpeed) {
 			velocity = velocity.normalize().scale(maxSpeed);
 		}
@@ -1409,7 +1425,8 @@ public class ShipEntity extends Entity {
 		Vector3d local = new Vector3d(v.x, v.y, v.z);
 		boolean hovering = !input.jump() && !(input.sprint() && decoupled) && gravity > 0;
 		// Coupled descent (Ctrl): hold a gentle sink rate the landing gear can take.
-		double targetClimb = input.sprint() && !decoupled ? -DESCENT_RATE : 0;
+		double targetClimb = input.sprint() && !decoupled ? -descentRate() : 0;
+		boosting = input.shift();
 		if (!decoupled) {
 			if (!input.forward() && !input.backward()) force.fma(-local.dot(fwdAxis) * perVelocity, fwdAxis);
 			if (!input.left() && !input.right()) force.fma(-local.dot(rightAxis) * perVelocity, rightAxis);
@@ -1618,11 +1635,72 @@ public class ShipEntity extends Entity {
 		}
 	}
 
-	/** Coupled descent rate while holding Ctrl (blocks/tick): 5 m/s, inside the gear's limit. */
-	private static final double DESCENT_RATE = 0.25;
+	/** Coupled descent (M9): up to 25 m/s high up, easing to 3 m/s in the last 15 m (blocks/tick). */
+	private static final double DESCENT_FAST = 1.25, DESCENT_SLOW = 0.15;
+
+	/** Whether the pilot is holding boost this tick (raises the speed cap). */
+	private boolean boosting;
+
+	/** Height of the hull's bottom above the ground below the ship's centre (blocks; 64 = nothing in range). */
+	private double clearance = 64;
+
+	private double descentRate() {
+		if (clearance <= 15) return DESCENT_SLOW;
+		double t = Math.min(1, (clearance - 15) / 45.0);
+		return DESCENT_SLOW + (DESCENT_FAST - DESCENT_SLOW) * t;
+	}
+
+	/** Measures {@link #clearance} straight down from the bottom of the bounding box (cheap: one column). */
+	private void measureClearance() {
+		AABB box = getBoundingBox();
+		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+		int x = Mth.floor(box.getCenter().x), z = Mth.floor(box.getCenter().z);
+		int top = Mth.floor(box.minY);
+		for (int dy = 0; dy < 64; dy++) {
+			p.set(x, top - dy, z);
+			if (!level().getBlockState(p).getCollisionShape(level(), p).isEmpty()) {
+				clearance = Math.max(0, box.minY - (top - dy + 1));
+				return;
+			}
+		}
+		clearance = 64;
+	}
 
 	/** Fraction of uncommanded velocity the flight computer tries to cancel each tick. */
 	private static final double COUPLED_BRAKING = 0.12;
+
+	/** Speed cap multiplier while boosting. */
+	private static final double BOOST_SPEED = 1.25;
+
+	/** Seconds of idle hover kept in reserve: below it an unpiloted ship lands itself if the ground is near. */
+	private static final int HOVER_RESERVE_TICKS = 1200;
+
+	/**
+	 * Unpiloted ships (M9): in space they brake to a stop and hold. On a planet they stay put if resting on
+	 * something; otherwise they hover at an idle burn (a tenth of what holding their weight on thrusters
+	 * costs); with the tank nearly dry they let themselves down gently if the ground is within 64 blocks,
+	 * and with it empty they fall.
+	 */
+	private Vec3 unpiloted(Vec3 velocity, ShipPhysics physics) {
+		double gravity = SpaceTravel.isSpace(level()) ? 0 : Planets.gravityOf(level().dimension());
+		if (gravity <= 0) {
+			velocity = velocity.scale(0.8);
+			return velocity.lengthSqr() < 1.0e-6 ? Vec3.ZERO : velocity;
+		}
+		neighbours = nearbyShips(getBoundingBox().inflate(1.0));
+		if (clip(Direction.Axis.Y, -0.05) == 0) return Vec3.ZERO; // parked on something
+		double weight = mass * gravity * physics.gravityToAccel() / physics.thrustToAccel();
+		double lift = dynamics.rawThrust(Direction.UP);
+		double idle = lift <= 0 ? 0 : dynamics.burnPushing(Direction.UP) * Math.min(1, weight / lift) * 0.1;
+		if (fuel() > 0 && lift > 0) {
+			burnFuel(idle);
+			double sink = fuel() < idle * HOVER_RESERVE_TICKS && clearance < 64 ? -descentRate() : 0;
+			Vec3 held = velocity.scale(0.8);
+			return new Vec3(held.x, held.y * 0.5 + sink * 0.5, held.z);
+		}
+		// Out of fuel: it falls.
+		return velocity.add(0, -gravity * physics.gravityToAccel(), 0).scale(physics.dragAtmosphere());
+	}
 
 	/** Adds an "everything along this local direction" request when the key is held. */
 	private void ask(Vector3d force, Direction direction, boolean held, double scale) {
@@ -1643,7 +1721,13 @@ public class ShipEntity extends Entity {
 		Quaternionfc q = orientation();
 		Vector3d nose = new Vector3d(forward.getStepX(), forward.getStepY(), forward.getStepZ());
 		Vector3d want = new Vector3d();
-		if (!freeLook) {
+		boolean joystick = (controls & CONTROL_JOYSTICK) != 0;
+		if (joystick) {
+			// Joystick mode: the stick sets yaw/pitch rates directly (yaw about the deck's up, pitch about its right).
+			Direction rightDir = forward.getClockWise();
+			want.add(0, -stickX * max, 0);
+			want.add(new Vector3d(rightDir.getStepX(), 0, rightDir.getStepZ()).mul(-stickY * max));
+		} else if (!freeLook) {
 			Vec3 lookWorld = pilot.getViewVector(1.0f);
 			Vector3f l = q.transformInverse(new Vector3f((float) lookWorld.x, (float) lookWorld.y, (float) lookWorld.z));
 			Vector3d look = new Vector3d(l.x, l.y, l.z).normalize();
@@ -2038,7 +2122,8 @@ public class ShipEntity extends Entity {
 	/** Seat position: on top of the Helm, or sitting in a Seat block. */
 	private Vec3 seatPoint(BlockPos seatLocal) {
 		boolean helm = seatLocal.equals(helmLocal);
-		return new Vec3(seatLocal.getX() + 0.5, seatLocal.getY() + (helm ? 1.0 : 0.5), seatLocal.getZ() + 0.5);
+		// M9: the pilot sits high on the Helm so their eye clears the dash.
+		return new Vec3(seatLocal.getX() + 0.5, seatLocal.getY() + (helm ? HELM_SEAT_HEIGHT : 0.5), seatLocal.getZ() + 0.5);
 	}
 
 	@Override

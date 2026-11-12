@@ -255,6 +255,11 @@ public final class ShipLocalMotion {
 	 * mouse-aim steering then chases that look direction.
 	 */
 	private static boolean turnSeated(LocalPlayer player, ShipEntity s, double dx, double dy) {
+		// Joystick mode (M9): the pilot's mouse moves the stick, not the view (free-look excepted).
+		if (s.pilot() == player && FlightControls.joystick() && !ShipClient.freeLookDown()) {
+			FlightControls.addStick(dx, dy);
+			return true;
+		}
 		// No mouse movement, no change: the round trip through the ship frame isn't exact, and
 		// re-applying it every frame made the view (and so a mouse-aimed ship) slowly drift.
 		if (dx == 0 && dy == 0) return true;

@@ -666,6 +666,11 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("key.starwake.roll_right", "Roll Right");
 		builder.add("key.starwake.free_look", "Free Look (hold)");
 		builder.add("key.starwake.leave_seat", "Leave Seat");
+		builder.add("key.starwake.steering_mode", "Steering: Mouse-aim / Joystick");
+		builder.add("message.starwake.steering.joystick", "Steering: joystick (mouse sets turn rates; view locked to the nose)");
+		builder.add("message.starwake.steering.mouse_aim", "Steering: mouse-aim (the ship turns toward where you look)");
+		builder.add("message.starwake.seat.pilot", "Piloting: %1$s leave seat · %2$s steering mode · %3$s Wristcom · Shift boost");
+		builder.add("message.starwake.seat.crew", "Seated: %1$s leave seat · %3$s Wristcom");
 		builder.add("hud.starwake.ship6", "Fuel %s/%s  %s m/s  HDG %s°  PIT %s°  ROL %s°  %s");
 		builder.add("hud.starwake.ship.alt", "ALT %s");
 		builder.add("hud.starwake.ship.orbit", "Orbiting %s");

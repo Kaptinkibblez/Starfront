@@ -435,6 +435,15 @@ public final class ShipDynamics {
 		return Math.max(0, alpha.dot(unit));
 	}
 
+	/** Fuel burned per tick by the thrusters pushing along a local direction, all at full throttle. */
+	public double burnPushing(Direction push) {
+		double sum = 0;
+		for (Thruster t : thrusters) {
+			if (t.nozzle().getOpposite() == push) sum += t.burn();
+		}
+		return sum;
+	}
+
 	/** Fuel burned per tick at these throttles (before boost/power scaling). */
 	public double burn(double[] throttles) {
 		double sum = 0;
