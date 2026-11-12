@@ -61,6 +61,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.createFurnace(com.starwake.registry.ModMachines.GAS_WELL, TexturedModel.ORIENTABLE_ONLY_TOP);
 		com.starwake.registry.ModMetalworks.blocks().forEach(b -> generators.createFurnace(b, TexturedModel.ORIENTABLE_ONLY_TOP));
 		com.starwake.registry.ModFabrication.blocks().forEach(b -> generators.createFurnace(b, TexturedModel.ORIENTABLE_ONLY_TOP));
+		com.starwake.registry.ModNuclear.blocks().forEach(b -> generators.createFurnace(b, TexturedModel.ORIENTABLE_ONLY_TOP));
 		generators.createTrivialBlock(com.starwake.registry.ModMachines.BATTERY, TexturedModel.COLUMN);
 		com.starwake.registry.ModProcess.blocks().forEach(b -> generators.createFurnace(b, TexturedModel.ORIENTABLE_ONLY_TOP));
 		simpleModelBlock(generators, com.starwake.registry.ModMachines.SOLAR_PANEL, "solar_panel", "solar_panel");

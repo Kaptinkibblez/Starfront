@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": "minecraft:iron_block",
+    "C": "starwake:copper_cable",
+    "D": "minecraft:diamond_block"
+  },
+  "pattern": [
+    "CCC",
+    "BDB",
+    "CCC"
+  ],
+  "result": {
+    "id": "starwake:particle_accelerator"
+  }
+}

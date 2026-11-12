@@ -1,0 +1,9 @@
+{
+ "machine": "roaster",
+ "equation": "UF6 + H2 -> UF4 + 2 HF",
+ "priority": 76,
+ "draw": [
+  "H2"
+ ],
+ "note": "Enriched UF6 back to UF4 (then Mg reduction)."
+}

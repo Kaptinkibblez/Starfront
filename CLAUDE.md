@@ -431,6 +431,18 @@ commit. **Don't start the next milestone until the user confirms the current one
         Fluid Tank of 1 kg H2 + 6 kg O2 + 1 g D2 + 1.5 g He3 piped into a Fuel Tank -> 1049 fuel units and
         fusion filled to its 20000 cap, leftovers kept; a tank's 777 fusion units moved into the assembled
         ship; `/starwake ship refuel` adds both.)*
+  - [x] 8g. Nuclear. Defaults chosen overnight: Gas Centrifuge (UF6 lots, heads ratio x1.6 per pass, cut 1/2,
+        U-235 stamped on both outputs; UF4 + F2 -> UF6 and UF6 + H2 -> UF4 in the Roasting Kiln); Fission Reactor
+        (500 kW grid generator; critical at >= 3% U-235 with light water or natural uranium with heavy water;
+        redstone = SCRAM; real 8.2e13 J/kg burn x1000 time compression; Pu bred at 0.6 per U-235 burned and 20
+        fission-product elements by real yields written into the fuel's composition; spent fuel ejected;
+        irradiation slot along real capture chains U -> Pu -> Am -> Cm -> Bk -> Cf -> Es -> Fm, Bi -> Po, Th -> Pa
+        -> U, Ra -> Ac, Np -> Pu); Fusion Reactor (2 MW, D + He3 at 3.5e14 J/kg x 0.4); Particle Accelerator
+        (Md...Og from the real target/beam pairs, 2-30 GJ per sample). *(Verified 2026-11-12 on a dedicated
+        server: natural UF6 -> heads 1.147% / tails 0.293% U-235; 5% uranium + water ran at 500 kW, U-235 fell
+        and the ingot gained Pu 60 ppm plus Cs, Ce, Mo, Ru, Nd, Zr, Xe; natural uranium stayed subcritical in
+        light water and ran in heavy water; a bismuth target became a polonium sample; the fusion reactor ran
+        on 1 mg D2 + 1.5 mg He3 and powered the accelerator into a mendelevium sample (Es + He).)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
   - **User notes for M9 (2026-11-12):** conveyors move items the wrong way; ship flight is buggy
     all around (overhaul it); hub NPCs (guards/crew) add little value: **remove them**.
@@ -1235,6 +1247,21 @@ normal gravity.
   `molar` override (real isotopic mass). `Process.ISOTOPE_COLUMN` (Mode ISOTOPE, 50 kW): 10 kg of inlet water per
   cycle -> its D2O (1.73e-4 kg/kg) to the liquid outlet, 1.5 MJ/kg. Electrolysis `2 D2O -> 2 D2 + O2` (KOH).
   Crystal-world air carries He3 = He x 1.66e-4 by atoms (protosolar).
+
+## How the nuclear machines work (Milestone 8g)
+
+- Data: `nuclear/Nuclear` reads `data/starwake/starwake/nuclear/default.json` (from `tools/nuclear.py`):
+  centrifuge beta and energy, minimum enrichment per moderator, J/kg, efficiency, burn scale, conversion ratio,
+  spent fraction, fission-product yields, irradiation chains (target, product, seconds) and accelerator routes
+  (target, beam, product, joules), fusion J/kg and efficiency. `Nuclear.elementOf(stack)` = the element an item
+  is or is mostly made of (any element item form, or a composition's base).
+- `GasCentrifugeBlockEntity` (20 kW): 2 x 1 kg UF6 lots per cycle -> 1 heads + 1 tails; heads ratio R x beta,
+  tails by mass balance; shares shown on the screen. UF6 is a solid at room temperature (the kiln's sublimate).
+- `FissionReactorBlockEntity` (500 kW generator): 4 fuel slots (uranium-base metal items), moderator tank (H2O or
+  D2O; D2O wins at >= 1 kg), target slot, spent and product outputs. Burn-up is accumulated per slot and folded
+  into the composition every 100 ppm (the composition resolves 10 ppm). Stops when its buffer is full.
+- `FusionReactorBlockEntity` (2 MW generator, D2/He3 tank, redstone shutdown); `AcceleratorBlockEntity` (2 MW
+  consumer; target + beam slots, a beam item lasts 16 samples). Screens: `client/fab/NuclearScreen`.
 
 ## 26.3 gotchas (learned the hard way)
 

@@ -22,6 +22,7 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 			for (int mk = 1; mk <= 3; mk++) materialDrop(com.starwake.registry.ModShipParts.get(part, mk));
 		}
 		com.starwake.registry.ModFabrication.blocks().forEach(this::dropSelf);
+		com.starwake.registry.ModNuclear.blocks().forEach(this::dropSelf);
 		com.starwake.registry.ModMachines.all().forEach(this::dropSelf);
 		com.starwake.registry.ModProcess.blocks().forEach(this::dropSelf);
 		com.starwake.registry.ModMetalworks.blocks().forEach(this::dropSelf);

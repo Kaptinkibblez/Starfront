@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/particle_accelerator_front",
+    "side": "starwake:block/particle_accelerator_side",
+    "top": "starwake:block/particle_accelerator_top"
+  }
+}

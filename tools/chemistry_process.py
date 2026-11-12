@@ -169,6 +169,7 @@ sp("Na2SO4", "Sodium sulfate", "sulfate", 2.66, 884, 1429, flags=["soluble"], co
 sp("PbSO4", "Anglesite", "sulfate", 6.29, 1087, 9999, color="#e8e8e8")
 # M8f: isotopes for fusion fuel. Formulas use the element (so reactions balance by element); "molar"
 # gives the real isotopic molar mass, so every reaction is mass-exact.
+sp("UF6", "Uranium hexafluoride", "halide", 5.09, 64, 56.5, flags=["toxic"], toxicity=0.8, color="#f4f0d8")
 sp("D2O", "Heavy water", "water", 1.107, 3.8, 101.4, color="#cfe6ff", formula="H2O", molar=20.028)
 sp("D2", "Deuterium", "gas", 0.00018, -254, -249, color="#d8ecff", formula="H2", molar=4.028)
 sp("He3", "Helium-3", "gas", 0.00013, -272, -270, color="#f0e8ff", formula="He", molar=3.016)
@@ -673,6 +674,10 @@ rx("roaster", "reduce_iridium_salt", "(NH4)2IrCl6 + 2 H2 -> Ir + 2 NH4Cl + 4 HCl
 # M8e-1: electronic-grade silicon. Submerged-arc carbothermic reduction (metallurgical Si, ~98-99%: the
 # coke's ash brings Fe/Al/Ca), hydrochlorination to trichlorosilane (it distils off; the iron and other
 # impurities stay behind as chlorides or metal), then Siemens deposition with hydrogen (HCl recycled).
+# M8g: uranium hexafluoride for enrichment (sublimes at 56.5 C: a solid at room temperature, so the kiln's
+# product leaves as a sublimate; the Gas Centrifuge takes it as 1 kg lots stamped with their U-235 share).
+rx("roaster", "fluorinate_uranium_tetrafluoride", "UF4 + F2 -> UF6", 75, "Fluorination for enrichment.", draw=["F2"])
+rx("roaster", "reduce_uranium_hexafluoride", "UF6 + H2 -> UF4 + 2 HF", 76, "Enriched UF6 back to UF4 (then Mg reduction).", draw=["H2"])
 # M8f: heavy water -> deuterium (alkaline electrolysis, like water).
 rx("electrolysis", "electrolyse_heavy_water", "2 D2O -> 2 D2 + O2", 6, "Deuterium for D-He3 fusion fuel.", electrons=4, voltage=2.0,
    catalyst="KOH")

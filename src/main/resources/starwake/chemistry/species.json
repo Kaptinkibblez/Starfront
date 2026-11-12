@@ -1307,6 +1307,20 @@
   "color": "#e8e8e8"
  },
  {
+  "id": "UF6",
+  "name": "Uranium hexafluoride",
+  "formula": "UF6",
+  "kind": "halide",
+  "density": 5.09,
+  "melting": 64,
+  "boiling": 56.5,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.8,
+  "color": "#f4f0d8"
+ },
+ {
   "id": "D2O",
   "name": "Heavy water",
   "formula": "H2O",

@@ -119,6 +119,10 @@
     "starwake:heat_treat_furnace",
     "starwake:crystal_puller",
     "starwake:clean_fab",
-    "starwake:fabricator"
+    "starwake:fabricator",
+    "starwake:gas_centrifuge",
+    "starwake:fission_reactor",
+    "starwake:fusion_reactor",
+    "starwake:particle_accelerator"
   ]
 }

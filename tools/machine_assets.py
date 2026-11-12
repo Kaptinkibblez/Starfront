@@ -439,6 +439,40 @@ def process_textures():
         rect(im, 7, 4, 8, 12, "#7ab8ff" if on else "#3a4a5a")
 
     front("isotope_column", "#5a6672", isotope_column)
+
+    # M8g: gas centrifuge (a row of tall rotors), fission reactor (pressure vessel with a Cherenkov glow),
+    # fusion reactor (tokamak torus), particle accelerator (a beamline ring with magnets).
+    def gas_centrifuge(im, on):
+        for x in (2, 6, 10):
+            rect(im, x, 1, x + 3, 14, "#c8d0d8")
+            rect(im, x + 1, 2, x + 2, 13, "#9ab0c8" if on else "#6a7280")
+
+    def fission_reactor(im, on):
+        rect(im, 3, 2, 12, 13, "#4a4e56")
+        rect(im, 5, 4, 10, 11, "#5ac8ff" if on else "#1a2a3a")
+        for x in (6, 8, 10):
+            rect(im, x - 1, 1, x - 1, 12, "#9aa4b0")
+
+    def fusion_reactor(im, on):
+        for y in range(16):
+            for x in range(16):
+                d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+                if 3.5 <= d <= 6.5:
+                    im.putpixel((x, y), hexrgb("#ff7ad8" if on and 4.5 <= d <= 5.5 else "#6a6e78") + (255,))
+
+    def particle_accelerator(im, on):
+        for y in range(16):
+            for x in range(16):
+                d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+                if 5 <= d <= 6.5:
+                    im.putpixel((x, y), hexrgb("#7af0ff" if on else "#3a4a5a") + (255,))
+        for (x, y) in ((7, 1), (13, 7), (7, 13), (1, 7)):
+            rect(im, x, y, x + 1, y + 1, "#c84a3a")
+
+    front("gas_centrifuge", "#5e6670", gas_centrifuge)
+    front("fission_reactor", "#4e5660", fission_reactor)
+    front("fusion_reactor", "#4a4a58", fusion_reactor)
+    front("particle_accelerator", "#525a66", particle_accelerator)
     front("arc_furnace", "#5a5650", arc_furnace)
     front("crystal_puller", "#606a74", crystal_puller)
     front("clean_fab", "#b8c0c8", clean_fab)

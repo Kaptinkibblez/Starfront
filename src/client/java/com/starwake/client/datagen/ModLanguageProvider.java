@@ -277,6 +277,25 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(com.starwake.registry.ModMetalworks.EXTRUSION_PRESS, "Extrusion Press");
 		builder.add(com.starwake.registry.ModMetalworks.FORGING_PRESS, "Forging Press");
 		builder.add(com.starwake.registry.ModMetalworks.HEAT_TREAT_FURNACE, "Heat Treatment Furnace");
+		// Nuclear (M8g).
+		builder.add(com.starwake.registry.ModNuclear.GAS_CENTRIFUGE, "Gas Centrifuge");
+		builder.add(com.starwake.registry.ModNuclear.FISSION_REACTOR, "Fission Reactor");
+		builder.add(com.starwake.registry.ModNuclear.FUSION_REACTOR, "Fusion Reactor");
+		builder.add(com.starwake.registry.ModNuclear.PARTICLE_ACCELERATOR, "Particle Accelerator");
+		builder.add("screen.starwake.fission.status.0", "Off");
+		builder.add("screen.starwake.fission.status.1", "Critical: generating");
+		builder.add("screen.starwake.fission.status.2", "No moderator (water / heavy water)");
+		builder.add("screen.starwake.fission.status.3", "Subcritical: enrich the fuel");
+		builder.add("screen.starwake.fission.status.4", "No uranium fuel");
+		builder.add("screen.starwake.fission.status.5", "SCRAM (redstone)");
+		builder.add("screen.starwake.fission.core", "Core U-235: %s%%");
+		builder.add("screen.starwake.fission.irradiation", "Target %s%%");
+		builder.add("screen.starwake.centrifuge.shares", "U-235 %s%% -> %s%%");
+		builder.add("screen.starwake.fusion.status.0", "Off");
+		builder.add("screen.starwake.fusion.status.1", "Burning D-He3");
+		builder.add("screen.starwake.fusion.status.2", "Needs D2 + He3");
+		builder.add("screen.starwake.fusion.status.3", "Shut down (redstone)");
+		builder.add("screen.starwake.machine.tank.fission_reactor.inlet", "Moderator");
 		// Fabrication (M8e-1).
 		builder.add(com.starwake.registry.ModFabrication.CRYSTAL_PULLER, "Crystal Puller");
 		builder.add(com.starwake.registry.ModFabrication.CLEAN_FAB, "Clean Fab");

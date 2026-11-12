@@ -100,6 +100,19 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.HEAT_TREAT_FURNACE).pattern("BBB").pattern("CFC").pattern("IRI")
 						.define('B', Items.BRICKS).define('F', Items.FURNACE).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT)
 						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				// M8g nuclear machines (provisional until 8i).
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModNuclear.GAS_CENTRIFUGE).pattern("IPI").pattern("CMC").pattern("IRI")
+						.define('P', Items.PISTON).define('M', ModMachines.ELECTRIC_FURNACE).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT)
+						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModNuclear.FISSION_REACTOR).pattern("OIO").pattern("CBC").pattern("OIO")
+						.define('O', Items.OBSIDIAN).define('B', Items.IRON_BLOCK).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT)
+						.unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModNuclear.FUSION_REACTOR).pattern("ONO").pattern("CBC").pattern("ONO")
+						.define('O', Items.OBSIDIAN).define('N', Items.NETHER_STAR).define('B', Items.IRON_BLOCK).define('C', ModMachines.COPPER_CABLE)
+						.unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModNuclear.PARTICLE_ACCELERATOR).pattern("CCC").pattern("BDB").pattern("CCC")
+						.define('D', Items.DIAMOND_BLOCK).define('B', Items.IRON_BLOCK).define('C', ModMachines.COPPER_CABLE)
+						.unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				// M8f heavy-water column (provisional until 8i).
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModProcess.block(com.starwake.process.ProcessMachineBlockEntity.Process.ISOTOPE_COLUMN))
 						.pattern("IGI").pattern("IGI").pattern("CRC").define('G', Items.GLASS).define('C', ModMachines.COPPER_CABLE)

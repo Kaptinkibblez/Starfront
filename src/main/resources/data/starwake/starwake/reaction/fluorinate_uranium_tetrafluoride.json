@@ -1,0 +1,9 @@
+{
+ "machine": "roaster",
+ "equation": "UF4 + F2 -> UF6",
+ "priority": 75,
+ "draw": [
+  "F2"
+ ],
+ "note": "Fluorination for enrichment."
+}
