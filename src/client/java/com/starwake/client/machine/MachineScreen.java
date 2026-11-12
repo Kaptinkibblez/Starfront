@@ -19,7 +19,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			DIM = 0xFF8A93A0, GOOD = 0xFF7CFFB2, WARN = 0xFFFFB347, ENERGY = 0xFF55D8FF;
 
 	public MachineScreen(MachineMenu menu, Inventory inventory, Component title) {
-		super(menu, inventory, title, 176, 166);
+		super(menu, inventory, title, 176, MachineMenu.INVENTORY_Y + 82);
 	}
 
 	public static void register() {
@@ -43,7 +43,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		}
 		// Energy bar (left).
 		int energy = menu.read(MachineMenu.ENERGY), capacity = menu.read(MachineMenu.CAPACITY);
-		int bx = x + 10, by = y + 18, bh = 52;
+		int bx = x + 10, by = y + 18, bh = 46;
 		g.fill(bx - 1, by - 1, bx + 9, by + bh + 1, WELL_EDGE);
 		g.fill(bx, by, bx + 8, by + bh, WELL);
 		int fill = capacity <= 0 ? 0 : Math.round(bh * Math.min(1f, energy / (float) capacity));
@@ -66,14 +66,17 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 	protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
 		g.text(font, title, titleLabelX, titleLabelY, EDGE, false);
 		g.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, DIM, false);
+		// Info strip between the machine and the inventory: status + stored energy, then the grid.
+		int strip = MachineMenu.INVENTORY_Y - 34;
+		g.fill(6, strip - 3, imageWidth - 6, strip - 2, 0x3055D8FF);
 		int power = menu.read(MachineMenu.POWER);
 		Component status = power > 0 ? Component.translatable("screen.starwake.machine.power_out", String.format("%.1f", power / 1000.0))
 				: power < 0 ? Component.translatable("screen.starwake.machine.power_in", String.format("%.1f", -power / 1000.0))
 				: Component.translatable(menu.read(MachineMenu.ENERGY) <= 0 ? "screen.starwake.machine.no_power" : "screen.starwake.machine.idle");
-		g.text(font, status, 112, 18, power > 0 ? GOOD : power < 0 ? TEXT : WARN, false);
-		g.text(font, Component.translatable("screen.starwake.machine.energy", menu.read(MachineMenu.ENERGY), menu.read(MachineMenu.CAPACITY)),
-				22, 50, DIM, false);
+		g.text(font, status, 8, strip, power > 0 ? GOOD : power < 0 ? TEXT : WARN, false);
+		Component energy = Component.translatable("screen.starwake.machine.energy", menu.read(MachineMenu.ENERGY), menu.read(MachineMenu.CAPACITY));
+		g.text(font, energy, imageWidth - 8 - font.width(energy), strip, DIM, false);
 		g.text(font, Component.translatable("screen.starwake.machine.grid", String.format("%.1f", menu.read(MachineMenu.SUPPLY) / 1000.0),
-				String.format("%.1f", menu.read(MachineMenu.DEMAND) / 1000.0)), 22, 60, DIM, false);
+				String.format("%.1f", menu.read(MachineMenu.DEMAND) / 1000.0)), 8, strip + 11, DIM, false);
 	}
 }

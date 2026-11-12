@@ -19,6 +19,8 @@ import net.minecraft.world.item.ItemStack;
  */
 public class MachineMenu extends AbstractContainerMenu {
 	/** Data slot indices. */
+	/** Top of the player inventory: the screen keeps an info strip above it. */
+	public static final int INVENTORY_Y = 104;
 	public static final int ENERGY = 0, CAPACITY = 2, PROGRESS = 4, PROGRESS_MAX = 5, POWER = 6, SUPPLY = 8, DEMAND = 10, STATUS = 12, COUNT = 13;
 
 	/** Slot positions and roles of a machine. */
@@ -61,7 +63,7 @@ public class MachineMenu extends AbstractContainerMenu {
 				}
 			});
 		}
-		addStandardInventorySlots(inventory, 8, 84);
+		addStandardInventorySlots(inventory, 8, INVENTORY_Y);
 		addDataSlots(data);
 	}
 
