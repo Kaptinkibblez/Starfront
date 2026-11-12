@@ -1,0 +1,10 @@
+{
+ "machine": "leach",
+ "equation": "3 Pt + 4 HNO3 + 18 HCl -> 3 H2PtCl6 + 4 NO + 8 H2O",
+ "priority": 50,
+ "draw": [
+  "HNO3",
+  "HCl"
+ ],
+ "note": "Aqua regia dissolves platinum."
+}

@@ -32,6 +32,11 @@ public final class ModComponents {
 					.persistent(com.starwake.process.GasCylinderItem.Fill.CODEC)
 					.networkSynchronized(com.starwake.process.GasCylinderItem.Fill.STREAM_CODEC).build());
 
+	/** U-235 share of the uranium in an item or fluid (M8c-3b; absent = natural 0.72%). */
+	public static final DataComponentType<Float> U235 = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			StarwakeMod.id("u235"), DataComponentType.<Float>builder().persistent(com.mojang.serialization.Codec.floatRange(0, 1))
+					.networkSynchronized(ByteBufCodecs.FLOAT).build());
+
 	private ModComponents() {}
 
 	public static void init() {}

@@ -44,13 +44,17 @@ public class WaterSourceBlockEntity extends MachineBlockEntity {
 	public static final MachineMenu.Layout LAYOUT = new MachineMenu.Layout(List.of(), new int[] {}, new int[] {}, new int[] {}, null,
 			new int[] {-1, -1, 80});
 	private final boolean pump;
+	/** M8c-3b: a Gas Well on a gas field produces natural gas instead of water. */
+	private final boolean well;
 	private final ChemicalTank tank;
 	private Map<String, Double> water;
 
 	public WaterSourceBlockEntity(BlockPos pos, BlockState state) {
 		super(ModMachines.WATER_SOURCE_BE, pos, state);
-		this.pump = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath().equals("water_pump");
-		this.tank = new ChemicalTank(8, false, true, s -> true, this::setChanged).mixed();
+		String path = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
+		this.pump = path.equals("water_pump");
+		this.well = path.equals("gas_well");
+		this.tank = well ? new ChemicalTank(8, false, true, s -> true, this::setChanged) : new ChemicalTank(8, false, true, s -> true, this::setChanged).mixed();
 	}
 
 	public Storage<FluidVariant> fluidStorage() {
@@ -64,7 +68,7 @@ public class WaterSourceBlockEntity extends MachineBlockEntity {
 
 	@Override
 	protected MenuType<MachineMenu> menuType() {
-		return pump ? ModMachines.WATER_PUMP_MENU : ModMachines.CONDENSER_MENU;
+		return well ? ModMachines.GAS_WELL_MENU : pump ? ModMachines.WATER_PUMP_MENU : ModMachines.CONDENSER_MENU;
 	}
 
 	@Override
@@ -75,6 +79,7 @@ public class WaterSourceBlockEntity extends MachineBlockEntity {
 	public static final TagKey<Biome> SEAWATER = TagKey.create(Registries.BIOME, StarwakeMod.id("seawater"));
 	public static final TagKey<Biome> SALT_LAKE = TagKey.create(Registries.BIOME, StarwakeMod.id("salt_lake"));
 	public static final TagKey<Biome> ACID_WATER = TagKey.create(Registries.BIOME, StarwakeMod.id("acid_water"));
+	public static final TagKey<Biome> GAS_FIELD = TagKey.create(Registries.BIOME, StarwakeMod.id("gas_field"));
 
 	/** The water source the pump draws from, or null. */
 	private BlockPos source(ServerLevel level) {
@@ -104,9 +109,13 @@ public class WaterSourceBlockEntity extends MachineBlockEntity {
 		powerKw = 0;
 		boolean working = false;
 		BlockPos from = pump ? source(level) : null;
-		boolean source = pump ? from != null : humidAir(level);
+		boolean source = well ? level.getBiome(worldPosition).is(GAS_FIELD) && worldPosition.getY() < level.getSeaLevel() + 40
+				: pump ? from != null : humidAir(level);
 		if (source && tank.total() < tank.capacityKg() * Chemicals.KG && drawPower(spec().power())) {
-			if (pump) {
+			if (well) {
+				double kg = spec().rate() / 20.0;
+				Species.feed(StarwakeMod.id("natural_gas")).ifPresent(f -> f.assay().masses(1.0).forEach((sp, x) -> tank.add(sp, x * kg)));
+			} else if (pump) {
 				if (water == null || (level.getGameTime() + worldPosition.asLong()) % 100 == 0) water = waterAt(level, from);
 				double kg = spec().rate() / 20.0;
 				water.forEach((sp, f) -> tank.add(sp, f * kg));

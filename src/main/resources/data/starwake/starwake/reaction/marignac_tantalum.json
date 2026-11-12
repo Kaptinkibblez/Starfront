@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "H2TaF7 + 2 KCl -> K2TaF7 + 2 HCl",
+ "priority": 96,
+ "draw": [
+  "KCl"
+ ],
+ "note": "Potassium heptafluorotantalate crystallises."
+}

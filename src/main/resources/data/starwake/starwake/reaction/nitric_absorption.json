@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "3 NO2 + H2O -> 2 HNO3 + NO",
+ "priority": 72,
+ "draw": [
+  "H2O"
+ ]
+}

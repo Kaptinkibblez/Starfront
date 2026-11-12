@@ -1,0 +1,8 @@
+{
+ "machine": "smelter",
+ "equation": "RaSO4 + 4 C -> RaS + 4 CO",
+ "priority": 30,
+ "draw": [
+  "C"
+ ]
+}

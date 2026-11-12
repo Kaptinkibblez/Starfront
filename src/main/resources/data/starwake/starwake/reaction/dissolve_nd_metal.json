@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "2 Nd + 6 HCl -> 2 NdCl3 + 3 H2",
+ "priority": 43,
+ "draw": [
+  "HCl"
+ ]
+}

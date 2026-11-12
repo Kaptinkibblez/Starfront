@@ -1,0 +1,8 @@
+{
+ "machine": "kroll",
+ "equation": "OsO4 + 4 H2 -> Os + 4 H2O",
+ "priority": 30,
+ "draw": [
+  "H2"
+ ]
+}

@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "Be(OH)2 + 2 HF -> BeF2 + 2 H2O",
+ "priority": 95,
+ "draw": [
+  "HF"
+ ]
+}

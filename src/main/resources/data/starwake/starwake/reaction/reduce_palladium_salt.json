@@ -1,0 +1,8 @@
+{
+ "machine": "roaster",
+ "equation": "Pd(NH3)2Cl2 + H2 -> Pd + 2 NH4Cl",
+ "priority": 71,
+ "draw": [
+  "H2"
+ ]
+}

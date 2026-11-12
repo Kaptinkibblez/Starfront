@@ -50,7 +50,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  */
 public class ProcessMachineBlockEntity extends MachineBlockEntity {
 	/** How a machine works out a cycle. */
-	public enum Mode { CRUSH, SEPARATE, PYRO, DRY, WET, EVAPORATE, ELECTRO, AIR }
+	public enum Mode { CRUSH, SEPARATE, PYRO, DRY, WET, EVAPORATE, ELECTRO, AIR, SX }
 
 	public enum Process {
 		CRUSHER("crusher", Mode.CRUSH, 1, false, 0, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.CRUSHED_ORE, false, false, false, 0),
@@ -78,7 +78,9 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		KROLL("kroll", Mode.DRY, 0, false, 1, outs(ProcessEngine.Out.METAL, ProcessEngine.Out.PRIMARY), BulkItem.Kind.CRYSTALS,
 				true, false, false, 1),
 		// M8c-3a: cryogenic air separation of whatever the planet's air holds.
-		AIR_SEPARATOR("air_separator", Mode.AIR, 0, false, 0, outs(), BulkItem.Kind.CRYSTALS, false, true, true, 0);
+		AIR_SEPARATOR("air_separator", Mode.AIR, 0, false, 0, outs(), BulkItem.Kind.CRYSTALS, true, true, true, 1),
+		// M8c-3b: counter-current solvent-extraction battery (extract -> gas-side tank, raffinate -> liquid tank).
+		SOLVENT_EXTRACTION("solvent_extraction", Mode.SX, 0, false, 0, outs(), BulkItem.Kind.CRYSTALS, true, true, true, 1);
 
 		public final String machine;
 		public final Mode mode;
@@ -165,7 +167,8 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		LAYOUTS.put(Process.ELECTROLYSIS, layout(List.of(xy(24, 18), xy(24, 42), xy(44, 42), xy(92, 18), xy(92, 42)), 3, xy(58, 22),
 				new int[] {126, 140, 154}));
 		LAYOUTS.put(Process.CHLORINATOR, layout(List.of(xy(34, 18), xy(34, 42), xy(92, 28)), 2, xy(58, 33), new int[] {126, 140, 154}));
-		LAYOUTS.put(Process.AIR_SEPARATOR, layout(List.of(), 0, xy(80, 33), new int[] {-1, 126, 148}));
+		LAYOUTS.put(Process.AIR_SEPARATOR, layout(List.of(), 0, xy(80, 33), new int[] {40, 126, 148}));
+		LAYOUTS.put(Process.SOLVENT_EXTRACTION, layout(List.of(), 0, xy(60, 28), new int[] {30, 140, 156}));
 		LAYOUTS.put(Process.KROLL, layout(List.of(xy(34, 28), xy(92, 18), xy(92, 42)), 1, xy(58, 33), new int[] {126, -1, -1}));
 	}
 
@@ -195,6 +198,8 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 	/** Products of the running cycle, released when its energy is delivered. */
 	private Map<ProcessEngine.Out, Map<String, Double>> pending;
 	private long energyNeeded, energyDone;
+	/** Uranium through this machine and its U-235 (kg), for isotope tracking. */
+	private double uKg, u235Kg;
 	private final ChemicalTank inlet, gasTank, liquidTank;
 	private final Storage<FluidVariant> fluids;
 
@@ -203,6 +208,7 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		this.process = Process.of(state);
 		this.inlet = process.inlet ? new ChemicalTank(16, true, false, s -> true, this::setChanged) : null;
 		this.gasTank = process.gas ? new ChemicalTank(32, false, true, s -> true, this::setChanged) : null;
+		if (process == Process.SOLVENT_EXTRACTION) gasTank.mixed(); // the extract is a solution
 		this.liquidTank = process.liquid ? new ChemicalTank(16, false, true, s -> true, this::setChanged) : null;
 		if (liquidTank != null) liquidTank.mixed();
 		List<ChemicalTank> tanks = new ArrayList<>();
@@ -246,11 +252,14 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		if (comp.isPresent()) {
 			double kg = MetalItems.formOf(stack).map(f -> f.kg).orElse(1.0);
 			Map<String, Double> out = new HashMap<>();
-			for (Composition.Part p : comp.get().parts()) out.put(p.element(), p.percent() / 100 * kg);
+			for (Composition.Part p : comp.get().parts()) out.merge(DIATOMIC.getOrDefault(p.element(), p.element()), p.percent() / 100 * kg, Double::sum);
 			return Optional.of(out);
 		}
 		return Optional.empty();
 	}
+
+	/** Gaseous elements dissolved in a metal are the molecular species (O -> O2). */
+	private static final Map<String, String> DIATOMIC = Map.of("H", "H2", "N", "N2", "O", "O2", "F", "F2", "Cl", "Cl2");
 
 	private static boolean rawOre(ItemStack stack) {
 		return Species.feed(BuiltInRegistries.ITEM.getKey(stack.getItem())).map(f -> f.mass() > 1).orElse(false);
@@ -266,7 +275,7 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		if (process == Process.CRUSHER) return rawOre(stack);
 		if (process.separator()) return stack.getItem() instanceof BulkItem;
 		if (rawOre(stack)) return false;
-		if (metal(stack) && !(process.pyro() || process == Process.ELECTROLYSIS)) return false;
+		// Metals go anywhere chemistry can use them (aqua regia on platinum sponge, refining, remelting).
 		return material(stack).isPresent();
 	}
 
@@ -323,7 +332,13 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		boolean hasCharge = process.charge > 0 && !items.get(0).isEmpty() && acceptsCharge(process, items.get(0));
 		boolean hasFeed = process.inletFeed > 0 && inlet != null && inlet.totalKg() > 0.05;
 		if (process.mode == Mode.AIR) {
-			return level != null && !com.starwake.planet.Atmospheres.of(level.dimension()).isEmpty() && gasTank.totalKg() < gasTank.capacityKg() - 1;
+			// Piped-in gas (natural gas from a well) first, else the planet's air.
+			return level != null && (hasFeed || !com.starwake.planet.Atmospheres.of(level.dimension()).isEmpty())
+					&& gasTank.totalKg() < gasTank.capacityKg() - 1;
+		}
+		if (process.mode == Mode.SX) {
+			return hasFeed && Reactions.sxFamilies().values().stream().anyMatch(f -> f.species().stream().anyMatch(sp -> inlet.kg(sp) > 1e-6))
+					&& gasTank.totalKg() < gasTank.capacityKg() - 2 && liquidTank.totalKg() < liquidTank.capacityKg() - 2;
 		}
 		boolean go = switch (process.charge) {
 			case 1 -> hasCharge;
@@ -361,7 +376,13 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		// charge put in first isn't wasted. Smelters may just remelt; coke ovens just drive off volatiles.
 		boolean chemical = process.mode == Mode.WET || process.mode == Mode.DRY && process != Process.COKE_OVEN
 				|| process.mode == Mode.ELECTRO && !refine;
-		if (chemical && !ProcessEngine.canReact(process.machine, pool, new Supply(level), this::catalystPresent)) return;
+		if (chemical && !ProcessEngine.canReact(process.machine, pool, new Supply(level), this::catalystPresent) && !dissolves(pool)) return;
+		// Uranium isotope ledger (M8c-3b): what comes in sets the U-235 share of what goes out.
+		if (uraniumHeld() <= 1e-12 && pending == null) uKg = u235Kg = 0;
+		double uCharge = useCharge ? Isotopes.uraniumKg(material(charge).orElse(Map.of())) : 0;
+		double uInlet = useInlet ? Isotopes.uraniumKg(inlet.peek(process.inletFeed)) : 0;
+		uKg += uCharge + uInlet;
+		u235Kg += uCharge * (useCharge ? Isotopes.of(charge) : 0) + uInlet * (useInlet ? inlet.u235() : 0);
 		if (useCharge) charge.shrink(1);
 		if (useInlet) inlet.slice(process.inletFeed);
 		double joules = 0;
@@ -387,15 +408,25 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 			}
 			case AIR -> {
 				// One cycle processes `rate` kg of air (less where it's thin); 0.4 MJ per kg (cryogenic).
-				double density = com.starwake.planet.Planets.airDensityOf(level.dimension());
-				double kg = spec().rate() * Math.min(1, density);
-				com.starwake.planet.Atmospheres.of(level.dimension()).forEach((k, v) -> pool.merge(k, v * kg, Double::sum));
+				double kg;
+				if (pool.isEmpty()) {
+					double density = com.starwake.planet.Planets.airDensityOf(level.dimension());
+					double air = spec().rate() * Math.min(1, density);
+					com.starwake.planet.Atmospheres.of(level.dimension()).forEach((k, v) -> pool.merge(k, v * air, Double::sum));
+					kg = air;
+				} else {
+					kg = total(pool);
+				}
 				out = new EnumMap<>(ProcessEngine.Out.class);
 				for (var e : pool.entrySet()) {
 					ProcessEngine.Out o = e.getKey().equals("H2O") ? ProcessEngine.Out.LIQUID : ProcessEngine.Out.GAS;
 					out.computeIfAbsent(o, k -> new HashMap<>()).put(e.getKey(), e.getValue());
 				}
 				joules = kg * AIR_SEPARATION_J_PER_KG;
+			}
+			case SX -> {
+				out = solventExtract(pool);
+				joules = 0;
 			}
 			case EVAPORATE -> {
 				out = ProcessEngine.evaporate(pool);
@@ -447,6 +478,11 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 	}
 
 	private void release(ServerLevel level, Map<ProcessEngine.Out, Map<String, Double>> out) {
+		double f = u235Fraction();
+		for (var e : out.entrySet()) {
+			ChemicalTank t = e.getKey() == ProcessEngine.Out.GAS ? gasTank : e.getKey() == ProcessEngine.Out.LIQUID ? liquidTank : null;
+			if (t != null) t.mixUranium(Isotopes.uraniumKg(e.getValue()), f);
+		}
 		out.forEach((o, species) -> {
 			switch (o) {
 				case GAS -> species.forEach((s, kg) -> overflow(level, s, gasTank == null ? kg : gasTank.add(s, kg)));
@@ -507,6 +543,12 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 	}
 
 	private ItemStack make(ProcessEngine.Out out, Map<String, Double> buffer) {
+		ItemStack made = makeItem(out, buffer);
+		if (Isotopes.uraniumKg(buffer) > 0) Isotopes.stamp(made, u235Fraction());
+		return made;
+	}
+
+	private ItemStack makeItem(ProcessEngine.Out out, Map<String, Double> buffer) {
 		ItemStack element = elementProduct(out, buffer);
 		if (!element.isEmpty()) return element;
 		if (process == Process.EVAPORATOR) return BulkItem.stack(ModProcess.bulk(BulkItem.Kind.CRYSTALS), Assay.of(buffer), 1);
@@ -554,6 +596,109 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		}
 		if (info.kind() == Species.Kind.METAL) return MetalItems.stack(MetalForm.DUST, comp, 1);
 		return ItemStack.EMPTY;
+	}
+
+	/** U-235 share of the uranium that has gone through this machine. */
+	private double u235Fraction() {
+		return uKg > 1e-12 ? u235Kg / uKg : Isotopes.NATURAL;
+	}
+
+	private double uraniumHeld() {
+		return Isotopes.uraniumKg(contents());
+	}
+
+	/**
+	 * Plain dissolution counts as leaching (M8c-3b): a Leach Tank also runs when its charge holds a
+	 * soluble salt and there is water to dissolve it (chromate calcine, chlororhodate...).
+	 */
+	private boolean dissolves(Map<String, Double> pool) {
+		if (process != Process.LEACH) return false;
+		boolean water = pool.getOrDefault("H2O", 0.0) > 0 || inlet != null && inlet.kg("H2O") > 0.1;
+		return water && pool.keySet().stream().anyMatch(sp -> !sp.equals("H2O") && Species.get(sp).map(Species.Info::soluble).orElse(false));
+	}
+
+	// --- Solvent extraction (M8c-3b) ---------------------------------------------------------------------
+
+	/** The cut: the lightest species sent to the extract (empty = automatic, between the first two present). */
+	private String cut = "";
+
+	public String cut() {
+		return cut;
+	}
+
+	/** Sneak-use with an empty hand: step the cut to the next species of the families. */
+	public net.minecraft.network.chat.Component cycleCut() {
+		java.util.List<String> options = new java.util.ArrayList<>();
+		options.add("");
+		for (var f : Reactions.sxFamilies().values()) options.addAll(f.species().subList(1, f.species().size()));
+		cut = options.get((options.indexOf(cut) + 1) % options.size());
+		setChanged();
+		if (cut.isEmpty()) return net.minecraft.network.chat.Component.translatable("message.starwake.sx.auto");
+		return net.minecraft.network.chat.Component.translatable("message.starwake.sx.cut",
+				Species.get(cut).map(Species.Info::displayName).orElse(net.minecraft.network.chat.Component.literal(cut)));
+	}
+
+	/**
+	 * One battery pass. For each family present, species split between extract and raffinate by an
+	 * ideal counter-current cascade around the cut: extracted share = 1 / (1 + (D_cut / D_i)^(N/2)),
+	 * with D from the family's separation factors and N stages (half extraction, half scrubbing).
+	 * Extracting consumes the family's reagents per mole (P507: 3 NaOH + 3 HCl -> 3 NaCl + 3 H2O), drawn
+	 * from the feed and inlet; without enough, less is extracted.
+	 */
+	private Map<ProcessEngine.Out, Map<String, Double>> solventExtract(Map<String, Double> pool) {
+		Map<String, Double> extract = new HashMap<>(), raffinate = new HashMap<>(pool);
+		for (var family : Reactions.sxFamilies().values()) {
+			Map<String, Double> logD = family.logD();
+			List<String> present = family.species().stream().filter(sp -> pool.getOrDefault(sp, 0.0) > 1e-9).toList();
+			if (present.isEmpty()) continue;
+			double cutLog;
+			if (logD.containsKey(cut)) {
+				int i = family.species().indexOf(cut);
+				cutLog = (logD.get(family.species().get(i - 1)) + logD.get(cut)) / 2;
+			} else if (present.size() >= 2) {
+				cutLog = (logD.get(present.get(0)) + logD.get(present.get(1))) / 2;
+			} else {
+				continue;
+			}
+			// Moles to extract, then scale down to the reagents available.
+			Map<String, Double> want = new HashMap<>();
+			double moles = 0;
+			for (String sp : present) {
+				double share = 1 / (1 + Math.pow(10, -(logD.get(sp) - cutLog) * family.stages() / 2.0));
+				double kg = pool.get(sp) * share;
+				want.put(sp, kg);
+				moles += kg / (Species.require(sp).molarMass() / 1000);
+			}
+			double scale = 1;
+			for (var r : family.perMole().entrySet()) {
+				double need = moles * r.getValue() * Species.require(r.getKey()).molarMass() / 1000;
+				double have = raffinate.getOrDefault(r.getKey(), 0.0) + (inlet == null ? 0 : inlet.kg(r.getKey()));
+				if (need > 0) scale = Math.min(scale, have / need);
+			}
+			for (var r : family.perMole().entrySet()) {
+				double need = moles * scale * r.getValue() * Species.require(r.getKey()).molarMass() / 1000;
+				double fromPool = Math.min(need, raffinate.getOrDefault(r.getKey(), 0.0));
+				ProcessEngine.add(raffinate, r.getKey(), -fromPool);
+				if (need - fromPool > 1e-12 && inlet != null) inlet.take(r.getKey(), need - fromPool);
+			}
+			for (var p : family.products().entrySet()) {
+				ProcessEngine.add(raffinate, p.getKey(), moles * scale * p.getValue() * Species.require(p.getKey()).molarMass() / 1000);
+			}
+			for (var w : want.entrySet()) {
+				ProcessEngine.add(extract, w.getKey(), w.getValue() * scale);
+				ProcessEngine.add(raffinate, w.getKey(), -w.getValue() * scale);
+			}
+		}
+		// The strip liquor: half the water carries the extract.
+		double water = raffinate.getOrDefault("H2O", 0.0);
+		if (!extract.isEmpty() && water > 0) {
+			extract.put("H2O", water / 2);
+			ProcessEngine.add(raffinate, "H2O", -water / 2);
+		}
+		Map<ProcessEngine.Out, Map<String, Double>> out = new EnumMap<>(ProcessEngine.Out.class);
+		out.put(ProcessEngine.Out.GAS, extract);
+		out.put(ProcessEngine.Out.LIQUID, raffinate);
+		return out;
 	}
 
 	// --- Reagent supply ----------------------------------------------------------------------------------
@@ -643,6 +788,7 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 
 	@Override
 	protected void writeData(int[] v) {
+		v[MachineMenu.STATUS] = cut.isEmpty() ? 0 : Species.get(cut).map(i -> i.index() + 1).orElse(0);
 		ChemicalTank[] tanks = {inlet, gasTank, liquidTank};
 		for (int t = 0; t < 3; t++) {
 			ChemicalTank tank = tanks[t];
@@ -678,6 +824,9 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		});
 		energyNeeded = input.getLongOr("energy_needed", 0);
 		energyDone = input.getLongOr("energy_done", 0);
+		cut = input.getStringOr("cut", "");
+		uKg = input.getDoubleOr("u_kg", 0);
+		u235Kg = input.getDoubleOr("u235_kg", 0);
 		if (inlet != null) inlet.read(input, "inlet");
 		if (gasTank != null) gasTank.read(input, "gas");
 		if (liquidTank != null) liquidTank.read(input, "liquid");
@@ -697,6 +846,11 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		}
 		output.putLong("energy_needed", energyNeeded);
 		output.putLong("energy_done", energyDone);
+		if (!cut.isEmpty()) output.putString("cut", cut);
+		if (uKg > 0) {
+			output.putDouble("u_kg", uKg);
+			output.putDouble("u235_kg", u235Kg);
+		}
 		if (inlet != null) inlet.write(output, "inlet");
 		if (gasTank != null) gasTank.write(output, "gas");
 		if (liquidTank != null) liquidTank.write(output, "liquid");

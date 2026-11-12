@@ -1,0 +1,9 @@
+{
+ "machine": "chlorinator",
+ "equation": "Ir + 2 Cl2 + 2 NaCl -> Na2IrCl6",
+ "priority": 21,
+ "draw": [
+  "Cl2",
+  "NaCl"
+ ]
+}

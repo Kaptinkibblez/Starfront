@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "NH3 + HCl -> NH4Cl",
+ "priority": 73,
+ "draw": [
+  "HCl"
+ ]
+}

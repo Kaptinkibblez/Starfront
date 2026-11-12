@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "FeWO4 + 2 NaOH -> Na2WO4 + Fe(OH)2",
+ "priority": 73,
+ "draw": [
+  "NaOH"
+ ]
+}

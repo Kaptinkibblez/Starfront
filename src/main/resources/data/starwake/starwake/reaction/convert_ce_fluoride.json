@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "CeF3 + 3 NaOH -> Ce(OH)3 + 3 NaF",
+ "priority": 39,
+ "draw": [
+  "NaOH"
+ ]
+}

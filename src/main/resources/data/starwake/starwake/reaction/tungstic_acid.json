@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "Na2WO4 + 2 HCl -> H2WO4 + 2 NaCl",
+ "priority": 98,
+ "draw": [
+  "HCl"
+ ]
+}

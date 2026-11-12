@@ -1,0 +1,8 @@
+{
+ "machine": "electrolysis",
+ "equation": "RaCl2 -> Ra + Cl2",
+ "priority": 16,
+ "electrons": 2,
+ "voltage": 6.0,
+ "anhydrous": true
+}

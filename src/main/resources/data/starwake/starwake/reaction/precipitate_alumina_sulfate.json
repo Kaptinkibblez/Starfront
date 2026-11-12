@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "Al2(SO4)3 + 6 NH3 + 6 H2O -> 2 Al(OH)3 + 3 (NH4)2SO4",
+ "priority": 94,
+ "draw": [
+  "NH3",
+  "H2O"
+ ]
+}

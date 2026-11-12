@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "Pd(NH3)4Cl2 + 2 HCl -> Pd(NH3)2Cl2 + 2 NH4Cl",
+ "priority": 83,
+ "draw": [
+  "HCl"
+ ],
+ "note": "Acidifying precipitates yellow Pd(NH3)2Cl2."
+}

@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "H2PtCl6 + 2 NH4Cl -> (NH4)2PtCl6 + 2 HCl",
+ "priority": 81,
+ "draw": [
+  "NH4Cl"
+ ],
+ "note": "Yellow ammonium chloroplatinate."
+}

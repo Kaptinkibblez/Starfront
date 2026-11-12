@@ -1,0 +1,10 @@
+{
+ "machine": "smelter",
+ "equation": "2 Ca5(PO4)3F + 15 C + 9 SiO2 -> 6 P + 15 CO + 9 CaSiO3 + CaF2",
+ "priority": 31,
+ "draw": [
+  "C",
+  "SiO2"
+ ],
+ "note": "Electric phosphorus furnace: P vapour condenses."
+}

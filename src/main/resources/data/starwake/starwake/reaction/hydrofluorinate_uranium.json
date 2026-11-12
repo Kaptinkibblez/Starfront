@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "UO2 + 4 HF -> UF4 + 2 H2O",
+ "priority": 91,
+ "draw": [
+  "HF"
+ ],
+ "note": "Green salt."
+}

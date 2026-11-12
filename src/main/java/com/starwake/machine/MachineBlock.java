@@ -82,6 +82,12 @@ public class MachineBlock extends BaseEntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		if (player.isSecondaryUseActive() && level.getBlockEntity(pos) instanceof com.starwake.process.ProcessMachineBlockEntity sx
+				&& sx.process() == com.starwake.process.ProcessMachineBlockEntity.Process.SOLVENT_EXTRACTION) {
+			// Sneak-use a solvent-extraction battery: step its cut (M8c-3b).
+			if (!level.isClientSide()) player.sendOverlayMessage(sx.cycleCut());
+			return InteractionResult.SUCCESS;
+		}
 		if (!level.isClientSide() && level.getBlockEntity(pos) instanceof MachineBlockEntity machine) {
 			player.openMenu(machine);
 		}

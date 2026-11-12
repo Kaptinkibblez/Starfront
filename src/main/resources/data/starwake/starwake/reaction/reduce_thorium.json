@@ -1,0 +1,8 @@
+{
+ "machine": "kroll",
+ "equation": "ThF4 + 2 Ca -> Th + 2 CaF2",
+ "priority": 33,
+ "draw": [
+  "Ca"
+ ]
+}

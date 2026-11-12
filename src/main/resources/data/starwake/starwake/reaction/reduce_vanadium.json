@@ -1,0 +1,8 @@
+{
+ "machine": "kroll",
+ "equation": "3 V2O5 + 10 Al -> 6 V + 5 Al2O3",
+ "priority": 42,
+ "draw": [
+  "Al"
+ ]
+}

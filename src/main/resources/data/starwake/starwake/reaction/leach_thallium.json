@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "2 Tl + H2SO4 -> Tl2SO4 + H2",
+ "priority": 77,
+ "draw": [
+  "H2SO4"
+ ]
+}

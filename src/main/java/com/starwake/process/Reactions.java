@@ -123,6 +123,51 @@ public final class Reactions {
 						separations = Map.copyOf(map);
 					}
 				});
+		ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(StarwakeMod.id("solvent_extraction"),
+				new SimpleJsonResourceReloadListener<>(SxFamily.CODEC, FileToIdConverter.json("starwake/solvent_extraction")) {
+					@Override
+					protected void apply(Map<Identifier, SxFamily> loaded, ResourceManager manager, ProfilerFiller profiler) {
+						Map<String, SxFamily> map = new java.util.TreeMap<>();
+						loaded.forEach((id, f) -> map.put(id.getPath(), f));
+						sxFamilies = map;
+					}
+				});
+	}
+
+	/**
+	 * A solvent-extraction family (M8c-3b): species in order of extraction with log10 of each adjacent
+	 * separation factor, battery stages, and reagents consumed / products made per mole extracted.
+	 */
+	public record SxFamily(int stages, Map<String, Double> perMole, Map<String, Double> products, List<List<String>> order, Optional<String> note) {
+		static final Codec<SxFamily> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.INT.optionalFieldOf("stages", 20).forGetter(SxFamily::stages),
+				Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).optionalFieldOf("per_mole", Map.of()).forGetter(SxFamily::perMole),
+				Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).optionalFieldOf("products", Map.of()).forGetter(SxFamily::products),
+				Codec.STRING.listOf().listOf().fieldOf("order").forGetter(SxFamily::order),
+				Codec.STRING.optionalFieldOf("note").forGetter(SxFamily::note)
+		).apply(i, SxFamily::new));
+
+		/** Species ids in extraction order. */
+		public List<String> species() {
+			return order.stream().map(List::getFirst).toList();
+		}
+
+		/** Cumulative log10 distribution coefficient of each species (the first is 0). */
+		public Map<String, Double> logD() {
+			Map<String, Double> out = new java.util.LinkedHashMap<>();
+			double l = 0;
+			for (List<String> e : order) {
+				l += Double.parseDouble(e.get(1));
+				out.put(e.getFirst(), l);
+			}
+			return out;
+		}
+	}
+
+	private static Map<String, SxFamily> sxFamilies = Map.of();
+
+	public static Map<String, SxFamily> sxFamilies() {
+		return sxFamilies;
 	}
 
 	public static List<Reaction> forMachine(String machine) {

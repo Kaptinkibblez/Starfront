@@ -315,7 +315,8 @@ ORES = {
     "starwake:raw_bastnaesite": ore({"CeCO3F": 0.62, "LaCO3F": 0.38}, 0.75, {"Nd": 30000, "Pr": 9000, "Eu": 300, "Sm": 2000}),
     "starwake:raw_columbite": ore({"FeNb2O6": 0.6, "FeTa2O6": 0.25, "MnNb2O6": 0.15}, 0.7, {"Sn": 3000, "Sc": 400, "U": 1000}),
     "starwake:raw_uraninite": ore({"UO2": 1.0}, 0.7, {"Ra": 0.3, "Rn": 0.000002, "Po": 0.0001, "Pa": 0.3, "Th": 3000, "Pb": 20000, "Np": 0.000002,
-                                                      "Pu": 0.00001, "Tc": 0.0000005, "Ac": 0.00015}),
+                                                      "Pu": 0.00001, "Tc": 0.0000005, "Ac": 0.00015, "Pm": 4e-12, "At": 1e-14,
+                                                      "Fr": 1e-14}),
     "starwake:raw_barite": ore({"BaSO4": 1.0}, 0.85, {"Sr": 10000}),
     "starwake:raw_celestine": ore({"SrSO4": 1.0}, 0.85, {"Ba": 10000}),
     "starwake:raw_fluorite": ore({"CaF2": 1.0}, 0.8, {"Y": 300, "Ce": 200}),
@@ -339,6 +340,8 @@ ORES = {
     # Acid crater-lake water (Kawah Ijen-type, pH ~0) on toxic worlds.
     "starwake:acid_lake_water": {"mass": 1.0, "assay": {"H2O": 0.88, "H2SO4": 0.065, "HCl": 0.02, "FeSO4": 0.015, "NaCl": 0.012,
                                                         "ZnSO4": 0.003, "CuSO4": 0.002, "MgSO4": 0.003}},
+    # Natural gas (M8c-3b) from a Gas Well on a gas field: methane with ethane, N2, CO2, H2S and helium.
+    "starwake:natural_gas": {"mass": 1.0, "assay": {"CH4": 0.87, "C2H6": 0.07, "N2": 0.035, "CO2": 0.02, "He": 0.003, "H2S": 0.002}},
     "minecraft:ice": {"mass": 1.0, "assay": {"H2O": 1.0}},
     "minecraft:packed_ice": {"mass": 1.0, "assay": {"H2O": 1.0}},
     "minecraft:blue_ice": {"mass": 1.0, "assay": {"H2O": 1.0}},
@@ -518,6 +521,219 @@ rx("smelter", "reduce_senarmontite", "Sb2O3 + 3 C -> 2 Sb + 3 CO", 26, draw=["C"
 rx("smelter", "reduce_arsenolite", "As2O3 + 3 C -> 2 As + 3 CO", 27, "Arsenic sublimes and condenses as grey arsenic.", draw=["C"])
 rx("smelter", "reduce_bismite", "Bi2O3 + 3 C -> 2 Bi + 3 CO", 28, draw=["C"])
 
+# --- M8c-3b: rare earths, PGMs, actinides and the element audit ---------------------------------------
+REE = ["La", "Ce", "Pr", "Nd", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Y", "Er", "Tm", "Yb", "Lu", "Sc"]
+for re_ in REE:
+    nm = ELEMENTS[re_]["name"].capitalize()
+    sp(f"{re_}Cl3", f"{nm} chloride", "halide", 3.9, 800, 1500, flags=["soluble"], color="#f2f2ee")
+    sp(f"{re_}(OH)3", f"{nm} hydroxide", "oxide", 4.5, 300, 9999, color="#efefe6")
+    sp(f"{re_}2(CO3)3", f"{nm} carbonate", "carbonate", 4.0, 300, 9999, color="#f2f2ea")
+    sp(f"{re_}2O3", f"{nm} oxide", "oxide", 7.0, 2300, 3700, color="#f0eee0")
+    sp(f"{re_}F3", f"{nm} fluoride", "halide", 6.0, 1400, 2300, color="#eeeee8")
+sp("Na3PO4", "Trisodium phosphate", "phosphate", 2.54, 1583, 9999, flags=["soluble"], color="#f2f2f2", solubility=0.14)
+sp("NaF", "Villiaumite", "halide", 2.56, 993, 1704, flags=["soluble", "toxic"], toxicity=0.3, color="#efefef", solubility=0.04)
+sp("KF", "Potassium fluoride", "halide", 2.48, 858, 1502, flags=["soluble", "toxic"], toxicity=0.3, color="#efefef")
+sp("LiF", "Griceite", "halide", 2.64, 845, 1676, color="#f2f2f2")
+sp("MgF2", "Sellaite", "halide", 3.15, 1263, 2260, color="#efefef")
+sp("F2", "Fluorine", "gas", 0.0017, -220, -188, flags=["toxic"], toxicity=1.0, color="#e8f088")
+sp("H2S", "Hydrogen sulfide", "gas", 0.0014, -82, -60, flags=["toxic"], toxicity=0.8, color="#e8e8a0")
+sp("C2H6", "Ethane", "gas", 0.0013, -183, -89, color="#d8e8ff")
+sp("HNO3", "Nitric acid", "oxide", 1.51, -42, 83, flags=["soluble", "toxic"], toxicity=0.6, color="#f0e8b0")
+sp("NO", "Nitric oxide", "gas", 0.0013, -164, -152, flags=["toxic"], toxicity=0.5, color="#e8d8c8")
+sp("NO2", "Nitrogen dioxide", "gas", 0.0019, -11, 21, flags=["toxic"], toxicity=0.8, color="#c86a2a")
+sp("NH4Cl", "Sal ammoniac", "halide", 1.52, 338, 520, flags=["soluble"], color="#f2f2f2", solubility=0.37)
+sp("NH4F", "Ammonium fluoride", "halide", 1.01, 100, 9999, flags=["soluble", "toxic"], toxicity=0.3, color="#f2f2f2")
+sp("(NH4)2SO4", "Mascagnite", "sulfate", 1.77, 235, 9999, flags=["soluble"], color="#f2f2f2", solubility=0.75)
+sp("H2PtCl6", "Chloroplatinic acid", "halide", 2.43, 60, 9999, flags=["soluble", "toxic"], toxicity=0.4, color="#e8a830")
+sp("H2PdCl4", "Chloropalladic acid", "halide", 2.5, 100, 9999, flags=["soluble"], color="#a85a2a")
+sp("HAuCl4", "Chloroauric acid", "halide", 3.9, 254, 9999, flags=["soluble", "toxic"], toxicity=0.3, color="#e8c830")
+sp("AgCl", "Chlorargyrite", "halide", 5.56, 455, 1547, color="#e8e8e0")
+sp("(NH4)2PtCl6", "Ammonium chloroplatinate", "halide", 3.07, 380, 9999, flags=["soluble"], color="#e8d838", solubility=0.005)
+sp("Pd(NH3)4Cl2", "Tetraamminepalladium chloride", "halide", 1.9, 120, 9999, flags=["soluble"], color="#f0f0e8")
+sp("Pd(NH3)2Cl2", "Diamminepalladium dichloride", "halide", 2.5, 200, 9999, color="#e8d870")
+sp("OsO4", "Osmium tetroxide", "gas", 4.9, 40, 130, flags=["toxic"], toxicity=1.0, color="#f0f0d8")
+sp("RuO4", "Ruthenium tetroxide", "gas", 3.29, 25, 40, flags=["toxic"], toxicity=0.9, color="#e8c040")
+sp("Na3RhCl6", "Sodium hexachlororhodate", "halide", 2.8, 500, 9999, flags=["soluble"], color="#c83a5a")
+sp("Na2IrCl6", "Sodium hexachloroiridate", "halide", 3.0, 500, 9999, flags=["soluble"], color="#5a2a1e")
+sp("(NH4)2IrCl6", "Ammonium hexachloroiridate", "halide", 2.86, 300, 9999, flags=["soluble"], color="#3a1a14", solubility=0.007)
+sp("ZnCl2", "Zinc chloride", "halide", 2.91, 290, 732, flags=["soluble"], color="#f2f2f2")
+sp("UO2SO4", "Uranyl sulfate", "sulfate", 3.28, 1000, 9999, flags=["soluble", "toxic"], toxicity=0.4, color="#e8e830")
+sp("(NH4)2U2O7", "Ammonium diuranate (yellowcake)", "oxide", 4.0, 300, 9999, flags=["toxic"], toxicity=0.4, color="#f0d820")
+sp("UO3", "Uranium trioxide", "oxide", 7.3, 200, 9999, flags=["toxic"], toxicity=0.4, color="#e8a820")
+sp("UF4", "Uranium tetrafluoride (green salt)", "halide", 6.7, 1036, 1417, flags=["toxic"], toxicity=0.4, color="#4a8a3a")
+sp("ThF4", "Thorium tetrafluoride", "halide", 6.3, 1110, 1680, color="#efefef")
+sp("RaSO4", "Radium sulfate", "sulfate", 4.5, 1000, 9999, color="#f2f2f2")
+sp("RaS", "Radium sulfide", "sulfide", 4.0, 1200, 9999, color="#efefe8")
+sp("RaCl2", "Radium chloride", "halide", 4.9, 900, 9999, flags=["soluble"], color="#f2f2f2")
+sp("BeSO4", "Beryllium sulfate", "sulfate", 2.44, 1127, 9999, flags=["soluble", "toxic"], toxicity=0.6, color="#f2f2f2")
+sp("Al2(SO4)3", "Aluminium sulfate", "sulfate", 2.67, 770, 9999, flags=["soluble"], color="#f2f2f2", solubility=0.36)
+sp("Be(OH)2", "Beryllium hydroxide", "oxide", 1.92, 400, 9999, flags=["toxic"], toxicity=0.6, color="#efefef")
+sp("BeF2", "Beryllium fluoride", "halide", 1.99, 552, 1169, flags=["toxic"], toxicity=0.7, color="#efefef")
+sp("AlCl3", "Aluminium chloride", "halide", 2.48, 192, 180, flags=["soluble"], color="#f2f2e8", solubility=0.45)
+sp("CsCl", "Caesium chloride", "halide", 3.99, 646, 1297, flags=["soluble"], color="#f2f2f2", solubility=1.9)
+sp("RbCl", "Rubidium chloride", "halide", 2.8, 718, 1390, flags=["soluble"], color="#f2f2f2", solubility=0.91)
+sp("SrS", "Strontium sulfide", "sulfide", 3.7, 2002, 9999, color="#efefe8")
+sp("BaS", "Barium sulfide", "sulfide", 4.25, 2235, 9999, color="#efefe8")
+sp("BaCl2", "Barium chloride", "halide", 3.86, 962, 1560, flags=["soluble", "toxic"], toxicity=0.5, color="#f2f2f2", solubility=0.36)
+sp("ZrCl4", "Zirconium tetrachloride", "halide", 2.8, 437, 331, color="#f2f2f2")
+sp("HfCl4", "Hafnium tetrachloride", "halide", 3.89, 432, 317, color="#f2f2f2")
+sp("SiCl4", "Silicon tetrachloride", "halide", 1.48, -69, 58, flags=["toxic"], toxicity=0.3, color="#f0f0f0")
+sp("ZrOCl2", "Zirconyl chloride", "halide", 1.9, 400, 9999, flags=["soluble"], color="#f2f2f2")
+sp("HfOCl2", "Hafnyl chloride", "halide", 2.5, 400, 9999, flags=["soluble"], color="#f2f2f2")
+sp("H2NbOF5", "Oxyfluoroniobic acid", "halide", 2.0, 100, 9999, flags=["soluble", "toxic"], toxicity=0.5, color="#f0f0f0")
+sp("H2TaF7", "Fluorotantalic acid", "halide", 2.5, 100, 9999, flags=["soluble", "toxic"], toxicity=0.5, color="#f0f0f0")
+sp("FeF2", "Iron(II) fluoride", "halide", 4.09, 970, 1100, flags=["soluble"], color="#d8d8c8")
+sp("MnF2", "Manganese fluoride", "halide", 3.98, 856, 1820, flags=["soluble"], color="#e8c8c8")
+sp("K2TaF7", "Potassium heptafluorotantalate", "halide", 5.24, 630, 9999, flags=["soluble"], color="#f2f2f2", solubility=0.005)
+sp("Nb2O5", "Niobium pentoxide", "oxide", 4.6, 1512, 9999, color="#f2f2f2")
+sp("Na2WO4", "Sodium tungstate", "oxide", 4.18, 698, 9999, flags=["soluble"], color="#f2f2f2")
+sp("Fe(OH)2", "Iron(II) hydroxide", "oxide", 3.4, 150, 9999, color="#6a7a5a")
+sp("Mn(OH)2", "Pyrochroite", "oxide", 3.26, 140, 9999, color="#d8c8b8")
+sp("H2WO4", "Tungstic acid", "oxide", 5.5, 100, 9999, color="#e8e030")
+sp("WO3", "Tungsten trioxide", "oxide", 7.16, 1473, 1700, color="#d8e030")
+sp("NaVO3", "Sodium metavanadate", "oxide", 2.84, 630, 9999, flags=["soluble", "toxic"], toxicity=0.3, color="#f0e8c0")
+sp("NH4VO3", "Ammonium metavanadate", "oxide", 2.33, 200, 9999, flags=["soluble", "toxic"], toxicity=0.3, color="#f2f2e0", solubility=0.005)
+sp("Na2CrO4", "Sodium chromate", "oxide", 2.72, 792, 9999, flags=["soluble", "toxic"], toxicity=0.8, color="#f0d820")
+sp("Na2Cr2O7", "Sodium dichromate", "oxide", 2.52, 357, 400, flags=["soluble", "toxic"], toxicity=0.8, color="#e87a20")
+sp("Cr2O3", "Eskolaite", "oxide", 5.22, 2435, 4000, color="#3a8a3a")
+sp("Tc2O7", "Technetium heptoxide", "oxide", 3.5, 120, 311, color="#f0e8a0")
+sp("HTcO4", "Pertechnetic acid", "oxide", 3.0, 100, 9999, flags=["soluble"], color="#f2f2e8")
+sp("NH4TcO4", "Ammonium pertechnetate", "oxide", 2.7, 300, 9999, flags=["soluble"], color="#f2f2f2", solubility=0.06)
+sp("Tl2SO4", "Thallium sulfate", "sulfate", 6.77, 632, 9999, flags=["soluble", "toxic"], toxicity=0.9, color="#f2f2f2", solubility=0.048)
+
+# Rare earths: phosphate cracking, bastnaesite roasting, HCl dissolution, SX (solvent_extraction.json),
+# carbonate precipitation, calcining, then metal: fluoride electrolysis (La-Nd) or Ca reduction.
+for re_ in ["La", "Ce", "Pr", "Nd", "Y"]:
+    rx("leach", f"crack_{re_.lower()}po4", f"{re_}PO4 + 3 NaOH -> {re_}(OH)3 + Na3PO4", 40,
+       "Caustic cracking of monazite/xenotime: rare-earth hydroxides stay, phosphate dissolves.", draw=["NaOH"])
+for re_ in ["Ce", "La"]:
+    rx("roaster", f"roast_{re_.lower()}co3f", f"3 {re_}CO3F -> {re_}F3 + {re_}2O3 + 3 CO2", 60, "Bastnaesite decomposes to oxide and fluoride.")
+for re_ in REE:
+    lo = re_.lower()
+    rx("leach", f"dissolve_{lo}_hydroxide", f"{re_}(OH)3 + 3 HCl -> {re_}Cl3 + 3 H2O", 41, draw=["HCl"])
+    rx("leach", f"dissolve_{lo}_oxide", f"{re_}2O3 + 6 HCl -> 2 {re_}Cl3 + 3 H2O", 42, draw=["HCl"])
+    rx("leach", f"dissolve_{lo}_metal", f"2 {re_} + 6 HCl -> 2 {re_}Cl3 + 3 H2", 43, draw=["HCl"])
+    rx("leach", f"convert_{lo}_fluoride", f"{re_}F3 + 3 NaOH -> {re_}(OH)3 + 3 NaF", 39, draw=["NaOH"])
+    rx("reactor", f"precipitate_{lo}_carbonate", f"2 {re_}Cl3 + 3 Na2CO3 -> {re_}2(CO3)3 + 6 NaCl", 60, "Soda ash precipitates rare-earth carbonate.",
+       draw=["Na2CO3"])
+    rx("reactor", f"fluorinate_{lo}_oxide", f"{re_}2O3 + 6 HF -> 2 {re_}F3 + 3 H2O", 61, draw=["HF"])
+    rx("roaster", f"calcine_{lo}_carbonate", f"{re_}2(CO3)3 -> {re_}2O3 + 3 CO2", 61)
+    rx("kroll", f"reduce_{lo}_fluoride", f"2 {re_}F3 + 3 Ca -> 2 {re_} + 3 CaF2", 20, "Calciothermic reduction (heavy rare earths, Y, Sc).",
+       draw=["Ca"])
+for re_ in ["La", "Ce", "Pr", "Nd"]:
+    rx("electrolysis", f"electrolyse_{re_.lower()}_oxide", f"2 {re_}2O3 + 3 C -> 4 {re_} + 3 CO2", 40,
+       "Oxide dissolved in a molten fluoride bath (LiF), carbon anode.", draw=["C"], electrons=12, voltage=6.0, catalyst="LiF",
+       anhydrous=True)
+rx("reactor", "lithium_fluoride", "Li2CO3 + 2 HF -> 2 LiF + CO2 + H2O", 62, draw=["HF"])
+
+# Nitric acid (Ostwald, platinum gauze catalyst) and ammonium chloride.
+rx("reactor", "ostwald_oxidation", "4 NH3 + 5 O2 -> 4 NO + 6 H2O", 70, "Ostwald process over platinum.", draw=["O2"], catalyst="Pt")
+rx("reactor", "nitric_oxide_oxidation", "2 NO + O2 -> 2 NO2", 71, draw=["O2"])
+rx("reactor", "nitric_absorption", "3 NO2 + H2O -> 2 HNO3 + NO", 72, draw=["H2O"])
+rx("reactor", "ammonium_chloride", "NH3 + HCl -> NH4Cl", 73, draw=["HCl"])
+# Platinum-group metals and gold: roast arsenide, aqua regia, selective precipitation, distillation.
+rx("roaster", "roast_sperrylite", "2 PtAs2 + 3 O2 -> 2 Pt + 2 As2O3", 23, "Arsenic fumes off; platinum sponge stays.", draw=["O2"])
+rx("leach", "aqua_regia_platinum", "3 Pt + 4 HNO3 + 18 HCl -> 3 H2PtCl6 + 4 NO + 8 H2O", 50, "Aqua regia dissolves platinum.", draw=["HNO3", "HCl"])
+rx("leach", "aqua_regia_palladium", "3 Pd + 2 HNO3 + 12 HCl -> 3 H2PdCl4 + 2 NO + 4 H2O", 51, draw=["HNO3", "HCl"])
+rx("leach", "aqua_regia_gold", "Au + HNO3 + 4 HCl -> HAuCl4 + NO + 2 H2O", 52, draw=["HNO3", "HCl"])
+rx("leach", "aqua_regia_silver", "3 Ag + HNO3 + 3 HCl -> 3 AgCl + NO + 2 H2O", 53, "Silver stays behind as chloride.", draw=["HNO3", "HCl"])
+rx("reactor", "precipitate_gold", "2 HAuCl4 + 3 SO2 + 6 H2O -> 2 Au + 3 H2SO4 + 8 HCl", 80, "Sulfur dioxide reduces gold first.", draw=["SO2", "H2O"])
+rx("reactor", "precipitate_chloroplatinate", "H2PtCl6 + 2 NH4Cl -> (NH4)2PtCl6 + 2 HCl", 81, "Yellow ammonium chloroplatinate.", draw=["NH4Cl"])
+rx("reactor", "palladium_tetraammine", "H2PdCl4 + 6 NH3 -> Pd(NH3)4Cl2 + 2 NH4Cl", 82, draw=["NH3"])
+rx("reactor", "palladium_diammine", "Pd(NH3)4Cl2 + 2 HCl -> Pd(NH3)2Cl2 + 2 NH4Cl", 83, "Acidifying precipitates yellow Pd(NH3)2Cl2.", draw=["HCl"])
+rx("reactor", "distil_osmium", "Os + 4 Cl2 + 8 NaOH -> OsO4 + 8 NaCl + 4 H2O", 84, "Oxidative distillation: very toxic OsO4 vapour.",
+   draw=["Cl2", "NaOH"])
+rx("reactor", "distil_ruthenium", "Ru + 4 Cl2 + 8 NaOH -> RuO4 + 8 NaCl + 4 H2O", 85, "Toxic, explosive RuO4 vapour.", draw=["Cl2", "NaOH"])
+rx("reactor", "precipitate_iridium", "Na2IrCl6 + 2 NH4Cl -> (NH4)2IrCl6 + 2 NaCl", 86, "Rhodium stays in solution.", draw=["NH4Cl"])
+rx("reactor", "cement_rhodium", "2 Na3RhCl6 + 3 Zn -> 2 Rh + 3 ZnCl2 + 6 NaCl", 87, draw=["Zn"])
+rx("reactor", "cement_silver_chloride", "2 AgCl + Zn -> 2 Ag + ZnCl2", 88, draw=["Zn"])
+rx("chlorinator", "chlorinate_rhodium", "2 Rh + 3 Cl2 + 6 NaCl -> 2 Na3RhCl6", 20, "Chlorinating with salt makes soluble chlororhodate.", draw=["Cl2", "NaCl"])
+rx("chlorinator", "chlorinate_iridium", "Ir + 2 Cl2 + 2 NaCl -> Na2IrCl6", 21, draw=["Cl2", "NaCl"])
+rx("roaster", "ignite_chloroplatinate", "3 (NH4)2PtCl6 -> 3 Pt + 2 NH4Cl + 16 HCl + 2 N2", 70, "Platinum sponge.")
+rx("roaster", "reduce_palladium_salt", "Pd(NH3)2Cl2 + H2 -> Pd + 2 NH4Cl", 71, draw=["H2"])
+rx("roaster", "reduce_iridium_salt", "(NH4)2IrCl6 + 2 H2 -> Ir + 2 NH4Cl + 4 HCl", 72, draw=["H2"])
+rx("kroll", "reduce_osmium_tetroxide", "OsO4 + 4 H2 -> Os + 4 H2O", 30, draw=["H2"])
+rx("kroll", "reduce_ruthenium_tetroxide", "RuO4 + 4 H2 -> Ru + 4 H2O", 31, draw=["H2"])
+
+# Uranium (acid leach -> yellowcake -> UO2 -> UF4 -> Mg reduction), thorium, radium.
+rx("leach", "leach_uraninite", "2 UO2 + O2 + 2 H2SO4 -> 2 UO2SO4 + 2 H2O", 60, "Oxidising acid leach; radium stays in the tailings.",
+   draw=["O2", "H2SO4"])
+rx("leach", "sulfate_radium", "Ra + H2SO4 -> RaSO4 + H2", 61, draw=["H2SO4"])
+rx("reactor", "yellowcake", "2 UO2SO4 + 6 NH3 + 3 H2O -> (NH4)2U2O7 + 2 (NH4)2SO4", 90, "Ammonia precipitates ammonium diuranate.",
+   draw=["NH3", "H2O"])
+rx("roaster", "calcine_yellowcake", "2 (NH4)2U2O7 -> 4 UO3 + 4 NH3 + 2 H2O", 73)
+rx("roaster", "reduce_uranium_trioxide", "UO3 + H2 -> UO2 + H2O", 74, draw=["H2"])
+rx("reactor", "hydrofluorinate_uranium", "UO2 + 4 HF -> UF4 + 2 H2O", 91, "Green salt.", draw=["HF"])
+rx("reactor", "hydrofluorinate_thorium", "ThO2 + 4 HF -> ThF4 + 2 H2O", 92, draw=["HF"])
+rx("kroll", "reduce_uranium", "UF4 + 2 Mg -> U + 2 MgF2", 32, "Magnesiothermic uranium metal.", draw=["Mg"])
+rx("kroll", "reduce_thorium", "ThF4 + 2 Ca -> Th + 2 CaF2", 33, draw=["Ca"])
+rx("smelter", "reduce_radium_sulfate", "RaSO4 + 4 C -> RaS + 4 CO", 30, draw=["C"])
+rx("leach", "dissolve_radium_sulfide", "RaS + 2 HCl -> RaCl2 + H2S", 62, draw=["HCl"])
+rx("electrolysis", "radium_chloride", "RaCl2 -> Ra + Cl2", 16, electrons=2, voltage=6.0, anhydrous=True)
+rx("electrolysis", "fluorine", "2 HF -> H2 + F2", 17, "Anhydrous HF electrolysis in molten KF.HF.", electrons=2, voltage=9.0, catalyst="KF",
+   anhydrous=True)
+# Beryllium, silicon, phosphorus, caesium, rubidium, strontium, barium.
+rx("leach", "leach_beryl", "Be3Al2Si6O18 + 6 H2SO4 -> 3 BeSO4 + Al2(SO4)3 + 6 SiO2 + 6 H2O", 63, "Sulfate process (after melting and quenching beryl).",
+   draw=["H2SO4"])
+rx("reactor", "precipitate_beryllium", "BeSO4 + 2 NH3 + 2 H2O -> Be(OH)2 + (NH4)2SO4", 93, draw=["NH3", "H2O"])
+rx("reactor", "precipitate_alumina_sulfate", "Al2(SO4)3 + 6 NH3 + 6 H2O -> 2 Al(OH)3 + 3 (NH4)2SO4", 94, draw=["NH3", "H2O"])
+rx("reactor", "fluorinate_beryllium", "Be(OH)2 + 2 HF -> BeF2 + 2 H2O", 95, draw=["HF"])
+rx("kroll", "reduce_beryllium", "BeF2 + Mg -> Be + MgF2", 34, draw=["Mg"])
+rx("kroll", "reduce_silica", "SiO2 + 2 Mg -> Si + 2 MgO", 35, "Magnesiothermic silicon; wash the magnesia out with HCl.", draw=["Mg"])
+rx("smelter", "phosphorus_furnace", "2 Ca5(PO4)3F + 15 C + 9 SiO2 -> 6 P + 15 CO + 9 CaSiO3 + CaF2", 31, "Electric phosphorus furnace: P vapour condenses.",
+   draw=["C", "SiO2"])
+rx("leach", "leach_pollucite", "2 CsAlSi2O6 + 8 HCl -> 2 CsCl + 2 AlCl3 + 4 SiO2 + 4 H2O", 64, draw=["HCl"])
+rx("leach", "dissolve_rubidium", "2 Rb + 2 HCl -> 2 RbCl + H2", 65, draw=["HCl"])
+rx("kroll", "reduce_caesium", "2 CsCl + Ca -> 2 Cs + CaCl2", 36, "Calcium reduction; caesium distils.", draw=["Ca"])
+rx("kroll", "reduce_rubidium", "2 RbCl + Ca -> 2 Rb + CaCl2", 37, draw=["Ca"])
+rx("smelter", "black_ash_strontium", "SrSO4 + 4 C -> SrS + 4 CO", 32, "Black-ash process.", draw=["C"])
+rx("smelter", "black_ash_barium", "BaSO4 + 4 C -> BaS + 4 CO", 33, draw=["C"])
+rx("leach", "dissolve_strontium_sulfide", "SrS + 2 HCl -> SrCl2 + H2S", 66, draw=["HCl"])
+rx("leach", "dissolve_barium_sulfide", "BaS + 2 HCl -> BaCl2 + H2S", 67, draw=["HCl"])
+rx("electrolysis", "barium_chloride", "BaCl2 -> Ba + Cl2", 18, electrons=2, voltage=6.5, anhydrous=True)
+# Zirconium and hafnium.
+rx("chlorinator", "chlorinate_zircon", "ZrSiO4 + 4 C + 4 Cl2 -> ZrCl4 + SiCl4 + 4 CO", 22, "Zircon chlorination.", draw=["C", "Cl2"])
+rx("chlorinator", "chlorinate_hafnium", "Hf + 2 Cl2 -> HfCl4", 23, draw=["Cl2"])
+rx("chlorinator", "rechlorinate_zirconyl", "ZrOCl2 + C + Cl2 -> ZrCl4 + CO", 24, draw=["C", "Cl2"])
+rx("chlorinator", "rechlorinate_hafnyl", "HfOCl2 + C + Cl2 -> HfCl4 + CO", 25, draw=["C", "Cl2"])
+rx("leach", "hydrolyse_zirconium", "ZrCl4 + H2O -> ZrOCl2 + 2 HCl", 68, draw=["H2O"])
+rx("leach", "hydrolyse_hafnium", "HfCl4 + H2O -> HfOCl2 + 2 HCl", 69, draw=["H2O"])
+rx("kroll", "reduce_zirconium", "ZrCl4 + 2 Mg -> Zr + 2 MgCl2", 38, draw=["Mg"])
+rx("kroll", "reduce_hafnium", "HfCl4 + 2 Mg -> Hf + 2 MgCl2", 39, draw=["Mg"])
+# Niobium and tantalum.
+rx("leach", "digest_columbite", "FeNb2O6 + 12 HF -> 2 H2NbOF5 + FeF2 + 4 H2O", 70, "Hydrofluoric digestion.", draw=["HF"])
+rx("leach", "digest_mangancolumbite", "MnNb2O6 + 12 HF -> 2 H2NbOF5 + MnF2 + 4 H2O", 71, draw=["HF"])
+rx("leach", "digest_tantalite", "FeTa2O6 + 16 HF -> 2 H2TaF7 + FeF2 + 6 H2O", 72, draw=["HF"])
+rx("reactor", "marignac_tantalum", "H2TaF7 + 2 KCl -> K2TaF7 + 2 HCl", 96, "Potassium heptafluorotantalate crystallises.", draw=["KCl"])
+rx("reactor", "precipitate_niobia", "2 H2NbOF5 + 10 NH3 + 3 H2O -> Nb2O5 + 10 NH4F", 97, draw=["NH3", "H2O"])
+rx("kroll", "reduce_tantalum", "K2TaF7 + 5 Na -> Ta + 2 KF + 5 NaF", 40, "Sodium reduction to tantalum powder.", draw=["Na"])
+rx("kroll", "reduce_niobia", "3 Nb2O5 + 10 Al -> 6 Nb + 5 Al2O3", 41, "Aluminothermic niobium.", draw=["Al"])
+# Tungsten.
+rx("leach", "digest_ferberite", "FeWO4 + 2 NaOH -> Na2WO4 + Fe(OH)2", 73, draw=["NaOH"])
+rx("leach", "digest_hubnerite", "MnWO4 + 2 NaOH -> Na2WO4 + Mn(OH)2", 74, draw=["NaOH"])
+rx("reactor", "tungstic_acid", "Na2WO4 + 2 HCl -> H2WO4 + 2 NaCl", 98, draw=["HCl"])
+rx("roaster", "dehydrate_tungstic_acid", "H2WO4 -> WO3 + H2O", 75)
+rx("roaster", "reduce_tungsten_trioxide", "WO3 + 3 H2 -> W + 3 H2O", 76, "Tungsten powder.", draw=["H2"])
+# Vanadium.
+rx("converter", "oxidise_vanadium", "4 V + 5 O2 -> 2 V2O5", 32, "Vanadium leaves pig iron into the slag.", draw=["O2"])
+rx("leach", "leach_vanadium_slag", "V2O5 + 2 NaOH -> 2 NaVO3 + H2O", 75, draw=["NaOH"])
+rx("reactor", "ammonium_metavanadate", "NaVO3 + NH4Cl -> NH4VO3 + NaCl", 99, draw=["NH4Cl"])
+rx("roaster", "calcine_metavanadate", "2 NH4VO3 -> V2O5 + 2 NH3 + H2O", 77)
+rx("kroll", "reduce_vanadium", "3 V2O5 + 10 Al -> 6 V + 5 Al2O3", 42, draw=["Al"])
+# Chromium.
+rx("roaster", "soda_roast_chromite", "4 FeCr2O4 + 8 Na2CO3 + 7 O2 -> 8 Na2CrO4 + 2 Fe2O3 + 8 CO2", 24, "Toxic hexavalent chromate.",
+   draw=["Na2CO3", "O2"])
+rx("reactor", "sodium_dichromate", "2 Na2CrO4 + H2SO4 -> Na2Cr2O7 + Na2SO4 + H2O", 100, draw=["H2SO4"])
+rx("roaster", "reduce_dichromate", "Na2Cr2O7 + 2 C -> Cr2O3 + Na2CO3 + CO", 25, draw=["C"])
+rx("kroll", "reduce_chromium", "Cr2O3 + 2 Al -> 2 Cr + Al2O3", 43, draw=["Al"])
+# Technetium (traces; same chemistry as rhenium), thallium.
+rx("roaster", "roast_technetium", "4 Tc + 7 O2 -> 2 Tc2O7", 26, draw=["O2"])
+rx("leach", "leach_technetium", "Tc2O7 + H2O -> 2 HTcO4", 76, draw=["H2O"])
+rx("reactor", "ammonium_pertechnetate", "HTcO4 + NH3 -> NH4TcO4", 101, draw=["NH3"])
+rx("roaster", "reduce_pertechnetate_h2", "2 NH4TcO4 + 7 H2 -> 2 Tc + 2 NH3 + 8 H2O", 78, draw=["H2"])
+rx("leach", "leach_thallium", "2 Tl + H2SO4 -> Tl2SO4 + H2", 77, draw=["H2SO4"])
+rx("reactor", "cement_thallium", "Tl2SO4 + Zn -> 2 Tl + ZnSO4", 102, draw=["Zn"])
+
 # Missing species used by reactions.
 sp("Sb2O3", "Senarmontite", "oxide", 5.2, 656, 1425, flags=["toxic"], toxicity=0.3, color="#efefef")
 
@@ -551,6 +767,52 @@ ATMOSPHERES = {
     "crystal": {"N2": 0.75, "Ar": 0.18, "Ne": 0.04, "He": 0.02, "Kr": 0.002, "Xe": 0.0005},
     "barren": {"Ar": 0.7, "He": 0.2, "Ne": 0.1},
 }
+
+
+# --- Solvent extraction families (M8c-3b) --------------------------------------------------------------
+# Order of extraction with log10 of each adjacent separation factor (beta = D_heavier / D_lighter).
+# Lanthanides: P507 (HEHEHP) in kerosene from chloride solution (literature betas: Ce/La 3.0, Pr/Ce 2.0,
+# Nd/Pr 1.4, Sm/Nd 9.8, Eu/Sm 2.2, Gd/Eu 1.5, Tb/Gd 5.6, Dy/Tb 2.1, Ho/Dy 2.0, Y/Ho 1.4, Er/Y 1.25,
+# Tm/Er 3.3, Yb/Tm 2.8, Lu/Yb 1.8; Sc is extracted almost completely). The saponified extractant swaps
+# 3 Na+ for each RE3+, and stripping returns it with 3 HCl: net 3 NaOH + 3 HCl -> 3 NaCl + 3 H2O.
+# Zr/Hf: MIBK-thiocyanate (Hf preferred, beta ~6). Nb/Ta: MIBK from HF (Ta preferred, beta ~100).
+SX_FAMILIES = {
+    "lanthanides": {"stages": 20, "per_mole": {"NaOH": 3, "HCl": 3}, "products": {"NaCl": 3, "H2O": 3},
+                    "order": [["LaCl3", 0], ["CeCl3", 0.48], ["PrCl3", 0.30], ["NdCl3", 0.15], ["SmCl3", 0.99], ["EuCl3", 0.34],
+                              ["GdCl3", 0.18], ["TbCl3", 0.75], ["DyCl3", 0.32], ["HoCl3", 0.30], ["YCl3", 0.15], ["ErCl3", 0.10],
+                              ["TmCl3", 0.52], ["YbCl3", 0.45], ["LuCl3", 0.26], ["ScCl3", 2.0]],
+                    "note": "P507 solvent extraction battery (chloride)."},
+    "zirconium_hafnium": {"stages": 20, "per_mole": {}, "products": {}, "order": [["ZrOCl2", 0], ["HfOCl2", 0.78]],
+                          "note": "MIBK-thiocyanate extraction: hafnium goes to the extract."},
+    "niobium_tantalum": {"stages": 20, "per_mole": {}, "products": {}, "order": [["H2NbOF5", 0], ["H2TaF7", 2.0]],
+                         "note": "MIBK extraction from HF: tantalum goes to the extract."},
+}
+
+
+def audit():
+    """Every natural element (Z 1-94) must have a source: a reaction that makes it, or occurrence as itself
+    (native metals, noble gases from air, radioactive traces in uraninite: practical amounts from reactors)."""
+    diatomic = {"H": "H2", "N": "N2", "O": "O2", "Cl": "Cl2", "F": "F2"}
+    native = set()
+    for o in ORES.values():
+        native |= set(o["assay"])
+    for a in ATMOSPHERES.values():
+        native |= set(a)
+    made = set()
+    for r in REACTIONS:
+        for t in r["equation"].split("->")[1].split(" + "):
+            m = re.match(r"^(\d+(?:\.\d+)?)\s+(.+)$", t.strip())
+            made.add(m.group(2) if m else t.strip())
+    physical, missing = [], []
+    for sym, e in sorted(ELEMENTS.items(), key=lambda x: x[1]["z"]):
+        if e["z"] > 94:
+            continue
+        sid = diatomic.get(sym, sym)
+        if sid in made:
+            continue
+        (physical if sid in native else missing).append(sym)
+    assert not missing, ("elements without any source", missing)
+    return physical
 
 
 def check():
@@ -601,7 +863,19 @@ def main():
         json.dump({"composition": v}, open(os.path.join(d, k + ".json"), "w"), indent=1)
     for k, v in SEPARATIONS.items():
         json.dump(v, open(os.path.join(DATA, "separation", k + ".json"), "w"), indent=1)
+    d = os.path.join(DATA, "solvent_extraction")
+    os.makedirs(d, exist_ok=True)
+    for f in os.listdir(d):
+        os.remove(os.path.join(d, f))
+    ids = {x["id"] for x in SPECIES}
+    for k, v in SX_FAMILIES.items():
+        for sid, _ in v["order"]:
+            assert sid in ids, (k, sid)
+        out = dict(v, order=[[sid, str(l)] for sid, l in v["order"]])
+        json.dump(out, open(os.path.join(d, k + ".json"), "w"), indent=1)
+    physical = audit()
     print(f"{len(SPECIES)} species, {len(ORES)} ore/feed items, {len(REACTIONS)} reactions (all balanced)")
+    print("Every natural element has a route; occurring as themselves only:", " ".join(physical))
 
 
 if __name__ == "__main__":

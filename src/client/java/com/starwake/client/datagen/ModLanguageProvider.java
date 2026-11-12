@@ -204,7 +204,7 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 				java.util.Map.entry("reactor", "Chemical Reactor"), java.util.Map.entry("leach", "Leach Tank"), java.util.Map.entry("evaporator", "Evaporator"),
 				java.util.Map.entry("crystallizer", "Crystallizer"), java.util.Map.entry("electrolysis", "Electrolysis Cell"),
 				java.util.Map.entry("chlorinator", "Chlorinator"), java.util.Map.entry("kroll", "Kroll Reactor"),
-				java.util.Map.entry("air_separator", "Air Separation Unit"));
+				java.util.Map.entry("air_separator", "Air Separation Unit"), java.util.Map.entry("solvent_extraction", "Solvent Extraction Battery"));
 		for (var p : com.starwake.process.ProcessMachineBlockEntity.Process.values()) {
 			builder.add(com.starwake.registry.ModProcess.block(p), machines.get(p.machine));
 		}
@@ -234,6 +234,19 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("item.starwake.gas_cylinder.help", "Use on a tank or machine to fill; sneak-use to empty");
 		builder.add("message.starwake.pipe.filter", "Pipe filter: %s");
 		builder.add("message.starwake.pipe.filter_any", "anything");
+		// M8c-3b.
+		builder.add(com.starwake.registry.ModMachines.GAS_WELL, "Gas Well");
+		builder.add("message.starwake.sx.cut", "Extracting %s and everything after it");
+		builder.add("message.starwake.sx.auto", "Cut: automatic (between the first two present)");
+		builder.add("screen.starwake.machine.sx_cut", "Extract ≥ %s");
+		builder.add("screen.starwake.machine.sx_auto", "Cut: auto");
+		builder.add("screen.starwake.machine.sx_hint", "Sneak-use: cut");
+		builder.add("screen.starwake.machine.tank.solvent_extraction.inlet", "Feed (chlorides, NaOH + HCl)");
+		builder.add("screen.starwake.machine.tank.solvent_extraction.gas", "Extract (heavier, stripped)");
+		builder.add("screen.starwake.machine.tank.solvent_extraction.liquid", "Raffinate (lighter)");
+		builder.add("screen.starwake.machine.tank.air_separator.inlet", "Feed gas (optional, else air)");
+		builder.add("process.starwake.tooltip.u235", "U-235: %s%% of the uranium");
+		builder.add("process.starwake.tooltip.u235_natural", "U-235: 0.72%% of the uranium (natural)");
 		builder.add("process.starwake.tooltip.radioactive", "☢ %s · %s at 1 m");
 		builder.add("hud.starwake.rad.rate", "☢ Dose rate");
 		builder.add("hud.starwake.rad.dose", "Acute dose");

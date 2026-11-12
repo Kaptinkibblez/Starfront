@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "2 Tb + 6 HCl -> 2 TbCl3 + 3 H2",
+ "priority": 43,
+ "draw": [
+  "HCl"
+ ]
+}

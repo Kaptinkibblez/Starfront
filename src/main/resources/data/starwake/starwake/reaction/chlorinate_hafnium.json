@@ -1,0 +1,8 @@
+{
+ "machine": "chlorinator",
+ "equation": "Hf + 2 Cl2 -> HfCl4",
+ "priority": 23,
+ "draw": [
+  "Cl2"
+ ]
+}

@@ -1,0 +1,9 @@
+{
+ "machine": "roaster",
+ "equation": "WO3 + 3 H2 -> W + 3 H2O",
+ "priority": 76,
+ "draw": [
+  "H2"
+ ],
+ "note": "Tungsten powder."
+}

@@ -1,0 +1,8 @@
+{
+ "machine": "roaster",
+ "equation": "2 NH4TcO4 + 7 H2 -> 2 Tc + 2 NH3 + 8 H2O",
+ "priority": 78,
+ "draw": [
+  "H2"
+ ]
+}

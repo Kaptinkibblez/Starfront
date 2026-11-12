@@ -1,0 +1,6 @@
+{
+ "machine": "roaster",
+ "equation": "3 (NH4)2PtCl6 -> 3 Pt + 2 NH4Cl + 16 HCl + 2 N2",
+ "priority": 70,
+ "note": "Platinum sponge."
+}

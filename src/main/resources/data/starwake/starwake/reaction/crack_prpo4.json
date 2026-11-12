@@ -1,0 +1,9 @@
+{
+ "machine": "leach",
+ "equation": "PrPO4 + 3 NaOH -> Pr(OH)3 + Na3PO4",
+ "priority": 40,
+ "draw": [
+  "NaOH"
+ ],
+ "note": "Caustic cracking of monazite/xenotime: rare-earth hydroxides stay, phosphate dissolves."
+}

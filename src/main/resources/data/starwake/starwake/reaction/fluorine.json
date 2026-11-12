@@ -1,0 +1,10 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 HF -> H2 + F2",
+ "priority": 17,
+ "electrons": 2,
+ "voltage": 9.0,
+ "catalyst": "KF",
+ "anhydrous": true,
+ "note": "Anhydrous HF electrolysis in molten KF.HF."
+}

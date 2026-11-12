@@ -1,0 +1,16 @@
+{
+ "stages": 20,
+ "per_mole": {},
+ "products": {},
+ "order": [
+  [
+   "ZrOCl2",
+   "0"
+  ],
+  [
+   "HfOCl2",
+   "0.78"
+  ]
+ ],
+ "note": "MIBK-thiocyanate extraction: hafnium goes to the extract."
+}

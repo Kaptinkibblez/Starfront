@@ -1,0 +1,16 @@
+{
+ "stages": 20,
+ "per_mole": {},
+ "products": {},
+ "order": [
+  [
+   "H2NbOF5",
+   "0"
+  ],
+  [
+   "H2TaF7",
+   "2.0"
+  ]
+ ],
+ "note": "MIBK extraction from HF: tantalum goes to the extract."
+}

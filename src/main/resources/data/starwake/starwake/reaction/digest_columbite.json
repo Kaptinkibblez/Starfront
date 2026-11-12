@@ -1,0 +1,9 @@
+{
+ "machine": "leach",
+ "equation": "FeNb2O6 + 12 HF -> 2 H2NbOF5 + FeF2 + 4 H2O",
+ "priority": 70,
+ "draw": [
+  "HF"
+ ],
+ "note": "Hydrofluoric digestion."
+}

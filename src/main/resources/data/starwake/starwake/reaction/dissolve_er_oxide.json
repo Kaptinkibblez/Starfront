@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "Er2O3 + 6 HCl -> 2 ErCl3 + 3 H2O",
+ "priority": 42,
+ "draw": [
+  "HCl"
+ ]
+}

@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "Lu2O3 + 6 HF -> 2 LuF3 + 3 H2O",
+ "priority": 61,
+ "draw": [
+  "HF"
+ ]
+}

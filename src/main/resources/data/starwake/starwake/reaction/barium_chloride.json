@@ -1,0 +1,8 @@
+{
+ "machine": "electrolysis",
+ "equation": "BaCl2 -> Ba + Cl2",
+ "priority": 18,
+ "electrons": 2,
+ "voltage": 6.5,
+ "anhydrous": true
+}

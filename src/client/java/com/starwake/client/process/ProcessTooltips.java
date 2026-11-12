@@ -40,6 +40,12 @@ public final class ProcessTooltips {
 			if (fill != null && fill.species().equals("O2")) lines.add(Component.translatable("item.starwake.gas_cylinder.suit").withColor(DIM));
 			lines.add(Component.translatable("item.starwake.gas_cylinder.help").withColor(DIM));
 		}
+		var material = com.starwake.process.ProcessMachineBlockEntity.material(stack).orElse(null);
+		if (material != null && com.starwake.process.Isotopes.uraniumKg(material) > 0) {
+			double f = com.starwake.process.Isotopes.of(stack);
+			lines.add((com.starwake.process.Isotopes.natural(f) ? Component.translatable("process.starwake.tooltip.u235_natural")
+					: Component.translatable("process.starwake.tooltip.u235", String.format("%.2f", f * 100))).withColor(DIM));
+		}
 		double[] r = com.starwake.process.Radiation.perItem(stack);
 		if (r[0] * stack.getCount() >= 1000) {
 			double a = r[0] * stack.getCount(), g = r[1] * stack.getCount();

@@ -1,0 +1,6 @@
+{
+ "machine": "roaster",
+ "equation": "3 LaCO3F -> LaF3 + La2O3 + 3 CO2",
+ "priority": 60,
+ "note": "Bastnaesite decomposes to oxide and fluoride."
+}

@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "Sm(OH)3 + 3 HCl -> SmCl3 + 3 H2O",
+ "priority": 41,
+ "draw": [
+  "HCl"
+ ]
+}

@@ -1,0 +1,10 @@
+{
+ "machine": "reactor",
+ "equation": "2 UO2SO4 + 6 NH3 + 3 H2O -> (NH4)2U2O7 + 2 (NH4)2SO4",
+ "priority": 90,
+ "draw": [
+  "NH3",
+  "H2O"
+ ],
+ "note": "Ammonia precipitates ammonium diuranate."
+}

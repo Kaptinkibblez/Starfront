@@ -1,0 +1,8 @@
+{
+ "machine": "roaster",
+ "equation": "(NH4)2IrCl6 + 2 H2 -> Ir + 2 NH4Cl + 4 HCl",
+ "priority": 72,
+ "draw": [
+  "H2"
+ ]
+}

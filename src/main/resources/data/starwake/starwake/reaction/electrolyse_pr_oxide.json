@@ -1,0 +1,13 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 Pr2O3 + 3 C -> 4 Pr + 3 CO2",
+ "priority": 40,
+ "draw": [
+  "C"
+ ],
+ "electrons": 12,
+ "voltage": 6.0,
+ "catalyst": "LiF",
+ "anhydrous": true,
+ "note": "Oxide dissolved in a molten fluoride bath (LiF), carbon anode."
+}

@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "Tl2SO4 + Zn -> 2 Tl + ZnSO4",
+ "priority": 102,
+ "draw": [
+  "Zn"
+ ]
+}

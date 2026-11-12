@@ -1,0 +1,8 @@
+{
+ "machine": "roaster",
+ "equation": "UO3 + H2 -> UO2 + H2O",
+ "priority": 74,
+ "draw": [
+  "H2"
+ ]
+}

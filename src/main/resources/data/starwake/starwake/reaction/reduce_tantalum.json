@@ -1,0 +1,9 @@
+{
+ "machine": "kroll",
+ "equation": "K2TaF7 + 5 Na -> Ta + 2 KF + 5 NaF",
+ "priority": 40,
+ "draw": [
+  "Na"
+ ],
+ "note": "Sodium reduction to tantalum powder."
+}

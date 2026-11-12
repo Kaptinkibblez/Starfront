@@ -1,0 +1,10 @@
+{
+ "machine": "reactor",
+ "equation": "4 NH3 + 5 O2 -> 4 NO + 6 H2O",
+ "priority": 70,
+ "draw": [
+  "O2"
+ ],
+ "catalyst": "Pt",
+ "note": "Ostwald process over platinum."
+}

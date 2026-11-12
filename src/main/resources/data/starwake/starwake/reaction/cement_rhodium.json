@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "2 Na3RhCl6 + 3 Zn -> 2 Rh + 3 ZnCl2 + 6 NaCl",
+ "priority": 87,
+ "draw": [
+  "Zn"
+ ]
+}

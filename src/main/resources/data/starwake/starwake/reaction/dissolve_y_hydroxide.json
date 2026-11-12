@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "Y(OH)3 + 3 HCl -> YCl3 + 3 H2O",
+ "priority": 41,
+ "draw": [
+  "HCl"
+ ]
+}

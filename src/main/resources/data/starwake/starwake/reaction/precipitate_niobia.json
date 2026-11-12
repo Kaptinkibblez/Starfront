@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "2 H2NbOF5 + 10 NH3 + 3 H2O -> Nb2O5 + 10 NH4F",
+ "priority": 97,
+ "draw": [
+  "NH3",
+  "H2O"
+ ]
+}

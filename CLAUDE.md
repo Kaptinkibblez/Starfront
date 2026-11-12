@@ -327,6 +327,26 @@ commit. **Don't start the next milestone until the user confirms the current one
         electrowon; pumps give seawater / brine by biome; uraninite shows 4 uSv/h at 1 m per chunk,
         64 chunks + 4 g radium nearby read 1.9-4.8 mSv/h on the HUD; an O2 cylinder refills the
         suit; cylinders fill from tanks and sneak-empty into them.)*
+  - **8c-3b decisions (user, 2026-11-12):** rare earths via an **SX battery block** (counter-current
+    battery with real per-pair separation factors; you set the cut; re-run products to raise
+    purity); **track U-235 from now** (uranium carries its U-235 fraction through every process,
+    ready for enrichment in 8g); ultra-trace elements stay at **real abundances** (routes exist,
+    practical Tc/Pm/Np/Pu/Po come from reactors in 8g; He from natural-gas wells); the **full classic
+    PGM route** (aqua regia, ammonium chloroplatinate, OsO4/RuO4 distillation with real hazards).
+  - [x] 8c-3b. Rare earths (caustic cracking, HCl dissolution, Solvent Extraction Battery, carbonate,
+        oxide, fluoride electrolysis / Ca reduction), PGMs (sperrylite roast, Ostwald nitric acid, aqua
+        regia, chloroplatinate, Pd ammines, OsO4/RuO4 distillation, Rh/Ir chlorination), uranium (acid
+        leach, yellowcake, UO2, UF4, Mg reduction) with **U-235 tracking**, thorium, radium, fluorine,
+        Be, Si, P, Cs, Rb, Sr, Ba, Zr/Hf (SX), Nb/Ta (SX, Marignac), W, V, Cr, Tc, Tl; Gas Well
+        (natural gas, helium via the ASU); dissolution-only leaching; the element audit in the tool.
+        *(Verified 2026-11-12 on a dedicated server + client: monazite cracked, ThO2 left in the HCl
+        residue; SX cut at Nd sends 85% Nd / 15% Pr to the extract, a second pass cut at Sm strips all
+        Sm/Dy leaving 93% Nd; Nd carbonate -> oxide -> fluoride electrolysis -> Nd 100% (3.3 kWh/kg);
+        Dy2O3 -> DyF3 -> Ca -> Dy; sperrylite -> 84% Pt sponge -> aqua regia -> H2PtCl6/H2PdCl4 with
+        Rh/Ru/Ir/Os left -> (NH4)2PtCl6; OsO4 + RuO4 distilled into the gas tank; Na3RhCl6/Na2IrCl6;
+        Ostwald HNO3 over Pt; 5%-tagged uraninite -> uranyl liquor (5%) -> pipe -> yellowcake stamped
+        5%; RaSO4 stays in the tailings; gas well + ASU -> helium; chromate dissolves in water; SX screen
+        shows the cut.)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
 
 ---
@@ -934,6 +954,52 @@ normal gravity.
   half-life; 0.5 Sv hunger, 1 Sv weakness, 2 Sv sickness damage, 4 Sv severe + nausea, 8 Sv
   ~2 HP/s (`starwake:radiation`, bypasses armour). Synced player attachment `starwake:radiation`
   (dose, rate) -> HUD card under the environment card; item tooltips show activity and dose rate.
+
+## How rare earths, PGMs and actinides work (Milestone 8c-3b)
+
+- **Element audit** (`tools/chemistry_process.py` `audit()`, runs every generation): every natural
+  element Z 1-94 has a reaction that makes it, or occurs as itself (noble gases from air or gas
+  wells; Pm, Po, At, Rn, Fr, Ac, Pa, Np, Pu as real-abundance traces in uraninite, which round to
+  nothing in an assay: practical amounts come from reactors in 8g). The tool fails if one is missing.
+- **Solvent Extraction Battery** (`Process.SOLVENT_EXTRACTION`, Mode SX; families in datapack
+  `starwake/solvent_extraction/*.json`: order of extraction + log10 of adjacent separation factors,
+  stages, reagents per mole). Feed (1 kg slice of the inlet) splits per species by an ideal
+  counter-current cascade around the **cut**: share to extract = 1 / (1 + (D_cut / D_i)^(N/2)) with
+  D_cut the geometric middle of the cut pair; N = 20. Lanthanides (P507: La < Ce < Pr < Nd < Sm < Eu <
+  Gd < Tb < Dy < Ho < Y < Er < Tm < Yb < Lu < Sc) consume 3 NaOH + 3 HCl per mole extracted (-> 3 NaCl
+  + 3 H2O; less is extracted without them); Zr/Hf (MIBK, Hf extracted, beta 6) and Nb/Ta (MIBK/HF,
+  Ta extracted, beta 100) need nothing. Extract (with half the water) -> the "gas" tank (a mixture
+  tank here), raffinate -> the liquid tank. **Sneak-use** the block with an empty hand to step the cut
+  (`cut` in NBT; STATUS data slot = species index + 1; the screen shows "Extract >= X"). Adjacent pairs
+  with low beta (Nd/Pr) need several passes; tank labels are per process
+  (`screen.starwake.machine.tank.<machine>.<role>`, falling back to the generic ones).
+- **Rare-earth route:** monazite/xenotime + NaOH (leach) -> RE(OH)3 + Na3PO4; bastnaesite roasts to
+  REF3 + RE2O3 (REF3 + NaOH -> RE(OH)3); HCl leach -> RECl3 (thoria stays) -> SX -> Na2CO3 (reactor)
+  -> RE2(CO3)3 -> roaster -> RE2O3 -> La-Nd: electrolysis in LiF with carbon (anhydrous); all: + HF ->
+  REF3 -> Kroll + Ca.
+- **PGM route:** sperrylite roast (As2O3 fume, Pt sponge as metal dust) or Ni/Cu anode slimes ->
+  aqua regia (HNO3 from Ostwald over a Pt catalyst + HCl) -> H2PtCl6, H2PdCl4, HAuCl4 (AgCl and
+  Rh/Ru/Ir/Os stay) -> SO2 drops Au; NH4Cl drops (NH4)2PtCl6 -> roaster -> Pt; NH3 then HCl ->
+  Pd(NH3)2Cl2 -> roaster + H2 -> Pd. Residue + Cl2 + NaOH (reactor) -> OsO4 and RuO4 (toxic "gas"
+  species in the gas tank; separate them with pipe filters) -> Kroll + H2 -> Os, Ru. Remaining Rh/Ir +
+  NaCl + Cl2 (chlorinator) -> Na3RhCl6/Na2IrCl6 -> reactor + NH4Cl: (NH4)2IrCl6 precipitates (-> H2
+  -> Ir), rhodium stays dissolved (-> Zn cementation -> Rh). (Pd uses the industrial ammine route,
+  not dimethylglyoxime.)
+- **Uranium:** acid leach with O2 -> UO2SO4 (Ra -> RaSO4 stays in the tailings) -> NH3 -> yellowcake
+  -> roaster -> UO3 -> H2 -> UO2 -> HF -> UF4 -> Kroll + Mg -> U. Thorium: ThO2 + HF -> ThF4 + Ca.
+  Radium: RaSO4 + C -> RaS -> HCl -> RaCl2 -> molten cell. Fluorine: 2 HF -> H2 + F2 (catalyst KF,
+  9 V).
+- **U-235 tracking** (`process/Isotopes`, component `starwake:u235` = U-235 share of the uranium,
+  absent = natural 0.72%): process machines keep a ledger (uranium in, U-235 in; reset when they hold
+  no uranium) and stamp every uranium-bearing output item and their tanks; `ChemicalTank` keeps a
+  `u235` share mixed by uranium mass and tags its chemical variants (non-natural only), so pipes carry
+  it. Tooltips show it. Enrichment comes in 8g.
+- **Gas Well** (`WaterSourceBlockEntity`, 3 kW, 0.2 kg/s natural gas: CH4, C2H6, N2, CO2, 0.3% He,
+  H2S) on `#starwake:gas_field` biomes below sea level + 40. The **Air Separation Unit** separates
+  piped-in gas first (helium recovery), otherwise the planet's air.
+- **Dissolution leaching:** a Leach Tank also runs when its charge holds a soluble salt and there's
+  water (no reaction needed). Metals are accepted as charges everywhere chemistry can use them
+  (aqua regia on platinum sponge). Gaseous elements in a metal's composition become O2/N2/H2/F2/Cl2.
 
 ## 26.3 gotchas (learned the hard way)
 

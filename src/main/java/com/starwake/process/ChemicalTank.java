@@ -26,6 +26,8 @@ public class ChemicalTank extends SnapshotParticipant<Map<String, Long>> impleme
 	/** Solutions: show the contents as one mixed fluid (M8c-2) instead of one fluid per species. */
 	private boolean mixture;
 	private final Predicate<String> accepts;
+	/** U-235 share of the uranium held here (M8c-3b). */
+	private double u235 = Isotopes.NATURAL;
 	private final Runnable onChange;
 
 	public ChemicalTank(double capacityKg, boolean insertable, boolean extractable, Predicate<String> accepts, Runnable onChange) {
@@ -79,6 +81,34 @@ public class ChemicalTank extends SnapshotParticipant<Map<String, Long>> impleme
 			}
 		}
 		return best;
+	}
+
+	public double u235() {
+		return u235;
+	}
+
+	/** Mixes in kgU of uranium at fraction f (call before adding the species). */
+	public void mixUranium(double kgU, double f) {
+		if (kgU <= 0) return;
+		Map<String, Double> kg = new LinkedHashMap<>();
+		amounts.forEach((k, v) -> kg.put(k, v / (double) Chemicals.KG));
+		u235 = Isotopes.mix(Isotopes.uraniumKg(kg), u235, kgU, f);
+	}
+
+	/** Adds the U-235 share to a chemical variant that carries uranium (only when not natural). */
+	private FluidVariant tagged(FluidVariant v, boolean hasUranium) {
+		if (!hasUranium || Isotopes.natural(u235) || !v.isOf(Chemicals.FLUID)) return v;
+		var b = net.minecraft.core.component.DataComponentPatch.builder();
+		String species = v.getComponents().get(Chemicals.SPECIES);
+		if (species != null) b.set(Chemicals.SPECIES, species);
+		Assay assay = v.getComponents().get(com.starwake.registry.ModComponents.ASSAY);
+		if (assay != null) b.set(com.starwake.registry.ModComponents.ASSAY, assay);
+		b.set(com.starwake.registry.ModComponents.U235, (float) u235);
+		return FluidVariant.of(Chemicals.FLUID, b.build());
+	}
+
+	private static boolean containsUranium(String species) {
+		return Species.get(species).map(s -> s.elements().containsKey("U")).orElse(false);
 	}
 
 	/** Machine side: adds kg, returns what didn't fit (kg). */
@@ -153,6 +183,12 @@ public class ChemicalTank extends SnapshotParticipant<Map<String, Long>> impleme
 		long put = Math.min(maxAmount, capacity - total());
 		if (put <= 0) return 0;
 		updateSnapshots(tx);
+		double uIn = 0;
+		for (var e : parts.entrySet()) {
+			Double f = Species.get(e.getKey()).map(x -> x.elements().get("U")).orElse(null);
+			if (f != null) uIn += f * e.getValue() * put / (double) Chemicals.KG;
+		}
+		if (uIn > 0) mixUranium(uIn, Isotopes.of(resource));
 		long placed = 0;
 		String largest = null;
 		double big = -1;
@@ -171,7 +207,7 @@ public class ChemicalTank extends SnapshotParticipant<Map<String, Long>> impleme
 
 	/** The fluid this tank shows in mixture mode. */
 	public FluidVariant mixtureVariant() {
-		return Chemicals.mixture(amounts);
+		return tagged(Chemicals.mixture(amounts), amounts.keySet().stream().anyMatch(ChemicalTank::containsUranium));
 	}
 
 	@Override
@@ -245,7 +281,7 @@ public class ChemicalTank extends SnapshotParticipant<Map<String, Long>> impleme
 			return views.iterator();
 		}
 		for (String species : List.copyOf(amounts.keySet())) {
-			FluidVariant variant = Chemicals.variant(species);
+			FluidVariant variant = tagged(Chemicals.variant(species), containsUranium(species));
 			views.add(new StorageView<>() {
 				@Override
 				public long extract(FluidVariant resource, long maxAmount, TransactionContext tx) {
@@ -295,10 +331,12 @@ public class ChemicalTank extends SnapshotParticipant<Map<String, Long>> impleme
 	public void write(ValueOutput output, String key) {
 		ValueOutput o = output.child(key);
 		amounts.forEach((k, v) -> o.putLong(k, v));
+		if (!Isotopes.natural(u235)) output.putDouble(key + "_u235", u235);
 	}
 
 	public void read(ValueInput input, String key) {
 		amounts.clear();
+		u235 = input.getDoubleOr(key + "_u235", Isotopes.NATURAL);
 		input.child(key).ifPresent(i -> {
 			for (var s : Species.all()) {
 				long v = i.getLongOr(s.id(), 0);

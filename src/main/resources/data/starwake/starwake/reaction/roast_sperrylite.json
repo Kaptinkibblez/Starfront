@@ -1,0 +1,9 @@
+{
+ "machine": "roaster",
+ "equation": "2 PtAs2 + 3 O2 -> 2 Pt + 2 As2O3",
+ "priority": 23,
+ "draw": [
+  "O2"
+ ],
+ "note": "Arsenic fumes off; platinum sponge stays."
+}

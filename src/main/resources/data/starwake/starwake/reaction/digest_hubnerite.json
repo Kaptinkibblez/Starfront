@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "MnWO4 + 2 NaOH -> Na2WO4 + Mn(OH)2",
+ "priority": 74,
+ "draw": [
+  "NaOH"
+ ]
+}

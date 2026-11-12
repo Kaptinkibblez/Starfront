@@ -1,0 +1,8 @@
+{
+ "machine": "roaster",
+ "equation": "Na2Cr2O7 + 2 C -> Cr2O3 + Na2CO3 + CO",
+ "priority": 25,
+ "draw": [
+  "C"
+ ]
+}

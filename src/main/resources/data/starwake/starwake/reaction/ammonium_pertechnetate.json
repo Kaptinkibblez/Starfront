@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "HTcO4 + NH3 -> NH4TcO4",
+ "priority": 101,
+ "draw": [
+  "NH3"
+ ]
+}

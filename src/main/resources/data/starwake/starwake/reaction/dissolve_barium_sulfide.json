@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "BaS + 2 HCl -> BaCl2 + H2S",
+ "priority": 67,
+ "draw": [
+  "HCl"
+ ]
+}

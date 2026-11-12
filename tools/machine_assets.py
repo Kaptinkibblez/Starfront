@@ -316,6 +316,23 @@ def process_textures():
 
     front("air_separator", "#5e6a76", air_separator)
 
+    # M8c-3b: mixer-settler battery (stacked boxes with two liquid layers) and a gas wellhead.
+    def solvent_extraction(im, on):
+        for i, x in enumerate((2, 6, 10)):
+            rect(im, x, 4, x + 3, 12, "#2e3a44")
+            rect(im, x, 6, x + 3, 8, "#d8b84a" if on else "#6a5a3a")
+            rect(im, x, 9, x + 3, 11, "#4a8ac8" if on else "#2a3a50")
+        rect(im, 2, 3, 13, 3, "#9aa4b0")
+
+    def gas_well(im, on):
+        rect(im, 6, 2, 9, 13, "#c83a2a")
+        rect(im, 4, 5, 11, 6, "#9aa4b0")
+        rect(im, 4, 9, 11, 10, "#9aa4b0")
+        rect(im, 7, 0, 8, 1, "#ffb03a" if on else "#4a4a4a")
+
+    front("solvent_extraction", "#5a6470", solvent_extraction)
+    front("gas_well", "#5e6066", gas_well)
+
 
 def bulk_textures():
     """Bulk materials (tinted by their main species): crushed ore, concentrate, tailings, calcine,

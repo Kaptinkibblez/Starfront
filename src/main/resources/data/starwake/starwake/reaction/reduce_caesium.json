@@ -1,0 +1,9 @@
+{
+ "machine": "kroll",
+ "equation": "2 CsCl + Ca -> 2 Cs + CaCl2",
+ "priority": 36,
+ "draw": [
+  "Ca"
+ ],
+ "note": "Calcium reduction; caesium distils."
+}

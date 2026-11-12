@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "2 AgCl + Zn -> 2 Ag + ZnCl2",
+ "priority": 88,
+ "draw": [
+  "Zn"
+ ]
+}

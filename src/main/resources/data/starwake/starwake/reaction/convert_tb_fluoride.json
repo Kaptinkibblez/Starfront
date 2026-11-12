@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "TbF3 + 3 NaOH -> Tb(OH)3 + 3 NaF",
+ "priority": 39,
+ "draw": [
+  "NaOH"
+ ]
+}

@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:is_ocean",
+    "minecraft:plains", "minecraft:desert", "minecraft:badlands", "minecraft:eroded_badlands", "minecraft:wooded_badlands",
+    "minecraft:savanna", "minecraft:swamp", "minecraft:mangrove_swamp", "minecraft:snowy_plains",
+    {"id": "starwake:planet/desert_dunes", "required": false},
+    {"id": "starwake:planet/desert_salt_flats", "required": false},
+    {"id": "starwake:planet/lush_wetlands", "required": false},
+    {"id": "starwake:planet/lush_mat_plains", "required": false},
+    {"id": "starwake:planet/ocean_shoals", "required": false},
+    {"id": "starwake:planet/frozen_tundra", "required": false}
+  ]
+}

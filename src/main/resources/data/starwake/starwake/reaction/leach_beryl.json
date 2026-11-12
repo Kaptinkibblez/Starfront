@@ -1,0 +1,9 @@
+{
+ "machine": "leach",
+ "equation": "Be3Al2Si6O18 + 6 H2SO4 -> 3 BeSO4 + Al2(SO4)3 + 6 SiO2 + 6 H2O",
+ "priority": 63,
+ "draw": [
+  "H2SO4"
+ ],
+ "note": "Sulfate process (after melting and quenching beryl)."
+}

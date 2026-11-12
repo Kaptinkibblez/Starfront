@@ -1,0 +1,9 @@
+{
+ "machine": "converter",
+ "equation": "4 V + 5 O2 -> 2 V2O5",
+ "priority": 32,
+ "draw": [
+  "O2"
+ ],
+ "note": "Vanadium leaves pig iron into the slag."
+}

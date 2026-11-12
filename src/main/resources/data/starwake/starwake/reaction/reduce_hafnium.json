@@ -1,0 +1,8 @@
+{
+ "machine": "kroll",
+ "equation": "HfCl4 + 2 Mg -> Hf + 2 MgCl2",
+ "priority": 39,
+ "draw": [
+  "Mg"
+ ]
+}

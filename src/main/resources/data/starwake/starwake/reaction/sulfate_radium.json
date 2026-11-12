@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "Ra + H2SO4 -> RaSO4 + H2",
+ "priority": 61,
+ "draw": [
+  "H2SO4"
+ ]
+}

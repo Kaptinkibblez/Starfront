@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "MnNb2O6 + 12 HF -> 2 H2NbOF5 + MnF2 + 4 H2O",
+ "priority": 71,
+ "draw": [
+  "HF"
+ ]
+}

@@ -1,0 +1,9 @@
+{
+ "machine": "leach",
+ "equation": "3 Pd + 2 HNO3 + 12 HCl -> 3 H2PdCl4 + 2 NO + 4 H2O",
+ "priority": 51,
+ "draw": [
+  "HNO3",
+  "HCl"
+ ]
+}

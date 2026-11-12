@@ -1,0 +1,10 @@
+{
+ "machine": "chlorinator",
+ "equation": "ZrSiO4 + 4 C + 4 Cl2 -> ZrCl4 + SiCl4 + 4 CO",
+ "priority": 22,
+ "draw": [
+  "C",
+  "Cl2"
+ ],
+ "note": "Zircon chlorination."
+}

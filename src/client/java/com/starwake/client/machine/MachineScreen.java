@@ -27,6 +27,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		MenuScreens.register(ModMachines.ELECTRIC_FURNACE_MENU, MachineScreen::new);
 		MenuScreens.register(ModMachines.WATER_PUMP_MENU, MachineScreen::new);
 		MenuScreens.register(ModMachines.CONDENSER_MENU, MachineScreen::new);
+		MenuScreens.register(ModMachines.GAS_WELL_MENU, MachineScreen::new);
 		for (var p : com.starwake.process.ProcessMachineBlockEntity.Process.values()) {
 			MenuScreens.register(com.starwake.registry.ModProcess.menu(p), MachineScreen::new);
 		}
@@ -93,15 +94,34 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			int species = menu.get(MachineMenu.TANKS + 3 * t + 2);
 			Component name = species < 0 ? Component.translatable("screen.starwake.machine.tank_empty")
 					: com.starwake.process.Species.byIndex(species).displayName();
-			Component kind = Component.translatable("screen.starwake.machine.tank." + (t == 0 ? "inlet" : t == 1 ? "gas" : "liquid"));
+			String role = t == 0 ? "inlet" : t == 1 ? "gas" : "liquid";
+			var process = process();
+			String special = process == null ? null : "screen.starwake.machine.tank." + process.machine + "." + role;
+			Component kind = Component.translatable(special != null && net.minecraft.locale.Language.getInstance().has(special) ? special
+					: "screen.starwake.machine.tank." + role);
 			g.setTooltipForNextFrame(java.util.List.of(kind.getVisualOrderText(),
 					name.copy().append(String.format("  %.2f / %d kg", amount / 100.0, capacity)).getVisualOrderText()), mouseX, mouseY);
 		}
 	}
 
+	/** The process machine behind this screen, if any. */
+	private com.starwake.process.ProcessMachineBlockEntity.@org.jspecify.annotations.Nullable Process process() {
+		for (var p : com.starwake.process.ProcessMachineBlockEntity.Process.values()) {
+			if (com.starwake.registry.ModProcess.menu(p) == menu.getType()) return p;
+		}
+		return null;
+	}
+
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
 		g.text(font, title, titleLabelX, titleLabelY, EDGE, false);
+		if (process() == com.starwake.process.ProcessMachineBlockEntity.Process.SOLVENT_EXTRACTION) {
+			int cut = menu.get(MachineMenu.STATUS);
+			Component label = cut <= 0 ? Component.translatable("screen.starwake.machine.sx_auto")
+					: Component.translatable("screen.starwake.machine.sx_cut", com.starwake.process.Species.byIndex(cut - 1).formula());
+			g.text(font, label, 46, 46, TEXT, false);
+			g.text(font, Component.translatable("screen.starwake.machine.sx_hint"), 46, 56, DIM, false);
+		}
 		g.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, DIM, false);
 		// Info strip between the machine and the inventory: status + stored energy, then the grid.
 		int strip = MachineMenu.INVENTORY_Y - 34;

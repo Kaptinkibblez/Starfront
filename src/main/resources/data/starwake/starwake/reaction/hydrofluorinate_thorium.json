@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "ThO2 + 4 HF -> ThF4 + 2 H2O",
+ "priority": 92,
+ "draw": [
+  "HF"
+ ]
+}

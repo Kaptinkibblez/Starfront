@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "PrF3 + 3 NaOH -> Pr(OH)3 + 3 NaF",
+ "priority": 39,
+ "draw": [
+  "NaOH"
+ ]
+}

@@ -3253,6 +3253,1971 @@
   "color": "#b0b0b8"
  },
  {
+  "id": "LaCl3",
+  "name": "Lanthanum chloride",
+  "formula": "LaCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "La(OH)3",
+  "name": "Lanthanum hydroxide",
+  "formula": "La(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "La2(CO3)3",
+  "name": "Lanthanum carbonate",
+  "formula": "La2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "La2O3",
+  "name": "Lanthanum oxide",
+  "formula": "La2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "LaF3",
+  "name": "Lanthanum fluoride",
+  "formula": "LaF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "CeCl3",
+  "name": "Cerium chloride",
+  "formula": "CeCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Ce(OH)3",
+  "name": "Cerium hydroxide",
+  "formula": "Ce(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Ce2(CO3)3",
+  "name": "Cerium carbonate",
+  "formula": "Ce2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Ce2O3",
+  "name": "Cerium oxide",
+  "formula": "Ce2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "CeF3",
+  "name": "Cerium fluoride",
+  "formula": "CeF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "PrCl3",
+  "name": "Praseodymium chloride",
+  "formula": "PrCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Pr(OH)3",
+  "name": "Praseodymium hydroxide",
+  "formula": "Pr(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Pr2(CO3)3",
+  "name": "Praseodymium carbonate",
+  "formula": "Pr2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Pr2O3",
+  "name": "Praseodymium oxide",
+  "formula": "Pr2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "PrF3",
+  "name": "Praseodymium fluoride",
+  "formula": "PrF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "NdCl3",
+  "name": "Neodymium chloride",
+  "formula": "NdCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Nd(OH)3",
+  "name": "Neodymium hydroxide",
+  "formula": "Nd(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Nd2(CO3)3",
+  "name": "Neodymium carbonate",
+  "formula": "Nd2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Nd2O3",
+  "name": "Neodymium oxide",
+  "formula": "Nd2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "NdF3",
+  "name": "Neodymium fluoride",
+  "formula": "NdF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "SmCl3",
+  "name": "Samarium chloride",
+  "formula": "SmCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Sm(OH)3",
+  "name": "Samarium hydroxide",
+  "formula": "Sm(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Sm2(CO3)3",
+  "name": "Samarium carbonate",
+  "formula": "Sm2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Sm2O3",
+  "name": "Samarium oxide",
+  "formula": "Sm2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "SmF3",
+  "name": "Samarium fluoride",
+  "formula": "SmF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "EuCl3",
+  "name": "Europium chloride",
+  "formula": "EuCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Eu(OH)3",
+  "name": "Europium hydroxide",
+  "formula": "Eu(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Eu2(CO3)3",
+  "name": "Europium carbonate",
+  "formula": "Eu2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Eu2O3",
+  "name": "Europium oxide",
+  "formula": "Eu2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "EuF3",
+  "name": "Europium fluoride",
+  "formula": "EuF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "GdCl3",
+  "name": "Gadolinium chloride",
+  "formula": "GdCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Gd(OH)3",
+  "name": "Gadolinium hydroxide",
+  "formula": "Gd(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Gd2(CO3)3",
+  "name": "Gadolinium carbonate",
+  "formula": "Gd2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Gd2O3",
+  "name": "Gadolinium oxide",
+  "formula": "Gd2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "GdF3",
+  "name": "Gadolinium fluoride",
+  "formula": "GdF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "TbCl3",
+  "name": "Terbium chloride",
+  "formula": "TbCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Tb(OH)3",
+  "name": "Terbium hydroxide",
+  "formula": "Tb(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Tb2(CO3)3",
+  "name": "Terbium carbonate",
+  "formula": "Tb2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Tb2O3",
+  "name": "Terbium oxide",
+  "formula": "Tb2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "TbF3",
+  "name": "Terbium fluoride",
+  "formula": "TbF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "DyCl3",
+  "name": "Dysprosium chloride",
+  "formula": "DyCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Dy(OH)3",
+  "name": "Dysprosium hydroxide",
+  "formula": "Dy(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Dy2(CO3)3",
+  "name": "Dysprosium carbonate",
+  "formula": "Dy2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Dy2O3",
+  "name": "Dysprosium oxide",
+  "formula": "Dy2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "DyF3",
+  "name": "Dysprosium fluoride",
+  "formula": "DyF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "HoCl3",
+  "name": "Holmium chloride",
+  "formula": "HoCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Ho(OH)3",
+  "name": "Holmium hydroxide",
+  "formula": "Ho(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Ho2(CO3)3",
+  "name": "Holmium carbonate",
+  "formula": "Ho2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Ho2O3",
+  "name": "Holmium oxide",
+  "formula": "Ho2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "HoF3",
+  "name": "Holmium fluoride",
+  "formula": "HoF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "YCl3",
+  "name": "Yttrium chloride",
+  "formula": "YCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Y(OH)3",
+  "name": "Yttrium hydroxide",
+  "formula": "Y(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Y2(CO3)3",
+  "name": "Yttrium carbonate",
+  "formula": "Y2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Y2O3",
+  "name": "Yttrium oxide",
+  "formula": "Y2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "YF3",
+  "name": "Yttrium fluoride",
+  "formula": "YF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "ErCl3",
+  "name": "Erbium chloride",
+  "formula": "ErCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Er(OH)3",
+  "name": "Erbium hydroxide",
+  "formula": "Er(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Er2(CO3)3",
+  "name": "Erbium carbonate",
+  "formula": "Er2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Er2O3",
+  "name": "Erbium oxide",
+  "formula": "Er2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "ErF3",
+  "name": "Erbium fluoride",
+  "formula": "ErF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "TmCl3",
+  "name": "Thulium chloride",
+  "formula": "TmCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Tm(OH)3",
+  "name": "Thulium hydroxide",
+  "formula": "Tm(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Tm2(CO3)3",
+  "name": "Thulium carbonate",
+  "formula": "Tm2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Tm2O3",
+  "name": "Thulium oxide",
+  "formula": "Tm2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "TmF3",
+  "name": "Thulium fluoride",
+  "formula": "TmF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "YbCl3",
+  "name": "Ytterbium chloride",
+  "formula": "YbCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Yb(OH)3",
+  "name": "Ytterbium hydroxide",
+  "formula": "Yb(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Yb2(CO3)3",
+  "name": "Ytterbium carbonate",
+  "formula": "Yb2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Yb2O3",
+  "name": "Ytterbium oxide",
+  "formula": "Yb2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "YbF3",
+  "name": "Ytterbium fluoride",
+  "formula": "YbF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "LuCl3",
+  "name": "Lutetium chloride",
+  "formula": "LuCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Lu(OH)3",
+  "name": "Lutetium hydroxide",
+  "formula": "Lu(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Lu2(CO3)3",
+  "name": "Lutetium carbonate",
+  "formula": "Lu2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Lu2O3",
+  "name": "Lutetium oxide",
+  "formula": "Lu2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "LuF3",
+  "name": "Lutetium fluoride",
+  "formula": "LuF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "ScCl3",
+  "name": "Scandium chloride",
+  "formula": "ScCl3",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 800,
+  "boiling": 1500,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ee"
+ },
+ {
+  "id": "Sc(OH)3",
+  "name": "Scandium hydroxide",
+  "formula": "Sc(OH)3",
+  "kind": "oxide",
+  "density": 4.5,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe6"
+ },
+ {
+  "id": "Sc2(CO3)3",
+  "name": "Scandium carbonate",
+  "formula": "Sc2(CO3)3",
+  "kind": "carbonate",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2ea"
+ },
+ {
+  "id": "Sc2O3",
+  "name": "Scandium oxide",
+  "formula": "Sc2O3",
+  "kind": "oxide",
+  "density": 7.0,
+  "melting": 2300,
+  "boiling": 3700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0eee0"
+ },
+ {
+  "id": "ScF3",
+  "name": "Scandium fluoride",
+  "formula": "ScF3",
+  "kind": "halide",
+  "density": 6.0,
+  "melting": 1400,
+  "boiling": 2300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#eeeee8"
+ },
+ {
+  "id": "Na3PO4",
+  "name": "Trisodium phosphate",
+  "formula": "Na3PO4",
+  "kind": "phosphate",
+  "density": 2.54,
+  "melting": 1583,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.14
+ },
+ {
+  "id": "NaF",
+  "name": "Villiaumite",
+  "formula": "NaF",
+  "kind": "halide",
+  "density": 2.56,
+  "melting": 993,
+  "boiling": 1704,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#efefef",
+  "solubility": 0.04
+ },
+ {
+  "id": "KF",
+  "name": "Potassium fluoride",
+  "formula": "KF",
+  "kind": "halide",
+  "density": 2.48,
+  "melting": 858,
+  "boiling": 1502,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#efefef"
+ },
+ {
+  "id": "LiF",
+  "name": "Griceite",
+  "formula": "LiF",
+  "kind": "halide",
+  "density": 2.64,
+  "melting": 845,
+  "boiling": 1676,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "MgF2",
+  "name": "Sellaite",
+  "formula": "MgF2",
+  "kind": "halide",
+  "density": 3.15,
+  "melting": 1263,
+  "boiling": 2260,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefef"
+ },
+ {
+  "id": "F2",
+  "name": "Fluorine",
+  "formula": "F2",
+  "kind": "gas",
+  "density": 0.0017,
+  "melting": -220,
+  "boiling": -188,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 1.0,
+  "color": "#e8f088"
+ },
+ {
+  "id": "H2S",
+  "name": "Hydrogen sulfide",
+  "formula": "H2S",
+  "kind": "gas",
+  "density": 0.0014,
+  "melting": -82,
+  "boiling": -60,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.8,
+  "color": "#e8e8a0"
+ },
+ {
+  "id": "C2H6",
+  "name": "Ethane",
+  "formula": "C2H6",
+  "kind": "gas",
+  "density": 0.0013,
+  "melting": -183,
+  "boiling": -89,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8e8ff"
+ },
+ {
+  "id": "HNO3",
+  "name": "Nitric acid",
+  "formula": "HNO3",
+  "kind": "oxide",
+  "density": 1.51,
+  "melting": -42,
+  "boiling": 83,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#f0e8b0"
+ },
+ {
+  "id": "NO",
+  "name": "Nitric oxide",
+  "formula": "NO",
+  "kind": "gas",
+  "density": 0.0013,
+  "melting": -164,
+  "boiling": -152,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.5,
+  "color": "#e8d8c8"
+ },
+ {
+  "id": "NO2",
+  "name": "Nitrogen dioxide",
+  "formula": "NO2",
+  "kind": "gas",
+  "density": 0.0019,
+  "melting": -11,
+  "boiling": 21,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.8,
+  "color": "#c86a2a"
+ },
+ {
+  "id": "NH4Cl",
+  "name": "Sal ammoniac",
+  "formula": "NH4Cl",
+  "kind": "halide",
+  "density": 1.52,
+  "melting": 338,
+  "boiling": 520,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.37
+ },
+ {
+  "id": "NH4F",
+  "name": "Ammonium fluoride",
+  "formula": "NH4F",
+  "kind": "halide",
+  "density": 1.01,
+  "melting": 100,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "(NH4)2SO4",
+  "name": "Mascagnite",
+  "formula": "(NH4)2SO4",
+  "kind": "sulfate",
+  "density": 1.77,
+  "melting": 235,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.75
+ },
+ {
+  "id": "H2PtCl6",
+  "name": "Chloroplatinic acid",
+  "formula": "H2PtCl6",
+  "kind": "halide",
+  "density": 2.43,
+  "melting": 60,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.4,
+  "color": "#e8a830"
+ },
+ {
+  "id": "H2PdCl4",
+  "name": "Chloropalladic acid",
+  "formula": "H2PdCl4",
+  "kind": "halide",
+  "density": 2.5,
+  "melting": 100,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#a85a2a"
+ },
+ {
+  "id": "HAuCl4",
+  "name": "Chloroauric acid",
+  "formula": "HAuCl4",
+  "kind": "halide",
+  "density": 3.9,
+  "melting": 254,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#e8c830"
+ },
+ {
+  "id": "AgCl",
+  "name": "Chlorargyrite",
+  "formula": "AgCl",
+  "kind": "halide",
+  "density": 5.56,
+  "melting": 455,
+  "boiling": 1547,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8e8e0"
+ },
+ {
+  "id": "(NH4)2PtCl6",
+  "name": "Ammonium chloroplatinate",
+  "formula": "(NH4)2PtCl6",
+  "kind": "halide",
+  "density": 3.07,
+  "melting": 380,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#e8d838",
+  "solubility": 0.005
+ },
+ {
+  "id": "Pd(NH3)4Cl2",
+  "name": "Tetraamminepalladium chloride",
+  "formula": "Pd(NH3)4Cl2",
+  "kind": "halide",
+  "density": 1.9,
+  "melting": 120,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f0f0e8"
+ },
+ {
+  "id": "Pd(NH3)2Cl2",
+  "name": "Diamminepalladium dichloride",
+  "formula": "Pd(NH3)2Cl2",
+  "kind": "halide",
+  "density": 2.5,
+  "melting": 200,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8d870"
+ },
+ {
+  "id": "OsO4",
+  "name": "Osmium tetroxide",
+  "formula": "OsO4",
+  "kind": "gas",
+  "density": 4.9,
+  "melting": 40,
+  "boiling": 130,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 1.0,
+  "color": "#f0f0d8"
+ },
+ {
+  "id": "RuO4",
+  "name": "Ruthenium tetroxide",
+  "formula": "RuO4",
+  "kind": "gas",
+  "density": 3.29,
+  "melting": 25,
+  "boiling": 40,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.9,
+  "color": "#e8c040"
+ },
+ {
+  "id": "Na3RhCl6",
+  "name": "Sodium hexachlororhodate",
+  "formula": "Na3RhCl6",
+  "kind": "halide",
+  "density": 2.8,
+  "melting": 500,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#c83a5a"
+ },
+ {
+  "id": "Na2IrCl6",
+  "name": "Sodium hexachloroiridate",
+  "formula": "Na2IrCl6",
+  "kind": "halide",
+  "density": 3.0,
+  "melting": 500,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#5a2a1e"
+ },
+ {
+  "id": "(NH4)2IrCl6",
+  "name": "Ammonium hexachloroiridate",
+  "formula": "(NH4)2IrCl6",
+  "kind": "halide",
+  "density": 2.86,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#3a1a14",
+  "solubility": 0.007
+ },
+ {
+  "id": "ZnCl2",
+  "name": "Zinc chloride",
+  "formula": "ZnCl2",
+  "kind": "halide",
+  "density": 2.91,
+  "melting": 290,
+  "boiling": 732,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "UO2SO4",
+  "name": "Uranyl sulfate",
+  "formula": "UO2SO4",
+  "kind": "sulfate",
+  "density": 3.28,
+  "melting": 1000,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.4,
+  "color": "#e8e830"
+ },
+ {
+  "id": "(NH4)2U2O7",
+  "name": "Ammonium diuranate (yellowcake)",
+  "formula": "(NH4)2U2O7",
+  "kind": "oxide",
+  "density": 4.0,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.4,
+  "color": "#f0d820"
+ },
+ {
+  "id": "UO3",
+  "name": "Uranium trioxide",
+  "formula": "UO3",
+  "kind": "oxide",
+  "density": 7.3,
+  "melting": 200,
+  "boiling": 9999,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.4,
+  "color": "#e8a820"
+ },
+ {
+  "id": "UF4",
+  "name": "Uranium tetrafluoride (green salt)",
+  "formula": "UF4",
+  "kind": "halide",
+  "density": 6.7,
+  "melting": 1036,
+  "boiling": 1417,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.4,
+  "color": "#4a8a3a"
+ },
+ {
+  "id": "ThF4",
+  "name": "Thorium tetrafluoride",
+  "formula": "ThF4",
+  "kind": "halide",
+  "density": 6.3,
+  "melting": 1110,
+  "boiling": 1680,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefef"
+ },
+ {
+  "id": "RaSO4",
+  "name": "Radium sulfate",
+  "formula": "RaSO4",
+  "kind": "sulfate",
+  "density": 4.5,
+  "melting": 1000,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "RaS",
+  "name": "Radium sulfide",
+  "formula": "RaS",
+  "kind": "sulfide",
+  "density": 4.0,
+  "melting": 1200,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe8"
+ },
+ {
+  "id": "RaCl2",
+  "name": "Radium chloride",
+  "formula": "RaCl2",
+  "kind": "halide",
+  "density": 4.9,
+  "melting": 900,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "BeSO4",
+  "name": "Beryllium sulfate",
+  "formula": "BeSO4",
+  "kind": "sulfate",
+  "density": 2.44,
+  "melting": 1127,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "Al2(SO4)3",
+  "name": "Aluminium sulfate",
+  "formula": "Al2(SO4)3",
+  "kind": "sulfate",
+  "density": 2.67,
+  "melting": 770,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.36
+ },
+ {
+  "id": "Be(OH)2",
+  "name": "Beryllium hydroxide",
+  "formula": "Be(OH)2",
+  "kind": "oxide",
+  "density": 1.92,
+  "melting": 400,
+  "boiling": 9999,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#efefef"
+ },
+ {
+  "id": "BeF2",
+  "name": "Beryllium fluoride",
+  "formula": "BeF2",
+  "kind": "halide",
+  "density": 1.99,
+  "melting": 552,
+  "boiling": 1169,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.7,
+  "color": "#efefef"
+ },
+ {
+  "id": "AlCl3",
+  "name": "Aluminium chloride",
+  "formula": "AlCl3",
+  "kind": "halide",
+  "density": 2.48,
+  "melting": 192,
+  "boiling": 180,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2e8",
+  "solubility": 0.45
+ },
+ {
+  "id": "CsCl",
+  "name": "Caesium chloride",
+  "formula": "CsCl",
+  "kind": "halide",
+  "density": 3.99,
+  "melting": 646,
+  "boiling": 1297,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 1.9
+ },
+ {
+  "id": "RbCl",
+  "name": "Rubidium chloride",
+  "formula": "RbCl",
+  "kind": "halide",
+  "density": 2.8,
+  "melting": 718,
+  "boiling": 1390,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.91
+ },
+ {
+  "id": "SrS",
+  "name": "Strontium sulfide",
+  "formula": "SrS",
+  "kind": "sulfide",
+  "density": 3.7,
+  "melting": 2002,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe8"
+ },
+ {
+  "id": "BaS",
+  "name": "Barium sulfide",
+  "formula": "BaS",
+  "kind": "sulfide",
+  "density": 4.25,
+  "melting": 2235,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe8"
+ },
+ {
+  "id": "BaCl2",
+  "name": "Barium chloride",
+  "formula": "BaCl2",
+  "kind": "halide",
+  "density": 3.86,
+  "melting": 962,
+  "boiling": 1560,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.5,
+  "color": "#f2f2f2",
+  "solubility": 0.36
+ },
+ {
+  "id": "ZrCl4",
+  "name": "Zirconium tetrachloride",
+  "formula": "ZrCl4",
+  "kind": "halide",
+  "density": 2.8,
+  "melting": 437,
+  "boiling": 331,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "HfCl4",
+  "name": "Hafnium tetrachloride",
+  "formula": "HfCl4",
+  "kind": "halide",
+  "density": 3.89,
+  "melting": 432,
+  "boiling": 317,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "SiCl4",
+  "name": "Silicon tetrachloride",
+  "formula": "SiCl4",
+  "kind": "halide",
+  "density": 1.48,
+  "melting": -69,
+  "boiling": 58,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#f0f0f0"
+ },
+ {
+  "id": "ZrOCl2",
+  "name": "Zirconyl chloride",
+  "formula": "ZrOCl2",
+  "kind": "halide",
+  "density": 1.9,
+  "melting": 400,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "HfOCl2",
+  "name": "Hafnyl chloride",
+  "formula": "HfOCl2",
+  "kind": "halide",
+  "density": 2.5,
+  "melting": 400,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "H2NbOF5",
+  "name": "Oxyfluoroniobic acid",
+  "formula": "H2NbOF5",
+  "kind": "halide",
+  "density": 2.0,
+  "melting": 100,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.5,
+  "color": "#f0f0f0"
+ },
+ {
+  "id": "H2TaF7",
+  "name": "Fluorotantalic acid",
+  "formula": "H2TaF7",
+  "kind": "halide",
+  "density": 2.5,
+  "melting": 100,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.5,
+  "color": "#f0f0f0"
+ },
+ {
+  "id": "FeF2",
+  "name": "Iron(II) fluoride",
+  "formula": "FeF2",
+  "kind": "halide",
+  "density": 4.09,
+  "melting": 970,
+  "boiling": 1100,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#d8d8c8"
+ },
+ {
+  "id": "MnF2",
+  "name": "Manganese fluoride",
+  "formula": "MnF2",
+  "kind": "halide",
+  "density": 3.98,
+  "melting": 856,
+  "boiling": 1820,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#e8c8c8"
+ },
+ {
+  "id": "K2TaF7",
+  "name": "Potassium heptafluorotantalate",
+  "formula": "K2TaF7",
+  "kind": "halide",
+  "density": 5.24,
+  "melting": 630,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.005
+ },
+ {
+  "id": "Nb2O5",
+  "name": "Niobium pentoxide",
+  "formula": "Nb2O5",
+  "kind": "oxide",
+  "density": 4.6,
+  "melting": 1512,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "Na2WO4",
+  "name": "Sodium tungstate",
+  "formula": "Na2WO4",
+  "kind": "oxide",
+  "density": 4.18,
+  "melting": 698,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "Fe(OH)2",
+  "name": "Iron(II) hydroxide",
+  "formula": "Fe(OH)2",
+  "kind": "oxide",
+  "density": 3.4,
+  "melting": 150,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#6a7a5a"
+ },
+ {
+  "id": "Mn(OH)2",
+  "name": "Pyrochroite",
+  "formula": "Mn(OH)2",
+  "kind": "oxide",
+  "density": 3.26,
+  "melting": 140,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8c8b8"
+ },
+ {
+  "id": "H2WO4",
+  "name": "Tungstic acid",
+  "formula": "H2WO4",
+  "kind": "oxide",
+  "density": 5.5,
+  "melting": 100,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8e030"
+ },
+ {
+  "id": "WO3",
+  "name": "Tungsten trioxide",
+  "formula": "WO3",
+  "kind": "oxide",
+  "density": 7.16,
+  "melting": 1473,
+  "boiling": 1700,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8e030"
+ },
+ {
+  "id": "NaVO3",
+  "name": "Sodium metavanadate",
+  "formula": "NaVO3",
+  "kind": "oxide",
+  "density": 2.84,
+  "melting": 630,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#f0e8c0"
+ },
+ {
+  "id": "NH4VO3",
+  "name": "Ammonium metavanadate",
+  "formula": "NH4VO3",
+  "kind": "oxide",
+  "density": 2.33,
+  "melting": 200,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#f2f2e0",
+  "solubility": 0.005
+ },
+ {
+  "id": "Na2CrO4",
+  "name": "Sodium chromate",
+  "formula": "Na2CrO4",
+  "kind": "oxide",
+  "density": 2.72,
+  "melting": 792,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.8,
+  "color": "#f0d820"
+ },
+ {
+  "id": "Na2Cr2O7",
+  "name": "Sodium dichromate",
+  "formula": "Na2Cr2O7",
+  "kind": "oxide",
+  "density": 2.52,
+  "melting": 357,
+  "boiling": 400,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.8,
+  "color": "#e87a20"
+ },
+ {
+  "id": "Cr2O3",
+  "name": "Eskolaite",
+  "formula": "Cr2O3",
+  "kind": "oxide",
+  "density": 5.22,
+  "melting": 2435,
+  "boiling": 4000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#3a8a3a"
+ },
+ {
+  "id": "Tc2O7",
+  "name": "Technetium heptoxide",
+  "formula": "Tc2O7",
+  "kind": "oxide",
+  "density": 3.5,
+  "melting": 120,
+  "boiling": 311,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0e8a0"
+ },
+ {
+  "id": "HTcO4",
+  "name": "Pertechnetic acid",
+  "formula": "HTcO4",
+  "kind": "oxide",
+  "density": 3.0,
+  "melting": 100,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2e8"
+ },
+ {
+  "id": "NH4TcO4",
+  "name": "Ammonium pertechnetate",
+  "formula": "NH4TcO4",
+  "kind": "oxide",
+  "density": 2.7,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.06
+ },
+ {
+  "id": "Tl2SO4",
+  "name": "Thallium sulfate",
+  "formula": "Tl2SO4",
+  "kind": "sulfate",
+  "density": 6.77,
+  "melting": 632,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.9,
+  "color": "#f2f2f2",
+  "solubility": 0.048
+ },
+ {
   "id": "Sb2O3",
   "name": "Senarmontite",
   "formula": "Sb2O3",

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": "minecraft:cauldron",
+    "C": "starwake:copper_cable",
+    "G": "minecraft:glass",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "GBG",
+    "GCG",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:solvent_extraction"
+  }
+}

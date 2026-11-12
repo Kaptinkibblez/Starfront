@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "V2O5 + 2 NaOH -> 2 NaVO3 + H2O",
+ "priority": 75,
+ "draw": [
+  "NaOH"
+ ]
+}

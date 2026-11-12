@@ -1,0 +1,8 @@
+{
+ "machine": "kroll",
+ "equation": "ZrCl4 + 2 Mg -> Zr + 2 MgCl2",
+ "priority": 38,
+ "draw": [
+  "Mg"
+ ]
+}

@@ -1,0 +1,9 @@
+{
+ "machine": "smelter",
+ "equation": "SrSO4 + 4 C -> SrS + 4 CO",
+ "priority": 32,
+ "draw": [
+  "C"
+ ],
+ "note": "Black-ash process."
+}

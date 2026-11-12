@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "2 CsAlSi2O6 + 8 HCl -> 2 CsCl + 2 AlCl3 + 4 SiO2 + 4 H2O",
+ "priority": 64,
+ "draw": [
+  "HCl"
+ ]
+}

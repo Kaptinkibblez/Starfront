@@ -1,0 +1,10 @@
+{
+ "machine": "leach",
+ "equation": "3 Ag + HNO3 + 3 HCl -> 3 AgCl + NO + 2 H2O",
+ "priority": 53,
+ "draw": [
+  "HNO3",
+  "HCl"
+ ],
+ "note": "Silver stays behind as chloride."
+}

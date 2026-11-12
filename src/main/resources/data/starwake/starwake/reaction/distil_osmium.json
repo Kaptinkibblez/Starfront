@@ -1,0 +1,10 @@
+{
+ "machine": "reactor",
+ "equation": "Os + 4 Cl2 + 8 NaOH -> OsO4 + 8 NaCl + 4 H2O",
+ "priority": 84,
+ "draw": [
+  "Cl2",
+  "NaOH"
+ ],
+ "note": "Oxidative distillation: very toxic OsO4 vapour."
+}

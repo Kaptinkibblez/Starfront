@@ -1,0 +1,8 @@
+{
+ "machine": "kroll",
+ "equation": "2 RbCl + Ca -> 2 Rb + CaCl2",
+ "priority": 37,
+ "draw": [
+  "Ca"
+ ]
+}

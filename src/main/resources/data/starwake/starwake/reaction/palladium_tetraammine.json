@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "H2PdCl4 + 6 NH3 -> Pd(NH3)4Cl2 + 2 NH4Cl",
+ "priority": 82,
+ "draw": [
+  "NH3"
+ ]
+}

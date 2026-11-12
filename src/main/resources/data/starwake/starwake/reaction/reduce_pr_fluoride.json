@@ -1,0 +1,9 @@
+{
+ "machine": "kroll",
+ "equation": "2 PrF3 + 3 Ca -> 2 Pr + 3 CaF2",
+ "priority": 20,
+ "draw": [
+  "Ca"
+ ],
+ "note": "Calciothermic reduction (heavy rare earths, Y, Sc)."
+}

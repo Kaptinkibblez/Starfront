@@ -1,0 +1,10 @@
+{
+ "machine": "leach",
+ "equation": "2 UO2 + O2 + 2 H2SO4 -> 2 UO2SO4 + 2 H2O",
+ "priority": 60,
+ "draw": [
+  "O2",
+  "H2SO4"
+ ],
+ "note": "Oxidising acid leach; radium stays in the tailings."
+}

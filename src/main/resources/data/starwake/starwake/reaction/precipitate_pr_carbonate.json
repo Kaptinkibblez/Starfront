@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "2 PrCl3 + 3 Na2CO3 -> Pr2(CO3)3 + 6 NaCl",
+ "priority": 60,
+ "draw": [
+  "Na2CO3"
+ ],
+ "note": "Soda ash precipitates rare-earth carbonate."
+}

@@ -1,0 +1,8 @@
+{
+ "machine": "kroll",
+ "equation": "BeF2 + Mg -> Be + MgF2",
+ "priority": 34,
+ "draw": [
+  "Mg"
+ ]
+}

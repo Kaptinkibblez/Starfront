@@ -49,6 +49,8 @@ public final class ModMachines {
 			p -> new MachineBlock(WaterSourceBlockEntity::new, () -> ModMachines.WATER_SOURCE_BE, p), machine());
 	public static final Block ATMOSPHERIC_CONDENSER = ModBlocks.register("atmospheric_condenser",
 			p -> new MachineBlock(WaterSourceBlockEntity::new, () -> ModMachines.WATER_SOURCE_BE, p), machine());
+	public static final Block GAS_WELL = ModBlocks.register("gas_well",
+			p -> new MachineBlock(WaterSourceBlockEntity::new, () -> ModMachines.WATER_SOURCE_BE, p), machine());
 	public static final Block CONVEYOR = ModBlocks.register("conveyor", ConveyorBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY).strength(1.5f, 4.0f).sound(SoundType.METAL).noOcclusion());
 
@@ -66,12 +68,14 @@ public final class ModMachines {
 			be("fluid_tank", FabricBlockEntityTypeBuilder.create(FluidTankBlockEntity::new, FLUID_TANK).build());
 
 	public static final BlockEntityType<WaterSourceBlockEntity> WATER_SOURCE_BE =
-			be("water_source", FabricBlockEntityTypeBuilder.create(WaterSourceBlockEntity::new, WATER_PUMP, ATMOSPHERIC_CONDENSER).build());
+			be("water_source", FabricBlockEntityTypeBuilder.create(WaterSourceBlockEntity::new, WATER_PUMP, ATMOSPHERIC_CONDENSER, GAS_WELL).build());
 
 	public static final MenuType<MachineMenu> WATER_PUMP_MENU = menu("water_pump",
 			(id, inv) -> new MachineMenu(ModMachines.WATER_PUMP_MENU, WaterSourceBlockEntity.LAYOUT, id, inv));
 	public static final MenuType<MachineMenu> CONDENSER_MENU = menu("atmospheric_condenser",
 			(id, inv) -> new MachineMenu(ModMachines.CONDENSER_MENU, WaterSourceBlockEntity.LAYOUT, id, inv));
+	public static final MenuType<MachineMenu> GAS_WELL_MENU = menu("gas_well",
+			(id, inv) -> new MachineMenu(ModMachines.GAS_WELL_MENU, WaterSourceBlockEntity.LAYOUT, id, inv));
 	public static final MenuType<MachineMenu> COMBUSTION_GENERATOR_MENU = menu("combustion_generator",
 			(id, inv) -> new MachineMenu(ModMachines.COMBUSTION_GENERATOR_MENU, CombustionGeneratorBlockEntity.LAYOUT, id, inv));
 	public static final MenuType<MachineMenu> ELECTRIC_FURNACE_MENU = menu("electric_furnace",
@@ -86,7 +90,7 @@ public final class ModMachines {
 
 	public static List<Block> all() {
 		return List.of(COMBUSTION_GENERATOR, ELECTRIC_FURNACE, SOLAR_PANEL, BATTERY, COPPER_CABLE, ALUMINIUM_CABLE, FLUID_PIPE, FLUID_TANK, CONVEYOR, WATER_PUMP,
-				ATMOSPHERIC_CONDENSER);
+				ATMOSPHERIC_CONDENSER, GAS_WELL);
 	}
 
 	private static BlockBehaviour.Properties machine() {

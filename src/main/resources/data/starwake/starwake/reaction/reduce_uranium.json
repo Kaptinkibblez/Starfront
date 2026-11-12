@@ -1,0 +1,9 @@
+{
+ "machine": "kroll",
+ "equation": "UF4 + 2 Mg -> U + 2 MgF2",
+ "priority": 32,
+ "draw": [
+  "Mg"
+ ],
+ "note": "Magnesiothermic uranium metal."
+}

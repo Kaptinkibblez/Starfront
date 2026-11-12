@@ -1,0 +1,8 @@
+{
+ "machine": "reactor",
+ "equation": "2 NO + O2 -> 2 NO2",
+ "priority": 71,
+ "draw": [
+  "O2"
+ ]
+}

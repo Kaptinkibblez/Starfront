@@ -1,0 +1,9 @@
+{
+ "machine": "kroll",
+ "equation": "SiO2 + 2 Mg -> Si + 2 MgO",
+ "priority": 35,
+ "draw": [
+  "Mg"
+ ],
+ "note": "Magnesiothermic silicon; wash the magnesia out with HCl."
+}

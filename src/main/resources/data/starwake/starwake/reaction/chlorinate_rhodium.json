@@ -1,0 +1,10 @@
+{
+ "machine": "chlorinator",
+ "equation": "2 Rh + 3 Cl2 + 6 NaCl -> 2 Na3RhCl6",
+ "priority": 20,
+ "draw": [
+  "Cl2",
+  "NaCl"
+ ],
+ "note": "Chlorinating with salt makes soluble chlororhodate."
+}

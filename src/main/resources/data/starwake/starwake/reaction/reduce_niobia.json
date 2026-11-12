@@ -1,0 +1,9 @@
+{
+ "machine": "kroll",
+ "equation": "3 Nb2O5 + 10 Al -> 6 Nb + 5 Al2O3",
+ "priority": 41,
+ "draw": [
+  "Al"
+ ],
+ "note": "Aluminothermic niobium."
+}

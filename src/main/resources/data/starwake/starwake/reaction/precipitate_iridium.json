@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "Na2IrCl6 + 2 NH4Cl -> (NH4)2IrCl6 + 2 NaCl",
+ "priority": 86,
+ "draw": [
+  "NH4Cl"
+ ],
+ "note": "Rhodium stays in solution."
+}

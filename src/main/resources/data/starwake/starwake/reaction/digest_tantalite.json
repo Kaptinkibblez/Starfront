@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "FeTa2O6 + 16 HF -> 2 H2TaF7 + FeF2 + 6 H2O",
+ "priority": 72,
+ "draw": [
+  "HF"
+ ]
+}

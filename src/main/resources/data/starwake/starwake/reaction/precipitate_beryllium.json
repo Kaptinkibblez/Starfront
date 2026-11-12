@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "BeSO4 + 2 NH3 + 2 H2O -> Be(OH)2 + (NH4)2SO4",
+ "priority": 93,
+ "draw": [
+  "NH3",
+  "H2O"
+ ]
+}

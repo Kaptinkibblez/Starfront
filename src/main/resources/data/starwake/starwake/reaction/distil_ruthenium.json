@@ -1,0 +1,10 @@
+{
+ "machine": "reactor",
+ "equation": "Ru + 4 Cl2 + 8 NaOH -> RuO4 + 8 NaCl + 4 H2O",
+ "priority": 85,
+ "draw": [
+  "Cl2",
+  "NaOH"
+ ],
+ "note": "Toxic, explosive RuO4 vapour."
+}

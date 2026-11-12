@@ -1,0 +1,10 @@
+{
+ "machine": "roaster",
+ "equation": "4 FeCr2O4 + 8 Na2CO3 + 7 O2 -> 8 Na2CrO4 + 2 Fe2O3 + 8 CO2",
+ "priority": 24,
+ "draw": [
+  "Na2CO3",
+  "O2"
+ ],
+ "note": "Toxic hexavalent chromate."
+}

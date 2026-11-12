@@ -1,0 +1,10 @@
+{
+ "machine": "reactor",
+ "equation": "2 HAuCl4 + 3 SO2 + 6 H2O -> 2 Au + 3 H2SO4 + 8 HCl",
+ "priority": 80,
+ "draw": [
+  "SO2",
+  "H2O"
+ ],
+ "note": "Sulfur dioxide reduces gold first."
+}
