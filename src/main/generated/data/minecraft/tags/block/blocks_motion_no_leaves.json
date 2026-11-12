@@ -68,6 +68,14 @@
     "starwake:combustion_generator",
     "starwake:electric_furnace",
     "starwake:battery",
-    "starwake:fluid_tank"
+    "starwake:fluid_tank",
+    "starwake:crusher",
+    "starwake:flotation",
+    "starwake:magnetic",
+    "starwake:gravity",
+    "starwake:roaster",
+    "starwake:coke_oven",
+    "starwake:smelter",
+    "starwake:converter"
   ]
 }

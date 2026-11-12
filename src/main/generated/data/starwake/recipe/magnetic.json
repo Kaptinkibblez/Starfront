@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "starwake:copper_cable",
+    "I": "minecraft:iron_ingot",
+    "L": "minecraft:lodestone",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "ILI",
+    "ICI",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:magnetic"
+  }
+}

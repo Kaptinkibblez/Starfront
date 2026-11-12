@@ -21,7 +21,7 @@ import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableIn
  * take it, so idle grids don't waste fuel.
  */
 public class CombustionGeneratorBlockEntity extends MachineBlockEntity {
-	public static final MachineMenu.Layout LAYOUT = new MachineMenu.Layout(List.of(new int[] {80, 44}), new int[] {0}, new int[] {}, new int[] {0}, false);
+	public static final MachineMenu.Layout LAYOUT = new MachineMenu.Layout(List.of(new int[] {80, 44}), new int[] {0}, new int[] {}, new int[] {0}, null, MachineMenu.Layout.NO_TANKS);
 
 	private int burnLeft;
 

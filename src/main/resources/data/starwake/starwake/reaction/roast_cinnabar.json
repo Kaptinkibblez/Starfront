@@ -1,0 +1,9 @@
+{
+ "machine": "roaster",
+ "equation": "HgS + O2 -> Hg + SO2",
+ "priority": 18,
+ "draw": [
+  "O2"
+ ],
+ "note": "Mercury distils off and is condensed."
+}

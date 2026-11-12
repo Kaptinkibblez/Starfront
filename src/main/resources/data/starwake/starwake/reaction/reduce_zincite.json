@@ -1,0 +1,9 @@
+{
+ "machine": "smelter",
+ "equation": "ZnO + C -> Zn + CO",
+ "priority": 18,
+ "draw": [
+  "C"
+ ],
+ "note": "Zinc boils off and is condensed (Imperial Smelting)."
+}

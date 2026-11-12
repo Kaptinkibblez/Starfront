@@ -1,0 +1,8 @@
+{
+ "machine": "roaster",
+ "equation": "2 Sb2S3 + 9 O2 -> 2 Sb2O3 + 6 SO2",
+ "priority": 19,
+ "draw": [
+  "O2"
+ ]
+}

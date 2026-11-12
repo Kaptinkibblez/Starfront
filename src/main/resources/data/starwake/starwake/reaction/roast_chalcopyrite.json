@@ -1,0 +1,9 @@
+{
+ "machine": "roaster",
+ "equation": "2 CuFeS2 + 4 O2 -> Cu2S + 2 FeO + 3 SO2",
+ "priority": 10,
+ "draw": [
+  "O2"
+ ],
+ "note": "Partial roast: iron oxidises, copper stays as sulfide for the matte."
+}

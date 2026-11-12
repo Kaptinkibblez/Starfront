@@ -269,6 +269,16 @@ commit. **Don't start the next milestone until the user confirms the current one
         tooltips, `/starwake metal`. *(Verified 2026-11-11: 304, Inconel 718 and Grade 2 Ti
         certify; low-Ni 304 reads off-spec naming Ni; 2024 without Mn off-spec; arbitrary
         Fe-Cr-Co estimated as stainless; vanilla iron = AISI 1010; tints and tooltips in game.)*
+  - **8c decisions (user, 2026-11-12):** ore blocks are **mineral-rich** (60-90% mineral + gangue,
+    real stoichiometry); **full chemistry** (every process consumes its real reagents and makes
+    its real by-products); minor/trace elements end up in **residues you refine** (slag, matte,
+    flue dust, anode slimes, leach liquors); chains of **3-5 real steps**; the plant is **general
+    unit-operation machines + data-driven reactions** (balanced equations in JSON); **real hazards
+    on leaks** (toxic gas clouds, the Survey Suit protects); split into **8c-1** (reaction engine,
+    chemical fluids, crushing/separation/roasting/coking/smelting/converting, Fe Cu Pb Zn Ni Sn +
+    ferroalloys), **8c-2** (hydrometallurgy and electrochemistry: acids, chlor-alkali, Bayer +
+    Hall-Heroult Al, Kroll Ti, leaching, electrorefining), **8c-3** (residue refining so every
+    element is obtainable, atmospheric gases, brines), each with a jar + pause.
   - [x] 8b. Power and logistics: electric grid (J/kW/kWh), copper and aluminium HV cables,
         Combustion Generator, Solar Panel (sun + starlight), Battery Bank, Electric Furnace,
         machine screens, Fluid Pipe (extract sides), Fluid Tank, Conveyor Belt, auto-eject,
@@ -732,8 +742,65 @@ normal gravity.
   (`ModRecipeProvider`, vanilla materials until 8i).
 - Known limits: tanks don't render their fluid yet; no aluminium recipe until 8c makes aluminium.
 
+## How process chemistry works (Milestone 8c-1)
+
+- **Species** (`process/Species`, bundled `/starwake/chemistry/species.json`, from
+  `tools/chemistry_process.py`): ~200 species (gangue, fluxes, ore minerals, intermediates such as
+  Cu2S/FeO/fayalite, gases, organics, every element) with formula (parsed: molar mass, element mass
+  fractions), kind, density, melting/boiling point, flags (`floats`, `magnetic`, `weak_magnetic`,
+  `toxic`), toxicity, colour. `ores.json`: what raw ore chunks (2 kg, mineral-rich: 60-90% mineral
+  + gangue + trace elements in ppm), fuels, fluxes and logs (1 kg) are made of. Vanilla raw copper is
+  supergene-enriched ore (chalcocite + chalcopyrite) so our chain matches a vanilla furnace's yield.
+- **Assay** (`process/Assay`, component `starwake:assay`): species -> parts per billion (keeps
+  traces like Ra at 0.3 ppm), rounded to 3 significant figures so steady production stacks.
+- **Bulk items** (`process/BulkItem`, `ModProcess`): `bulk_crushed_ore|concentrate|tailings|calcine|
+  matte|slag|flue_dust|coke`, 1 kg each, named by main species ("Chalcopyrite Concentrate",
+  "Copper Matte"), tinted by its colour. Tooltips (`client/process/ProcessTooltips`): assay and
+  the valuable elements in g/mg/µg; Shift lists every species.
+- **Chemical fluids** (`process/Chemicals`, `ChemicalFluid`): one fluid `starwake:chemical` + a
+  `starwake:species` component; water is vanilla water (H2O). 1 bucket = 1 kg. `ChemicalTank`: a
+  multi-species machine tank exposing each species to pipes as its own fluid (transactional).
+- **Reactions** (`process/Reactions`, datapack `starwake/reaction/*.json`): balanced equations
+  checked on load (element balance), per machine, priority order, `draw` = reactants the machine
+  feeds from reagent slots / inlet / air. **Separations** (`starwake/separation/*.json`):
+  flotation (flag `floats`, recovery 0.62, 0.9 with pine-oil frother, 1.5 kg water/kg), magnetic
+  (strong/weak), gravity (density >= 4.5).
+- **Engine** (`process/ProcessEngine`): reactions run as far as the pool allows; drawn reactants are
+  fed only to react with what's in the pool (exact stoichiometric coke, flux, oxygen). Routing by
+  phase: room-temperature gases -> GAS (steam vented); volatile at the machine temperature: metals
+  -> CONDENSATE (Zn, Cd), liquids -> LIQUID (Hg, pine oil, tar), others -> FLUE dust (As2O3, Se,
+  Te); molten bath: sulfides -> MATTE, metals -> METAL except Goldschmidt lithophile oxide-formers
+  (Ti, Al, REE, U...) -> SLAG and chalcophile traces (and noble metals when there's no real bath)
+  -> MATTE; oxides/silicates -> SLAG; carbon saturates iron (~4.3%, drawing coke if needed) and the
+  rest burns to CO2 (in air). Separation: selected minerals at recovery, the rest entrained; trace
+  elements follow the selected minerals' recovery (locked in the grains).
+- **Machines** (`process/ProcessMachineBlockEntity`, one block entity class, `Process` enum; numbers
+  in `machine/<id>.json`: power, speed kg/s, temperature): Jaw Crusher (raw chunk -> 2 crushed),
+  Flotation Cell (water + pine oil inlet), Magnetic Separator, Shaking Table (water), Roasting Kiln
+  (650 C, air O2; off-gas + liquid outlets, flue dust), Coke Oven (1000 C pyrolysis: coke, CH4,
+  tar; wood -> charcoal + pine oil), Electric Smelter (1550 C; charge + 2 reagent slots; metal,
+  condensate, matte, slag, flue dust; gas + liquid outlets; CO flared to CO2), Converter (1250 C,
+  O2 blow: matte -> blister copper; flux slot). Reagent items become **lots**: drawing C from coke
+  also moves that coke's share of ash into the batch (mass-exact, nothing wasted). Oxygen is free in
+  breathable air (not in space), otherwise from the inlet tank. Outputs leave 1 kg at a time from
+  buffers (a full buffer stalls the machine); machines auto-eject to inventories/conveyors.
+- **Hazards** (`process/GasHazards`): venting (full off-gas tank, breaking a machine or Fluid Tank
+  with chemicals) makes a cloud for species with toxicity >= 0.2: coloured haze, damage once a second
+  (0.5 + 2.5 x toxicity), Survey Suit with oxygen protects, creative immune.
+- Screens: `MachineMenu.Layout` has an arrow position and up to three tank gauges (inlet, gas,
+  liquid; hover for species and kg).
+- Chains verified (2026-11-12): copper ore -> crusher -> flotation (81% chalcopyrite conc., Au/Ag/
+  Se/Te follow) -> roaster (Cu2S/FeO calcine + SO2) -> smelter + quartz (99.95% Cu2S matte with Ag,
+  fayalite slag, Se/Te flue dust) -> converter (Cu 99.94%, Ag 0.058%); iron ore + coke + limestone
+  -> pig iron (Fe 94.7%, C 4.25%, Mn, V) + wollastonite slag + CO2; coal -> coke (93% C) + CH4 +
+  tar; zinc calcine + coke -> condensed zinc (Zn 98.95%, Cd 1.05%); breaking a roaster with 6 kg SO2
+  gassed the tester.
+
 ## 26.3 gotchas (learned the hard way)
 
+- **`/item replace ... from block ...` copies** the slot (doesn't move it): clear the source in tests.
+- The Friends List screen opens on the `friends` key (O): a test that types before chat opens can
+  trigger it. `run/options.txt` unbinds `key_key.friends` and `key_key.socialInteractions`.
 - **Menu data slots sync as shorts** (`ClientboundContainerSetDataPacket` writes shorts): split
   larger values across two slots.
 - Fuel burn time is a data component in 26.3: `ResolvableInt.getFromItem(stack,

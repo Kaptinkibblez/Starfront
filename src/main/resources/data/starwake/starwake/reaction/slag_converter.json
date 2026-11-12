@@ -1,0 +1,8 @@
+{
+ "machine": "converter",
+ "equation": "2 FeO + SiO2 -> Fe2SiO4",
+ "priority": 11,
+ "draw": [
+  "O2"
+ ]
+}

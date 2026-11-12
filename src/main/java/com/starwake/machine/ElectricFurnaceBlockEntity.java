@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class ElectricFurnaceBlockEntity extends MachineBlockEntity {
 	public static final MachineMenu.Layout LAYOUT = new MachineMenu.Layout(List.of(new int[] {56, 35}, new int[] {116, 35}),
-			new int[] {0}, new int[] {1}, new int[] {}, true);
+			new int[] {0}, new int[] {1}, new int[] {}, new int[] {80, 39}, MachineMenu.Layout.NO_TANKS);
 	private final RecipeManager.CachedCheck<SingleRecipeInput, SmeltingRecipe> check = RecipeManager.createCheck(RecipeType.SMELTING);
 
 	public ElectricFurnaceBlockEntity(BlockPos pos, BlockState state) {

@@ -20,6 +20,12 @@ public final class ModComponents {
 					.persistent(com.starwake.metal.Composition.CODEC)
 					.networkSynchronized(com.starwake.metal.Composition.STREAM_CODEC).build());
 
+	/** What a bulk process material is made of (M8c chemistry). */
+	public static final DataComponentType<com.starwake.process.Assay> ASSAY = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			StarwakeMod.id("assay"), DataComponentType.<com.starwake.process.Assay>builder()
+					.persistent(com.starwake.process.Assay.CODEC)
+					.networkSynchronized(com.starwake.process.Assay.STREAM_CODEC).build());
+
 	private ModComponents() {}
 
 	public static void init() {}

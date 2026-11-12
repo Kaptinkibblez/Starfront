@@ -1,0 +1,9 @@
+{
+ "machine": "smelter",
+ "equation": "CaCO3 + SiO2 -> CaSiO3 + CO2",
+ "priority": 42,
+ "draw": [
+  "CaCO3"
+ ],
+ "note": "Limestone flux takes up silica gangue as slag."
+}

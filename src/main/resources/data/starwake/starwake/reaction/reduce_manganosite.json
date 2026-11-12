@@ -1,0 +1,8 @@
+{
+ "machine": "smelter",
+ "equation": "MnO + C -> Mn + CO",
+ "priority": 15,
+ "draw": [
+  "C"
+ ]
+}

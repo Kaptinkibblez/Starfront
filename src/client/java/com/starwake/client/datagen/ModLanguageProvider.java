@@ -194,6 +194,28 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("screen.starwake.machine.idle", "Idle");
 		builder.add("screen.starwake.machine.grid", "Grid: %s kW in · %s kW use");
 		builder.add("screen.starwake.machine.no_power", "No power");
+		// Process chemistry (M8c-1).
+		java.util.Map<String, String> machines = java.util.Map.of("crusher", "Jaw Crusher", "flotation", "Flotation Cell", "magnetic", "Magnetic Separator",
+				"gravity", "Shaking Table", "roaster", "Roasting Kiln", "coke_oven", "Coke Oven", "smelter", "Electric Smelter", "converter", "Converter");
+		for (var p : com.starwake.process.ProcessMachineBlockEntity.Process.values()) {
+			builder.add(com.starwake.registry.ModProcess.block(p), machines.get(p.machine));
+		}
+		java.util.Map<String, String[]> bulk = java.util.Map.of("crushed_ore", new String[] {"Crushed Ore", "Crushed %s Ore"},
+				"concentrate", new String[] {"Concentrate", "%s Concentrate"}, "tailings", new String[] {"Tailings", "%s Tailings"},
+				"calcine", new String[] {"Calcine", "%s Calcine"}, "matte", new String[] {"Matte", "%s Matte"}, "slag", new String[] {"Slag", "%s Slag"},
+				"flue_dust", new String[] {"Flue Dust", "%s Flue Dust"}, "coke", new String[] {"Coke", "Coke"});
+		bulk.forEach((k, v) -> {
+			builder.add("item.starwake.bulk_" + k, v[0]);
+			builder.add("item.starwake.bulk_" + k + ".of", v[1]);
+		});
+		builder.add("fluid.starwake.chemical", "Chemical");
+		builder.add("process.starwake.tooltip.feed", "%s kg chunk, made of:");
+		builder.add("process.starwake.tooltip.more", "  ... %s more");
+		builder.add("process.starwake.tooltip.elements", "Contains: %s");
+		builder.add("screen.starwake.machine.tank_empty", "Empty");
+		builder.add("screen.starwake.machine.tank.inlet", "Inlet (water, reagents, oxygen)");
+		builder.add("screen.starwake.machine.tank.gas", "Off-gas outlet");
+		builder.add("screen.starwake.machine.tank.liquid", "Liquid outlet");
 		// Metallurgy (M8a).
 		builder.add("itemGroup.starwake.materials", "Starwake: Materials");
 		for (var form : com.starwake.metal.MetalForm.values()) {

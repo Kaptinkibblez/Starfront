@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": "minecraft:bucket",
+    "C": "starwake:copper_cable",
+    "G": "minecraft:glass",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "IBI",
+    "GCG",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:flotation"
+  }
+}

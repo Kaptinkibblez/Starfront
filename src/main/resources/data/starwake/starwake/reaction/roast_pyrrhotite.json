@@ -1,0 +1,8 @@
+{
+ "machine": "roaster",
+ "equation": "4 FeS + 7 O2 -> 2 Fe2O3 + 4 SO2",
+ "priority": 12,
+ "draw": [
+  "O2"
+ ]
+}

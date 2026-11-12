@@ -1,0 +1,14 @@
+{
+ "select": [
+  "floats"
+ ],
+ "recovery": 0.62,
+ "entrainment": 0.1,
+ "water": 1.5,
+ "frother": {
+  "species": "C10H16",
+  "kg": 0.02,
+  "recovery": 0.9
+ },
+ "note": "Froth flotation: sulfides, tellurides, arsenides, graphite and sulfur float. Pine oil frother raises recovery."
+}

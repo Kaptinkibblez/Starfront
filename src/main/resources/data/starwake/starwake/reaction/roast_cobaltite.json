@@ -1,0 +1,9 @@
+{
+ "machine": "roaster",
+ "equation": "4 CoAsS + 9 O2 -> 4 CoO + 2 As2O3 + 4 SO2",
+ "priority": 16,
+ "draw": [
+  "O2"
+ ],
+ "note": "Arsenic leaves as toxic As2O3 fume (flue dust)."
+}

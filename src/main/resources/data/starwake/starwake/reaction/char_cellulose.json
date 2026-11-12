@@ -1,0 +1,6 @@
+{
+ "machine": "coke_oven",
+ "equation": "C6H10O5 -> 6 C + 5 H2O",
+ "priority": 10,
+ "note": "Wood chars to charcoal; spruce gives pine oil."
+}

@@ -1,0 +1,8 @@
+{
+ "machine": "smelter",
+ "equation": "NiO + C -> Ni + CO",
+ "priority": 19,
+ "draw": [
+  "C"
+ ]
+}

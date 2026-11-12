@@ -1,0 +1,5 @@
+{
+ "machine": "roaster",
+ "equation": "MgCO3 -> MgO + CO2",
+ "priority": 31
+}

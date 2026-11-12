@@ -26,9 +26,10 @@ import net.minecraft.world.level.block.Block;
  * @param fuel     fuel multiplier: generator burn time = vanilla burn time x fuel
  * @param rating   kW: what a cable carries (a network carries its weakest cable's rating)
  * @param rate     transfer rate: buckets/s for pipes, blocks/s for conveyors
+ * @param temperature process temperature, C (roasters, smelters...)
  */
-public record MachineSpec(double power, double buffer, double io, double capacity, double speed, double fuel, double rating, double rate) {
-	public static final MachineSpec DEFAULT = new MachineSpec(1, 20, 10, 0, 1, 1, 32, 1);
+public record MachineSpec(double power, double buffer, double io, double capacity, double speed, double fuel, double rating, double rate, double temperature) {
+	public static final MachineSpec DEFAULT = new MachineSpec(1, 20, 10, 0, 1, 1, 32, 1, 25);
 
 	public static final Codec<MachineSpec> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.DOUBLE.optionalFieldOf("power", DEFAULT.power).forGetter(MachineSpec::power),
@@ -38,7 +39,8 @@ public record MachineSpec(double power, double buffer, double io, double capacit
 			Codec.DOUBLE.optionalFieldOf("speed", DEFAULT.speed).forGetter(MachineSpec::speed),
 			Codec.DOUBLE.optionalFieldOf("fuel", DEFAULT.fuel).forGetter(MachineSpec::fuel),
 			Codec.DOUBLE.optionalFieldOf("rating", DEFAULT.rating).forGetter(MachineSpec::rating),
-			Codec.DOUBLE.optionalFieldOf("rate", DEFAULT.rate).forGetter(MachineSpec::rate)
+			Codec.DOUBLE.optionalFieldOf("rate", DEFAULT.rate).forGetter(MachineSpec::rate),
+			Codec.DOUBLE.optionalFieldOf("temperature", DEFAULT.temperature).forGetter(MachineSpec::temperature)
 	).apply(i, MachineSpec::new));
 
 	private static Map<Identifier, MachineSpec> specs = Map.of();

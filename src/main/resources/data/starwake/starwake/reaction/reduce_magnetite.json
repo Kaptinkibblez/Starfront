@@ -1,0 +1,8 @@
+{
+ "machine": "smelter",
+ "equation": "Fe3O4 + 4 C -> 3 Fe + 4 CO",
+ "priority": 11,
+ "draw": [
+  "C"
+ ]
+}

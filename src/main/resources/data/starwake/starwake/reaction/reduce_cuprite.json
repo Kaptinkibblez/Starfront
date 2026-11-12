@@ -1,0 +1,8 @@
+{
+ "machine": "smelter",
+ "equation": "Cu2O + C -> 2 Cu + CO",
+ "priority": 22,
+ "draw": [
+  "C"
+ ]
+}

@@ -1,0 +1,9 @@
+{
+ "machine": "smelter",
+ "equation": "Fe2O3 + 3 C -> 2 Fe + 3 CO",
+ "priority": 10,
+ "draw": [
+  "C"
+ ],
+ "note": "Blast-furnace ironmaking; excess carbon dissolves in the iron (pig iron)."
+}

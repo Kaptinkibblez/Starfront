@@ -1,0 +1,9 @@
+{
+ "machine": "smelter",
+ "equation": "FeCr2O4 + 4 C -> Fe + 2 Cr + 4 CO",
+ "priority": 13,
+ "draw": [
+  "C"
+ ],
+ "note": "Ferrochrome for stainless steel."
+}

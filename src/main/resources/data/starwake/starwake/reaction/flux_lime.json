@@ -1,0 +1,5 @@
+{
+ "machine": "smelter",
+ "equation": "CaO + SiO2 -> CaSiO3",
+ "priority": 41
+}

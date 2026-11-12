@@ -18,6 +18,7 @@ public final class StarwakeClient implements ClientModInitializer {
 		com.starwake.client.galaxy.GalaxyClient.init();
 		com.starwake.client.chem.ChemistryTooltips.init();
 		com.starwake.client.metal.MetalTooltips.init();
+		com.starwake.client.process.ProcessTooltips.init();
 		com.starwake.client.machine.MachineScreen.register();
 		com.starwake.client.ship.ShipEditingClient.init();
 		com.starwake.client.hud.FlightHud.init();

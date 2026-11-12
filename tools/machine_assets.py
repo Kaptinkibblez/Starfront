@@ -163,6 +163,117 @@ def textures():
     save(im, "conveyor_side")
 
 
+def process_textures():
+    """M8c-1 unit operations: a front that shows the machine's job (lit when working), side, top."""
+    def front(name, base, draw):
+        for on in (False, True):
+            im = panel(base, sum(map(ord, name)) & 0xFF)
+            draw(im, on)
+            save(im, f"{name}_front" + ("_on" if on else ""))
+        side = panel(base, (sum(map(ord, name)) * 7) & 0xFF)
+        rect(side, 3, 3, 12, 3, "#c8a040")
+        save(side, f"{name}_side")
+        top = panel(base, (sum(map(ord, name)) * 13) & 0xFF)
+        rect(top, 5, 5, 10, 10, "#2a2c31")
+        save(top, f"{name}_top")
+
+    def crusher(im, on):
+        rect(im, 3, 3, 12, 12, "#2a2c31")
+        for i in range(4):
+            rect(im, 4 + i * 2, 4 + i, 5 + i * 2, 11 - i, "#8a8f98")
+        rect(im, 12, 2, 13, 3, "#ff4a3a" if on else "#5a2a2a")
+
+    def flotation(im, on):
+        rect(im, 3, 3, 12, 12, "#1a3a5a")
+        for x, y in ((5, 9), (8, 6), (10, 10), (6, 5), (11, 4)):
+            rect(im, x, y, x, y, "#bfe8ff" if on else "#4a7aa0")
+        rect(im, 3, 3, 12, 4, "#c8b060" if on else "#7a6a40")
+
+    def magnetic(im, on):
+        rect(im, 3, 4, 12, 11, "#2a2c31")
+        for x in range(4, 12):
+            rect(im, x, 5, x, 10, "#c87a3a" if x % 2 else "#a85a2a")
+        rect(im, 7, 3, 8, 12, "#55d8ff" if on else "#3a5a6a")
+
+    def gravity(im, on):
+        rect(im, 2, 5, 13, 11, "#c8c0a8")
+        for y in (6, 8, 10):
+            rect(im, 3, y, 12 - (y - 6), y, "#6a5a40")
+        rect(im, 10, 6, 12, 7, "#3a2e2a" if on else "#8a7a60")
+
+    def roaster(im, on):
+        rect(im, 3, 4, 12, 12, "#2a1e1a")
+        for y in range(6, 12, 2):
+            rect(im, 4, y, 11, y, "#ff7a2a" if on else "#4a3a34")
+        rect(im, 3, 3, 12, 3, "#8a4a2a")
+
+    def coke_oven(im, on):
+        for y in range(2, 14):
+            for x in range(2, 14):
+                im.putpixel((x, y), (hexrgb("#6a3a2e") if (x + (y // 2) * 2) % 4 else hexrgb("#4a2a22")) + (255,))
+        rect(im, 5, 6, 10, 13, "#1a1414")
+        if on:
+            rect(im, 6, 10, 9, 12, "#ff6a1a")
+
+    def smelter(im, on):
+        rect(im, 3, 3, 12, 12, "#5a4a44")
+        rect(im, 5, 5, 10, 10, "#1a1414")
+        rect(im, 6, 7, 9, 10, "#ffb03a" if on else "#3a2a24")
+        rect(im, 7, 11, 8, 13, "#ff7a1a" if on else "#2a2420")
+
+    def converter(im, on):
+        for y in range(3, 13):
+            half = 3 + min(y - 3, 12 - y, 2)
+            for x in range(8 - half, 8 + half):
+                im.putpixel((x, y), hexrgb("#4a4e56") + (255,))
+        rect(im, 6, 3, 9, 4, "#ffd25a" if on else "#2a2420")
+
+    front("crusher", "#6a6e66", crusher)
+    front("flotation", "#5e7080", flotation)
+    front("magnetic", "#6a6e78", magnetic)
+    front("gravity", "#7a7468", gravity)
+    front("roaster", "#6e5a50", roaster)
+    front("coke_oven", "#5e4a44", coke_oven)
+    front("smelter", "#6a6460", smelter)
+    front("converter", "#5a5e68", converter)
+
+
+def bulk_textures():
+    """Bulk materials (tinted by their main species): crushed ore, concentrate, tailings, calcine,
+    matte, slag, flue dust, coke. Light grey with shading only."""
+    out = os.path.join(ROOT, "textures", "item")
+    rnd = random.Random(42)
+
+    def pile(seed, lumpy, grain, base=215):
+        r = random.Random(seed)
+        im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        for y in range(5, 15):
+            half = (y - 4) * 0.8 + 1
+            for x in range(16):
+                if abs(x - 7.5) <= half and (not lumpy or r.random() > 0.08 or y > 10):
+                    v = base - (y - 5) * 6 + r.randint(-grain, grain)
+                    im.putpixel((x, y), (max(0, min(255, v)),) * 3 + (255,))
+        return im
+
+    def lumps(seed, n, size, base=210):
+        r = random.Random(seed)
+        im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        for _ in range(n):
+            cx, cy = r.randint(3, 12), r.randint(4, 13)
+            for y in range(cy - size, cy + size):
+                for x in range(cx - size, cx + size):
+                    if 0 <= x < 16 and 0 <= y < 16 and (x - cx) ** 2 + (y - cy) ** 2 <= size * size:
+                        v = base + (cy - y) * 8 + r.randint(-15, 10)
+                        im.putpixel((x, y), (max(0, min(255, v)),) * 3 + (255,))
+        return im
+
+    images = {"crushed_ore": lumps(1, 9, 2), "concentrate": pile(2, False, 12), "tailings": pile(3, True, 25, 190),
+              "calcine": lumps(4, 14, 1, 225), "matte": lumps(5, 3, 4, 170), "slag": lumps(6, 4, 3, 150),
+              "flue_dust": pile(7, False, 6, 235), "coke": lumps(8, 7, 2, 120)}
+    for name, im in images.items():
+        im.save(os.path.join(out, f"bulk_{name}.png"))
+
+
 def element(fr, to, tex, faces=("north", "south", "east", "west", "up", "down"), uv=None):
     return {"from": fr, "to": to, "faces": {f: ({"texture": tex, "uv": uv} if uv else {"texture": tex}) for f in faces}}
 
@@ -213,6 +324,8 @@ def models():
 
 def main():
     textures()
+    process_textures()
+    bulk_textures()
     models()
     print("machine assets written")
 

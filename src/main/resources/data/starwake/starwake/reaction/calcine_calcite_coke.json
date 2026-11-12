@@ -1,0 +1,5 @@
+{
+ "machine": "coke_oven",
+ "equation": "CaCO3 -> CaO + CO2",
+ "priority": 20
+}

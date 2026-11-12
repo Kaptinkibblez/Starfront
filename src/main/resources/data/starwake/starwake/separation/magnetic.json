@@ -1,0 +1,12 @@
+{
+ "select": [
+  "magnetic"
+ ],
+ "weak": [
+  "weak_magnetic"
+ ],
+ "recovery": 0.95,
+ "weak_recovery": 0.55,
+ "entrainment": 0.05,
+ "note": "Magnetite is strongly magnetic; ilmenite, chromite, wolframite, hematite and monazite weakly."
+}

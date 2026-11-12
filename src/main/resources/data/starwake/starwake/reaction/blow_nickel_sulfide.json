@@ -1,0 +1,8 @@
+{
+ "machine": "converter",
+ "equation": "2 NiS + 3 O2 -> 2 NiO + 2 SO2",
+ "priority": 12,
+ "draw": [
+  "O2"
+ ]
+}

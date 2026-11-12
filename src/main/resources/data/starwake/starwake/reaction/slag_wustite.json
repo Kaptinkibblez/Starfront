@@ -1,0 +1,9 @@
+{
+ "machine": "smelter",
+ "equation": "2 FeO + SiO2 -> Fe2SiO4",
+ "priority": 40,
+ "draw": [
+  "SiO2"
+ ],
+ "note": "Without carbon, iron oxide goes to fayalite slag (copper and nickel matte smelting)."
+}

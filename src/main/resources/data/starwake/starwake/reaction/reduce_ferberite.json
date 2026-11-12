@@ -1,0 +1,9 @@
+{
+ "machine": "smelter",
+ "equation": "FeWO4 + 4 C -> Fe + W + 4 CO",
+ "priority": 24,
+ "draw": [
+  "C"
+ ],
+ "note": "Ferrotungsten."
+}

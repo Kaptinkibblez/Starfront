@@ -1,0 +1,9 @@
+{
+ "machine": "converter",
+ "equation": "2 FeS + 3 O2 -> 2 FeO + 2 SO2",
+ "priority": 10,
+ "draw": [
+  "O2"
+ ],
+ "note": "Slag blow: iron sulfide burns first."
+}

@@ -1,0 +1,8 @@
+{
+ "machine": "converter",
+ "equation": "NiO + C -> Ni + CO",
+ "priority": 21,
+ "draw": [
+  "C"
+ ]
+}

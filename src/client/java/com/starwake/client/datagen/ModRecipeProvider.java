@@ -49,6 +49,29 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				shaped(RecipeCategory.REDSTONE, ModMachines.CONVEYOR, 6).pattern("KKK").pattern("IRI")
 						.define('K', Items.DRIED_KELP).define('I', Items.IRON_INGOT).define('R', Items.REDSTONE)
 						.unlockedBy("has_iron", has(Items.IRON_INGOT)).save(output);
+				// Process machines (M8c-1), provisional vanilla-material recipes until 8i.
+				var P = com.starwake.process.ProcessMachineBlockEntity.Process.class;
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.CRUSHER, "IPI", "ICI", "IRI", Items.PISTON);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.FLOTATION, "IBI", "GCG", "IRI", Items.BUCKET);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.MAGNETIC, "ILI", "ICI", "IRI", Items.LODESTONE);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.GRAVITY, "SSS", "ICI", "IRI", Items.SMOOTH_STONE_SLAB);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.ROASTER, "BBB", "BCB", "IRI", Items.BRICKS);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.COKE_OVEN, "BBB", "BFB", "BBB", Items.BRICKS);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.SMELTER, "BBB", "BCB", "IRI", Items.NETHER_BRICKS);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.CONVERTER, "I I", "ICI", "BRB", Items.NETHER_BRICKS);
+			}
+
+			private void machine(com.starwake.process.ProcessMachineBlockEntity.Process p, String a, String b, String c,
+					net.minecraft.world.item.Item special) {
+				var builder = shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModProcess.block(p)).pattern(a).pattern(b).pattern(c);
+				String all = a + b + c;
+				if (all.indexOf('I') >= 0) builder.define('I', Items.IRON_INGOT);
+				if (all.indexOf('R') >= 0) builder.define('R', Items.REDSTONE);
+				if (all.indexOf('C') >= 0) builder.define('C', ModMachines.COPPER_CABLE);
+				if (all.indexOf('G') >= 0) builder.define('G', Items.GLASS);
+				if (all.indexOf('F') >= 0) builder.define('F', Items.FURNACE);
+				for (char k : new char[] {'P', 'B', 'L', 'S'}) if (all.indexOf(k) >= 0) builder.define(k, special);
+				builder.unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 			}
 		};
 	}

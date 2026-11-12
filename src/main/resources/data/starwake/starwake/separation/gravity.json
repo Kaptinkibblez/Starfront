@@ -1,0 +1,7 @@
+{
+ "min_density": 4.5,
+ "recovery": 0.8,
+ "entrainment": 0.08,
+ "water": 1.0,
+ "note": "Shaking table: heavy minerals (cassiterite, wolframite, gold, zircon...) separate from light gangue."
+}

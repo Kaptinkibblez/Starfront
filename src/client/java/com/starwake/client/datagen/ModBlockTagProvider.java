@@ -48,6 +48,7 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		builder(BlockTags.LOGS).add(key(ModPlanetBlocks.FERNWOOD_LOG), key(ModPlanetBlocks.FUNGAL_STEM));
 		var machines = builder(BlockTags.MINEABLE_WITH_PICKAXE);
 		com.starwake.registry.ModMachines.all().forEach(block -> machines.add(key(block)));
+		com.starwake.registry.ModProcess.blocks().forEach(block -> machines.add(key(block)));
 		var ores = builder(BlockTags.MINEABLE_WITH_PICKAXE);
 		var ironTier = builder(BlockTags.NEEDS_IRON_TOOL);
 		var stoneTier = builder(BlockTags.NEEDS_STONE_TOOL);

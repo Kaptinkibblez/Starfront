@@ -21,10 +21,19 @@ public class MachineMenu extends AbstractContainerMenu {
 	/** Data slot indices. */
 	/** Top of the player inventory: the screen keeps an info strip above it. */
 	public static final int INVENTORY_Y = 104;
-	public static final int ENERGY = 0, CAPACITY = 2, PROGRESS = 4, PROGRESS_MAX = 5, POWER = 6, SUPPLY = 8, DEMAND = 10, STATUS = 12, COUNT = 13;
+	public static final int ENERGY = 0, CAPACITY = 2, PROGRESS = 4, PROGRESS_MAX = 5, POWER = 6, SUPPLY = 8, DEMAND = 10, STATUS = 12;
+	/** Up to three tank gauges (inlet, gas outlet, liquid outlet): amount in centi-kg, capacity in kg, main species index. */
+	public static final int TANKS = 13, COUNT = TANKS + 9;
 
-	/** Slot positions and roles of a machine. */
-	public record Layout(List<int[]> slots, int[] inputs, int[] outputs, int[] fuel, boolean arrow) {
+	/**
+	 * Slot positions and roles of a machine.
+	 *
+	 * @param arrow progress arrow position {x, y}, or null
+	 * @param tanks gauge x positions for the inlet, gas and liquid tanks (-1 = none)
+	 */
+	public record Layout(List<int[]> slots, int[] inputs, int[] outputs, int[] fuel, int @org.jspecify.annotations.Nullable [] arrow, int[] tanks) {
+		public static final int[] NO_TANKS = {-1, -1, -1};
+
 		public int size() {
 			return slots.size();
 		}

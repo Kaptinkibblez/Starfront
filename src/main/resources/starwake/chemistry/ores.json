@@ -1,0 +1,607 @@
+{
+ "minecraft:raw_iron": {
+  "mass": 2.0,
+  "assay": {
+   "Fe2O3": 0.68,
+   "Fe3O4": 0.17,
+   "SiO2": 0.08736,
+   "Al2O3": 0.02184,
+   "CaCO3": 0.01456,
+   "KAlSi3O8": 0.02184,
+   "Mn": 0.003,
+   "Ti": 0.0008,
+   "P": 0.0004,
+   "V": 0.0002
+  }
+ },
+ "minecraft:raw_copper": {
+  "mass": 2.0,
+  "assay": {
+   "Cu2S": 0.4125,
+   "CuFeS2": 0.2625,
+   "FeS2": 0.075,
+   "SiO2": 0.149698,
+   "Al2O3": 0.037425,
+   "CaCO3": 0.02495,
+   "KAlSi3O8": 0.037425,
+   "Ag": 0.00012,
+   "Au": 8e-06,
+   "Se": 6e-05,
+   "Te": 1.5e-05,
+   "Mo": 0.0003
+  }
+ },
+ "minecraft:raw_gold": {
+  "mass": 2.0,
+  "assay": {
+   "Au": 0.51,
+   "Ag": 0.09,
+   "SiO2": 0.359523,
+   "Al2O3": 0.039947,
+   "Cu": 0.0005,
+   "Te": 3e-05
+  }
+ },
+ "starwake:raw_bauxite": {
+  "mass": 2.0,
+  "assay": {
+   "Al(OH)3": 0.51,
+   "AlO(OH)": 0.2125,
+   "Fe2O3": 0.1275,
+   "SiO2": 0.08514,
+   "TiO2": 0.02838,
+   "Al2O3": 0.02838,
+   "Ga": 6e-05,
+   "Ti": 0.008,
+   "Sc": 4e-05
+  }
+ },
+ "starwake:raw_ilmenite": {
+  "mass": 2.0,
+  "assay": {
+   "FeTiO3": 0.8,
+   "SiO2": 0.1161,
+   "Al2O3": 0.029025,
+   "CaCO3": 0.01935,
+   "KAlSi3O8": 0.029025,
+   "V": 0.0015,
+   "Mn": 0.003,
+   "Mg": 0.002
+  }
+ },
+ "starwake:raw_pentlandite": {
+  "mass": 2.0,
+  "assay": {
+   "NiS": 0.357,
+   "FeS": 0.343,
+   "SiO2": 0.146245,
+   "MgO": 0.087747,
+   "Al2O3": 0.058498,
+   "Co": 0.0015,
+   "Pt": 4e-06,
+   "Pd": 6e-06,
+   "Cu": 0.006
+  }
+ },
+ "starwake:raw_chromite": {
+  "mass": 2.0,
+  "assay": {
+   "FeCr2O4": 0.85,
+   "MgO": 0.07005,
+   "SiO2": 0.04203,
+   "Al2O3": 0.02802,
+   "Mg": 0.005,
+   "Al": 0.004,
+   "V": 0.0009
+  }
+ },
+ "starwake:raw_cassiterite": {
+  "mass": 2.0,
+  "assay": {
+   "SnO2": 0.7,
+   "SiO2": 0.1797,
+   "Al2O3": 0.044925,
+   "CaCO3": 0.02995,
+   "KAlSi3O8": 0.044925,
+   "In": 5e-05,
+   "Nb": 0.0003,
+   "Ta": 0.00015
+  }
+ },
+ "starwake:raw_wolframite": {
+  "mass": 2.0,
+  "assay": {
+   "FeWO4": 0.375,
+   "MnWO4": 0.375,
+   "SiO2": 0.14958,
+   "Al2O3": 0.037395,
+   "CaCO3": 0.02493,
+   "KAlSi3O8": 0.037395,
+   "Sc": 0.0001,
+   "Nb": 0.0004,
+   "Ta": 0.0002
+  }
+ },
+ "starwake:raw_cobaltite": {
+  "mass": 2.0,
+  "assay": {
+   "CoAsS": 0.65,
+   "SiO2": 0.204,
+   "Al2O3": 0.051,
+   "CaCO3": 0.034,
+   "KAlSi3O8": 0.051,
+   "Ni": 0.004,
+   "Fe": 0.006
+  }
+ },
+ "starwake:raw_galena": {
+  "mass": 2.0,
+  "assay": {
+   "PbS": 0.8,
+   "SiO2": 0.119088,
+   "Al2O3": 0.029772,
+   "CaCO3": 0.019848,
+   "KAlSi3O8": 0.029772,
+   "Ag": 0.0008,
+   "Bi": 0.0003,
+   "Tl": 2e-05,
+   "Sb": 0.0004
+  }
+ },
+ "starwake:raw_sphalerite": {
+  "mass": 2.0,
+  "assay": {
+   "ZnS": 0.752,
+   "FeS": 0.048,
+   "SiO2": 0.118056,
+   "Al2O3": 0.029514,
+   "CaCO3": 0.019676,
+   "KAlSi3O8": 0.029514,
+   "Cd": 0.003,
+   "Ga": 8e-05,
+   "Ge": 6e-05,
+   "In": 0.0001
+  }
+ },
+ "starwake:raw_molybdenite": {
+  "mass": 2.0,
+  "assay": {
+   "MoS2": 0.65,
+   "SiO2": 0.2097,
+   "Al2O3": 0.052425,
+   "CaCO3": 0.03495,
+   "KAlSi3O8": 0.052425,
+   "Re": 0.0005
+  }
+ },
+ "starwake:raw_pyrolusite": {
+  "mass": 2.0,
+  "assay": {
+   "MnO2": 0.8,
+   "SiO2": 0.11856,
+   "Al2O3": 0.02964,
+   "CaCO3": 0.01976,
+   "KAlSi3O8": 0.02964,
+   "Co": 0.001,
+   "Ni": 0.0008,
+   "Cu": 0.0006
+  }
+ },
+ "starwake:raw_stibnite": {
+  "mass": 2.0,
+  "assay": {
+   "Sb2S3": 0.75,
+   "SiO2": 0.14862,
+   "Al2O3": 0.037155,
+   "CaCO3": 0.02477,
+   "KAlSi3O8": 0.037155,
+   "As": 0.002,
+   "Hg": 0.0003
+  }
+ },
+ "starwake:raw_bismuthinite": {
+  "mass": 2.0,
+  "assay": {
+   "Bi2S3": 0.7,
+   "SiO2": 0.1797,
+   "Al2O3": 0.044925,
+   "CaCO3": 0.02995,
+   "KAlSi3O8": 0.044925,
+   "Te": 0.0003,
+   "Se": 0.0002
+  }
+ },
+ "starwake:raw_acanthite": {
+  "mass": 2.0,
+  "assay": {
+   "Ag2S": 0.7,
+   "SiO2": 0.17976,
+   "Al2O3": 0.04494,
+   "CaCO3": 0.02996,
+   "KAlSi3O8": 0.04494,
+   "Au": 0.0004
+  }
+ },
+ "starwake:raw_sperrylite": {
+  "mass": 2.0,
+  "assay": {
+   "PtAs2": 0.6,
+   "SiO2": 0.23286,
+   "Al2O3": 0.058215,
+   "CaCO3": 0.03881,
+   "KAlSi3O8": 0.058215,
+   "Pd": 0.008,
+   "Rh": 0.0015,
+   "Ru": 0.0015,
+   "Ir": 0.0005,
+   "Os": 0.0004
+  }
+ },
+ "starwake:raw_calaverite": {
+  "mass": 2.0,
+  "assay": {
+   "AuTe2": 0.6,
+   "SiO2": 0.23682,
+   "Al2O3": 0.059205,
+   "CaCO3": 0.03947,
+   "KAlSi3O8": 0.059205,
+   "Ag": 0.005,
+   "Se": 0.0003
+  }
+ },
+ "starwake:raw_spodumene": {
+  "mass": 2.0,
+  "assay": {
+   "LiAlSi2O6": 0.8,
+   "SiO2": 0.117,
+   "Al2O3": 0.02925,
+   "CaCO3": 0.0195,
+   "KAlSi3O8": 0.02925,
+   "Na": 0.003,
+   "K": 0.002
+  }
+ },
+ "starwake:raw_beryl": {
+  "mass": 2.0,
+  "assay": {
+   "Be3Al2Si6O18": 0.8,
+   "SiO2": 0.11862,
+   "Al2O3": 0.029655,
+   "CaCO3": 0.01977,
+   "KAlSi3O8": 0.029655,
+   "Cs": 0.0015,
+   "Li": 0.0008
+  }
+ },
+ "starwake:raw_pollucite": {
+  "mass": 2.0,
+  "assay": {
+   "CsAlSi2O6": 0.75,
+   "SiO2": 0.144,
+   "Al2O3": 0.036,
+   "CaCO3": 0.024,
+   "KAlSi3O8": 0.036,
+   "Rb": 0.008,
+   "Li": 0.002
+  }
+ },
+ "starwake:raw_zircon": {
+  "mass": 2.0,
+  "assay": {
+   "ZrSiO4": 0.8,
+   "SiO2": 0.1131,
+   "Al2O3": 0.028275,
+   "CaCO3": 0.01885,
+   "KAlSi3O8": 0.028275,
+   "Hf": 0.01,
+   "U": 0.0003,
+   "Th": 0.0002,
+   "Y": 0.001
+  }
+ },
+ "starwake:raw_monazite": {
+  "mass": 2.0,
+  "assay": {
+   "CePO4": 0.384,
+   "LaPO4": 0.192,
+   "NdPO4": 0.144,
+   "PrPO4": 0.04,
+   "ThO2": 0.04,
+   "SiO2": 0.1155,
+   "Al2O3": 0.028875,
+   "CaCO3": 0.01925,
+   "KAlSi3O8": 0.028875,
+   "Sm": 0.003,
+   "Gd": 0.0015,
+   "Eu": 0.0002,
+   "Y": 0.002,
+   "Tb": 0.0002,
+   "Dy": 0.0006
+  }
+ },
+ "starwake:raw_xenotime": {
+  "mass": 2.0,
+  "assay": {
+   "YPO4": 0.75,
+   "SiO2": 0.13596,
+   "Al2O3": 0.03399,
+   "CaCO3": 0.02266,
+   "KAlSi3O8": 0.03399,
+   "Dy": 0.006,
+   "Er": 0.004,
+   "Yb": 0.004,
+   "Ho": 0.0012,
+   "Tb": 0.0008,
+   "Tm": 0.0006,
+   "Lu": 0.0006,
+   "Gd": 0.003,
+   "U": 0.002,
+   "Th": 0.001,
+   "Sc": 0.0002
+  }
+ },
+ "starwake:raw_bastnaesite": {
+  "mass": 2.0,
+  "assay": {
+   "CeCO3F": 0.465,
+   "LaCO3F": 0.285,
+   "SiO2": 0.12522,
+   "Al2O3": 0.031305,
+   "CaCO3": 0.02087,
+   "KAlSi3O8": 0.031305,
+   "Nd": 0.03,
+   "Pr": 0.009,
+   "Eu": 0.0003,
+   "Sm": 0.002
+  }
+ },
+ "starwake:raw_columbite": {
+  "mass": 2.0,
+  "assay": {
+   "FeNb2O6": 0.42,
+   "FeTa2O6": 0.175,
+   "MnNb2O6": 0.105,
+   "SiO2": 0.17736,
+   "Al2O3": 0.04434,
+   "CaCO3": 0.02956,
+   "KAlSi3O8": 0.04434,
+   "Sn": 0.003,
+   "Sc": 0.0004,
+   "U": 0.001
+  }
+ },
+ "starwake:raw_uraninite": {
+  "mass": 2.0,
+  "assay": {
+   "UO2": 0.7,
+   "SiO2": 0.1662,
+   "Al2O3": 0.04155,
+   "CaCO3": 0.0277,
+   "KAlSi3O8": 0.04155,
+   "Ra": 0.0,
+   "Po": 0.0,
+   "Pa": 0.0,
+   "Th": 0.003,
+   "Pb": 0.02,
+   "Np": 0.0,
+   "Pu": 0.0,
+   "Tc": 0.0,
+   "Ac": 0.0
+  }
+ },
+ "starwake:raw_barite": {
+  "mass": 2.0,
+  "assay": {
+   "BaSO4": 0.85,
+   "SiO2": 0.084,
+   "Al2O3": 0.021,
+   "CaCO3": 0.014,
+   "KAlSi3O8": 0.021,
+   "Sr": 0.01
+  }
+ },
+ "starwake:raw_celestine": {
+  "mass": 2.0,
+  "assay": {
+   "SrSO4": 0.85,
+   "SiO2": 0.084,
+   "Al2O3": 0.021,
+   "CaCO3": 0.014,
+   "KAlSi3O8": 0.021,
+   "Ba": 0.01
+  }
+ },
+ "starwake:raw_fluorite": {
+  "mass": 2.0,
+  "assay": {
+   "CaF2": 0.8,
+   "SiO2": 0.1197,
+   "Al2O3": 0.029925,
+   "CaCO3": 0.01995,
+   "KAlSi3O8": 0.029925,
+   "Y": 0.0003,
+   "Ce": 0.0002
+  }
+ },
+ "starwake:raw_apatite": {
+  "mass": 2.0,
+  "assay": {
+   "Ca5(PO4)3F": 0.75,
+   "SiO2": 0.14844,
+   "Al2O3": 0.03711,
+   "CaCO3": 0.02474,
+   "KAlSi3O8": 0.03711,
+   "Ce": 0.002,
+   "Y": 0.0005,
+   "U": 0.0001
+  }
+ },
+ "starwake:raw_magnesite": {
+  "mass": 2.0,
+  "assay": {
+   "MgCO3": 0.85,
+   "SiO2": 0.084,
+   "Al2O3": 0.021,
+   "CaCO3": 0.014,
+   "KAlSi3O8": 0.021,
+   "Fe": 0.005,
+   "Ca": 0.005
+  }
+ },
+ "starwake:raw_sylvite": {
+  "mass": 2.0,
+  "assay": {
+   "KCl": 0.63,
+   "NaCl": 0.27,
+   "CaSO4(H2O)2": 0.05862,
+   "SiO2": 0.03908,
+   "Rb": 0.0003,
+   "Br": 0.002
+  }
+ },
+ "starwake:raw_borax": {
+  "mass": 2.0,
+  "assay": {
+   "Na2B4O7(H2O)10": 0.8,
+   "SiO2": 0.11982,
+   "Al2O3": 0.029955,
+   "CaCO3": 0.01997,
+   "KAlSi3O8": 0.029955,
+   "Li": 0.0003
+  }
+ },
+ "starwake:raw_nitratine": {
+  "mass": 2.0,
+  "assay": {
+   "NaNO3": 0.75,
+   "SiO2": 0.14364,
+   "Al2O3": 0.03591,
+   "CaCO3": 0.02394,
+   "KAlSi3O8": 0.03591,
+   "I": 0.0006,
+   "K": 0.01
+  }
+ },
+ "minecraft:cinnabar": {
+  "mass": 2.0,
+  "assay": {
+   "HgS": 0.7,
+   "SiO2": 0.17958,
+   "Al2O3": 0.044895,
+   "CaCO3": 0.02993,
+   "KAlSi3O8": 0.044895,
+   "Se": 0.0002,
+   "Sb": 0.0005
+  }
+ },
+ "minecraft:sulfur": {
+  "mass": 2.0,
+  "assay": {
+   "S": 0.9,
+   "CaSO4(H2O)2": 0.069755,
+   "CaCO3": 0.029895,
+   "Se": 0.0003,
+   "Te": 5e-05
+  }
+ },
+ "minecraft:coal": {
+  "mass": 1.0,
+  "assay": {
+   "C": 0.78,
+   "CH4": 0.07,
+   "C10H8": 0.04,
+   "H2O": 0.05,
+   "S": 0.01,
+   "SiO2": 0.03,
+   "Al2O3": 0.02
+  }
+ },
+ "minecraft:charcoal": {
+  "mass": 1.0,
+  "assay": {
+   "C": 0.9,
+   "H2O": 0.04,
+   "CaCO3": 0.03,
+   "KAlSi3O8": 0.03
+  }
+ },
+ "minecraft:calcite": {
+  "mass": 1.0,
+  "assay": {
+   "CaCO3": 0.97,
+   "MgCO3": 0.02,
+   "SiO2": 0.01
+  }
+ },
+ "minecraft:quartz": {
+  "mass": 1.0,
+  "assay": {
+   "SiO2": 1.0
+  }
+ },
+ "minecraft:sand": {
+  "mass": 1.0,
+  "assay": {
+   "SiO2": 0.95,
+   "Al2O3": 0.03,
+   "Fe2O3": 0.02
+  }
+ },
+ "minecraft:clay_ball": {
+  "mass": 1.0,
+  "assay": {
+   "Al2O3": 0.4,
+   "SiO2": 0.46,
+   "H2O": 0.14
+  }
+ },
+ "minecraft:oak_log": {
+  "mass": 1.0,
+  "assay": {
+   "C6H10O5": 0.96,
+   "H2O": 0.03,
+   "KAlSi3O8": 0.01
+  }
+ },
+ "minecraft:spruce_log": {
+  "mass": 1.0,
+  "assay": {
+   "C6H10O5": 0.92,
+   "C10H16": 0.04,
+   "H2O": 0.03,
+   "KAlSi3O8": 0.01
+  }
+ },
+ "minecraft:birch_log": {
+  "mass": 1.0,
+  "assay": {
+   "C6H10O5": 0.96,
+   "H2O": 0.03,
+   "KAlSi3O8": 0.01
+  }
+ },
+ "minecraft:dark_oak_log": {
+  "mass": 1.0,
+  "assay": {
+   "C6H10O5": 0.96,
+   "H2O": 0.03,
+   "KAlSi3O8": 0.01
+  }
+ },
+ "minecraft:jungle_log": {
+  "mass": 1.0,
+  "assay": {
+   "C6H10O5": 0.96,
+   "H2O": 0.03,
+   "KAlSi3O8": 0.01
+  }
+ },
+ "minecraft:acacia_log": {
+  "mass": 1.0,
+  "assay": {
+   "C6H10O5": 0.96,
+   "H2O": 0.03,
+   "KAlSi3O8": 0.01
+  }
+ }
+}

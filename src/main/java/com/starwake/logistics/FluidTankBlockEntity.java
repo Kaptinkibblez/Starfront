@@ -26,6 +26,16 @@ public class FluidTankBlockEntity extends BlockEntity {
 		return storage;
 	}
 
+	/** Breaking a tank of a toxic chemical releases it (M8c hazards). */
+	@Override
+	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		super.preRemoveSideEffects(pos, state);
+		if (level instanceof net.minecraft.server.level.ServerLevel server && storage != null && !storage.isResourceBlank()) {
+			com.starwake.process.Chemicals.speciesOf(storage.getResource()).ifPresent(s ->
+					com.starwake.process.GasHazards.vent(server, pos, s, storage.getAmount() / (double) com.starwake.process.Chemicals.KG));
+		}
+	}
+
 	@Override
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);

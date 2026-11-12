@@ -84,7 +84,11 @@ public abstract class MachineBlockEntity extends BaseContainerBlockEntity implem
 		MachineMenu.write(v, MachineMenu.POWER, (int) Math.round(machine.powerKw * 1000));
 		MachineMenu.write(v, MachineMenu.SUPPLY, (int) Math.min(Integer.MAX_VALUE, Math.round(EnergyNode.kw(network.lastGeneration) * 1000)));
 		MachineMenu.write(v, MachineMenu.DEMAND, (int) Math.min(Integer.MAX_VALUE, Math.round(EnergyNode.kw(network.lastDemand) * 1000)));
+		machine.writeData(v);
 	}
+
+	/** Extra screen data (tank gauges) for subclasses. */
+	protected void writeData(int[] values) {}
 
 	// --- Energy -----------------------------------------------------------------------------------
 

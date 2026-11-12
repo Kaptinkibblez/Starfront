@@ -57,6 +57,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.createFurnace(com.starwake.registry.ModMachines.COMBUSTION_GENERATOR, TexturedModel.ORIENTABLE_ONLY_TOP);
 		generators.createFurnace(com.starwake.registry.ModMachines.ELECTRIC_FURNACE, TexturedModel.ORIENTABLE_ONLY_TOP);
 		generators.createTrivialBlock(com.starwake.registry.ModMachines.BATTERY, TexturedModel.COLUMN);
+		com.starwake.registry.ModProcess.blocks().forEach(b -> generators.createFurnace(b, TexturedModel.ORIENTABLE_ONLY_TOP));
 		simpleModelBlock(generators, com.starwake.registry.ModMachines.SOLAR_PANEL, "solar_panel", "solar_panel");
 		simpleModelBlock(generators, com.starwake.registry.ModMachines.FLUID_TANK, "fluid_tank", "fluid_tank");
 		generators.blockStateOutput.accept(net.minecraft.client.data.models.blockstates.MultiVariantGenerator.dispatch(
@@ -217,6 +218,14 @@ public final class ModModelProvider extends FabricModelProvider {
 		ModPlanetBlocks.ores().forEach(ore -> generators.generateFlatItem(ore.raw(), ModelTemplates.FLAT_ITEM));
 		generators.generateFlatItem(ModItems.SURVEY_SUIT, ModelTemplates.FLAT_ITEM);
 		generators.generateFlatItem(com.starwake.registry.ModHubBlocks.SEALED_CARGO, ModelTemplates.FLAT_ITEM);
+		// Bulk process materials (M8c): grey textures tinted by their main species.
+		for (var item : com.starwake.registry.ModProcess.bulkItems()) {
+			var texture = net.minecraft.resources.Identifier.fromNamespaceAndPath("starwake", "item/bulk_" + item.kind().id);
+			var model = ModelTemplates.FLAT_ITEM.create(item, net.minecraft.client.data.models.model.TextureMapping.layer0(
+					new net.minecraft.client.resources.model.sprite.Material(texture)), generators.modelOutput);
+			generators.itemModelOutput.accept(item, net.minecraft.client.data.models.model.ItemModelUtils.tintedModel(model,
+					new net.minecraft.client.color.item.CustomModelDataSource(0, 0x888888)));
+		}
 		// Metal forms (M8a): grey textures tinted by the stack's composition colour (custom model data).
 		for (var item : com.starwake.metal.MetalItems.all()) {
 			var texture = net.minecraft.resources.Identifier.fromNamespaceAndPath("starwake", "item/metal_" + item.form().id);

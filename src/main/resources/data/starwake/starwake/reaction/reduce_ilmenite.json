@@ -1,0 +1,9 @@
+{
+ "machine": "smelter",
+ "equation": "FeTiO3 + C -> Fe + TiO2 + CO",
+ "priority": 16,
+ "draw": [
+  "C"
+ ],
+ "note": "Titania slag (for the Kroll process) plus iron."
+}

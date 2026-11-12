@@ -1,0 +1,2497 @@
+[
+ {
+  "id": "SiO2",
+  "name": "Quartz",
+  "formula": "SiO2",
+  "kind": "oxide",
+  "density": 2.65,
+  "melting": 1713,
+  "boiling": 2950,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8d4cc"
+ },
+ {
+  "id": "Al2O3",
+  "name": "Alumina",
+  "formula": "Al2O3",
+  "kind": "oxide",
+  "density": 3.95,
+  "melting": 2072,
+  "boiling": 2977,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8e4e0"
+ },
+ {
+  "id": "CaCO3",
+  "name": "Calcite",
+  "formula": "CaCO3",
+  "kind": "carbonate",
+  "density": 2.71,
+  "melting": 825,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efe9dc"
+ },
+ {
+  "id": "MgCO3",
+  "name": "Magnesite",
+  "formula": "MgCO3",
+  "kind": "carbonate",
+  "density": 3.0,
+  "melting": 350,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e4e0d6"
+ },
+ {
+  "id": "CaO",
+  "name": "Quicklime",
+  "formula": "CaO",
+  "kind": "oxide",
+  "density": 3.34,
+  "melting": 2613,
+  "boiling": 2850,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2efe8"
+ },
+ {
+  "id": "MgO",
+  "name": "Magnesia",
+  "formula": "MgO",
+  "kind": "oxide",
+  "density": 3.58,
+  "melting": 2852,
+  "boiling": 3600,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefef"
+ },
+ {
+  "id": "KAlSi3O8",
+  "name": "Orthoclase",
+  "formula": "KAlSi3O8",
+  "kind": "silicate",
+  "density": 2.56,
+  "melting": 1200,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8b8a8"
+ },
+ {
+  "id": "Fe2O3",
+  "name": "Hematite",
+  "formula": "Fe2O3",
+  "kind": "oxide",
+  "density": 5.26,
+  "melting": 1565,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#7a3a2a"
+ },
+ {
+  "id": "Fe3O4",
+  "name": "Magnetite",
+  "formula": "Fe3O4",
+  "kind": "oxide",
+  "density": 5.17,
+  "melting": 1597,
+  "boiling": 9999,
+  "flags": [
+   "magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#2a2a2e"
+ },
+ {
+  "id": "FeO",
+  "name": "Wustite",
+  "formula": "FeO",
+  "kind": "oxide",
+  "density": 5.7,
+  "melting": 1377,
+  "boiling": 3414,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#3a3634"
+ },
+ {
+  "id": "Fe2SiO4",
+  "name": "Fayalite",
+  "formula": "Fe2SiO4",
+  "kind": "silicate",
+  "density": 4.39,
+  "melting": 1205,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#4a4038"
+ },
+ {
+  "id": "CaSiO3",
+  "name": "Wollastonite",
+  "formula": "CaSiO3",
+  "kind": "silicate",
+  "density": 2.9,
+  "melting": 1540,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#cfc8b8"
+ },
+ {
+  "id": "CuFeS2",
+  "name": "Chalcopyrite",
+  "formula": "CuFeS2",
+  "kind": "sulfide",
+  "density": 4.2,
+  "melting": 950,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#c8a838"
+ },
+ {
+  "id": "Cu2S",
+  "name": "Chalcocite",
+  "formula": "Cu2S",
+  "kind": "sulfide",
+  "density": 5.6,
+  "melting": 1130,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#3c3c44"
+ },
+ {
+  "id": "FeS",
+  "name": "Pyrrhotite",
+  "formula": "FeS",
+  "kind": "sulfide",
+  "density": 4.8,
+  "melting": 1194,
+  "boiling": 9999,
+  "flags": [
+   "floats",
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#a8884a"
+ },
+ {
+  "id": "FeS2",
+  "name": "Pyrite",
+  "formula": "FeS2",
+  "kind": "sulfide",
+  "density": 5.0,
+  "melting": 1180,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#d8c060"
+ },
+ {
+  "id": "NiS",
+  "name": "Millerite",
+  "formula": "NiS",
+  "kind": "sulfide",
+  "density": 5.5,
+  "melting": 797,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#b8a858"
+ },
+ {
+  "id": "Cu2O",
+  "name": "Cuprite",
+  "formula": "Cu2O",
+  "kind": "oxide",
+  "density": 6.0,
+  "melting": 1232,
+  "boiling": 1800,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#8a2a20"
+ },
+ {
+  "id": "NiO",
+  "name": "Bunsenite",
+  "formula": "NiO",
+  "kind": "oxide",
+  "density": 6.67,
+  "melting": 1955,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#4a6a3a"
+ },
+ {
+  "id": "CoO",
+  "name": "Cobalt oxide",
+  "formula": "CoO",
+  "kind": "oxide",
+  "density": 6.44,
+  "melting": 1933,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#3a3a6a"
+ },
+ {
+  "id": "CoAsS",
+  "name": "Cobaltite",
+  "formula": "CoAsS",
+  "kind": "sulfide",
+  "density": 6.3,
+  "melting": 1000,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#b8b8c8"
+ },
+ {
+  "id": "PbS",
+  "name": "Galena",
+  "formula": "PbS",
+  "kind": "sulfide",
+  "density": 7.6,
+  "melting": 1118,
+  "boiling": 1281,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#6a6e78"
+ },
+ {
+  "id": "PbO",
+  "name": "Litharge",
+  "formula": "PbO",
+  "kind": "oxide",
+  "density": 9.53,
+  "melting": 888,
+  "boiling": 1477,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8a838"
+ },
+ {
+  "id": "ZnS",
+  "name": "Sphalerite",
+  "formula": "ZnS",
+  "kind": "sulfide",
+  "density": 4.05,
+  "melting": 1700,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#6a4a2a"
+ },
+ {
+  "id": "ZnO",
+  "name": "Zincite",
+  "formula": "ZnO",
+  "kind": "oxide",
+  "density": 5.61,
+  "melting": 1975,
+  "boiling": 2360,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe8"
+ },
+ {
+  "id": "SnO2",
+  "name": "Cassiterite",
+  "formula": "SnO2",
+  "kind": "oxide",
+  "density": 6.95,
+  "melting": 1630,
+  "boiling": 1900,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#3a2e2a"
+ },
+ {
+  "id": "MoS2",
+  "name": "Molybdenite",
+  "formula": "MoS2",
+  "kind": "sulfide",
+  "density": 5.0,
+  "melting": 1750,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#5a5e6a"
+ },
+ {
+  "id": "MoO3",
+  "name": "Molybdite",
+  "formula": "MoO3",
+  "kind": "oxide",
+  "density": 4.69,
+  "melting": 795,
+  "boiling": 1155,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8d8b8"
+ },
+ {
+  "id": "HgS",
+  "name": "Cinnabar",
+  "formula": "HgS",
+  "kind": "sulfide",
+  "density": 8.1,
+  "melting": 580,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#b82a2a"
+ },
+ {
+  "id": "Sb2S3",
+  "name": "Stibnite",
+  "formula": "Sb2S3",
+  "kind": "sulfide",
+  "density": 4.63,
+  "melting": 550,
+  "boiling": 1150,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#5e626e"
+ },
+ {
+  "id": "Bi2S3",
+  "name": "Bismuthinite",
+  "formula": "Bi2S3",
+  "kind": "sulfide",
+  "density": 6.8,
+  "melting": 775,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#7a7e88"
+ },
+ {
+  "id": "Ag2S",
+  "name": "Acanthite",
+  "formula": "Ag2S",
+  "kind": "sulfide",
+  "density": 7.2,
+  "melting": 825,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#3a3a3a"
+ },
+ {
+  "id": "PtAs2",
+  "name": "Sperrylite",
+  "formula": "PtAs2",
+  "kind": "sulfide",
+  "density": 10.6,
+  "melting": 1500,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#c8c8c8"
+ },
+ {
+  "id": "AuTe2",
+  "name": "Calaverite",
+  "formula": "AuTe2",
+  "kind": "sulfide",
+  "density": 9.1,
+  "melting": 464,
+  "boiling": 9999,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#c8b878"
+ },
+ {
+  "id": "As2O3",
+  "name": "Arsenolite",
+  "formula": "As2O3",
+  "kind": "oxide",
+  "density": 3.74,
+  "melting": 312,
+  "boiling": 465,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.8,
+  "color": "#efefef"
+ },
+ {
+  "id": "FeCr2O4",
+  "name": "Chromite",
+  "formula": "FeCr2O4",
+  "kind": "oxide",
+  "density": 4.6,
+  "melting": 2180,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#2a2620"
+ },
+ {
+  "id": "MnO2",
+  "name": "Pyrolusite",
+  "formula": "MnO2",
+  "kind": "oxide",
+  "density": 5.03,
+  "melting": 535,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#2e2a28"
+ },
+ {
+  "id": "MnO",
+  "name": "Manganosite",
+  "formula": "MnO",
+  "kind": "oxide",
+  "density": 5.37,
+  "melting": 1945,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#3a6a3a"
+ },
+ {
+  "id": "FeTiO3",
+  "name": "Ilmenite",
+  "formula": "FeTiO3",
+  "kind": "oxide",
+  "density": 4.72,
+  "melting": 1050,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#2a2a2a"
+ },
+ {
+  "id": "TiO2",
+  "name": "Rutile",
+  "formula": "TiO2",
+  "kind": "oxide",
+  "density": 4.23,
+  "melting": 1843,
+  "boiling": 2972,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#8a4a2a"
+ },
+ {
+  "id": "FeWO4",
+  "name": "Ferberite",
+  "formula": "FeWO4",
+  "kind": "oxide",
+  "density": 7.5,
+  "melting": 1200,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#3a3430"
+ },
+ {
+  "id": "MnWO4",
+  "name": "Hubnerite",
+  "formula": "MnWO4",
+  "kind": "oxide",
+  "density": 7.2,
+  "melting": 1200,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#6a4a3a"
+ },
+ {
+  "id": "FeNb2O6",
+  "name": "Ferrocolumbite",
+  "formula": "FeNb2O6",
+  "kind": "oxide",
+  "density": 5.3,
+  "melting": 1500,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#2a2a2a"
+ },
+ {
+  "id": "FeTa2O6",
+  "name": "Ferrotantalite",
+  "formula": "FeTa2O6",
+  "kind": "oxide",
+  "density": 7.9,
+  "melting": 1500,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#2e2a2a"
+ },
+ {
+  "id": "MnNb2O6",
+  "name": "Manganocolumbite",
+  "formula": "MnNb2O6",
+  "kind": "oxide",
+  "density": 5.0,
+  "melting": 1500,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#3a2e2a"
+ },
+ {
+  "id": "ZrSiO4",
+  "name": "Zircon",
+  "formula": "ZrSiO4",
+  "kind": "silicate",
+  "density": 4.65,
+  "melting": 2550,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a86a4a"
+ },
+ {
+  "id": "Al(OH)3",
+  "name": "Gibbsite",
+  "formula": "Al(OH)3",
+  "kind": "oxide",
+  "density": 2.42,
+  "melting": 300,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8b8a0"
+ },
+ {
+  "id": "AlO(OH)",
+  "name": "Boehmite",
+  "formula": "AlO(OH)",
+  "kind": "oxide",
+  "density": 3.0,
+  "melting": 450,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8a890"
+ },
+ {
+  "id": "LiAlSi2O6",
+  "name": "Spodumene",
+  "formula": "LiAlSi2O6",
+  "kind": "silicate",
+  "density": 3.15,
+  "melting": 1423,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8c8d8"
+ },
+ {
+  "id": "Be3Al2Si6O18",
+  "name": "Beryl",
+  "formula": "Be3Al2Si6O18",
+  "kind": "silicate",
+  "density": 2.76,
+  "melting": 1650,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#8ad8b8"
+ },
+ {
+  "id": "CsAlSi2O6",
+  "name": "Pollucite",
+  "formula": "CsAlSi2O6",
+  "kind": "silicate",
+  "density": 2.9,
+  "melting": 1900,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefef"
+ },
+ {
+  "id": "CePO4",
+  "name": "Monazite-(Ce)",
+  "formula": "CePO4",
+  "kind": "phosphate",
+  "density": 5.2,
+  "melting": 2045,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#c87a3a"
+ },
+ {
+  "id": "LaPO4",
+  "name": "Monazite-(La)",
+  "formula": "LaPO4",
+  "kind": "phosphate",
+  "density": 5.1,
+  "melting": 2072,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#c8883a"
+ },
+ {
+  "id": "NdPO4",
+  "name": "Monazite-(Nd)",
+  "formula": "NdPO4",
+  "kind": "phosphate",
+  "density": 5.3,
+  "melting": 1975,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#b87a5a"
+ },
+ {
+  "id": "PrPO4",
+  "name": "Monazite-(Pr)",
+  "formula": "PrPO4",
+  "kind": "phosphate",
+  "density": 5.2,
+  "melting": 1938,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#a8a85a"
+ },
+ {
+  "id": "ThO2",
+  "name": "Thorianite",
+  "formula": "ThO2",
+  "kind": "oxide",
+  "density": 10.0,
+  "melting": 3390,
+  "boiling": 4400,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#4a4a4a"
+ },
+ {
+  "id": "YPO4",
+  "name": "Xenotime",
+  "formula": "YPO4",
+  "kind": "phosphate",
+  "density": 4.3,
+  "melting": 2150,
+  "boiling": 9999,
+  "flags": [
+   "weak_magnetic"
+  ],
+  "toxicity": 0.0,
+  "color": "#a87a4a"
+ },
+ {
+  "id": "CeCO3F",
+  "name": "Bastnaesite-(Ce)",
+  "formula": "CeCO3F",
+  "kind": "carbonate",
+  "density": 4.95,
+  "melting": 1000,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8a87a"
+ },
+ {
+  "id": "LaCO3F",
+  "name": "Bastnaesite-(La)",
+  "formula": "LaCO3F",
+  "kind": "carbonate",
+  "density": 4.9,
+  "melting": 1000,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8a88a"
+ },
+ {
+  "id": "UO2",
+  "name": "Uraninite",
+  "formula": "UO2",
+  "kind": "oxide",
+  "density": 10.97,
+  "melting": 2865,
+  "boiling": 9999,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.5,
+  "color": "#1e1e1e"
+ },
+ {
+  "id": "BaSO4",
+  "name": "Barite",
+  "formula": "BaSO4",
+  "kind": "sulfate",
+  "density": 4.48,
+  "melting": 1580,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8e0d8"
+ },
+ {
+  "id": "SrSO4",
+  "name": "Celestine",
+  "formula": "SrSO4",
+  "kind": "sulfate",
+  "density": 3.96,
+  "melting": 1605,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8d8e8"
+ },
+ {
+  "id": "CaF2",
+  "name": "Fluorite",
+  "formula": "CaF2",
+  "kind": "halide",
+  "density": 3.18,
+  "melting": 1418,
+  "boiling": 2533,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#8a5ac8"
+ },
+ {
+  "id": "Ca5(PO4)3F",
+  "name": "Fluorapatite",
+  "formula": "Ca5(PO4)3F",
+  "kind": "phosphate",
+  "density": 3.19,
+  "melting": 1660,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#5a8a7a"
+ },
+ {
+  "id": "KCl",
+  "name": "Sylvite",
+  "formula": "KCl",
+  "kind": "halide",
+  "density": 1.98,
+  "melting": 770,
+  "boiling": 1420,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8c8c8"
+ },
+ {
+  "id": "NaCl",
+  "name": "Halite",
+  "formula": "NaCl",
+  "kind": "halide",
+  "density": 2.16,
+  "melting": 801,
+  "boiling": 1465,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefef"
+ },
+ {
+  "id": "Na2B4O7(H2O)10",
+  "name": "Borax",
+  "formula": "Na2B4O7(H2O)10",
+  "kind": "sulfate",
+  "density": 1.71,
+  "melting": 75,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefef"
+ },
+ {
+  "id": "NaNO3",
+  "name": "Nitratine",
+  "formula": "NaNO3",
+  "kind": "sulfate",
+  "density": 2.26,
+  "melting": 308,
+  "boiling": 380,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefef"
+ },
+ {
+  "id": "CaSO4(H2O)2",
+  "name": "Gypsum",
+  "formula": "CaSO4(H2O)2",
+  "kind": "sulfate",
+  "density": 2.32,
+  "melting": 150,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f0ea"
+ },
+ {
+  "id": "O2",
+  "name": "Oxygen",
+  "formula": "O2",
+  "kind": "gas",
+  "density": 0.0014,
+  "melting": -218,
+  "boiling": -183,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8d8ff"
+ },
+ {
+  "id": "N2",
+  "name": "Nitrogen",
+  "formula": "N2",
+  "kind": "gas",
+  "density": 0.0012,
+  "melting": -210,
+  "boiling": -196,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8d0e8"
+ },
+ {
+  "id": "H2",
+  "name": "Hydrogen",
+  "formula": "H2",
+  "kind": "gas",
+  "density": 9e-05,
+  "melting": -259,
+  "boiling": -253,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8f0ff"
+ },
+ {
+  "id": "CO",
+  "name": "Carbon monoxide",
+  "formula": "CO",
+  "kind": "gas",
+  "density": 0.0012,
+  "melting": -205,
+  "boiling": -191,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.7,
+  "color": "#c8c8c8"
+ },
+ {
+  "id": "CO2",
+  "name": "Carbon dioxide",
+  "formula": "CO2",
+  "kind": "gas",
+  "density": 0.0018,
+  "melting": -56,
+  "boiling": -78,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.1,
+  "color": "#d8d8d8"
+ },
+ {
+  "id": "SO2",
+  "name": "Sulfur dioxide",
+  "formula": "SO2",
+  "kind": "gas",
+  "density": 0.0026,
+  "melting": -72,
+  "boiling": -10,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#e8e0a8"
+ },
+ {
+  "id": "CH4",
+  "name": "Methane",
+  "formula": "CH4",
+  "kind": "gas",
+  "density": 0.0007,
+  "melting": -182,
+  "boiling": -161,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8e8ff"
+ },
+ {
+  "id": "H2O",
+  "name": "Water",
+  "formula": "H2O",
+  "kind": "water",
+  "density": 1.0,
+  "melting": 0,
+  "boiling": 100,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#3a6aff"
+ },
+ {
+  "id": "C",
+  "name": "Carbon",
+  "formula": "C",
+  "kind": "carbon",
+  "density": 2.0,
+  "melting": 3550,
+  "boiling": 4027,
+  "flags": [
+   "floats"
+  ],
+  "toxicity": 0.0,
+  "color": "#2a2a2a"
+ },
+ {
+  "id": "C6H10O5",
+  "name": "Cellulose",
+  "formula": "C6H10O5",
+  "kind": "organic",
+  "density": 1.5,
+  "melting": 260,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8885a"
+ },
+ {
+  "id": "C10H16",
+  "name": "Pine oil",
+  "formula": "C10H16",
+  "kind": "organic",
+  "density": 0.86,
+  "melting": -64,
+  "boiling": 155,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8b84a"
+ },
+ {
+  "id": "C10H8",
+  "name": "Coal tar",
+  "formula": "C10H8",
+  "kind": "organic",
+  "density": 1.14,
+  "melting": 80,
+  "boiling": 218,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.2,
+  "color": "#1e1a16"
+ },
+ {
+  "id": "H",
+  "name": "Hydrogen",
+  "formula": "H",
+  "kind": "gas",
+  "density": 9e-05,
+  "melting": -259,
+  "boiling": -253,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8f0ff"
+ },
+ {
+  "id": "He",
+  "name": "Helium",
+  "formula": "He",
+  "kind": "gas",
+  "density": 0.00018,
+  "melting": -272,
+  "boiling": -269,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#ffd8f0"
+ },
+ {
+  "id": "Li",
+  "name": "Lithium",
+  "formula": "Li",
+  "kind": "metal",
+  "density": 0.534,
+  "melting": 181,
+  "boiling": 1342,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c8c0"
+ },
+ {
+  "id": "Be",
+  "name": "Beryllium",
+  "formula": "Be",
+  "kind": "metal",
+  "density": 1.85,
+  "melting": 1287,
+  "boiling": 3000,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#a8b0a8"
+ },
+ {
+  "id": "B",
+  "name": "Boron",
+  "formula": "B",
+  "kind": "element",
+  "density": 2.34,
+  "melting": 2076,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#5a4a3a"
+ },
+ {
+  "id": "N",
+  "name": "Nitrogen",
+  "formula": "N",
+  "kind": "gas",
+  "density": 0.00125,
+  "melting": -210,
+  "boiling": -196,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8d8ff"
+ },
+ {
+  "id": "O",
+  "name": "Oxygen",
+  "formula": "O",
+  "kind": "gas",
+  "density": 0.00143,
+  "melting": -219,
+  "boiling": -183,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8d0ff"
+ },
+ {
+  "id": "F",
+  "name": "Fluorine",
+  "formula": "F",
+  "kind": "gas",
+  "density": 0.0017,
+  "melting": -220,
+  "boiling": -188,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.9,
+  "color": "#e8f0a0"
+ },
+ {
+  "id": "Ne",
+  "name": "Neon",
+  "formula": "Ne",
+  "kind": "gas",
+  "density": 0.0009,
+  "melting": -248,
+  "boiling": -246,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#ff7a4a"
+ },
+ {
+  "id": "Na",
+  "name": "Sodium",
+  "formula": "Na",
+  "kind": "metal",
+  "density": 0.971,
+  "melting": 98,
+  "boiling": 883,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d0d0c8"
+ },
+ {
+  "id": "Mg",
+  "name": "Magnesium",
+  "formula": "Mg",
+  "kind": "metal",
+  "density": 1.738,
+  "melting": 650,
+  "boiling": 1091,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c4c8"
+ },
+ {
+  "id": "Al",
+  "name": "Aluminium",
+  "formula": "Al",
+  "kind": "metal",
+  "density": 2.7,
+  "melting": 660,
+  "boiling": 2470,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d0d4d8"
+ },
+ {
+  "id": "Si",
+  "name": "Silicon",
+  "formula": "Si",
+  "kind": "element",
+  "density": 2.329,
+  "melting": 1414,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#6a6a78"
+ },
+ {
+  "id": "P",
+  "name": "Phosphorus",
+  "formula": "P",
+  "kind": "element",
+  "density": 1.82,
+  "melting": 44,
+  "boiling": 280,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c84a3a"
+ },
+ {
+  "id": "S",
+  "name": "Sulfur",
+  "formula": "S",
+  "kind": "element",
+  "density": 2.067,
+  "melting": 115,
+  "boiling": 445,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8d84a"
+ },
+ {
+  "id": "Cl",
+  "name": "Chlorine",
+  "formula": "Cl",
+  "kind": "gas",
+  "density": 0.0032,
+  "melting": -101,
+  "boiling": -34,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.7,
+  "color": "#c8e86a"
+ },
+ {
+  "id": "Ar",
+  "name": "Argon",
+  "formula": "Ar",
+  "kind": "gas",
+  "density": 0.00178,
+  "melting": -189,
+  "boiling": -186,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8a8ff"
+ },
+ {
+  "id": "K",
+  "name": "Potassium",
+  "formula": "K",
+  "kind": "metal",
+  "density": 0.862,
+  "melting": 64,
+  "boiling": 759,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c8c0"
+ },
+ {
+  "id": "Ca",
+  "name": "Calcium",
+  "formula": "Ca",
+  "kind": "metal",
+  "density": 1.54,
+  "melting": 842,
+  "boiling": 1484,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8d8d0"
+ },
+ {
+  "id": "Sc",
+  "name": "Scandium",
+  "formula": "Sc",
+  "kind": "metal",
+  "density": 2.985,
+  "melting": 1541,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c8c0"
+ },
+ {
+  "id": "Ti",
+  "name": "Titanium",
+  "formula": "Ti",
+  "kind": "metal",
+  "density": 4.506,
+  "melting": 1668,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8a8b0"
+ },
+ {
+  "id": "V",
+  "name": "Vanadium",
+  "formula": "V",
+  "kind": "metal",
+  "density": 6.0,
+  "melting": 1910,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a0a8b0"
+ },
+ {
+  "id": "Cr",
+  "name": "Chromium",
+  "formula": "Cr",
+  "kind": "metal",
+  "density": 7.15,
+  "melting": 1907,
+  "boiling": 2671,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b8c0c8"
+ },
+ {
+  "id": "Mn",
+  "name": "Manganese",
+  "formula": "Mn",
+  "kind": "metal",
+  "density": 7.21,
+  "melting": 1246,
+  "boiling": 2061,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8a098"
+ },
+ {
+  "id": "Fe",
+  "name": "Iron",
+  "formula": "Fe",
+  "kind": "metal",
+  "density": 7.874,
+  "melting": 1538,
+  "boiling": 2861,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0aca8"
+ },
+ {
+  "id": "Co",
+  "name": "Cobalt",
+  "formula": "Co",
+  "kind": "metal",
+  "density": 8.86,
+  "melting": 1495,
+  "boiling": 2927,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8a8b8"
+ },
+ {
+  "id": "Ni",
+  "name": "Nickel",
+  "formula": "Ni",
+  "kind": "metal",
+  "density": 8.912,
+  "melting": 1455,
+  "boiling": 2913,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0b8a0"
+ },
+ {
+  "id": "Cu",
+  "name": "Copper",
+  "formula": "Cu",
+  "kind": "metal",
+  "density": 8.96,
+  "melting": 1085,
+  "boiling": 2562,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8783a"
+ },
+ {
+  "id": "Zn",
+  "name": "Zinc",
+  "formula": "Zn",
+  "kind": "metal",
+  "density": 7.14,
+  "melting": 420,
+  "boiling": 907,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b8c0c8"
+ },
+ {
+  "id": "Ga",
+  "name": "Gallium",
+  "formula": "Ga",
+  "kind": "metal",
+  "density": 5.91,
+  "melting": 30,
+  "boiling": 2400,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8ccd4"
+ },
+ {
+  "id": "Ge",
+  "name": "Germanium",
+  "formula": "Ge",
+  "kind": "element",
+  "density": 5.323,
+  "melting": 938,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#9a9aa0"
+ },
+ {
+  "id": "As",
+  "name": "Arsenic",
+  "formula": "As",
+  "kind": "element",
+  "density": 5.727,
+  "melting": 817,
+  "boiling": 615,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.8,
+  "color": "#7a7a80"
+ },
+ {
+  "id": "Se",
+  "name": "Selenium",
+  "formula": "Se",
+  "kind": "element",
+  "density": 4.81,
+  "melting": 221,
+  "boiling": 685,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.4,
+  "color": "#5a3a3a"
+ },
+ {
+  "id": "Br",
+  "name": "Bromine",
+  "formula": "Br",
+  "kind": "element",
+  "density": 3.1028,
+  "melting": -7,
+  "boiling": 59,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#8a2a1a"
+ },
+ {
+  "id": "Kr",
+  "name": "Krypton",
+  "formula": "Kr",
+  "kind": "gas",
+  "density": 0.00375,
+  "melting": -157,
+  "boiling": -153,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e0e8ff"
+ },
+ {
+  "id": "Rb",
+  "name": "Rubidium",
+  "formula": "Rb",
+  "kind": "metal",
+  "density": 1.532,
+  "melting": 39,
+  "boiling": 688,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c4b8"
+ },
+ {
+  "id": "Sr",
+  "name": "Strontium",
+  "formula": "Sr",
+  "kind": "metal",
+  "density": 2.64,
+  "melting": 777,
+  "boiling": 1377,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d0ccc0"
+ },
+ {
+  "id": "Y",
+  "name": "Yttrium",
+  "formula": "Y",
+  "kind": "metal",
+  "density": 4.472,
+  "melting": 1526,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "Zr",
+  "name": "Zirconium",
+  "formula": "Zr",
+  "kind": "metal",
+  "density": 6.52,
+  "melting": 1855,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b8b8b0"
+ },
+ {
+  "id": "Nb",
+  "name": "Niobium",
+  "formula": "Nb",
+  "kind": "metal",
+  "density": 8.57,
+  "melting": 2477,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8a8b8"
+ },
+ {
+  "id": "Mo",
+  "name": "Molybdenum",
+  "formula": "Mo",
+  "kind": "metal",
+  "density": 10.28,
+  "melting": 2623,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a0a0a8"
+ },
+ {
+  "id": "Tc",
+  "name": "Technetium",
+  "formula": "Tc",
+  "kind": "metal",
+  "density": 11.0,
+  "melting": 2157,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8a8b0"
+ },
+ {
+  "id": "Ru",
+  "name": "Ruthenium",
+  "formula": "Ru",
+  "kind": "metal",
+  "density": 12.45,
+  "melting": 2334,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Rh",
+  "name": "Rhodium",
+  "formula": "Rh",
+  "kind": "metal",
+  "density": 12.41,
+  "melting": 1964,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c8d0"
+ },
+ {
+  "id": "Pd",
+  "name": "Palladium",
+  "formula": "Pd",
+  "kind": "metal",
+  "density": 12.023,
+  "melting": 1555,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c0"
+ },
+ {
+  "id": "Ag",
+  "name": "Silver",
+  "formula": "Ag",
+  "kind": "metal",
+  "density": 10.49,
+  "melting": 962,
+  "boiling": 2162,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8d8e0"
+ },
+ {
+  "id": "Cd",
+  "name": "Cadmium",
+  "formula": "Cd",
+  "kind": "metal",
+  "density": 8.65,
+  "melting": 321,
+  "boiling": 767,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.7,
+  "color": "#b8b8c0"
+ },
+ {
+  "id": "In",
+  "name": "Indium",
+  "formula": "In",
+  "kind": "metal",
+  "density": 7.31,
+  "melting": 157,
+  "boiling": 2072,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "Sn",
+  "name": "Tin",
+  "formula": "Sn",
+  "kind": "metal",
+  "density": 7.265,
+  "melting": 232,
+  "boiling": 2602,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c8c8"
+ },
+ {
+  "id": "Sb",
+  "name": "Antimony",
+  "formula": "Sb",
+  "kind": "element",
+  "density": 6.697,
+  "melting": 631,
+  "boiling": 1587,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a0a0a8"
+ },
+ {
+  "id": "Te",
+  "name": "Tellurium",
+  "formula": "Te",
+  "kind": "element",
+  "density": 6.24,
+  "melting": 450,
+  "boiling": 988,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#9898a0"
+ },
+ {
+  "id": "I",
+  "name": "Iodine",
+  "formula": "I",
+  "kind": "element",
+  "density": 4.933,
+  "melting": 114,
+  "boiling": 184,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#4a2a5a"
+ },
+ {
+  "id": "Xe",
+  "name": "Xenon",
+  "formula": "Xe",
+  "kind": "gas",
+  "density": 0.0059,
+  "melting": -112,
+  "boiling": -108,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8c8ff"
+ },
+ {
+  "id": "Cs",
+  "name": "Caesium",
+  "formula": "Cs",
+  "kind": "metal",
+  "density": 1.93,
+  "melting": 29,
+  "boiling": 671,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8c890"
+ },
+ {
+  "id": "Ba",
+  "name": "Barium",
+  "formula": "Ba",
+  "kind": "metal",
+  "density": 3.51,
+  "melting": 727,
+  "boiling": 1845,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c8c0"
+ },
+ {
+  "id": "La",
+  "name": "Lanthanum",
+  "formula": "La",
+  "kind": "metal",
+  "density": 6.162,
+  "melting": 920,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c8c0"
+ },
+ {
+  "id": "Ce",
+  "name": "Cerium",
+  "formula": "Ce",
+  "kind": "metal",
+  "density": 6.77,
+  "melting": 795,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0b8"
+ },
+ {
+  "id": "Pr",
+  "name": "Praseodymium",
+  "formula": "Pr",
+  "kind": "metal",
+  "density": 6.77,
+  "melting": 935,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b8c0b0"
+ },
+ {
+  "id": "Nd",
+  "name": "Neodymium",
+  "formula": "Nd",
+  "kind": "metal",
+  "density": 7.01,
+  "melting": 1024,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "Pm",
+  "name": "Promethium",
+  "formula": "Pm",
+  "kind": "metal",
+  "density": 7.26,
+  "melting": 1042,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0d0c0"
+ },
+ {
+  "id": "Sm",
+  "name": "Samarium",
+  "formula": "Sm",
+  "kind": "metal",
+  "density": 7.52,
+  "melting": 1072,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c8c0"
+ },
+ {
+  "id": "Eu",
+  "name": "Europium",
+  "formula": "Eu",
+  "kind": "metal",
+  "density": 5.244,
+  "melting": 826,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c4b8"
+ },
+ {
+  "id": "Gd",
+  "name": "Gadolinium",
+  "formula": "Gd",
+  "kind": "metal",
+  "density": 7.9,
+  "melting": 1312,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c0"
+ },
+ {
+  "id": "Tb",
+  "name": "Terbium",
+  "formula": "Tb",
+  "kind": "metal",
+  "density": 8.23,
+  "melting": 1356,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0b8"
+ },
+ {
+  "id": "Dy",
+  "name": "Dysprosium",
+  "formula": "Dy",
+  "kind": "metal",
+  "density": 8.54,
+  "melting": 1407,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c0"
+ },
+ {
+  "id": "Ho",
+  "name": "Holmium",
+  "formula": "Ho",
+  "kind": "metal",
+  "density": 8.79,
+  "melting": 1461,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c0"
+ },
+ {
+  "id": "Er",
+  "name": "Erbium",
+  "formula": "Er",
+  "kind": "metal",
+  "density": 9.066,
+  "melting": 1529,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c0c0"
+ },
+ {
+  "id": "Tm",
+  "name": "Thulium",
+  "formula": "Tm",
+  "kind": "metal",
+  "density": 9.32,
+  "melting": 1545,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c0"
+ },
+ {
+  "id": "Yb",
+  "name": "Ytterbium",
+  "formula": "Yb",
+  "kind": "metal",
+  "density": 6.9,
+  "melting": 824,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c8c0"
+ },
+ {
+  "id": "Lu",
+  "name": "Lutetium",
+  "formula": "Lu",
+  "kind": "metal",
+  "density": 9.841,
+  "melting": 1652,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c0"
+ },
+ {
+  "id": "Hf",
+  "name": "Hafnium",
+  "formula": "Hf",
+  "kind": "metal",
+  "density": 13.31,
+  "melting": 2233,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Ta",
+  "name": "Tantalum",
+  "formula": "Ta",
+  "kind": "metal",
+  "density": 16.69,
+  "melting": 3017,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#9898a8"
+ },
+ {
+  "id": "W",
+  "name": "Tungsten",
+  "formula": "W",
+  "kind": "metal",
+  "density": 19.25,
+  "melting": 3422,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a0a0a0"
+ },
+ {
+  "id": "Re",
+  "name": "Rhenium",
+  "formula": "Re",
+  "kind": "metal",
+  "density": 21.02,
+  "melting": 3186,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8a8b0"
+ },
+ {
+  "id": "Os",
+  "name": "Osmium",
+  "formula": "Os",
+  "kind": "metal",
+  "density": 22.59,
+  "melting": 3033,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8b0c0"
+ },
+ {
+  "id": "Ir",
+  "name": "Iridium",
+  "formula": "Ir",
+  "kind": "metal",
+  "density": 22.56,
+  "melting": 2446,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c8d0"
+ },
+ {
+  "id": "Pt",
+  "name": "Platinum",
+  "formula": "Pt",
+  "kind": "metal",
+  "density": 21.45,
+  "melting": 1768,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d0d0d8"
+ },
+ {
+  "id": "Au",
+  "name": "Gold",
+  "formula": "Au",
+  "kind": "metal",
+  "density": 19.3,
+  "melting": 1064,
+  "boiling": 2856,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8c040"
+ },
+ {
+  "id": "Hg",
+  "name": "Mercury",
+  "formula": "Hg",
+  "kind": "metal",
+  "density": 13.534,
+  "melting": -39,
+  "boiling": 357,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.9,
+  "color": "#c8c8d0"
+ },
+ {
+  "id": "Tl",
+  "name": "Thallium",
+  "formula": "Tl",
+  "kind": "metal",
+  "density": 11.85,
+  "melting": 304,
+  "boiling": 1473,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.9,
+  "color": "#a8a8b0"
+ },
+ {
+  "id": "Pb",
+  "name": "Lead",
+  "formula": "Pb",
+  "kind": "metal",
+  "density": 11.34,
+  "melting": 328,
+  "boiling": 1749,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#7a7a88"
+ },
+ {
+  "id": "Bi",
+  "name": "Bismuth",
+  "formula": "Bi",
+  "kind": "metal",
+  "density": 9.78,
+  "melting": 272,
+  "boiling": 1564,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d0a8c0"
+ },
+ {
+  "id": "Po",
+  "name": "Polonium",
+  "formula": "Po",
+  "kind": "metal",
+  "density": 9.196,
+  "melting": 254,
+  "boiling": 962,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 1.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "At",
+  "name": "Astatine",
+  "formula": "At",
+  "kind": "element",
+  "density": 6.4,
+  "melting": 302,
+  "boiling": 337,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#3a3a3a"
+ },
+ {
+  "id": "Rn",
+  "name": "Radon",
+  "formula": "Rn",
+  "kind": "gas",
+  "density": 0.00973,
+  "melting": -71,
+  "boiling": -62,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.5,
+  "color": "#d0f0d0"
+ },
+ {
+  "id": "Fr",
+  "name": "Francium",
+  "formula": "Fr",
+  "kind": "metal",
+  "density": 2.48,
+  "melting": 27,
+  "boiling": 677,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8c0a0"
+ },
+ {
+  "id": "Ra",
+  "name": "Radium",
+  "formula": "Ra",
+  "kind": "metal",
+  "density": 5.5,
+  "melting": 700,
+  "boiling": 1737,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.9,
+  "color": "#e8f0e0"
+ },
+ {
+  "id": "Ac",
+  "name": "Actinium",
+  "formula": "Ac",
+  "kind": "metal",
+  "density": 10.07,
+  "melting": 1050,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c8d0e0"
+ },
+ {
+  "id": "Th",
+  "name": "Thorium",
+  "formula": "Th",
+  "kind": "metal",
+  "density": 11.72,
+  "melting": 1750,
+  "boiling": 3000,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#909098"
+ },
+ {
+  "id": "Pa",
+  "name": "Protactinium",
+  "formula": "Pa",
+  "kind": "metal",
+  "density": 15.37,
+  "melting": 1568,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a8a8b0"
+ },
+ {
+  "id": "U",
+  "name": "Uranium",
+  "formula": "U",
+  "kind": "metal",
+  "density": 19.1,
+  "melting": 1132,
+  "boiling": 3000,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.4,
+  "color": "#8a9080"
+ },
+ {
+  "id": "Np",
+  "name": "Neptunium",
+  "formula": "Np",
+  "kind": "metal",
+  "density": 20.45,
+  "melting": 644,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#a0a0a8"
+ },
+ {
+  "id": "Pu",
+  "name": "Plutonium",
+  "formula": "Pu",
+  "kind": "metal",
+  "density": 19.816,
+  "melting": 640,
+  "boiling": 3000,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 1.0,
+  "color": "#909098"
+ },
+ {
+  "id": "Am",
+  "name": "Americium",
+  "formula": "Am",
+  "kind": "metal",
+  "density": 12.0,
+  "melting": 1176,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "Cm",
+  "name": "Curium",
+  "formula": "Cm",
+  "kind": "metal",
+  "density": 13.51,
+  "melting": 1340,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "Bk",
+  "name": "Berkelium",
+  "formula": "Bk",
+  "kind": "metal",
+  "density": 14.78,
+  "melting": 986,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "Cf",
+  "name": "Californium",
+  "formula": "Cf",
+  "kind": "metal",
+  "density": 15.1,
+  "melting": 900,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "Es",
+  "name": "Einsteinium",
+  "formula": "Es",
+  "kind": "metal",
+  "density": 8.84,
+  "melting": 860,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "Fm",
+  "name": "Fermium",
+  "formula": "Fm",
+  "kind": "metal",
+  "density": 9.7,
+  "melting": 1527,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "Md",
+  "name": "Mendelevium",
+  "formula": "Md",
+  "kind": "metal",
+  "density": 10.3,
+  "melting": 827,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "No",
+  "name": "Nobelium",
+  "formula": "No",
+  "kind": "metal",
+  "density": 9.9,
+  "melting": 827,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "Lr",
+  "name": "Lawrencium",
+  "formula": "Lr",
+  "kind": "metal",
+  "density": 15.6,
+  "melting": 1627,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#c0c0c8"
+ },
+ {
+  "id": "Rf",
+  "name": "Rutherfordium",
+  "formula": "Rf",
+  "kind": "metal",
+  "density": 23.2,
+  "melting": 2127,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Db",
+  "name": "Dubnium",
+  "formula": "Db",
+  "kind": "metal",
+  "density": 29.3,
+  "melting": 1000,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Sg",
+  "name": "Seaborgium",
+  "formula": "Sg",
+  "kind": "metal",
+  "density": 35.0,
+  "melting": 1000,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Bh",
+  "name": "Bohrium",
+  "formula": "Bh",
+  "kind": "metal",
+  "density": 37.1,
+  "melting": 1000,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Hs",
+  "name": "Hassium",
+  "formula": "Hs",
+  "kind": "metal",
+  "density": 41.0,
+  "melting": 1000,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Mt",
+  "name": "Meitnerium",
+  "formula": "Mt",
+  "kind": "metal",
+  "density": 37.4,
+  "melting": 1000,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Ds",
+  "name": "Darmstadtium",
+  "formula": "Ds",
+  "kind": "metal",
+  "density": 34.8,
+  "melting": 1000,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Rg",
+  "name": "Roentgenium",
+  "formula": "Rg",
+  "kind": "metal",
+  "density": 28.7,
+  "melting": 1000,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Cn",
+  "name": "Copernicium",
+  "formula": "Cn",
+  "kind": "metal",
+  "density": 14.0,
+  "melting": 1000,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Nh",
+  "name": "Nihonium",
+  "formula": "Nh",
+  "kind": "metal",
+  "density": 16.0,
+  "melting": 427,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Fl",
+  "name": "Flerovium",
+  "formula": "Fl",
+  "kind": "metal",
+  "density": 11.4,
+  "melting": 1000,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Mc",
+  "name": "Moscovium",
+  "formula": "Mc",
+  "kind": "metal",
+  "density": 13.5,
+  "melting": 397,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Lv",
+  "name": "Livermorium",
+  "formula": "Lv",
+  "kind": "metal",
+  "density": 12.9,
+  "melting": 427,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Ts",
+  "name": "Tennessine",
+  "formula": "Ts",
+  "kind": "element",
+  "density": 7.2,
+  "melting": 427,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Og",
+  "name": "Oganesson",
+  "formula": "Og",
+  "kind": "element",
+  "density": 7.2,
+  "melting": 52,
+  "boiling": 3000,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#b0b0b8"
+ },
+ {
+  "id": "Sb2O3",
+  "name": "Senarmontite",
+  "formula": "Sb2O3",
+  "kind": "oxide",
+  "density": 5.2,
+  "melting": 656,
+  "boiling": 1425,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.3,
+  "color": "#efefef"
+ }
+]

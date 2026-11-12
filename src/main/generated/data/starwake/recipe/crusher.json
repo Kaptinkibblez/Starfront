@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "starwake:copper_cable",
+    "I": "minecraft:iron_ingot",
+    "P": "minecraft:piston",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "IPI",
+    "ICI",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:crusher"
+  }
+}
