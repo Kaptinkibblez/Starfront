@@ -166,6 +166,8 @@ public class ShipEntity extends Entity {
 
 	// Derived from the structure (recomputed on load; never saved). Keyed by LOCAL direction.
 	private double mass = 1;
+	private double[] hullProbes = new double[0];
+	private double radius = 1;
 	/** Rigid-body model: centre of mass, inertia, thrusters (3h). */
 	private ShipDynamics dynamics = new ShipDynamics().finish();
 	/** Structure entry index of each thruster in {@code dynamics} (for the synced throttles). */
@@ -278,6 +280,7 @@ public class ShipEntity extends Entity {
 		}
 		dynamics = model.finish();
 		mass = dynamics.mass();
+		computeProbes();
 		thrusterEntries = thrusterIndex.stream().mapToInt(Integer::intValue).toArray();
 		throttles = new double[thrusterEntries.length];
 
@@ -292,6 +295,29 @@ public class ShipEntity extends Entity {
 	}
 
 	/** Server: pushes systems numbers to the synced HUD fields. */
+	/** Unique corners of the hull boxes, as contact probes for {@link com.starwake.ship.physics.ShipMotion}. */
+	private void computeProbes() {
+		java.util.LinkedHashSet<Long> seen = new java.util.LinkedHashSet<>();
+		java.util.List<Double> out = new ArrayList<>();
+		double far = 1;
+		Vector3d c = dynamics.centre();
+		for (AABB box : hull) {
+			for (int k = 0; k < 8; k++) {
+				double x = (k & 1) == 0 ? box.minX : box.maxX, y = (k & 2) == 0 ? box.minY : box.maxY, z = (k & 4) == 0 ? box.minZ : box.maxZ;
+				long key = (Math.round(x * 16) & 0x1FFFFF) | ((Math.round(y * 16) & 0x1FFFFF) << 21) | ((Math.round(z * 16) & 0x1FFFFF) << 42);
+				if (!seen.add(key)) continue;
+				// Probes sit a hair inside the box, so a hull resting exactly on a block face isn't "inside" it.
+				out.add(x + ((k & 1) == 0 ? 0.001 : -0.001));
+				out.add(y + ((k & 2) == 0 ? 0.001 : -0.001));
+				out.add(z + ((k & 4) == 0 ? 0.001 : -0.001));
+				far = Math.max(far, Math.sqrt((x - c.x) * (x - c.x) + (y - c.y) * (y - c.y) + (z - c.z) * (z - c.z)));
+			}
+		}
+		hullProbes = new double[out.size()];
+		for (int i = 0; i < hullProbes.length; i++) hullProbes[i] = out.get(i);
+		radius = far;
+	}
+
 	private void publishSystems() {
 		if (level() == null || level().isClientSide()) return;
 		entityData.set(SHIELD_MAX, (float) systems.shieldCapacity());
@@ -613,6 +639,21 @@ public class ShipEntity extends Entity {
 	public BlockPos helmLocal() { return helmLocal; }
 	public Direction forward() { return forward; }
 	public double mass() { return mass; }
+
+	/** Angular velocity in the ship's own frame (rad/tick); {@link com.starwake.ship.physics.ShipMotion} updates it in place. */
+	public Vector3d angularVelocity() { return angularVelocity; }
+
+	/** Corners of every outer hull block's collision box, local coordinates, packed xyz (contact probes). */
+	public double[] hullProbes() { return hullProbes; }
+
+	/** Distance from the centre of mass to the farthest hull corner (blocks). */
+	public double radius() { return radius; }
+
+	/** Sets position and orientation together (the contact solver moves both). */
+	public void setPose(Vec3 position, Quaternionfc rotation) {
+		setOrientation(rotation);
+		setPos(position.x, position.y, position.z);
+	}
 	public Vec3 lastMove() { return lastMove; }
 	public boolean isSealed() { return sealed; }
 	public boolean isGrounded() { return grounded; }
@@ -953,10 +994,8 @@ public class ShipEntity extends Entity {
 			velocity = unpiloted(velocity, physics);
 			angularVelocity.mul(0.8);
 			java.util.Arrays.fill(throttles, 0);
-			rotate();
 		} else {
 			velocity = fly(pilot, velocity, physics);
-			rotate();
 		}
 		publishThrottles();
 
@@ -981,11 +1020,24 @@ public class ShipEntity extends Entity {
 			velocity = velocity.normalize().scale(maxSpeed);
 		}
 		setDeltaMovement(velocity);
-		if (velocity.lengthSqr() > 0) {
-			moveWithCollision(velocity);
-			if (level() instanceof ServerLevel serverLevel && SpaceTravel.checkAltitude(this, serverLevel)) {
-				return true;
-			}
+		// M9: rigid-body motion with contacts (slides, tips, settles, shoves other ships).
+		neighbours = nearbyShips(getBoundingBox().expandTowards(velocity).inflate(1.5));
+		var result = com.starwake.ship.physics.ShipMotion.step(this, velocity, neighbours, pilot == null);
+		grounded = result.grounded();
+		if (com.starwake.ship.physics.ShipMotion.DEBUG && tickCount % 5 == 0) com.starwake.StarwakeMod.LOGGER.info(
+				"[ship] t={} pos=({}) v=({}) w=({}) grounded={} impact={} decoupled={} pilot={}", tickCount,
+				String.format("%.2f %.2f %.2f", getX(), getY(), getZ()),
+				String.format("%.3f %.3f %.3f", getDeltaMovement().x, getDeltaMovement().y, getDeltaMovement().z),
+				String.format("%.4f %.4f %.4f", angularVelocity.x, angularVelocity.y, angularVelocity.z), grounded,
+				String.format("%.3f", result.impact()), decoupled, pilot != null);
+		if (impactCooldown > 0) impactCooldown--;
+		else {
+			boolean upright = worldDirection(Direction.UP).y > 0.8;
+			double safe = !result.touchdown() ? SAFE_IMPACT : isGearDown() && upright ? SAFE_GEAR_LANDING : SAFE_BELLY_LANDING;
+			if (result.impact() > safe) onImpact(result.impact(), safe, result.blocked());
+		}
+		if (result.moved() && level() instanceof ServerLevel serverLevel && SpaceTravel.checkAltitude(this, serverLevel)) {
+			return true;
 		}
 
 		tickSystems();
@@ -1501,7 +1553,9 @@ public class ShipEntity extends Entity {
 						- (decoupled ? 0 : (velocity.y - targetClimb) * perVelocity)) : 0;
 
 		// Wanted torque: steer the angular velocity toward what the pilot asks for.
-		Vector3d alpha = wantedRotation(pilot, physics, space).sub(angularVelocity).mul(0.35);
+		// Landed (M9): the mouse doesn't twist the ship on its gear; steering starts once it lifts off.
+		Vector3d wanted = grounded && !input.jump() ? new Vector3d() : wantedRotation(pilot, physics, space);
+		Vector3d alpha = wanted.sub(angularVelocity).mul(0.35);
 		Vector3d torque = dynamics.inertia().transform(alpha, new Vector3d()).div(physics.thrustToAccel());
 
 		// Wings (3i): their lift carries part of the weight, so thrusters only make up the rest,
@@ -1750,8 +1804,10 @@ public class ShipEntity extends Entity {
 			velocity = velocity.scale(0.8);
 			return velocity.lengthSqr() < 1.0e-6 ? Vec3.ZERO : velocity;
 		}
-		neighbours = nearbyShips(getBoundingBox().inflate(1.0));
-		if (clip(Direction.Axis.Y, -0.05) == 0) return Vec3.ZERO; // parked on something
+		if (grounded) {
+			// Parked on something: gravity and the contacts keep it there (it settles and tips like a real object).
+			return velocity.add(0, -gravity * physics.gravityToAccel(), 0).scale(0.9);
+		}
 		double weight = mass * gravity * physics.gravityToAccel() / physics.thrustToAccel();
 		double lift = dynamics.rawThrust(Direction.UP);
 		double idle = lift <= 0 ? 0 : dynamics.burnPushing(Direction.UP) * Math.min(1, weight / lift) * 0.1;
@@ -1816,26 +1872,6 @@ public class ShipEntity extends Entity {
 		return want;
 	}
 
-	/**
-	 * Integrates the angular velocity. A rotation that would push the hull into terrain is
-	 * retried slightly higher (so a grounded ship can always right itself), else stopped.
-	 */
-	private void rotate() {
-		double angle = angularVelocity.length();
-		if (angle < 1.0e-7) return;
-		Quaternionf next = new Quaternionf(orientation()).rotateAxis((float) angle,
-				(float) (angularVelocity.x / angle), (float) (angularVelocity.y / angle), (float) (angularVelocity.z / angle)).normalize();
-		for (double lift : new double[] {0, 0.5, 1.0}) {
-			Vec3 at = position().add(0, lift, 0);
-			if (!hullCollides(at, next)) {
-				if (lift > 0) setPos(at);
-				setOrientation(next);
-				return;
-			}
-		}
-		angularVelocity.zero();
-	}
-
 	/** Syncs thruster throttles for exhaust effects: "entryIndex:0-9;" for each firing thruster. */
 	private void publishThrottles() {
 		StringBuilder out = new StringBuilder();
@@ -1872,28 +1908,6 @@ public class ShipEntity extends Entity {
 	}
 
 	// --- Terrain collision -------------------------------------------------------------------
-
-	/** Moves axis by axis, clipping each against terrain using the hull blocks' world boxes. */
-	private void moveWithCollision(Vec3 velocity) {
-		// Other ships this move could touch (3j: ships collide, and can land on each other).
-		neighbours = nearbyShips(getBoundingBox().expandTowards(velocity).inflate(1.0));
-		double dy = clip(Direction.Axis.Y, velocity.y);
-		grounded = velocity.y < 0 && dy > velocity.y;
-		setPos(getX(), getY() + dy, getZ());
-		double dx = clip(Direction.Axis.X, velocity.x);
-		setPos(getX() + dx, getY(), getZ());
-		double dz = clip(Direction.Axis.Z, velocity.z);
-		setPos(getX(), getY(), getZ() + dz);
-		setDeltaMovement(dx == velocity.x ? velocity.x : 0, dy == velocity.y ? velocity.y : 0, dz == velocity.z ? velocity.z : 0);
-		double impact = Math.abs(velocity.x - dx) + Math.abs(velocity.y - dy) + Math.abs(velocity.z - dz);
-		// Touchdowns (mostly vertical, downward) are soft only on deployed gear with the ship
-		// upright; anything else is a belly landing. Side impacts keep the general limit.
-		boolean touchdown = velocity.y < 0 && Math.abs(velocity.y - dy) > impact * 0.7;
-		double safe = !touchdown ? SAFE_IMPACT
-				: isGearDown() && worldDirection(Direction.UP).y > 0.8 ? SAFE_GEAR_LANDING : SAFE_BELLY_LANDING;
-		if (impactCooldown > 0) impactCooldown--;
-		else if (impact > safe) onImpact(impact, safe, new Vec3(velocity.x - dx, velocity.y - dy, velocity.z - dz));
-	}
 
 	/** Ticks before another impact can register: a crash counts once, not once per tick of scraping. */
 	private int impactCooldown;

@@ -56,6 +56,7 @@ public final class ShipCommands {
 												.then(Commands.argument("fusion", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
 														.executes(ShipCommands::refuel))))
 								.then(Commands.literal("disassemble").executes(ShipCommands::disassemble))
+								.then(Commands.literal("pilot").executes(ShipCommands::pilot))
 								.then(Commands.literal("info")
 										.executes(ctx -> info(ctx, null))
 										.then(Commands.argument("local", BlockPosArgument.blockPos())
@@ -177,6 +178,22 @@ public final class ShipCommands {
 		source.sendSuccess(() -> Component.literal("Ship " + ship.getId() + ": fuel " + ship.fuel() + "/" + ship.fuelCapacity() + ", fusion "
 				+ ship.fusion() + "/" + ship.fusionCapacity()), false);
 		return 1;
+	}
+
+	/** Testing (M9): makes the player owner of the nearest ship and seats them at its Helm. */
+	private static int pilot(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		CommandSourceStack source = ctx.getSource();
+		net.minecraft.server.level.ServerPlayer player = source.getPlayerOrException();
+		ShipEntity ship = null;
+		for (ShipEntity s : ShipCollisions.shipsIn(source.getLevel())) {
+			if (ship == null || s.distanceToSqr(source.getPosition()) < ship.distanceToSqr(source.getPosition())) ship = s;
+		}
+		if (ship == null) {
+			source.sendFailure(Component.translatable("commands.starwake.ship.none_nearby"));
+			return 0;
+		}
+		ship.setOwner(player);
+		return ship.seat(player, ship.helmLocal()) ? 1 : 0;
 	}
 
 	/** Testing (M9): disassembles the nearest ship (the same rules as the console button). */
