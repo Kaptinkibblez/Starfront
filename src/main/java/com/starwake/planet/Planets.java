@@ -106,6 +106,24 @@ public final class Planets {
 		return planet.planet().destination() ? planet.planet().airDensity() : 0.0;
 	}
 
+	/** M9: gravity for a level on either side (clients look the planet up in the synced planet list). */
+	public static double gravityOf(Level level) {
+		if (!level.isClientSide()) return gravityOf(level.dimension());
+		for (PlanetRef ref : all(level.registryAccess())) {
+			if (ref.planet().dimension().equals(level.dimension())) return ref.planet().gravity();
+		}
+		return 1.0;
+	}
+
+	/** M9: air density for a level on either side. */
+	public static double airDensityOf(Level level) {
+		if (!level.isClientSide()) return airDensityOf(level.dimension());
+		for (PlanetRef ref : all(level.registryAccess())) {
+			if (ref.planet().dimension().equals(level.dimension())) return ref.planet().destination() ? ref.planet().airDensity() : 0.0;
+		}
+		return 1.0;
+	}
+
 	/** Gravity multiplier for a dimension: the planet's gravity, or 1.0 anywhere else. */
 	public static double gravityOf(ResourceKey<Level> dimension) {
 		PlanetRef planet = byDimension.get(dimension);

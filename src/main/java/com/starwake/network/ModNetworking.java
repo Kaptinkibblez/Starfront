@@ -15,6 +15,9 @@ public final class ModNetworking {
 	public static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(ShipConsolePayload.TYPE, ShipConsolePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ShipStructurePayload.TYPE, ShipStructurePayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ShipStatePayload.TYPE, ShipStatePayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ShipDynamicsPayload.TYPE, ShipDynamicsPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ShipPhysicsPayload.TYPE, ShipPhysicsPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(PlanetListPayload.TYPE, PlanetListPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(GalaxyInfoPayload.TYPE, GalaxyInfoPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SystemInfoPayload.TYPE, SystemInfoPayload.CODEC);
@@ -30,6 +33,7 @@ public final class ModNetworking {
 		PayloadTypeRegistry.serverboundPlay().register(ShipConsoleActionPayload.TYPE, ShipConsoleActionPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipInteractPayload.TYPE, ShipInteractPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipControlPayload.TYPE, ShipControlPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ShipInputPayload.TYPE, ShipInputPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipPowerPayload.TYPE, ShipPowerPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipQuantumPayload.TYPE, ShipQuantumPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipCrewPayload.TYPE, ShipCrewPayload.CODEC);
@@ -41,10 +45,16 @@ public final class ModNetworking {
 			if (context.player().getVehicle() instanceof com.starwake.ship.ShipEntity ship) {
 				if (payload.leave()) {
 					context.player().stopRiding();
-				} else if (ship.pilot() == context.player()) {
+				} else if (ship.pilot() == context.player() && !ship.receivesInputs()) {
 					ship.setControls(payload.controls());
 					ship.setStick(payload.stickX(), payload.stickY());
 				}
+			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(ShipInputPayload.TYPE, (payload, context) -> {
+			if (context.player().getVehicle() instanceof com.starwake.ship.ShipEntity ship && ship.getId() == payload.shipId()
+					&& ship.pilot() == context.player()) {
+				ship.acceptInput(payload);
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(ShipPowerPayload.TYPE, (payload, context) -> {

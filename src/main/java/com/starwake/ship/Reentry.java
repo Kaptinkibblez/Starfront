@@ -8,7 +8,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Re-entry intensity (3j, shared by client effects and, since M8e-1, server-side hull heating): 0..1 from
- * speed (1.2 -> 3 blocks/tick), scaled by how close the ship is to an atmosphere boundary (the top of a
+ * speed (2.5 -> 5.5 blocks/tick since M9; only while descending in an atmosphere), scaled by how close the ship is to an atmosphere boundary (the top of a
  * planet's sky, or within 250 blocks of a planet's atmosphere sphere in space while diving toward it).
  */
 public final class Reentry {
@@ -22,7 +22,8 @@ public final class Reentry {
 	/** With an explicit velocity (blocks/tick); the server passes last tick's movement. */
 	public static float intensity(ShipEntity ship, Vec3 v) {
 		double speed = v.length();
-		float fromSpeed = (float) Mth.clamp((speed - 1.2) / 1.8, 0, 1);
+		// M9: from 50 m/s to 110 m/s (the speed caps went up; climbing at full speed must not cook a hull).
+		float fromSpeed = (float) Mth.clamp((speed - 2.5) / 3.0, 0, 1);
 		if (fromSpeed <= 0) return 0;
 		Level level = ship.level();
 		if (SpaceTravel.isSpace(level)) {
@@ -34,6 +35,7 @@ public final class Reentry {
 			if (v.dot(inward) <= 0) return 0; // only when diving toward it
 			return fromSpeed * (float) Mth.clamp(1 - gap / 250.0, 0, 1);
 		}
+		if (v.y >= 0) return 0; // climbing out doesn't heat the hull; coming down from space does
 		double fromTop = (level.getMaxY() + SpaceTravel.EXIT_MARGIN) - ship.getY();
 		return fromSpeed * (float) Mth.clamp(1 - fromTop / 120.0, 0, 1);
 	}

@@ -70,6 +70,11 @@ public record ShipPhysics(double thrustToAccel, double gravityToAccel, double dr
 		return current;
 	}
 
+	/** Client (M9): the server's tuning, from {@code ShipPhysicsPayload}. */
+	public static void setFromServer(ShipPhysics physics) {
+		current = physics;
+	}
+
 	public static void init() {
 		ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(StarwakeMod.id("ship_physics"),
 				new SimpleJsonResourceReloadListener<>(CODEC, FileToIdConverter.json("starwake/ship_physics")) {

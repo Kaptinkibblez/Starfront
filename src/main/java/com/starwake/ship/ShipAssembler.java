@@ -88,7 +88,7 @@ public final class ShipAssembler {
 		// M9: the blocks move into a shipyard plot as real blocks (block entities restored there).
 		ServerLevel yard = com.starwake.ship.yard.Shipyard.level(level.getServer());
 		if (yard != null) {
-			int plot = com.starwake.ship.yard.Shipyard.allocate(level.getServer());
+			int plot = com.starwake.ship.yard.Shipyard.allocate(level.getServer(), ship.getUUID());
 			com.starwake.ship.yard.Shipyard.write(yard, plot, entries);
 			ship.setPlot(plot);
 		}

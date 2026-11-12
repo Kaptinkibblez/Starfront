@@ -281,6 +281,13 @@ public class ShipEntity extends Entity {
 		dynamics = model.finish();
 		mass = dynamics.mass();
 		computeProbes();
+		if (level() instanceof ServerLevel && tickCount > 0) {
+			// M9: trackers get the new model (pilots predict with it).
+			var payload = com.starwake.network.ShipDynamicsPayload.of(getId(), dynamics);
+			for (ServerPlayer player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(this)) {
+				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
+			}
+		}
 		thrusterEntries = thrusterIndex.stream().mapToInt(Integer::intValue).toArray();
 		throttles = new double[thrusterEntries.length];
 
@@ -428,8 +435,13 @@ public class ShipEntity extends Entity {
 		if (!(level() instanceof ServerLevel world) || structure == null) return;
 		ServerLevel yard = com.starwake.ship.yard.Shipyard.level(world.getServer());
 		if (yard == null) return;
+		if (plot >= 0 && !com.starwake.ship.yard.Shipyard.claim(world.getServer(), plot, getUUID())) {
+			// Another ship owns this plot (we're a stale copy): move into a plot of our own from our snapshot.
+			com.starwake.StarwakeMod.LOGGER.warn("Ship {} found plot {} owned by another ship; moving to a new plot", getId(), plot);
+			plot = -1;
+		}
 		if (plot < 0) {
-			plot = com.starwake.ship.yard.Shipyard.allocate(world.getServer());
+			plot = com.starwake.ship.yard.Shipyard.allocate(world.getServer(), getUUID());
 			com.starwake.ship.yard.Shipyard.write(yard, plot, structure.entries());
 			com.starwake.StarwakeMod.LOGGER.info("Ship {} moved into shipyard plot {} ({} blocks)", getId(), plot, structure.entries().size());
 		}
@@ -486,13 +498,13 @@ public class ShipEntity extends Entity {
 	public void remove(RemovalReason reason) {
 		if (!level().isClientSide() && plot >= 0 && level().getServer() != null) {
 			com.starwake.ship.yard.Shipyard.untrack(this, plot);
-			if (reason.shouldDestroy()) {
+			if (reason.shouldDestroy() && com.starwake.ship.yard.Shipyard.owns(level().getServer(), plot, getUUID())) {
 				// The ship is gone for good (disassembled after its blocks were copied out, or destroyed): free the plot.
 				ServerLevel yard = com.starwake.ship.yard.Shipyard.level(level().getServer());
 				if (yard != null && structure != null) {
 					com.starwake.ship.yard.Shipyard.clear(yard, plot, structure.entries().stream().map(ShipStructure.Entry::pos).toList());
 				}
-				com.starwake.ship.yard.Shipyard.free(level().getServer(), plot);
+				com.starwake.ship.yard.Shipyard.free(level().getServer(), plot, getUUID());
 			}
 		}
 		super.remove(reason);
@@ -638,7 +650,7 @@ public class ShipEntity extends Entity {
 	}
 	public BlockPos helmLocal() { return helmLocal; }
 	public Direction forward() { return forward; }
-	public double mass() { return mass; }
+	public double mass() { return level().isClientSide() && serverDynamics != null ? serverDynamics.mass() : mass; }
 
 	/** Angular velocity in the ship's own frame (rad/tick); {@link com.starwake.ship.physics.ShipMotion} updates it in place. */
 	public Vector3d angularVelocity() { return angularVelocity; }
@@ -666,6 +678,9 @@ public class ShipEntity extends Entity {
 	/** Admin/testing: constant spin (yaw, pitch, roll in degrees/second about the ship's own axes). Not saved. */
 	public void setSpin(Vec3 spin) { this.spin = spin; }
 	public void setControls(int controls) { this.controls = controls; }
+
+	/** Server: true while the pilot streams ShipInputPayloads (their controls ride along; the older control packet is ignored). */
+	public boolean receivesInputs() { return tickCount - lastInputTick < INPUT_TIMEOUT; }
 
 	/** Joystick steering (M9): the pilot's virtual stick, -1..1 (x = yaw right, y = pitch down). */
 	private float stickX, stickY;
@@ -733,11 +748,12 @@ public class ShipEntity extends Entity {
 	// =========================================================================================
 
 	public Quaternionfc orientation() {
-		return entityData.get(ORIENTATION);
+		return predicting ? predictedOrientation : entityData.get(ORIENTATION);
 	}
 
 	public void setOrientation(Quaternionfc orientation) {
-		entityData.set(ORIENTATION, new Quaternionf(orientation).normalize());
+		if (predicting) predictedOrientation.set(orientation).normalize();
+		else entityData.set(ORIENTATION, new Quaternionf(orientation).normalize());
 		setBoundingBox(makeBoundingBox(position()));
 	}
 
@@ -937,8 +953,10 @@ public class ShipEntity extends Entity {
 	@Override
 	public void tick() {
 		super.tick();
+		if (level().isClientSide()) clientTick();
 		if (!level().isClientSide() && structure != null) {
 			if (serverTick()) return; // replaced by a copy in another dimension
+			sendPilotState();
 			if (lastTickPos != null && (movementThisTick().lengthSqr() > 0 || !orientation().equals(lastTickOrientation, 1.0e-7f))) {
 				carryEntities();
 			}
@@ -988,17 +1006,50 @@ public class ShipEntity extends Entity {
 					.rotateZ((float) Math.toRadians(spin.z / 20));
 			setOrientation(next.normalize());
 		}
-		if (pilot == null && drift.lengthSqr() > 0) {
-			velocity = drift;
-		} else if (pilot == null) {
-			velocity = unpiloted(velocity, physics);
-			angularVelocity.mul(0.8);
-			java.util.Arrays.fill(throttles, 0);
+		if (pilot == null) {
+			if (drift.lengthSqr() > 0) {
+				velocity = drift;
+			} else {
+				velocity = unpiloted(velocity, physics);
+				angularVelocity.mul(0.8);
+				java.util.Arrays.fill(throttles, 0);
+			}
+			publishThrottles();
+			if (moveStep(velocity, physics, null)) return true;
 		} else {
-			velocity = fly(pilot, velocity, physics);
+			// M9: one flight step per pilot input, in order. Inputs arrive in bursts (a client's slow frame runs
+			// several ticks at once); stepping per input keeps the server exactly in step with the pilot's prediction,
+			// as vanilla does for walking players. With no input for a while the ship flies on with the last one.
+			int steps = 0;
+			while (!inputQueue.isEmpty() && steps < MAX_STEPS_PER_TICK) {
+				applyInput(inputQueue.poll());
+				steps++;
+				velocity = fly(pilot, getDeltaMovement(), physics, pilotInput);
+				publishThrottles();
+				if (moveStep(velocity, physics, pilot)) return true;
+			}
+			if (steps == 0 && tickCount - lastInputTick > INPUT_TIMEOUT) {
+				velocity = fly(pilot, getDeltaMovement(), physics, serverInput(pilot));
+				publishThrottles();
+				if (moveStep(velocity, physics, pilot)) return true;
+			}
 		}
-		publishThrottles();
+		tickSystems();
+		tickHull();
+		return false;
+	}
 
+	/** Inputs waiting to be flown (server), at most {@link #MAX_STEPS_PER_TICK} per tick. */
+	private final java.util.ArrayDeque<com.starwake.network.ShipInputPayload> inputQueue = new java.util.ArrayDeque<>();
+	private static final int MAX_STEPS_PER_TICK = 5, INPUT_TIMEOUT = 10, MAX_QUEUE = 40;
+
+	/**
+	 * One physics step after the flight computer (or the unpiloted rules) chose the velocity: orbit-insertion assist,
+	 * speed cap, terrain streaming, contacts, impacts and the atmosphere boundary.
+	 *
+	 * @return true if the ship left for another dimension (stop ticking this copy)
+	 */
+	private boolean moveStep(Vec3 velocity, ShipPhysics physics, @Nullable Player pilot) {
 		if (exitAssist > 0) {
 			// Just out of the atmosphere: the flight computer settles the ship into orbit, with a
 			// little free help so ships with weak downward thrusters don't drift away for ages.
@@ -1008,7 +1059,7 @@ public class ShipEntity extends Entity {
 				angularVelocity.mul(0.9);
 			}
 		}
-		if (tickCount % 5 == 0) measureClearance();
+		measureClearance(); // every step on both sides, so prediction matches
 		double maxSpeed = (SpaceTravel.isSpace(level()) ? physics.maxSpeedSpace() : physics.maxSpeed())
 				* (pilot != null && boosting ? BOOST_SPEED : 1.0);
 		if (tickCount % 10 == 0 && velocity.lengthSqr() > 1.0 && level() instanceof ServerLevel ahead) {
@@ -1016,33 +1067,19 @@ public class ShipEntity extends Entity {
 			ahead.getChunkSource().addTicketWithRadius(net.minecraft.server.level.TicketType.PORTAL,
 					net.minecraft.world.level.ChunkPos.containing(BlockPos.containing(position().add(velocity.scale(60)))), 2);
 		}
-		if (velocity.lengthSqr() > maxSpeed * maxSpeed) {
-			velocity = velocity.normalize().scale(maxSpeed);
-		}
+		if (velocity.lengthSqr() > maxSpeed * maxSpeed) velocity = velocity.normalize().scale(maxSpeed);
 		setDeltaMovement(velocity);
 		// M9: rigid-body motion with contacts (slides, tips, settles, shoves other ships).
 		neighbours = nearbyShips(getBoundingBox().expandTowards(velocity).inflate(1.5));
 		var result = com.starwake.ship.physics.ShipMotion.step(this, velocity, neighbours, pilot == null);
 		grounded = result.grounded();
-		if (com.starwake.ship.physics.ShipMotion.DEBUG && tickCount % 5 == 0) com.starwake.StarwakeMod.LOGGER.info(
-				"[ship] t={} pos=({}) v=({}) w=({}) grounded={} impact={} decoupled={} pilot={}", tickCount,
-				String.format("%.2f %.2f %.2f", getX(), getY(), getZ()),
-				String.format("%.3f %.3f %.3f", getDeltaMovement().x, getDeltaMovement().y, getDeltaMovement().z),
-				String.format("%.4f %.4f %.4f", angularVelocity.x, angularVelocity.y, angularVelocity.z), grounded,
-				String.format("%.3f", result.impact()), decoupled, pilot != null);
 		if (impactCooldown > 0) impactCooldown--;
 		else {
 			boolean upright = worldDirection(Direction.UP).y > 0.8;
 			double safe = !result.touchdown() ? SAFE_IMPACT : isGearDown() && upright ? SAFE_GEAR_LANDING : SAFE_BELLY_LANDING;
 			if (result.impact() > safe) onImpact(result.impact(), safe, result.blocked());
 		}
-		if (result.moved() && level() instanceof ServerLevel serverLevel && SpaceTravel.checkAltitude(this, serverLevel)) {
-			return true;
-		}
-
-		tickSystems();
-		tickHull();
-		return false;
+		return result.moved() && level() instanceof ServerLevel serverLevel && SpaceTravel.checkAltitude(this, serverLevel);
 	}
 
 	// --- Hull: re-entry heating (M8e-1) ------------------------------------------------------------
@@ -1507,25 +1544,27 @@ public class ShipEntity extends Entity {
 	// or missing rotation axes, or drift: the design decides how the ship flies.
 
 	/** Pilot input -> thruster throttles -> new velocity (angular velocity is updated too). */
-	private Vec3 fly(Player pilot, Vec3 velocity, ShipPhysics physics) {
-		Input input = pilot instanceof ServerPlayer sp ? sp.getLastClientInput() : Input.EMPTY;
+	private Vec3 fly(Player pilot, Vec3 velocity, ShipPhysics physics, Input input) {
+		ShipDynamics dynamics = dynamics();
+		double mass = mass();
+		boolean decoupled = isDecoupled();
 		boolean space = SpaceTravel.isSpace(level());
 		// Ships are weightless in space (space's 0.15g is only for people on EVA near the hull).
-		double gravity = space ? 0 : Planets.gravityOf(level().dimension());
+		double gravity = space ? 0 : Planets.gravityOf(level());
 		// Power routing and boost scale every thruster; no fuel, no thrust.
-		double scale = fuel() > 0 ? systems.engineFactor(allocation) * (input.shift() ? physics.boostMultiplier() : 1.0) : 0;
+		double scale = fuel() > 0 ? engineFactor() * (input.shift() ? physics.boostMultiplier() : 1.0) : 0;
 		Quaternionfc q = orientation();
 
 		// Wanted push: "as much as you've got" along each commanded axis.
 		Vector3d force = new Vector3d();
 		Direction left = forward.getCounterClockWise();
-		ask(force, forward, input.forward(), scale);
-		ask(force, forward.getOpposite(), input.backward(), scale);
-		ask(force, left, input.left(), scale);
-		ask(force, left.getOpposite(), input.right(), scale);
-		ask(force, Direction.UP, input.jump(), scale);
+		ask(dynamics, force, forward, input.forward(), scale);
+		ask(dynamics, force, forward.getOpposite(), input.backward(), scale);
+		ask(dynamics, force, left, input.left(), scale);
+		ask(dynamics, force, left.getOpposite(), input.right(), scale);
+		ask(dynamics, force, Direction.UP, input.jump(), scale);
 		// Ctrl: coupled = controlled descent (below); decoupled = cut lift and push down.
-		ask(force, Direction.DOWN, input.sprint() && (decoupled || gravity <= 0), scale);
+		ask(dynamics, force, Direction.DOWN, input.sprint() && (decoupled || gravity <= 0), scale);
 		// Coupled mode (Star Citizen's IFCS): on any axis the pilot isn't commanding, the flight
 		// computer fires the opposite thrusters to null the drift. No retros, no braking.
 		double perVelocity = mass / physics.thrustToAccel() * COUPLED_BRAKING; // force per (block/tick)
@@ -1560,16 +1599,17 @@ public class ShipEntity extends Entity {
 
 		// Wings (3i): their lift carries part of the weight, so thrusters only make up the rest,
 		// and the flight computer counters their pitching/yawing moments where it can.
-		double density = space ? 0 : Planets.airDensityOf(level().dimension());
+		double density = space ? 0 : Planets.airDensityOf(level());
 		double[] air = dynamics.aero(local, angularVelocity, new Vector3d(fwdAxis), density, physics.wingLift(), physics.wingDrag());
 		double airLift = air[0] * upLocal.x + air[1] * upLocal.y + air[2] * upLocal.z;
 		double fullWeight = mass * gravity * physics.gravityToAccel() / physics.thrustToAccel();
-		entityData.set(WING_LIFT, fullWeight > 0 ? (float) Mth.clamp(airLift / fullWeight, 0, 9) : 0f);
+		if (!level().isClientSide()) entityData.set(WING_LIFT, fullWeight > 0 ? (float) Mth.clamp(airLift / fullWeight, 0, 9) : 0f);
 		if (hovering) weight -= airLift; // may go negative: then hold the ship down
 		torque.sub(air[3], air[4], air[5]);
 
-		double[] achieved = dynamics.allocate(new Vector3d(upLocal.x, upLocal.y, upLocal.z), hovering, weight, torque, force, scale, throttles);
-		if (scale > 0) burnFuel(dynamics.burn(throttles) * scale);
+		double[] th = level().isClientSide() || throttles.length != dynamics.thrusterCount() ? new double[dynamics.thrusterCount()] : throttles;
+		double[] achieved = dynamics.allocate(new Vector3d(upLocal.x, upLocal.y, upLocal.z), hovering, weight, torque, force, scale, th);
+		if (scale > 0 && !level().isClientSide()) burnFuel(dynamics.burn(th) * scale);
 
 		for (int j = 0; j < 6; j++) achieved[j] += air[j]; // thrust + aerodynamics
 		Vector3f f = q.transform(new Vector3f((float) achieved[0], (float) achieved[1], (float) achieved[2]));
@@ -1580,6 +1620,217 @@ public class ShipEntity extends Entity {
 		double cap = Math.toRadians(physics.turnRateDegrees()) / 20.0 * 1.25;
 		if (angularVelocity.length() > cap) angularVelocity.normalize(cap);
 		return velocity.add(accel).scale(space ? physics.dragSpace() : physics.dragAtmosphere());
+	}
+
+	// =========================================================================================
+	// Prediction (M9): the pilot's client flies its own copy of the ship with the same flight
+	// computer and contact physics, and the server stays in charge. The client sends its input
+	// for each tick (with a sequence number); the server flies with exactly that input and sends
+	// back the state it reached; the client compares with what it predicted for that tick and
+	// shifts its state (and its remembered predictions) by the difference.
+	// =========================================================================================
+
+	/** Client hooks (registered by the client entrypoint; common code can't see client classes). */
+	public interface PilotHook {
+		boolean isLocalPilot(ShipEntity ship);
+		Input input();
+		int controls();
+		float stickX();
+		float stickY();
+		Vec3 look();
+		void send(com.starwake.network.ShipInputPayload payload);
+	}
+
+	public static @Nullable PilotHook pilotHook;
+
+	/** A predicted tick: the input sequence and the state the client reached with it. */
+	private static final class Predicted {
+		final int seq;
+		Vec3 pos;
+		final Quaternionf rotation;
+		Vec3 velocity;
+		final Vector3d spin;
+
+		Predicted(int seq, Vec3 pos, Quaternionfc rotation, Vec3 velocity, org.joml.Vector3dc spin) {
+			this.seq = seq;
+			this.pos = pos;
+			this.rotation = new Quaternionf(rotation);
+			this.velocity = velocity;
+			this.spin = new Vector3d(spin);
+		}
+	}
+
+	/** Client: true while the local player pilots this ship and the client predicts it. */
+	private boolean predicting;
+	private final Quaternionf predictedOrientation = new Quaternionf();
+	private int predictSeq;
+	private final java.util.ArrayDeque<Predicted> history = new java.util.ArrayDeque<>();
+	/** Client: the server's rigid-body model of this ship (ShipDynamicsPayload). */
+	private @Nullable ShipDynamics serverDynamics;
+
+	/** Server: the pilot's latest input from ShipInputPayload, its sequence and when it arrived. */
+	private Input pilotInput = Input.EMPTY;
+	private @Nullable Vec3 pilotLook;
+	private int lastInputSeq = -1, lastInputTick = -100;
+
+	public void setServerDynamics(ShipDynamics dynamics) {
+		this.serverDynamics = dynamics;
+	}
+
+	public boolean isPredicting() {
+		return predicting;
+	}
+
+	/** Server: the pilot's input for this tick (from ShipInputPayload if fresh, else vanilla's last input). */
+	private Input serverInput(Player pilot) {
+		if (tickCount - lastInputTick < 10) return pilotInput;
+		return pilot instanceof ServerPlayer sp ? sp.getLastClientInput() : Input.EMPTY;
+	}
+
+	/** Server: a pilot input arrived; it's flown in order, one step each (see serverTick). */
+	public void acceptInput(com.starwake.network.ShipInputPayload payload) {
+		inputQueue.addLast(payload);
+		while (inputQueue.size() > MAX_QUEUE) inputQueue.removeFirst(); // far behind: skip ahead (the client will snap)
+		lastInputTick = tickCount;
+	}
+
+	private void applyInput(com.starwake.network.ShipInputPayload payload) {
+		pilotInput = payload.input();
+		controls = payload.controls();
+		setStick(payload.stickX(), payload.stickY());
+		pilotLook = new Vec3(payload.lookX(), payload.lookY(), payload.lookZ());
+		lastInputSeq = payload.seq();
+	}
+
+	/** Server: tells the pilot where the ship really is after their latest input. */
+	private void sendPilotState() {
+		if (!(pilot() instanceof ServerPlayer player) || lastInputSeq < 0 || isRemoved()) return;
+		Quaternionfc q = orientation();
+		Vec3 v = getDeltaMovement();
+		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new com.starwake.network.ShipStatePayload(getId(), lastInputSeq,
+				getX(), getY(), getZ(), q.x(), q.y(), q.z(), q.w(), v.x, v.y, v.z,
+				(float) angularVelocity.x, (float) angularVelocity.y, (float) angularVelocity.z));
+	}
+
+	/** Client tick: predict the ship we pilot; otherwise follow the server. */
+	private void clientTick() {
+		PilotHook hook = pilotHook;
+		boolean local = hook != null && structure != null && serverDynamics != null && hook.isLocalPilot(this)
+				&& jumpTicks < 0 && entityData.get(QT_STATE) != QT_TRAVEL;
+		if (!local) {
+			if (predicting) {
+				predicting = false;
+				history.clear();
+			}
+			return;
+		}
+		if (!predicting) {
+			predictedOrientation.set(entityData.get(ORIENTATION));
+			predicting = true;
+			history.clear();
+		}
+		Player pilot = pilot();
+		if (pilot == null) return;
+		Input input = hook.input();
+		controls = hook.controls();
+		setStick(hook.stickX(), hook.stickY());
+		int seq = ++predictSeq;
+		Vec3 look = hook.look();
+		hook.send(new com.starwake.network.ShipInputPayload(getId(), seq, input, controls, stickX, stickY,
+				(float) look.x, (float) look.y, (float) look.z));
+		ShipPhysics physics = ShipPhysics.get();
+		measureClearance();
+		Vec3 velocity = fly(pilot, getDeltaMovement(), physics, input);
+		double maxSpeed = (SpaceTravel.isSpace(level()) ? physics.maxSpeedSpace() : physics.maxSpeed()) * (boosting ? BOOST_SPEED : 1.0);
+		if (velocity.lengthSqr() > maxSpeed * maxSpeed) velocity = velocity.normalize().scale(maxSpeed);
+		neighbours = nearbyShips(getBoundingBox().expandTowards(velocity).inflate(1.5));
+		var result = com.starwake.ship.physics.ShipMotion.step(this, velocity, neighbours, false);
+		grounded = result.grounded();
+		history.addLast(new Predicted(seq, position(), orientation(), getDeltaMovement(), angularVelocity));
+		while (history.size() > 100) history.removeFirst();
+	}
+
+	/**
+	 * Client: the server's state after input {@code seq}. The difference from what we predicted for that tick is
+	 * added to our current state (and to the predictions after it), so the ship stays where the server has it
+	 * without replaying. A large error (a teleport, a collision we didn't see) snaps.
+	 */
+	public void reconcile(com.starwake.network.ShipStatePayload state) {
+		if (!predicting) return;
+		Predicted base = null;
+		while (!history.isEmpty() && history.peekFirst().seq <= state.seq()) {
+			Predicted p = history.removeFirst();
+			if (p.seq == state.seq()) base = p;
+		}
+		if (com.starwake.ship.physics.ShipMotion.DEBUG && state.seq() % 40 == 0) com.starwake.StarwakeMod.LOGGER.info("[predict-sample] seq={} matched={} pending={}",
+				state.seq(), base != null, history.size());
+		if (base == null) return;
+		Vec3 serverPos = new Vec3(state.x(), state.y(), state.z());
+		Quaternionf serverRot = new Quaternionf(state.qx(), state.qy(), state.qz(), state.qw());
+		Vec3 dPos = serverPos.subtract(base.pos);
+		Quaternionf dRot = new Quaternionf(serverRot).mul(new Quaternionf(base.rotation).conjugate()).normalize();
+		Vec3 dVel = new Vec3(state.vx(), state.vy(), state.vz()).subtract(base.velocity);
+		Vector3d dSpin = new Vector3d(state.wx(), state.wy(), state.wz()).sub(base.spin);
+		double angle = 2 * Math.acos(Math.min(1, Math.abs(dRot.w)));
+		if (dPos.lengthSqr() < 1e-8 && angle < 1e-5 && dVel.lengthSqr() < 1e-10) return;
+		if (com.starwake.ship.physics.ShipMotion.DEBUG || dPos.length() > 0.05) com.starwake.StarwakeMod.LOGGER.info("[predict] seq={} pending={} dPos={} angle={} dVel={}",
+				state.seq(), history.size(), String.format("%.4f", dPos.length()), String.format("%.5f", angle), String.format("%.4f", dVel.length()));
+		if (dPos.length() > 4 || angle > 0.6) {
+			// Way off: take the server's state as it is and start predicting afresh.
+			setPose(serverPos, serverRot);
+			setDeltaMovement(new Vec3(state.vx(), state.vy(), state.vz()));
+			angularVelocity.set(state.wx(), state.wy(), state.wz());
+			history.clear();
+			return;
+		}
+		setPose(position().add(dPos), new Quaternionf(dRot).mul(orientation()).normalize());
+		setDeltaMovement(getDeltaMovement().add(dVel));
+		angularVelocity.add(dSpin);
+		for (Predicted p : history) {
+			p.pos = p.pos.add(dPos);
+			new Quaternionf(dRot).mul(p.rotation, p.rotation).normalize();
+			p.velocity = p.velocity.add(dVel);
+			p.spin.add(dSpin);
+		}
+	}
+
+	/** The server's velocity packets don't overwrite a predicted ship's velocity either. */
+	@Override
+	public void lerpMotion(Vec3 movement) {
+		if (!predicting) super.lerpMotion(movement);
+	}
+
+	/** Server packets don't move a ship the client is predicting (it reconciles instead). */
+	@Override
+	protected net.minecraft.world.entity.InterpolationHandler createInterpolationHandler() {
+		return new net.minecraft.world.entity.InterpolationHandler() {
+			@Override
+			public net.minecraft.core.@Nullable PositionAndRotation target() {
+				return null;
+			}
+
+			@Override
+			public boolean interpolateTo(net.minecraft.world.entity.@Nullable PositionPath position, float yRot, float xRot, boolean hasRotation) {
+				return predicting;
+			}
+
+			@Override
+			public void interpolate() {
+			}
+
+			@Override
+			public void applyPredictedMovement(Vec3 delta) {
+			}
+
+			@Override
+			public boolean hasActiveInterpolation() {
+				return false;
+			}
+
+			@Override
+			public void cancel() {
+			}
+		};
 	}
 
 	// =========================================================================================
@@ -1822,7 +2073,7 @@ public class ShipEntity extends Entity {
 	}
 
 	/** Adds an "everything along this local direction" request when the key is held. */
-	private void ask(Vector3d force, Direction direction, boolean held, double scale) {
+	private static void ask(ShipDynamics dynamics, Vector3d force, Direction direction, boolean held, double scale) {
 		if (!held) return;
 		double amount = dynamics.rawThrust(direction) * scale;
 		force.add(direction.getStepX() * amount, direction.getStepY() * amount, direction.getStepZ() * amount);
@@ -1847,7 +2098,7 @@ public class ShipEntity extends Entity {
 			want.add(0, -stickX * max, 0);
 			want.add(new Vector3d(rightDir.getStepX(), 0, rightDir.getStepZ()).mul(-stickY * max));
 		} else if (!freeLook) {
-			Vec3 lookWorld = pilot.getViewVector(1.0f);
+			Vec3 lookWorld = !level().isClientSide() && pilotLook != null && tickCount - lastInputTick < 10 ? pilotLook : pilot.getViewVector(1.0f);
 			Vector3f l = q.transformInverse(new Vector3f((float) lookWorld.x, (float) lookWorld.y, (float) lookWorld.z));
 			Vector3d look = new Vector3d(l.x, l.y, l.z).normalize();
 			double angle = Math.acos(Mth.clamp(nose.dot(look), -1, 1));
@@ -1894,7 +2145,7 @@ public class ShipEntity extends Entity {
 
 	/** The rigid-body model (centre of mass, inertia, thrusters). */
 	public ShipDynamics dynamics() {
-		return dynamics;
+		return level().isClientSide() && serverDynamics != null ? serverDynamics : dynamics;
 	}
 
 	/** Fractional fuel accumulates so small burns still drain the tank over time. */

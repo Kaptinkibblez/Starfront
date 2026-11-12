@@ -102,6 +102,58 @@ public final class ShipClient {
 			if (entity instanceof ShipEntity ship) ShipCollisions.remove(ship);
 		});
 
+		// M9 prediction: the server's state for the ship we pilot, its rigid-body model, and the physics tuning.
+		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.ShipStatePayload.TYPE, (payload, context) -> {
+			if (context.client().level != null && context.client().level.getEntity(payload.shipId()) instanceof ShipEntity ship) ship.reconcile(payload);
+		});
+		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.ShipDynamicsPayload.TYPE, (payload, context) -> {
+			if (context.client().level != null && context.client().level.getEntity(payload.shipId()) instanceof ShipEntity ship) {
+				ship.setServerDynamics(payload.read());
+			}
+		});
+		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.ShipPhysicsPayload.TYPE,
+				(payload, context) -> com.starwake.ship.data.ShipPhysics.setFromServer(payload.physics()));
+		ShipEntity.pilotHook = new ShipEntity.PilotHook() {
+			@Override
+			public boolean isLocalPilot(ShipEntity ship) {
+				Minecraft client = Minecraft.getInstance();
+				return client.player != null && client.player.getVehicle() == ship && ship.pilot() == client.player;
+			}
+
+			@Override
+			public net.minecraft.world.entity.player.Input input() {
+				Minecraft client = Minecraft.getInstance();
+				return client.player == null ? net.minecraft.world.entity.player.Input.EMPTY : client.player.input.keyPresses;
+			}
+
+			@Override
+			public int controls() {
+				return (ROLL_LEFT.isDown() ? ShipEntity.CONTROL_ROLL_LEFT : 0) | (ROLL_RIGHT.isDown() ? ShipEntity.CONTROL_ROLL_RIGHT : 0)
+						| (FREE_LOOK.isDown() ? ShipEntity.CONTROL_FREE_LOOK : 0) | (FlightControls.joystick() ? ShipEntity.CONTROL_JOYSTICK : 0);
+			}
+
+			@Override
+			public float stickX() {
+				return FlightControls.joystick() ? FlightControls.sentX() : 0;
+			}
+
+			@Override
+			public float stickY() {
+				return FlightControls.joystick() ? FlightControls.sentY() : 0;
+			}
+
+			@Override
+			public net.minecraft.world.phys.Vec3 look() {
+				Minecraft client = Minecraft.getInstance();
+				return client.player == null ? net.minecraft.world.phys.Vec3.ZERO : client.player.getViewVector(1.0f);
+			}
+
+			@Override
+			public void send(com.starwake.network.ShipInputPayload payload) {
+				ClientPlayNetworking.send(payload);
+			}
+		};
+
 		ClientPlayNetworking.registerGlobalReceiver(ShipStructurePayload.TYPE, (payload, context) -> {
 			if (context.client().level != null && context.client().level.getEntity(payload.entityId()) instanceof ShipEntity ship) {
 				ship.setStructure(payload.structure());

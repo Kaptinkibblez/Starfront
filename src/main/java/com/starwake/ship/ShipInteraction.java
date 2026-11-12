@@ -35,9 +35,18 @@ public final class ShipInteraction {
 	private ShipInteraction() {}
 
 	public static void init() {
+		// M9: clients get the ship physics tuning on join and after every reload (for flight prediction).
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+				sender.sendPacket(new com.starwake.network.ShipPhysicsPayload(com.starwake.ship.data.ShipPhysics.get())));
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resources, success) -> {
+			for (var player : server.getPlayerList().getPlayers()) {
+				ServerPlayNetworking.send(player, new com.starwake.network.ShipPhysicsPayload(com.starwake.ship.data.ShipPhysics.get()));
+			}
+		});
 		EntityTrackingEvents.START_TRACKING.register((entity, player) -> {
 			if (entity instanceof ShipEntity ship && ship.structure() != null) {
 				ServerPlayNetworking.send(player, new ShipStructurePayload(ship.getId(), ship.structure()));
+				ServerPlayNetworking.send(player, com.starwake.network.ShipDynamicsPayload.of(ship.getId(), ship.dynamics()));
 			}
 		});
 	}

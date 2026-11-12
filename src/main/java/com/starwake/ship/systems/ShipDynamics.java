@@ -113,6 +113,68 @@ public final class ShipDynamics {
 		return this;
 	}
 
+	/**
+	 * M9: the finished model as bytes, so a pilot's client can run the same flight computer and contact
+	 * physics for prediction (ship stats and part materials are server-side data).
+	 */
+	public void write(net.minecraft.network.FriendlyByteBuf buf) {
+		buf.writeDouble(mass);
+		buf.writeDouble(centre.x).writeDouble(centre.y).writeDouble(centre.z);
+		double[] m = new double[9];
+		inertia.get(m);
+		for (double v : m) buf.writeDouble(v);
+		buf.writeDouble(gyration);
+		buf.writeVarInt(thrusters.size());
+		for (Thruster t : thrusters) {
+			buf.writeDouble(t.position().x).writeDouble(t.position().y).writeDouble(t.position().z);
+			buf.writeDouble(t.push().x).writeDouble(t.push().y).writeDouble(t.push().z);
+			buf.writeDouble(t.thrust()).writeDouble(t.burn());
+			buf.writeByte(t.nozzle().get3DDataValue());
+			buf.writeBlockPos(t.pos());
+		}
+		buf.writeVarInt(wings.size());
+		for (Wing w : wings) {
+			buf.writeDouble(w.position().x).writeDouble(w.position().y).writeDouble(w.position().z);
+			buf.writeDouble(w.normal().x).writeDouble(w.normal().y).writeDouble(w.normal().z);
+			buf.writeBoolean(w.horizontal());
+		}
+	}
+
+	/** Reads a model written by {@link #write} (derived values are rebuilt). */
+	public static ShipDynamics read(net.minecraft.network.FriendlyByteBuf buf) {
+		ShipDynamics d = new ShipDynamics();
+		d.mass = buf.readDouble();
+		d.centre.set(buf.readDouble(), buf.readDouble(), buf.readDouble());
+		double[] m = new double[9];
+		for (int i = 0; i < 9; i++) m[i] = buf.readDouble();
+		d.inertia.set(m);
+		d.inertia.invert(d.inverseInertia);
+		d.gyration = buf.readDouble();
+		int n = buf.readVarInt();
+		for (int i = 0; i < n; i++) {
+			Vector3d pos = new Vector3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
+			Vector3d push = new Vector3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
+			double thrust = buf.readDouble(), burn = buf.readDouble();
+			Direction nozzle = Direction.from3DDataValue(buf.readByte());
+			d.thrusters.add(new Thruster(pos, push, thrust, burn, nozzle, buf.readBlockPos()));
+		}
+		int w = buf.readVarInt();
+		for (int i = 0; i < w; i++) {
+			Vector3d pos = new Vector3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
+			Vector3d normal = new Vector3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
+			d.wings.add(new Wing(pos, normal, buf.readBoolean()));
+		}
+		d.columns = new double[d.thrusters.size()][];
+		for (int k = 0; k < d.thrusters.size(); k++) {
+			Thruster t = d.thrusters.get(k);
+			Vector3d r = new Vector3d(t.position()).sub(d.centre);
+			Vector3d torque = r.cross(t.push(), new Vector3d());
+			d.columns[k] = new double[] {t.push().x * t.thrust(), t.push().y * t.thrust(), t.push().z * t.thrust(),
+					torque.x * t.thrust(), torque.y * t.thrust(), torque.z * t.thrust()};
+		}
+		return d;
+	}
+
 	public double mass() { return mass; }
 	public Vector3d centre() { return centre; }
 	public Matrix3d inertia() { return inertia; }

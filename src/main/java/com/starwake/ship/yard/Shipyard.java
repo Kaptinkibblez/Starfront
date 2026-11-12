@@ -125,16 +125,31 @@ public final class Shipyard {
 
 	// --- Plots --------------------------------------------------------------------------------------
 
-	/** Saved plot allocation: the next fresh index and the indices freed by disassembled ships. */
+	/**
+	 * Saved plot allocation: the next fresh index, the indices freed by disassembled ships, and which ship (UUID)
+	 * owns each plot in use. Ownership keeps a stale copy of a ship (a duplicate entity, an old save) from ever
+	 * clearing or freeing a plot another ship lives in.
+	 */
 	public static final class State extends SavedData {
 		public static final Codec<State> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.fieldOf("next").forGetter(s -> s.next),
-				Codec.INT.listOf().fieldOf("free").forGetter(s -> s.free)
-		).apply(i, State::new));
+				Codec.INT.listOf().fieldOf("free").forGetter(s -> s.free),
+				Codec.unboundedMap(Codec.STRING, net.minecraft.core.UUIDUtil.STRING_CODEC).optionalFieldOf("owners", java.util.Map.of())
+						.forGetter(s -> {
+							java.util.Map<String, java.util.UUID> out = new java.util.HashMap<>();
+							s.owners.forEach((k, v) -> out.put(Integer.toString(k), v));
+							return out;
+						})
+		).apply(i, (next, free, owners) -> {
+			State state = new State(next, free);
+			owners.forEach((k, v) -> state.owners.put(Integer.parseInt(k), v));
+			return state;
+		}));
 		public static final SavedDataType<State> TYPE = new SavedDataType<>(StarwakeMod.id("shipyard"), State::new, CODEC,
 				DataFixTypes.SAVED_DATA_COMMAND_STORAGE);
 		int next;
 		final List<Integer> free;
+		final java.util.Map<Integer, java.util.UUID> owners = new java.util.HashMap<>();
 
 		State() {
 			this(0, List.of());
@@ -150,15 +165,42 @@ public final class Shipyard {
 		return server.getDataStorage().computeIfAbsent(State.TYPE);
 	}
 
-	public static int allocate(MinecraftServer server) {
+	public static int allocate(MinecraftServer server, java.util.UUID owner) {
 		State state = state(server);
 		state.setDirty();
-		return state.free.isEmpty() ? state.next++ : state.free.removeLast();
+		int index;
+		do {
+			index = state.free.isEmpty() ? state.next++ : state.free.removeLast();
+		} while (state.owners.containsKey(index));
+		state.owners.put(index, owner);
+		return index;
 	}
 
-	public static void free(MinecraftServer server, int index) {
+	/**
+	 * Whether {@code ship} may use plot {@code index}: it owns it, or the plot has no recorded owner yet (saves from
+	 * before ownership), in which case it claims it.
+	 */
+	public static boolean claim(MinecraftServer server, int index, java.util.UUID ship) {
+		State state = state(server);
+		java.util.UUID owner = state.owners.get(index);
+		if (owner == null) {
+			state.owners.put(index, ship);
+			state.free.remove((Integer) index);
+			state.setDirty();
+			return true;
+		}
+		return owner.equals(ship);
+	}
+
+	public static boolean owns(MinecraftServer server, int index, java.util.UUID ship) {
+		return ship.equals(state(server).owners.get(index));
+	}
+
+	public static void free(MinecraftServer server, int index, java.util.UUID ship) {
 		if (index < 0) return;
 		State state = state(server);
+		if (!ship.equals(state.owners.get(index))) return; // not ours: never free someone else's plot
+		state.owners.remove(index);
 		if (!state.free.contains(index)) state.free.add(index);
 		state.setDirty();
 		LOADED.remove(index);
