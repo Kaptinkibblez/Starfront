@@ -87,6 +87,11 @@ public abstract class MachineBlockEntity extends BaseContainerBlockEntity implem
 		machine.writeData(v);
 	}
 
+	/** A screen button pressed (menu button id); return true if handled. Server side. */
+	public boolean onButton(int id, net.minecraft.world.entity.player.Player player) {
+		return false;
+	}
+
 	/** Extra screen data (tank gauges) for subclasses. */
 	protected void writeData(int[] values) {}
 

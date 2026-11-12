@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/sinter_press_front",
+    "side": "starwake:block/sinter_press_side",
+    "top": "starwake:block/sinter_press_top"
+  }
+}

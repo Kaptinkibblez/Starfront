@@ -601,6 +601,11 @@ sp("HTcO4", "Pertechnetic acid", "oxide", 3.0, 100, 9999, flags=["soluble"], col
 sp("NH4TcO4", "Ammonium pertechnetate", "oxide", 2.7, 300, 9999, flags=["soluble"], color="#f2f2f2", solubility=0.06)
 sp("Tl2SO4", "Thallium sulfate", "sulfate", 6.77, 632, 9999, flags=["soluble", "toxic"], toxicity=0.9, color="#f2f2f2", solubility=0.048)
 
+# Steelmaking slag species (M8d-1).
+sp("P2O5", "Phosphorus pentoxide", "oxide", 2.39, 340, 360, color="#f2f2f2")
+sp("CaS", "Oldhamite", "sulfide", 2.59, 2525, 9999, color="#e8e8d8")
+sp("ZrO2", "Baddeleyite", "oxide", 5.68, 2715, 4300, color="#efefe8")
+
 # Rare earths: phosphate cracking, bastnaesite roasting, HCl dissolution, SX (solvent_extraction.json),
 # carbonate precipitation, calcining, then metal: fluoride electrolysis (La-Nd) or Ca reduction.
 for re_ in ["La", "Ce", "Pr", "Nd", "Y"]:
@@ -789,6 +794,25 @@ SX_FAMILIES = {
 }
 
 
+# --- Steelmaking (M8d-1): oxidation order when oxygen is blown into a melt at ~1600 C (Ellingham),
+# residual floors (wt%) and the oxide each element goes to. With argon dilution (AOD, Ar >= O2 in the
+# inlet) carbon burns before chromium, which is how stainless steel is decarburised.
+STEELMAKING = {
+    "order": ["Ca", "Mg", "Al", "Ti", "Zr", "Si", "B", "V", "Mn", "Nb", "Cr", "C", "P", "Fe"],
+    "aod_order": ["Ca", "Mg", "Al", "Ti", "Zr", "Si", "B", "V", "C", "Mn", "Nb", "Cr", "P", "Fe"],
+    "oxides": {"Ca": "CaO", "Mg": "MgO", "Al": "Al2O3", "Ti": "TiO2", "Zr": "ZrO2", "Si": "SiO2", "B": "B2O3", "V": "V2O5",
+               "Mn": "MnO", "Nb": "Nb2O5", "Cr": "Cr2O3", "C": "CO", "P": "P2O5", "Fe": "FeO"},
+    "residual": {"C": 0.02, "Si": 0.003, "Mn": 0.03, "P": 0.004, "Al": 0.001, "Ti": 0.001, "Cr": 0.01, "V": 0.002},
+    "aod_carbon": 0.008,
+    "oxygen_saturation": 0.06,
+    "blow_kg_per_s": 0.25,
+    "lime_per_p2o5": 3.0,
+    "desulfurise_fraction": 0.5,
+    "sulfur_floor": 0.002,
+    "deoxidised_oxygen": 0.004,
+}
+
+
 def audit():
     """Every natural element (Z 1-94) must have a source: a reaction that makes it, or occurrence as itself
     (native metals, noble gases from air, radioactive traces in uraninite: practical amounts from reactors)."""
@@ -873,6 +897,8 @@ def main():
             assert sid in ids, (k, sid)
         out = dict(v, order=[[sid, str(l)] for sid, l in v["order"]])
         json.dump(out, open(os.path.join(d, k + ".json"), "w"), indent=1)
+    os.makedirs(os.path.join(DATA, "steelmaking"), exist_ok=True)
+    json.dump(STEELMAKING, open(os.path.join(DATA, "steelmaking", "default.json"), "w"), indent=1)
     physical = audit()
     print(f"{len(SPECIES)} species, {len(ORES)} ore/feed items, {len(REACTIONS)} reactions (all balanced)")
     print("Every natural element has a route; occurring as themselves only:", " ".join(physical))

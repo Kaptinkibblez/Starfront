@@ -42,6 +42,7 @@ public final class StarwakeMod implements ModInitializer {
 		com.starwake.registry.ModHubBlocks.init();
 		com.starwake.registry.ModMachines.init();
 		com.starwake.registry.ModProcess.init();
+		com.starwake.registry.ModMetalworks.init();
 		com.starwake.worldgen.CraterFeature.init();
 		com.starwake.registry.ModSounds.init();
 		ModBlockEntities.init();
@@ -64,6 +65,7 @@ public final class StarwakeMod implements ModInitializer {
 		com.starwake.process.Reactions.init();
 		com.starwake.process.GasHazards.init();
 		com.starwake.planet.Atmospheres.init();
+		com.starwake.metal.Melt.init();
 		com.starwake.process.Radiation.init();
 		com.starwake.metal.MetalCommands.init();
 		com.starwake.trade.TradeData.init();

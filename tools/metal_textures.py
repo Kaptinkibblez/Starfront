@@ -118,11 +118,79 @@ def dust():
     return im
 
 
+def billet():
+    """10 kg round billet (M8d): a cylinder lying across, end face toward the viewer."""
+    im = img()
+    for y in range(5, 12):
+        for x in range(1, 12):
+            put(im, x, y, 200 + (30 if y == 6 else 0) - abs(y - 7) * 10)
+    for y in range(4, 13):
+        for x in range(11, 16):
+            if (x - 13) ** 2 + (y - 8) ** 2 <= 9:
+                put(im, x, y, 175 + ((x * 7 + y * 3) % 5) * 4)
+    outline(im)
+    return im
+
+
+def slab():
+    """10 kg slab (M8d): a thick rectangular block with a cast skin."""
+    im = img()
+    for y in range(5, 12):
+        for x in range(1, 15):
+            top = y < 7
+            put(im, x, y, (232 if top else 190) - (x % 3 == 0) * 6 + (y == 7) * 30)
+    outline(im)
+    return im
+
+
+def casting():
+    """10 kg shaped casting (M8d): a flanged body with a sprue stub."""
+    im = img()
+    for y in range(4, 13):
+        for x in range(3, 13):
+            if (x - 8) ** 2 / 25 + (y - 8) ** 2 / 16 <= 1:
+                put(im, x, y, 210 - (y - 4) * 6 + (x == 6) * 25)
+    for x in range(1, 15):
+        put(im, x, 11, 160)
+        put(im, x, 12, 140)
+    for y in range(1, 4):
+        put(im, 8, y, 220)
+        put(im, 9, y, 200)
+    outline(im)
+    return im
+
+
+def mould(kind):
+    """Graphite moulds (M8d): dark block with the cavity shape in lighter grey (not tinted)."""
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(3, 14):
+        for x in range(1, 15):
+            im.putpixel((x, y), (52, 54, 58, 255) if (x + y) % 5 else (60, 62, 66, 255))
+    if kind == "billet":
+        for x in range(3, 13):
+            for y in range(7, 10):
+                im.putpixel((x, y), (120, 124, 130, 255))
+    elif kind == "slab":
+        for x in range(3, 13):
+            for y in range(6, 11):
+                im.putpixel((x, y), (120, 124, 130, 255))
+    else:
+        for x in range(4, 12):
+            for y in range(5, 12):
+                if (x - 8) ** 2 / 16 + (y - 8) ** 2 / 9 <= 1:
+                    im.putpixel((x, y), (120, 124, 130, 255))
+        im.putpixel((8, 4), (140, 144, 150, 255))
+    return im
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
-    for name, fn in (("ingot", ingot), ("plate", plate), ("rod", rod), ("wire", wire), ("dust", dust)):
+    for name, fn in (("ingot", ingot), ("plate", plate), ("rod", rod), ("wire", wire), ("dust", dust), ("billet", billet), ("slab", slab),
+                     ("casting", casting)):
         fn().save(os.path.join(OUT, f"metal_{name}.png"))
-    print("5 metal textures")
+    for kind in ("billet", "slab", "casting"):
+        mould(kind).save(os.path.join(OUT, f"{kind}_mould.png"))
+    print("8 metal textures + 3 moulds")
 
 
 if __name__ == "__main__":

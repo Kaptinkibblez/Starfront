@@ -21,6 +21,7 @@ public final class ModNetworking {
 		PayloadTypeRegistry.serverboundPlay().register(SystemInfoRequestPayload.TYPE, SystemInfoRequestPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(JumpTargetPayload.TYPE, JumpTargetPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(EconomyPayload.TYPE, EconomyPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(MeltStatePayload.TYPE, MeltStatePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(HubListPayload.TYPE, HubListPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(MarketPayload.TYPE, MarketPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ShopPayload.TYPE, ShopPayload.CODEC);

@@ -52,6 +52,11 @@ public final class MetalTooltips {
 		}
 		String comp = c.format(5) + (c.parts().size() > 5 ? " · +" + (c.parts().size() - 5) : "");
 		lines.add(Component.literal(comp).withColor(COMP));
+		String condition = stack.get(com.starwake.registry.ModComponents.CONDITION);
+		if (condition != null) {
+			lines.add(Component.translatable("metal.starwake.tooltip.condition", Component.translatable("metal.starwake.condition." + condition))
+					.withColor(DIM));
+		}
 		lines.add(Component.translatable("metal.starwake.tooltip.strength", String.format("%.2f", p.density()),
 				Math.round(p.yieldStrength()), Math.round(p.tensileStrength())).withColor(TEXT));
 		lines.add(Component.translatable("metal.starwake.tooltip.heat", Math.round(p.serviceTemp()), Math.round(p.solidus())).withColor(TEXT));

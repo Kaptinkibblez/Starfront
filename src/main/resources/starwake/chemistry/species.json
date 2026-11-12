@@ -5218,6 +5218,42 @@
   "solubility": 0.048
  },
  {
+  "id": "P2O5",
+  "name": "Phosphorus pentoxide",
+  "formula": "P2O5",
+  "kind": "oxide",
+  "density": 2.39,
+  "melting": 340,
+  "boiling": 360,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "CaS",
+  "name": "Oldhamite",
+  "formula": "CaS",
+  "kind": "sulfide",
+  "density": 2.59,
+  "melting": 2525,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#e8e8d8"
+ },
+ {
+  "id": "ZrO2",
+  "name": "Baddeleyite",
+  "formula": "ZrO2",
+  "kind": "oxide",
+  "density": 5.68,
+  "melting": 2715,
+  "boiling": 4300,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe8"
+ },
+ {
   "id": "Sb2O3",
   "name": "Senarmontite",
   "formula": "Sb2O3",

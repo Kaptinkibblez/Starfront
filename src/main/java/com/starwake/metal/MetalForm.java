@@ -6,7 +6,9 @@ package com.starwake.metal;
  * metallurgy work with. Mass is per item, for recipes that track metal by weight.
  */
 public enum MetalForm {
-	INGOT("ingot", 1.0), PLATE("plate", 1.0), ROD("rod", 0.5), WIRE("wire", 0.25), DUST("dust", 1.0);
+	INGOT("ingot", 1.0), PLATE("plate", 1.0), ROD("rod", 0.5), WIRE("wire", 0.25), DUST("dust", 1.0),
+	/** M8d castings, 10 kg: billets feed extrusion and forging, slabs the rolling mill, castings are shaped parts. */
+	BILLET("billet", 10.0), SLAB("slab", 10.0), CASTING("casting", 10.0);
 
 	public final String id;
 	/** kg of metal in one item. */

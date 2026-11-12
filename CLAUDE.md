@@ -347,6 +347,26 @@ commit. **Don't start the next milestone until the user confirms the current one
         Ostwald HNO3 over Pt; 5%-tagged uraninite -> uranyl liquor (5%) -> pipe -> yellowcake stamped
         5%; RaSO4 stays in the tailings; gas well + ASU -> helium; chromate dissolves in water; SX screen
         shows the cut.)*
+  - **8d decisions (user, 2026-11-12):** **real furnace types** (Induction Furnace ~1750 C for steels,
+    Cu, Al, Ni alloys; Vacuum Arc Furnace for Ti/Zr/Nb/Ta and other reactive metals, which pick up
+    O/N if melted in air; Sintering Press for W/Mo/WC-Co powders); **real steel refining** (oxygen
+    blowing burns C/Si/Mn/P in Ellingham order, lime slag takes P and S, Al/Si deoxidation, AOD
+    with argon keeps Cr); **tempers tracked** (forming work-hardens; anneal, solution + age, quench +
+    temper; handbook properties per temper); a **molten bath with a target-grade assistant** (live
+    composition, nearest grade, exact additions to reach a chosen grade); taps give **ingots or
+    shaped castings** (10 kg billet, slab, casting; as-cast properties until worked); split into
+    **8d-1** (melting, refining, bath, assistant, castings, sintering) and **8d-2** (Rolling Mill,
+    Wire Drawer, Extrusion Press, Forging Press, Heat Treatment Furnace, temper properties).
+  - [x] 8d-1. Induction Furnace, Vacuum Arc Furnace, Sintering Press; molten bath with live
+        composition, liquidus check, air pickup for reactive metals, oxygen blowing in Ellingham order,
+        AOD with argon, lime slag (P, S), Al/Si deoxidation; target-grade assistant; tapping ingots or
+        10 kg billets/slabs/castings through moulds ("as cast"); sintered ingots. *(Verified 2026-11-12,
+        dedicated server + client: pig iron (C 4.25%) + limestone + O2 -> C 0.021%, P 0.004% into the
+        lime slag, Si/Mn out, overblow makes FeO; a Cr-Ni melt with 1.5% C blown with O2 + Ar -> C
+        0.008%, Cr 18.55%, Ni 9.3%, while pure O2 drops Cr to 14.5% with C still 1.6%; CP Ti melted in
+        air picks up O 0.50%/N 0.20%, in vacuum stays 100% Ti; tungsten refused as too refractory;
+        W + coke + Co powders sintered into 19 WC-Co ingots; slab mould taps a 10 kg slab; the screen's
+        assistant asks for +0.424 kg Cr, +0.382 kg Ni and blowing 0.022 kg C to reach mid-spec 304.)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
   - **User notes for M9 (2026-11-12):** conveyors move items the wrong way; ship flight is buggy
     all around (overhaul it); hub NPCs (guards/crew) add little value: **remove them**.
@@ -1002,6 +1022,39 @@ normal gravity.
 - **Dissolution leaching:** a Leach Tank also runs when its charge holds a soluble salt and there's
   water (no reaction needed). Metals are accepted as charges everywhere chemistry can use them
   (aqua regia on platinum sponge). Gaseous elements in a metal's composition become O2/N2/H2/F2/Cl2.
+
+## How melting and refining work (Milestone 8d-1)
+
+- **Bath** (`metal/Melt`): element kg + slag species kg. `liquidus()` = the analysed solidus + 50 C;
+  `meltEnergyPerKg(T)` = 650 J/kg/K x (T - 25) + 300 kJ/kg (~1.35 MJ/kg for steel). Refining rules
+  are data (`data/starwake/starwake/steelmaking/default.json`, from `tools/chemistry_process.py`
+  `STEELMAKING`): oxidation order (Ca Mg Al Ti Zr Si B V Mn Nb Cr C P Fe; AOD moves C before Mn/Cr),
+  oxides, residual floors (wt%), AOD carbon floor, O saturation, blow rate (kg O2/s), lime needed per
+  P2O5, desulfurisation share and floor, deoxidised O level. `blow(o2, aod)` returns gases (CO,
+  burned to CO2 above an open bath); `settle()` deoxidises with Al then Si and desulfurises under lime
+  once deoxidised. Reactive bases (`Melt.REACTIVE`: Ti, Zr, Hf, Nb, Ta, V, U, Th, Be, REE, Li, Mg, Ca)
+  pick up 0.5% O + 0.2% N per kg melted in air unless the inlet holds argon.
+- **Assistant** (`Melt.plan(bath, grade)`): elements with a real minimum aim at the middle of their
+  range; elements whose minimum is 0 are caps (never added, kept <= 80% of max); blowable elements
+  (`BLOWABLE`: C, Si, Mn, P, Al, Ti, V, O) above target are listed as "blow down", others are
+  diluted. Fixed-point solve for the final mass. Runs client-side on the synced bath.
+- **Furnaces** (`metal/MeltFurnaceBlockEntity`, `registry/ModMetalworks`; numbers in
+  `machine/<id>.json`): Induction Furnace (60 kW, 1750 C, 64 kg, open to air, can blow O2) and Vacuum
+  Arc Furnace (120 kW, 3100 C, 32 kg, no pickup, no blowing). Slots: charge (any metal item, melts
+  one at a time for its energy; refused when it would push the liquidus over the furnace limit or the
+  bath past capacity), flux (lime/limestone/fluorspar -> slag; carbonates calcine), mould, metal out,
+  slag out (1 kg slag items). Tanks: gas inlet (O2/Ar) and off-gas. The lance only blows once nothing
+  is waiting to melt. Tapping (screen button) pours 1 kg ingots, or 10 kg billet/slab/casting with a
+  mould (`MetalForm.BILLET/SLAB/CASTING`), stamped `starwake:condition` = "as_cast". Breaking a
+  furnace drops the bath as ingots (a "skull") and vents the off-gas.
+- **Screen** (`client/metal/MeltFurnaceScreen`, a `MachineScreen` with a side panel): bath mass,
+  liquidus vs limit, analysed grade, composition, slag, status, target grade (< > x) with the
+  assistant's lines, tapping toggle. Buttons are container button clicks (`MachineMenu.clickMenuButton`
+  -> `MachineBlockEntity.onButton`); the bath arrives in `MeltStatePayload` twice a second, only for
+  players with that furnace's menu open.
+- **Sintering Press** (`metal/SinterPressBlockEntity`, 30 kW, 3 MJ/kg): blends everything in its four
+  powder slots (metal dust, element powders, coke as carbon) once they've been unchanged for 2 s,
+  drops H/O/N, and makes 1 kg "sintered" ingots (W, Mo, WC-Co, TZM).
 
 ## 26.3 gotchas (learned the hard way)
 

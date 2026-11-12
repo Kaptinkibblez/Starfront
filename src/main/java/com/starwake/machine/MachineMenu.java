@@ -107,6 +107,16 @@ public class MachineMenu extends AbstractContainerMenu {
 		return copy;
 	}
 
+	public Container container() {
+		return container;
+	}
+
+	/** Screen buttons (sent by the client as container button clicks) go to the machine. */
+	@Override
+	public boolean clickMenuButton(Player player, int id) {
+		return container instanceof MachineBlockEntity machine && machine.onButton(id, player);
+	}
+
 	@Override
 	public boolean stillValid(Player player) {
 		return container.stillValid(player);

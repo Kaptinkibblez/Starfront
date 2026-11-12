@@ -267,6 +267,38 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 			builder.add("item.starwake.metal_" + form.id + ".of", "%s " + name);
 		}
 		builder.add("metal.starwake.unknown", "Unknown Metal");
+		// Metalworking (M8d-1).
+		builder.add(com.starwake.registry.ModMetalworks.INDUCTION_FURNACE, "Induction Furnace");
+		builder.add(com.starwake.registry.ModMetalworks.VACUUM_ARC_FURNACE, "Vacuum Arc Furnace");
+		builder.add(com.starwake.registry.ModMetalworks.SINTER_PRESS, "Sintering Press");
+		builder.add(com.starwake.registry.ModMetalworks.BILLET_MOULD, "Billet Mould");
+		builder.add(com.starwake.registry.ModMetalworks.SLAB_MOULD, "Slab Mould");
+		builder.add(com.starwake.registry.ModMetalworks.CASTING_MOULD, "Casting Mould");
+		builder.add("metal.starwake.condition.as_cast", "As cast");
+		builder.add("metal.starwake.condition.sintered", "Sintered");
+		builder.add("metal.starwake.tooltip.condition", "Condition: %s");
+		builder.add("screen.starwake.melt.empty", "Bath empty: add metal to melt");
+		builder.add("screen.starwake.melt.bath", "Bath %s kg");
+		builder.add("screen.starwake.melt.liquidus", "Liquidus %s °C · max %s °C");
+		builder.add("screen.starwake.melt.no_slag", "No slag");
+		builder.add("screen.starwake.melt.slag", "Slag %s kg (%s)");
+		builder.add("screen.starwake.melt.target", "Target grade");
+		builder.add("screen.starwake.melt.no_target", "none");
+		builder.add("screen.starwake.melt.on_spec", "On spec: tap it");
+		builder.add("screen.starwake.melt.add", "+ %s kg %s");
+		builder.add("screen.starwake.melt.blow", "Blow down %s (-%s kg)");
+		builder.add("screen.starwake.melt.tap_on", "Tapping: ON");
+		builder.add("screen.starwake.melt.tap_off", "Tapping: OFF");
+		builder.add("screen.starwake.melt.status.melting", "Melting charge");
+		builder.add("screen.starwake.melt.status.too_hot", "Too refractory for this furnace");
+		builder.add("screen.starwake.melt.status.full", "Bath full");
+		builder.add("screen.starwake.melt.status.blowing", "Blowing oxygen");
+		builder.add("screen.starwake.melt.status.vacuum", "Under vacuum");
+		builder.add("screen.starwake.melt.status.air", "Open to air (argon inlet shields)");
+		builder.add("screen.starwake.machine.tank.induction_furnace.inlet", "Gas inlet (O2 to blow, Ar to shield/AOD)");
+		builder.add("screen.starwake.machine.tank.induction_furnace.gas", "Off-gas (CO2)");
+		builder.add("screen.starwake.machine.tank.vacuum_arc_furnace.inlet", "Gas inlet");
+		builder.add("screen.starwake.machine.tank.vacuum_arc_furnace.gas", "Off-gas");
 		builder.add("metal.starwake.off_spec", "Off-spec %s");
 		builder.add("metal.starwake.alloy", "%s Alloy");
 		builder.add("metal.starwake.tooltip.grade", "Certified grade · %s");

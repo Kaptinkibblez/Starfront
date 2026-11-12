@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "starwake:copper_cable",
+    "F": "starwake:induction_furnace",
+    "G": "minecraft:glass",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "IGI",
+    "CFC",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:vacuum_arc_furnace"
+  }
+}

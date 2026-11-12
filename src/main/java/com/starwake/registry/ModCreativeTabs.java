@@ -38,6 +38,8 @@ public final class ModCreativeTabs {
 				.displayItems((parameters, output) -> {
 					ModBlocks.all().forEach(output::accept);
 					ModItems.all().forEach(output::accept);
+					ModMetalworks.moulds().forEach(output::accept);
+					output.accept(ModProcess.GAS_CYLINDER);
 				})
 				.build());
 		// The periodic table, in atomic-number order (vanilla ingots for Fe, Cu, Au).

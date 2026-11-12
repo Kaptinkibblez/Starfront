@@ -333,6 +333,29 @@ def process_textures():
     front("solvent_extraction", "#5a6470", solvent_extraction)
     front("gas_well", "#5e6066", gas_well)
 
+    # M8d-1: induction furnace (coil around a crucible), vacuum arc furnace (chamber + electrode),
+    # sintering press (ram over a die).
+    def induction_furnace(im, on):
+        rect(im, 4, 3, 11, 13, "#3a3e46")
+        for y in range(4, 13, 2):
+            rect(im, 3, y, 12, y, "#c87a3a")
+        rect(im, 6, 5, 9, 12, "#ffb03a" if on else "#2a2420")
+
+    def vacuum_arc_furnace(im, on):
+        rect(im, 4, 2, 11, 13, "#6a6e78")
+        rect(im, 7, 1, 8, 7, "#9aa4b0")
+        rect(im, 5, 9, 10, 12, "#e8f4ff" if on else "#2a2e36")
+        rect(im, 3, 7, 12, 7, "#3a3e46")
+
+    def sinter_press(im, on):
+        rect(im, 6, 1, 9, 6, "#9aa4b0")
+        rect(im, 3, 7, 12, 8, "#5a5e66")
+        rect(im, 5, 9, 10, 13, "#ff8a3a" if on else "#3a3e46")
+
+    front("induction_furnace", "#5e6066", induction_furnace)
+    front("vacuum_arc_furnace", "#5a5e68", vacuum_arc_furnace)
+    front("sinter_press", "#646056", sinter_press)
+
 
 def bulk_textures():
     """Bulk materials (tinted by their main species): crushed ore, concentrate, tailings, calcine,

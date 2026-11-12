@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": "minecraft:bricks",
+    "C": "starwake:copper_cable",
+    "F": "minecraft:blast_furnace",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "CBC",
+    "CFC",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:induction_furnace"
+  }
+}

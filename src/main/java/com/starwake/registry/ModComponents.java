@@ -37,6 +37,11 @@ public final class ModComponents {
 			StarwakeMod.id("u235"), DataComponentType.<Float>builder().persistent(com.mojang.serialization.Codec.floatRange(0, 1))
 					.networkSynchronized(ByteBufCodecs.FLOAT).build());
 
+	/** A metal item's condition (M8d): "as_cast", "sintered"; tempers in 8d-2. Absent = wrought/annealed. */
+	public static final DataComponentType<String> CONDITION = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			StarwakeMod.id("condition"), DataComponentType.<String>builder().persistent(com.mojang.serialization.Codec.STRING)
+					.networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
+
 	private ModComponents() {}
 
 	public static void init() {}

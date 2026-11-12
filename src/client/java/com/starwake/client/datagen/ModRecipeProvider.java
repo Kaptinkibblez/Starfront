@@ -74,6 +74,22 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				shaped(RecipeCategory.TOOLS, com.starwake.registry.ModProcess.GAS_CYLINDER).pattern(" I ").pattern("I I").pattern("III")
 						.define('I', Items.IRON_INGOT).unlockedBy("has_iron", has(Items.IRON_INGOT)).save(output);
+				// M8d-1 metalworking (provisional until 8i).
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.INDUCTION_FURNACE).pattern("CBC").pattern("CFC").pattern("IRI")
+						.define('C', ModMachines.COPPER_CABLE).define('B', Items.BRICKS).define('F', Items.BLAST_FURNACE)
+						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.VACUUM_ARC_FURNACE).pattern("IGI").pattern("CFC").pattern("IRI")
+						.define('C', ModMachines.COPPER_CABLE).define('G', Items.GLASS).define('F', com.starwake.registry.ModMetalworks.INDUCTION_FURNACE)
+						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.SINTER_PRESS).pattern("IPI").pattern("CFC").pattern("IRI")
+						.define('C', ModMachines.COPPER_CABLE).define('P', Items.PISTON).define('F', Items.FURNACE)
+						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				String[][] mouldPatterns = {{"B B", "BCB", "BBB"}, {"BCB", "BCB", "BBB"}, {"BCB", "B B", "BBB"}};
+				var moulds = com.starwake.registry.ModMetalworks.moulds();
+				for (int i = 0; i < moulds.size(); i++) {
+					shaped(RecipeCategory.TOOLS, moulds.get(i)).pattern(mouldPatterns[i][0]).pattern(mouldPatterns[i][1]).pattern(mouldPatterns[i][2])
+							.define('B', Items.BRICK).define('C', Items.CLAY_BALL).unlockedBy("has_brick", has(Items.BRICK)).save(output);
+				}
 				shaped(RecipeCategory.REDSTONE, ModMachines.WATER_PUMP).pattern("IPI").pattern("CBC").pattern("IRI")
 						.define('I', Items.IRON_INGOT).define('P', Items.PISTON).define('C', ModMachines.COPPER_CABLE).define('B', Items.BUCKET)
 						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);

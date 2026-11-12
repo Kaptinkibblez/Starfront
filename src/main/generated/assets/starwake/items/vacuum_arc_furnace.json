@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "starwake:block/vacuum_arc_furnace"
+  }
+}
