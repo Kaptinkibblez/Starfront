@@ -47,6 +47,11 @@ public final class ModComponents {
 			StarwakeMod.id("temper"), DataComponentType.<com.starwake.metal.Tempers.Temper>builder().persistent(com.starwake.metal.Tempers.Temper.CODEC)
 					.networkSynchronized(com.starwake.metal.Tempers.Temper.STREAM_CODEC).build());
 
+	/** Fabricated items and placed parts (M8e-1): how far the materials beat the design's gates (1.0 = just meets, max 1.5). */
+	public static final DataComponentType<Float> QUALITY = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			StarwakeMod.id("quality"), DataComponentType.<Float>builder().persistent(com.mojang.serialization.Codec.floatRange(0, 10))
+					.networkSynchronized(ByteBufCodecs.FLOAT).build());
+
 	private ModComponents() {}
 
 	public static void init() {}

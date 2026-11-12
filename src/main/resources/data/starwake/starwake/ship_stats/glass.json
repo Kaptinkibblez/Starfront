@@ -3,5 +3,7 @@
     "#minecraft:impermeable",
     "#c:glass_blocks"
   ],
-  "mass": 0.5
+  "mass": 0.5,
+  "heat_limit": 700,
+  "armor": 2
 }

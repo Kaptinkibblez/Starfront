@@ -160,6 +160,7 @@ sp("FeSO4", "Iron(II) sulfate", "sulfate", 3.65, 680, 9999, flags=["soluble"], c
 sp("CoSO4", "Cobalt sulfate", "sulfate", 3.71, 735, 9999, flags=["soluble"], color="#c83a6a")
 sp("Na2SO4", "Sodium sulfate", "sulfate", 2.66, 884, 1429, flags=["soluble"], color="#f2f2f2", solubility=0.28)
 sp("PbSO4", "Anglesite", "sulfate", 6.29, 1087, 9999, color="#e8e8e8")
+sp("SiHCl3", "Trichlorosilane", "halide", 1.34, -126, 32, flags=["toxic"], toxicity=0.5, color="#f4f4ec")
 sp("TiCl4", "Titanium tetrachloride", "halide", 1.73, -24, 136, flags=["toxic"], toxicity=0.6, color="#e8e8a8")
 sp("MgCl2", "Magnesium chloride", "halide", 2.32, 714, 1412, flags=["soluble"], color="#f0f0f0", solubility=0.54)
 sp("FeCl2", "Iron(II) chloride", "halide", 3.16, 677, 1023, flags=["soluble"], color="#a8c87a")
@@ -657,6 +658,17 @@ rx("chlorinator", "chlorinate_iridium", "Ir + 2 Cl2 + 2 NaCl -> Na2IrCl6", 21, d
 rx("roaster", "ignite_chloroplatinate", "3 (NH4)2PtCl6 -> 3 Pt + 2 NH4Cl + 16 HCl + 2 N2", 70, "Platinum sponge.")
 rx("roaster", "reduce_palladium_salt", "Pd(NH3)2Cl2 + H2 -> Pd + 2 NH4Cl", 71, draw=["H2"])
 rx("roaster", "reduce_iridium_salt", "(NH4)2IrCl6 + 2 H2 -> Ir + 2 NH4Cl + 4 HCl", 72, draw=["H2"])
+# M8e-1: electronic-grade silicon. Submerged-arc carbothermic reduction (metallurgical Si, ~98-99%: the
+# coke's ash brings Fe/Al/Ca), hydrochlorination to trichlorosilane (it distils off; the iron and other
+# impurities stay behind as chlorides or metal), then Siemens deposition with hydrogen (HCl recycled).
+rx("arc_furnace", "reduce_silica_carbon", "SiO2 + 2 C -> Si + 2 CO", 10, "Metallurgical silicon in a submerged-arc furnace (~2000 C).",
+   draw=["C"])
+rx("arc_furnace", "reduce_hematite_arc", "Fe2O3 + 3 C -> 2 Fe + 3 CO", 11, "Iron oxide in the quartz and coke ash ends up in the silicon.",
+   draw=["C"])
+rx("chlorinator", "hydrochlorinate_silicon", "Si + 3 HCl -> SiHCl3 + H2", 30, "Trichlorosilane boils at 32 C: it leaves the impurities behind.",
+   draw=["HCl"])
+rx("kroll", "siemens_silicon", "SiHCl3 + H2 -> Si + 3 HCl", 5, "Siemens process: polysilicon grows on hot rods; the HCl goes back.",
+   draw=["H2"])
 rx("kroll", "reduce_osmium_tetroxide", "OsO4 + 4 H2 -> Os + 4 H2O", 30, draw=["H2"])
 rx("kroll", "reduce_ruthenium_tetroxide", "RuO4 + 4 H2 -> Ru + 4 H2O", 31, draw=["H2"])
 

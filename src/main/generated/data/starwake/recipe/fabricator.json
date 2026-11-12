@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "starwake:copper_cable",
+    "I": "minecraft:iron_ingot",
+    "P": "minecraft:piston",
+    "R": "minecraft:redstone",
+    "T": "minecraft:crafting_table"
+  },
+  "pattern": [
+    "IPI",
+    "CTC",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:fabricator"
+  }
+}

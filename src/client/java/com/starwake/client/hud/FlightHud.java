@@ -388,6 +388,13 @@ public final class FlightHud {
 			texts.add(Component.translatable("hud.starwake.overheat"));
 			colors.add(ALERT);
 		}
+		if (ship.skinTemperature() > 0) {
+			// Re-entry (M8e-1): skin temperature against the weakest block on the leading face.
+			float skin = ship.skinTemperature(), limit = ship.hullHeatLimit();
+			boolean over = limit > 0 && skin > limit;
+			texts.add(Component.translatable(over ? "hud.starwake.hull_burning" : "hud.starwake.hull_temp", Math.round(skin), Math.round(limit)));
+			colors.add(over ? (blink ? ALERT : WARN) : skin > limit * 0.8f ? WARN : 0xFFE6F2FF);
+		}
 		if (ship.shieldMax() > 0 && ship.shield() < 1) {
 			texts.add(Component.translatable("hud.starwake.shields_down"));
 			colors.add(blink ? ALERT : WARN);

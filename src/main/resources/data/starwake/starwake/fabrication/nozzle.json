@@ -1,0 +1,15 @@
+{
+ "output": "starwake:nozzle",
+ "order": 21,
+ "energy": 2000,
+ "inputs": [
+  {
+   "form": "plate",
+   "count": 2,
+   "main": true,
+   "min": {
+    "service": 700
+   }
+  }
+ ]
+}

@@ -1,0 +1,23 @@
+{
+ "output": "starwake:combustion_chamber",
+ "order": 20,
+ "energy": 2500,
+ "inputs": [
+  {
+   "form": "plate",
+   "count": 2,
+   "main": true,
+   "min": {
+    "service": 500,
+    "yield": 200
+   }
+  },
+  {
+   "form": "plate",
+   "count": 1,
+   "min": {
+    "conductivity": 40
+   }
+  }
+ ]
+}

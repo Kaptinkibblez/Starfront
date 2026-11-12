@@ -8,6 +8,15 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "modifier": {
+            "type": "minecraft:copy_components",
+            "include": [
+              "starwake:composition",
+              "starwake:temper",
+              "starwake:quality"
+            ],
+            "source": "block_entity"
+          },
           "name": "starwake:hull_plating"
         }
       ],

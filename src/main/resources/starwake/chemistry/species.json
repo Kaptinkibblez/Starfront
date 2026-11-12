@@ -1307,6 +1307,20 @@
   "color": "#e8e8e8"
  },
  {
+  "id": "SiHCl3",
+  "name": "Trichlorosilane",
+  "formula": "SiHCl3",
+  "kind": "halide",
+  "density": 1.34,
+  "melting": -126,
+  "boiling": 32,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.5,
+  "color": "#f4f4ec"
+ },
+ {
   "id": "TiCl4",
   "name": "Titanium tetrachloride",
   "formula": "TiCl4",

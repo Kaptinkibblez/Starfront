@@ -7,5 +7,7 @@
     "minecraft:crying_obsidian",
     "#minecraft:anvil"
   ],
-  "mass": 4.0
+  "mass": 4.0,
+  "heat_limit": 1200,
+  "armor": 15
 }

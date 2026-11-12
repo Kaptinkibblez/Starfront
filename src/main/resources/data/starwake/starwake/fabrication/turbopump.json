@@ -1,0 +1,22 @@
+{
+ "output": "starwake:turbopump",
+ "order": 22,
+ "energy": 4000,
+ "inputs": [
+  {
+   "form": "forging",
+   "count": 1,
+   "main": true,
+   "min": {
+    "yield": 600
+   }
+  },
+  {
+   "form": "rod",
+   "count": 2,
+   "min": {
+    "hardness": 250
+   }
+  }
+ ]
+}

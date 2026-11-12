@@ -51,22 +51,7 @@ public final class ReentryEffects {
 	}
 
 	static float intensityOf(ShipEntity ship) {
-		Vec3 v = ship.recentVelocity();
-		double speed = v.length();
-		float fromSpeed = (float) Mth.clamp((speed - 1.2) / 1.8, 0, 1);
-		if (fromSpeed <= 0) return 0;
-		Level level = ship.level();
-		if (SpaceTravel.isSpace(level)) {
-			var nearest = SolarSystem.nearest(level, ship.position());
-			if (nearest.isEmpty()) return 0;
-			var body = nearest.get().body();
-			double gap = ship.position().distanceTo(body.position()) - body.entryRadius();
-			Vec3 inward = body.position().subtract(ship.position()).normalize();
-			if (v.dot(inward) <= 0) return 0; // only when diving toward it
-			return fromSpeed * (float) Mth.clamp(1 - gap / 250.0, 0, 1);
-		}
-		double fromTop = (level.getMaxY() + SpaceTravel.EXIT_MARGIN) - ship.getY();
-		return fromSpeed * (float) Mth.clamp(1 - fromTop / 120.0, 0, 1);
+		return com.starwake.ship.Reentry.intensity(ship);
 	}
 
 	public static void tick(Minecraft client) {

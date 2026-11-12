@@ -204,7 +204,8 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 				java.util.Map.entry("reactor", "Chemical Reactor"), java.util.Map.entry("leach", "Leach Tank"), java.util.Map.entry("evaporator", "Evaporator"),
 				java.util.Map.entry("crystallizer", "Crystallizer"), java.util.Map.entry("electrolysis", "Electrolysis Cell"),
 				java.util.Map.entry("chlorinator", "Chlorinator"), java.util.Map.entry("kroll", "Kroll Reactor"),
-				java.util.Map.entry("air_separator", "Air Separation Unit"), java.util.Map.entry("solvent_extraction", "Solvent Extraction Battery"));
+				java.util.Map.entry("air_separator", "Air Separation Unit"), java.util.Map.entry("solvent_extraction", "Solvent Extraction Battery"),
+				java.util.Map.entry("arc_furnace", "Submerged Arc Furnace"));
 		for (var p : com.starwake.process.ProcessMachineBlockEntity.Process.values()) {
 			builder.add(com.starwake.registry.ModProcess.block(p), machines.get(p.machine));
 		}
@@ -276,6 +277,50 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(com.starwake.registry.ModMetalworks.EXTRUSION_PRESS, "Extrusion Press");
 		builder.add(com.starwake.registry.ModMetalworks.FORGING_PRESS, "Forging Press");
 		builder.add(com.starwake.registry.ModMetalworks.HEAT_TREAT_FURNACE, "Heat Treatment Furnace");
+		// Fabrication (M8e-1).
+		builder.add(com.starwake.registry.ModFabrication.CRYSTAL_PULLER, "Crystal Puller");
+		builder.add(com.starwake.registry.ModFabrication.CLEAN_FAB, "Clean Fab");
+		builder.add(com.starwake.registry.ModFabrication.FABRICATOR, "Fabricator");
+		builder.add(com.starwake.registry.ModFabrication.SILICON_WAFER, "Silicon Wafer");
+		builder.add(com.starwake.registry.ModFabrication.MICROCHIP, "Microchip");
+		builder.add(com.starwake.registry.ModFabrication.PRESSURE_VESSEL, "Pressure Vessel");
+		builder.add(com.starwake.registry.ModFabrication.STRUCTURAL_FRAME, "Structural Frame");
+		builder.add(com.starwake.registry.ModFabrication.COMBUSTION_CHAMBER, "Combustion Chamber");
+		builder.add(com.starwake.registry.ModFabrication.NOZZLE, "Nozzle");
+		builder.add(com.starwake.registry.ModFabrication.TURBOPUMP, "Turbopump");
+		builder.add(com.starwake.registry.ModFabrication.HEAT_EXCHANGER, "Heat Exchanger");
+		builder.add(com.starwake.registry.ModFabrication.MAGNET_COIL, "Magnet Coil");
+		builder.add(com.starwake.registry.ModFabrication.CONTROL_BOARD, "Control Board");
+		builder.add("tooltip.starwake.wafer.intrinsic", "Intrinsic (undoped)");
+		builder.add("tooltip.starwake.wafer.p", "p-type (%s-doped)");
+		builder.add("tooltip.starwake.wafer.n", "n-type (%s-doped)");
+		builder.add("tooltip.starwake.quality", "Quality %s (+%s%% over the design)");
+		builder.add("screen.starwake.fabricator.none", "No blueprints loaded");
+		builder.add("screen.starwake.fabricator.energy", "Energy %s MJ");
+		builder.add("screen.starwake.fabricator.fails", "   fails: %s is %s");
+		builder.add("screen.starwake.fabricator.quality", "Ready: quality %s");
+		builder.add("screen.starwake.fabricator.element", "anything %s");
+		builder.add("screen.starwake.fabricator.status.0", "Idle");
+		builder.add("screen.starwake.fabricator.status.1", "Fabricating");
+		builder.add("screen.starwake.fabricator.status.2", "Output blocked");
+		for (var f : com.starwake.metal.MetalForm.values()) {
+			builder.add("screen.starwake.fabricator.form." + f.id, f.id.substring(0, 1).toUpperCase() + f.id.substring(1));
+		}
+		builder.add("screen.starwake.semiconductor.status.0", "Idle");
+		builder.add("screen.starwake.semiconductor.status.1", "Working");
+		builder.add("screen.starwake.semiconductor.status.2", "Silicon not electronic grade (99.999%)");
+		builder.add("screen.starwake.semiconductor.status.3", "Needs a dopant (B, Ga, Al / P, As, Sb)");
+		builder.add("screen.starwake.semiconductor.status.4", "Needs argon in the tank");
+		builder.add("screen.starwake.semiconductor.status.5", "Needs Al or Cu wire, 99.99%");
+		builder.add("screen.starwake.semiconductor.status.6", "Output blocked");
+		builder.add("screen.starwake.semiconductor.status.7", "Dopant must be the other type");
+		builder.add("screen.starwake.semiconductor.doses", "Dopant: %s doses");
+		builder.add("screen.starwake.semiconductor.metal", "Metal: %s wafers");
+		builder.add("screen.starwake.semiconductor.argon", "Argon inlet ->");
+		builder.add("hud.starwake.hull_temp", "SKIN %s C / %s");
+		builder.add("hud.starwake.hull_burning", "HULL BURNING %s C > %s");
+		builder.add("message.starwake.hull.burned", "Re-entry heat burned off %s hull blocks!");
+		builder.add("message.starwake.hull.smashed", "Impact tore off %s hull blocks!");
 		builder.add("screen.starwake.forming.hot", "Mode: HOT");
 		builder.add("screen.starwake.forming.cold", "Mode: COLD");
 		builder.add("screen.starwake.forming.strain", "Strain %s / %s");

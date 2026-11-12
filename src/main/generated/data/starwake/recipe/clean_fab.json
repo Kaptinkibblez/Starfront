@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "starwake:copper_cable",
+    "D": "minecraft:diamond",
+    "G": "minecraft:glass",
+    "I": "minecraft:iron_ingot",
+    "Q": "minecraft:quartz_block",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "QGQ",
+    "CDC",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:clean_fab"
+  }
+}

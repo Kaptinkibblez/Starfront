@@ -66,6 +66,9 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 				ProcessEngine.Out.SLAG, ProcessEngine.Out.FLUE), BulkItem.Kind.SLAG, false, true, true, 0),
 		CONVERTER("converter", Mode.PYRO, 1, false, 1, outs(ProcessEngine.Out.METAL, ProcessEngine.Out.SLAG, ProcessEngine.Out.FLUE),
 				BulkItem.Kind.SLAG, true, true, false, 0),
+		// M8e-1: submerged-arc furnace (metallurgical silicon, ~2000 C).
+		ARC_FURNACE("arc_furnace", Mode.PYRO, 1, false, 1, outs(ProcessEngine.Out.METAL, ProcessEngine.Out.SLAG, ProcessEngine.Out.FLUE),
+				BulkItem.Kind.SLAG, false, true, false, 0),
 		// M8c-2: wet chemistry and electrochemistry.
 		REACTOR("reactor", Mode.WET, 2, true, 1, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.CRYSTALS, true, true, true, 1),
 		LEACH("leach", Mode.WET, 1, false, 0, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.RESIDUE, true, true, true, 1),
@@ -76,7 +79,7 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 				true, true, true, 1),
 		CHLORINATOR("chlorinator", Mode.DRY, 1, false, 1, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.RESIDUE, true, true, true, 0),
 		KROLL("kroll", Mode.DRY, 0, false, 1, outs(ProcessEngine.Out.METAL, ProcessEngine.Out.PRIMARY), BulkItem.Kind.CRYSTALS,
-				true, false, false, 1),
+				true, true, false, 1),
 		// M8c-3a: cryogenic air separation of whatever the planet's air holds.
 		AIR_SEPARATOR("air_separator", Mode.AIR, 0, false, 0, outs(), BulkItem.Kind.CRYSTALS, true, true, true, 1),
 		// M8c-3b: counter-current solvent-extraction battery (extract -> gas-side tank, raffinate -> liquid tank).
@@ -169,7 +172,9 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		LAYOUTS.put(Process.CHLORINATOR, layout(List.of(xy(34, 18), xy(34, 42), xy(92, 28)), 2, xy(58, 33), new int[] {126, 140, 154}));
 		LAYOUTS.put(Process.AIR_SEPARATOR, layout(List.of(), 0, xy(80, 33), new int[] {40, 126, 148}));
 		LAYOUTS.put(Process.SOLVENT_EXTRACTION, layout(List.of(), 0, xy(60, 28), new int[] {30, 140, 156}));
-		LAYOUTS.put(Process.KROLL, layout(List.of(xy(34, 28), xy(92, 18), xy(92, 42)), 1, xy(58, 33), new int[] {126, -1, -1}));
+		LAYOUTS.put(Process.KROLL, layout(List.of(xy(34, 28), xy(92, 18), xy(92, 42)), 1, xy(58, 33), new int[] {126, 140, -1}));
+		LAYOUTS.put(Process.ARC_FURNACE, layout(List.of(xy(24, 18), xy(24, 42), xy(76, 18), xy(76, 42), xy(96, 30)), 2, xy(46, 22),
+				new int[] {-1, 140, -1}));
 	}
 
 	private static int[] xy(int x, int y) {
@@ -351,11 +356,8 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 			if (inlet == null || inlet.contents().keySet().stream().noneMatch(s -> !s.equals("H2O")
 					&& Species.get(s).map(Species.Info::soluble).orElse(false))) return false;
 		}
-		if (process.charge == 0 && process.reagents > 0) {
-			boolean reagent = !lots.isEmpty();
-			for (int s = process.firstReagent(); s < process.firstOutput(); s++) reagent |= !items.get(s).isEmpty();
-			if (!reagent) return false;
-		}
+		// (Inlet-fed machines with reagent slots, like the Kroll reactor, need no reagent for inlet-only
+		// reactions such as Siemens deposition: start() checks that some reaction can run.)
 		if (process.separator()) {
 			var sep = Reactions.separation(process.machine).orElse(null);
 			return sep != null && (sep.water() <= 0 || inlet != null && inlet.kg("H2O") >= sep.water());
@@ -452,7 +454,7 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 				Supply supply = new Supply(level);
 				ProcessEngine.react(process.machine, pool, supply, this::catalystPresent);
 				boolean metalOut = List.of(process.outputs).contains(ProcessEngine.Out.METAL);
-				out = ProcessEngine.route(pool, spec().temperature(), process.pyro(), process == Process.SMELTER, supply.air(), supply);
+				out = ProcessEngine.route(pool, spec().temperature(), process.pyro(), process == Process.SMELTER || process == Process.ARC_FURNACE, supply.air(), supply);
 				if (!process.pyro() && metalOut) {
 					// Kroll: metal products are a sponge (or a condensed vapour, like potassium), not a calcine.
 					for (ProcessEngine.Out o : List.of(ProcessEngine.Out.PRIMARY, ProcessEngine.Out.FLUE, ProcessEngine.Out.CONDENSATE)) {

@@ -302,7 +302,8 @@ public final class ProcessEngine {
 			} else if (s.kind() == Species.Kind.SULFIDE) {
 				o = hasMatte ? Out.MATTE : Out.METAL;
 			} else if (s.kind() == Species.Kind.METAL || s.kind() == Species.Kind.ELEMENT) {
-				if (Species.SLAG_FORMERS.contains(id)) o = Out.SLAG;
+				// Above ~1800 C carbon reduces silica and silicon stays metallic (arc furnace); cooler baths oxidise it to slag.
+				if (Species.SLAG_FORMERS.contains(id) && !(id.equals("Si") && temperature >= 1800)) o = Out.SLAG;
 				else if (hasMatte && (Species.CHALCOPHILE.contains(id) || !bath)) o = Out.MATTE;
 				else o = Out.METAL;
 			} else if (s.kind() == Species.Kind.ORGANIC) {

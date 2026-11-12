@@ -53,8 +53,13 @@ public final class ShipDynamics {
 	 * ({@code clearExhaust}).
 	 */
 	public void add(BlockPos pos, BlockState state, boolean clearExhaust) {
+		add(pos, state, clearExhaust, 1.0);
+	}
+
+	/** Adds one block whose mass is scaled by its material ({@code massFactor}, M8e-1). */
+	public void add(BlockPos pos, BlockState state, boolean clearExhaust, double massFactor) {
 		ShipStats.BlockStats stats = ShipStats.get(state);
-		double m = stats.mass();
+		double m = stats.mass() * massFactor;
 		double x = pos.getX() + 0.5, y = pos.getY() + 0.5, z = pos.getZ() + 0.5;
 		mass += m;
 		weightedPos.add(x * m, y * m, z * m);

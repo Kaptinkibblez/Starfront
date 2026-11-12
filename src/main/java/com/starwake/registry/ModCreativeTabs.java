@@ -40,6 +40,9 @@ public final class ModCreativeTabs {
 					ModItems.all().forEach(output::accept);
 					ModMetalworks.moulds().forEach(output::accept);
 					output.accept(ModProcess.GAS_CYLINDER);
+					output.accept(ModFabrication.SILICON_WAFER);
+					output.accept(ModFabrication.MICROCHIP);
+					ModFabrication.components().forEach(output::accept);
 				})
 				.build());
 		// The periodic table, in atomic-number order (vanilla ingots for Fe, Cu, Au).

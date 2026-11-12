@@ -1,0 +1,9 @@
+{
+ "machine": "kroll",
+ "equation": "SiHCl3 + H2 -> Si + 3 HCl",
+ "priority": 5,
+ "draw": [
+  "H2"
+ ],
+ "note": "Siemens process: polysilicon grows on hot rods; the HCl goes back."
+}

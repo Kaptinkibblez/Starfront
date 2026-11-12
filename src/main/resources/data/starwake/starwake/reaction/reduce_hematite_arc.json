@@ -1,0 +1,9 @@
+{
+ "machine": "arc_furnace",
+ "equation": "Fe2O3 + 3 C -> 2 Fe + 3 CO",
+ "priority": 11,
+ "draw": [
+  "C"
+ ],
+ "note": "Iron oxide in the quartz and coke ash ends up in the silicon."
+}

@@ -5,5 +5,7 @@
   "mass": 8.0,
   "thrust": 200,
   "fuel_burn": 0.15,
-  "power_draw": 16
+  "power_draw": 16,
+  "heat_limit": 1400,
+  "armor": 10
 }

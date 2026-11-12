@@ -1,0 +1,9 @@
+{
+ "machine": "arc_furnace",
+ "equation": "SiO2 + 2 C -> Si + 2 CO",
+ "priority": 10,
+ "draw": [
+  "C"
+ ],
+ "note": "Metallurgical silicon in a submerged-arc furnace (~2000 C)."
+}

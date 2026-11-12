@@ -400,6 +400,43 @@ def process_textures():
     front("forging_press", "#5c6068", forging_press)
     front("heat_treat_furnace", "#665a52", heat_treat_furnace)
 
+    # M8e-1: submerged-arc furnace (three electrodes into a glowing charge), crystal puller (a tall
+    # chamber with the boule on its seed rod), clean fab (a white cleanroom panel with a wafer stage),
+    # fabricator (robot arm over a work bed).
+    def arc_furnace(im, on):
+        rect(im, 2, 9, 13, 13, "#3a3e46")
+        for x in (4, 7, 10):
+            rect(im, x, 1, x + 1, 9, "#2a2c31")
+        rect(im, 3, 10, 12, 12, "#ffd84a" if on else "#4a3a30")
+
+    def crystal_puller(im, on):
+        rect(im, 4, 1, 11, 14, "#8a949e")
+        rect(im, 7, 1, 8, 6, "#c8d0d8")
+        rect(im, 6, 6, 9, 10, "#b8c0d0" if on else "#5a6070")
+        rect(im, 5, 11, 10, 13, "#ff8a3a" if on else "#3a3e46")
+
+    def clean_fab(im, on):
+        rect(im, 1, 1, 14, 14, "#d8dde4")
+        rect(im, 3, 3, 12, 8, "#2a3a50")
+        for y in range(4, 8):
+            for x in range(4, 12):
+                if (x + y) % 2 == 0:
+                    im.putpixel((x, y), hexrgb("#c8a0ff" if on else "#4a5a70") + (255,))
+        rect(im, 4, 10, 11, 12, "#9aa4b0")
+
+    def fabricator(im, on):
+        rect(im, 1, 11, 14, 14, "#4a4e56")
+        rect(im, 3, 2, 4, 10, "#9aa4b0")
+        rect(im, 3, 2, 11, 3, "#9aa4b0")
+        rect(im, 10, 3, 11, 7, "#c8a040")
+        rect(im, 9, 8, 12, 9, "#ff5a3a" if on else "#5a5e66")
+        rect(im, 6, 10, 12, 10, "#7a8088")
+
+    front("arc_furnace", "#5a5650", arc_furnace)
+    front("crystal_puller", "#606a74", crystal_puller)
+    front("clean_fab", "#b8c0c8", clean_fab)
+    front("fabricator", "#5e6268", fabricator)
+
 
 def bulk_textures():
     """Bulk materials (tinted by their main species): crushed ore, concentrate, tailings, calcine,

@@ -1,0 +1,15 @@
+{
+ "output": "starwake:structural_frame",
+ "order": 10,
+ "energy": 600,
+ "inputs": [
+  {
+   "form": "rod",
+   "count": 4,
+   "main": true,
+   "min": {
+    "yield": 250
+   }
+  }
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "output": "starwake:heat_exchanger",
+ "order": 30,
+ "energy": 1500,
+ "inputs": [
+  {
+   "form": "plate",
+   "count": 4,
+   "main": true,
+   "min": {
+    "conductivity": 40
+   }
+  },
+  {
+   "form": "rod",
+   "count": 2,
+   "min": {
+    "corrosion": 5
+   }
+  }
+ ]
+}

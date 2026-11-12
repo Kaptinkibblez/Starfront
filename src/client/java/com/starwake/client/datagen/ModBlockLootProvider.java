@@ -16,7 +16,16 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 
 	@Override
 	public void generate() {
-		dropSelf(ModBlocks.HULL_PLATING);
+		// Hull plating keeps its alloy (M8e-1): copy the material components from the block entity.
+		add(ModBlocks.HULL_PLATING, net.minecraft.world.level.storage.loot.LootTable.lootTable().withPool(applyExplosionCondition(ModBlocks.HULL_PLATING,
+				net.minecraft.world.level.storage.loot.LootPool.lootPool().setRolls(net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders.exactly(1))
+						.add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(ModBlocks.HULL_PLATING)
+								.apply(net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction
+										.copyComponentsFromBlockEntity(net.minecraft.world.level.storage.loot.parameters.LootContextParams.BLOCK_ENTITY)
+										.include(com.starwake.registry.ModComponents.COMPOSITION)
+										.include(com.starwake.registry.ModComponents.TEMPER)
+										.include(com.starwake.registry.ModComponents.QUALITY))))));
+		com.starwake.registry.ModFabrication.blocks().forEach(this::dropSelf);
 		com.starwake.registry.ModMachines.all().forEach(this::dropSelf);
 		com.starwake.registry.ModProcess.blocks().forEach(this::dropSelf);
 		com.starwake.registry.ModMetalworks.blocks().forEach(this::dropSelf);

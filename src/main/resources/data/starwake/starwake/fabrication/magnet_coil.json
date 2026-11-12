@@ -1,0 +1,20 @@
+{
+ "output": "starwake:magnet_coil",
+ "order": 31,
+ "energy": 1500,
+ "inputs": [
+  {
+   "form": "wire",
+   "count": 8,
+   "main": true,
+   "min": {
+    "conductivity": 95
+   }
+  },
+  {
+   "form": "rod",
+   "count": 1,
+   "base": "Fe"
+  }
+ ]
+}

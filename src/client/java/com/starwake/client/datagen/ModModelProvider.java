@@ -60,6 +60,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.createFurnace(com.starwake.registry.ModMachines.ATMOSPHERIC_CONDENSER, TexturedModel.ORIENTABLE_ONLY_TOP);
 		generators.createFurnace(com.starwake.registry.ModMachines.GAS_WELL, TexturedModel.ORIENTABLE_ONLY_TOP);
 		com.starwake.registry.ModMetalworks.blocks().forEach(b -> generators.createFurnace(b, TexturedModel.ORIENTABLE_ONLY_TOP));
+		com.starwake.registry.ModFabrication.blocks().forEach(b -> generators.createFurnace(b, TexturedModel.ORIENTABLE_ONLY_TOP));
 		generators.createTrivialBlock(com.starwake.registry.ModMachines.BATTERY, TexturedModel.COLUMN);
 		com.starwake.registry.ModProcess.blocks().forEach(b -> generators.createFurnace(b, TexturedModel.ORIENTABLE_ONLY_TOP));
 		simpleModelBlock(generators, com.starwake.registry.ModMachines.SOLAR_PANEL, "solar_panel", "solar_panel");
@@ -224,6 +225,9 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.generateFlatItem(com.starwake.registry.ModHubBlocks.SEALED_CARGO, ModelTemplates.FLAT_ITEM);
 		generators.generateFlatItem(com.starwake.registry.ModProcess.GAS_CYLINDER, ModelTemplates.FLAT_ITEM);
 		com.starwake.registry.ModMetalworks.moulds().forEach(m -> generators.generateFlatItem(m, ModelTemplates.FLAT_ITEM));
+		generators.generateFlatItem(com.starwake.registry.ModFabrication.SILICON_WAFER, ModelTemplates.FLAT_ITEM);
+		generators.generateFlatItem(com.starwake.registry.ModFabrication.MICROCHIP, ModelTemplates.FLAT_ITEM);
+		com.starwake.registry.ModFabrication.components().forEach(c -> generators.generateFlatItem(c, ModelTemplates.FLAT_ITEM));
 		// Bulk process materials (M8c): grey textures tinted by their main species.
 		for (var item : com.starwake.registry.ModProcess.bulkItems()) {
 			var texture = net.minecraft.resources.Identifier.fromNamespaceAndPath("starwake", "item/bulk_" + item.kind().id);

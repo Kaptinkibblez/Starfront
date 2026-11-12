@@ -123,7 +123,7 @@ public final class ShipEditing {
 		BlockPos cell = worldCell(ship, local);
 		ItemStack tool = player.getMainHandItem();
 		if (!creative) {
-			List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, level, cell, null, player, tool));
+			List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, level, cell, storedBlockEntity(level, cell, state, structure.blockEntity(local)), player, tool));
 			drops.addAll(containerContents(ship, local));
 			tool.mineBlock(level, state, cell, player);
 			for (ItemStack drop : drops) give(player, drop);
@@ -188,7 +188,7 @@ public final class ShipEditing {
 	 * Detached blocks leave the ship: placed into the world where they are if the ship is parked
 	 * level on a planet and the cells are free; otherwise dropped as items there.
 	 */
-	private static void dropDebris(ShipEntity ship, ServerLevel level, ShipStructure structure, Set<BlockPos> detached, ServerPlayer player) {
+	private static void dropDebris(ShipEntity ship, ServerLevel level, ShipStructure structure, Set<BlockPos> detached, @Nullable ServerPlayer player) {
 		boolean parked = !SpaceTravel.isSpace(level) && ship.isAxisAligned() && ship.lastMove().lengthSqr() < 0.0025;
 		Rotation rotation = parked ? ship.cardinalRotation() : Rotation.NONE;
 		for (BlockPos local : detached) {
@@ -206,7 +206,7 @@ public final class ShipEditing {
 					}
 				});
 			} else {
-				List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, level, cell, null));
+				List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, level, cell, storedBlockEntity(level, cell, state, data)));
 				drops.addAll(containerContents(ship, local));
 				Vec3 at = ship.blockCenter(local);
 				for (ItemStack drop : drops) {
@@ -216,7 +216,58 @@ public final class ShipEditing {
 				}
 			}
 		}
-		player.sendOverlayMessage(Component.translatable("message.starwake.edit.detached", detached.size()));
+		if (player != null) player.sendOverlayMessage(Component.translatable("message.starwake.edit.detached", detached.size()));
+		else ship.messageAboard(Component.translatable("message.starwake.edit.detached", detached.size()));
+	}
+
+	/**
+	 * Blocks lost to damage (M8e-1: burned off in re-entry, smashed in a crash). The Helm survives;
+	 * with {@code drop}, the blocks fall as items (keeping their materials). Detached parts follow.
+	 */
+	public static void destroy(ShipEntity ship, Set<BlockPos> cells, boolean drop) {
+		ShipStructure structure = ship.structure();
+		if (structure == null || !(ship.level() instanceof ServerLevel level)) return;
+		Set<BlockPos> removed = new HashSet<>();
+		for (BlockPos local : cells) {
+			BlockState state = structure.get(local);
+			if (state == null || state.getBlock() instanceof HelmBlock) continue;
+			removed.add(local.immutable());
+			BlockPos cell = worldCell(ship, local);
+			level.levelEvent(2001, cell, Block.getId(state));
+			if (drop) {
+				List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, level, cell, storedBlockEntity(level, cell, state, structure.blockEntity(local))));
+				drops.addAll(containerContents(ship, local));
+				Vec3 at = ship.blockCenter(local);
+				for (ItemStack stack : drops) {
+					ItemEntity item = new ItemEntity(level, at.x, at.y, at.z, stack);
+					item.setDeltaMovement(ship.lastMove());
+					level.addFreshEntity(item);
+				}
+			}
+		}
+		if (removed.isEmpty()) return;
+		ShipStructure next = structure.without(removed);
+		Set<BlockPos> detached = detached(next, ship.helmLocal());
+		if (!detached.isEmpty()) {
+			dropDebris(ship, level, next, detached, null);
+			next = next.without(detached);
+		}
+		ship.applyEdit(next);
+	}
+
+	/** A throwaway block entity loaded from a ship block's saved NBT, so loot tables can copy its components. */
+	private static @Nullable BlockEntity storedBlockEntity(ServerLevel level, BlockPos cell, BlockState state, Optional<CompoundTag> data) {
+		if (data.isEmpty()) return null;
+		return BlockEntity.loadStatic(cell, state, data.get(), level.registryAccess());
+	}
+
+	/** Block-entity NBT for a block placed on a ship from an item (its components: hull alloy and the like). */
+	private static Optional<CompoundTag> placedData(net.minecraft.world.level.Level level, BlockState state, ItemStack stack) {
+		if (!(state.getBlock() instanceof net.minecraft.world.level.block.EntityBlock entityBlock)) return Optional.empty();
+		BlockEntity be = entityBlock.newBlockEntity(BlockPos.ZERO, state);
+		if (be == null) return Optional.empty();
+		be.applyComponentsFromItemStack(stack);
+		return Optional.of(be.saveWithFullMetadata(level.registryAccess()));
 	}
 
 	// =========================================================================================
@@ -271,7 +322,8 @@ public final class ShipEditing {
 		}
 
 		ShipStructure next = structure;
-		for (int i = 0; i < cells.size(); i++) next = next.plus(cells.get(i), states.get(i), Optional.empty());
+		Optional<CompoundTag> data = placedData(player.level(), state, stack);
+		for (int i = 0; i < cells.size(); i++) next = next.plus(cells.get(i), states.get(i), i == 0 ? data : Optional.empty());
 		ship.applyEdit(next);
 		if (!player.isCreative()) stack.shrink(1);
 		var sound = state.getSoundType();

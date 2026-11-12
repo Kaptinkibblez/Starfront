@@ -1,0 +1,16 @@
+{
+ "output": "starwake:hull_plating",
+ "count": 4,
+ "order": 0,
+ "energy": 400,
+ "inputs": [
+  {
+   "form": "plate",
+   "count": 2,
+   "main": true,
+   "min": {
+    "yield": 100
+   }
+  }
+ ]
+}

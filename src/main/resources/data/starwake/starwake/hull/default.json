@@ -1,0 +1,8 @@
+{
+  "reference_density": 7.87,
+  "reference_toughness": 10220,
+  "reentry_peak": 1650,
+  "reentry_exponent": 1.5,
+  "burn_rate": 0.01,
+  "crumple": 0.5
+}

@@ -79,10 +79,12 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 		for (BlockPos pos : ship) {
 			BlockState state = level.getBlockState(pos);
 			ShipStats.BlockStats stats = ShipStats.get(state);
-			mass += stats.mass();
+			double massFactor = com.starwake.ship.data.ShipMaterials.rate(state,
+					com.starwake.ship.data.ShipMaterials.of(level.getBlockEntity(pos))).massFactor();
+			mass += stats.mass() * massFactor;
 			boolean clear = !(state.getBlock() instanceof ThrusterBlock) || !ship.contains(pos.relative(state.getValue(ThrusterBlock.FACING)));
 			systems.add(state, clear);
-			dynamics.add(pos, state, clear);
+			dynamics.add(pos, state, clear, massFactor);
 			if (state.is(ModBlocks.HELM)) {
 				helms++;
 			} else if (state.getBlock() instanceof ThrusterBlock) {

@@ -6,6 +6,8 @@ import com.starwake.ship.block.SeatBlock;
 import com.starwake.ship.block.ThrusterBlock;
 import com.starwake.ship.data.ShipPhysics;
 import com.starwake.ship.data.ShipStats;
+import com.starwake.ship.data.HullTuning;
+import com.starwake.ship.data.ShipMaterials;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -81,6 +83,9 @@ public class ShipEntity extends Entity {
 	private static final EntityDataAccessor<Integer> FUEL_CAPACITY = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> SHIELD = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Float> SHIELD_MAX = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	/** M8e-1: skin temperature of the leading face (C, 0 = not heating) and the weakest heat limit on it. */
+	private static final EntityDataAccessor<Float> SKIN_TEMP = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	private static final EntityDataAccessor<Float> HULL_LIMIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	/** Packed power split percents (0-100 each): engines * 1_000_000 + shields * 1000 + quantum. */
 	private static final EntityDataAccessor<Integer> POWER_SPLIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> ENGINE_FACTOR = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
@@ -171,6 +176,10 @@ public class ShipEntity extends Entity {
 	 * touch the ground and deployed gear reaches below its block.
 	 */
 	private final List<AABB> hull = new ArrayList<>();
+	/** Per block: mass factor, heat limit and armour from its material (M8e-1). */
+	private final Map<BlockPos, ShipMaterials.Rating> ratings = new HashMap<>();
+	/** Re-entry heat soaked by leading-face blocks (a block burns off at 1). */
+	private final Map<BlockPos, Double> heatDose = new HashMap<>();
 	/** Landing gear blocks aboard (local positions). */
 	private final List<BlockPos> gear = new ArrayList<>();
 
@@ -231,6 +240,7 @@ public class ShipEntity extends Entity {
 		mass = 0;
 		seats.clear();
 		hull.clear();
+		ratings.clear();
 		gear.clear();
 		if (structure == null) return;
 		ShipDynamics model = new ShipDynamics();
@@ -242,7 +252,9 @@ public class ShipEntity extends Entity {
 			int before = model.thrusterCount();
 			boolean clear = !(state.getBlock() instanceof ThrusterBlock)
 					|| structure.get(entry.pos().relative(state.getValue(ThrusterBlock.FACING))) == null;
-			model.add(entry.pos(), state, clear);
+			ShipMaterials.Rating rating = ShipMaterials.rate(state, ShipMaterials.of(entry.blockEntity()));
+			ratings.put(entry.pos(), rating);
+			model.add(entry.pos(), state, clear, rating.massFactor());
 			if (model.thrusterCount() > before) thrusterIndex.add(index);
 			if (state.getBlock() instanceof com.starwake.ship.block.LandingGearBlock) gear.add(entry.pos());
 			if (state.getBlock() instanceof HelmBlock) {
@@ -443,6 +455,8 @@ public class ShipEntity extends Entity {
 		builder.define(FUEL_CAPACITY, 0);
 		builder.define(SHIELD, 0f);
 		builder.define(SHIELD_MAX, 0f);
+		builder.define(SKIN_TEMP, 0f);
+		builder.define(HULL_LIMIT, 0f);
 		builder.define(POWER_SPLIT, 60_020_020);
 		builder.define(ENGINE_FACTOR, 1f);
 		builder.define(THERMAL, 1f);
@@ -857,7 +871,82 @@ public class ShipEntity extends Entity {
 		}
 
 		tickSystems();
+		tickHull();
 		return false;
+	}
+
+	// --- Hull: re-entry heating (M8e-1) ------------------------------------------------------------
+
+	public float skinTemperature() {
+		return entityData.get(SKIN_TEMP);
+	}
+
+	public float hullHeatLimit() {
+		return entityData.get(HULL_LIMIT);
+	}
+
+	/** The local direction closest to a world direction. */
+	public Direction localDirection(Vec3 world) {
+		Vector3f v = new Vector3f((float) world.x, (float) world.y, (float) world.z);
+		orientation().transformInverse(v);
+		return Direction.getApproximateNearest(v.x, v.y, v.z);
+	}
+
+	/**
+	 * Every half second: the leading face heats to 25 + peak x intensity^n x sqrt(air density) C; blocks
+	 * whose heat limit (alloy service temperature, or ship_stats {@code heat_limit}) is lower soak heat in
+	 * proportion to the excess and burn off at a dose of 1. Cooler blocks shed it again.
+	 */
+	private void tickHull() {
+		if (tickCount % 10 != 0 || structure == null) return;
+		HullTuning tuning = HullTuning.get();
+		// Mid-tick on the server the half-second ring isn't updated yet: use last tick's movement.
+		Vec3 v = lastMove();
+		double intensity = Reentry.intensity(this, v);
+		double density = Reentry.airDensity(this);
+		float skin = intensity < 0.02 || density <= 0 ? 0
+				: (float) (25 + tuning.reentryPeak() * Math.pow(intensity, tuning.reentryExponent()) * Math.sqrt(density));
+		if (skin <= 0) {
+			entityData.set(SKIN_TEMP, 0f);
+			heatDose.replaceAll((k, d) -> d * 0.8);
+			heatDose.values().removeIf(d -> d < 0.01);
+			return;
+		}
+		Direction lead = localDirection(v.lengthSqr() > 1e-6 ? v : worldDirection(Direction.DOWN));
+		double weakest = Double.MAX_VALUE;
+		java.util.Set<BlockPos> burned = new java.util.HashSet<>();
+		for (BlockPos pos : structure.outerFace(lead)) {
+			ShipMaterials.Rating r = ratings.get(pos);
+			double limit = r == null ? ShipStats.get(structure.get(pos)).heatLimit() : r.heatLimit();
+			weakest = Math.min(weakest, limit);
+			double over = skin - limit;
+			double dose = heatDose.getOrDefault(pos, 0.0);
+			dose = over > 0 ? dose + over * tuning.burnRate() * 0.5 : dose * 0.8;
+			if (dose >= 1) burned.add(pos);
+			else if (dose > 0.01) heatDose.put(pos, dose);
+			else heatDose.remove(pos);
+		}
+		entityData.set(SKIN_TEMP, skin);
+		entityData.set(HULL_LIMIT, weakest == Double.MAX_VALUE ? 0f : (float) weakest);
+		if (!burned.isEmpty() && level() instanceof ServerLevel server) {
+			burned.forEach(heatDose::remove);
+			for (BlockPos pos : burned) {
+				Vec3 at = blockCenter(pos);
+				server.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME, at.x, at.y, at.z, 12, 0.4, 0.4, 0.4, 0.05);
+			}
+			messageAboard(Component.translatable("message.starwake.hull.burned", burned.size()));
+			com.starwake.StarwakeMod.LOGGER.info("Ship {}: re-entry at {} C burned off {} blocks", getId(), Math.round(skin), burned.size());
+			com.starwake.ship.edit.ShipEditing.destroy(this, burned, false);
+		}
+	}
+
+	/** An action-bar message for the pilot and everyone aboard. */
+	public void messageAboard(Component message) {
+		if (!(level() instanceof ServerLevel server)) return;
+		for (net.minecraft.server.level.ServerPlayer player : server.getPlayers(p -> p.getVehicle() == this || isSupporting(p)
+				|| p.distanceToSqr(this) < 64 * 64 && getBoundingBox().inflate(2).contains(p.position()))) {
+			player.sendOverlayMessage(message);
+		}
 	}
 
 	/** Shield regeneration and quantum spool, scaled by the power routed to each. */
@@ -1613,7 +1702,7 @@ public class ShipEntity extends Entity {
 		double safe = !touchdown ? SAFE_IMPACT
 				: isGearDown() && worldDirection(Direction.UP).y > 0.8 ? SAFE_GEAR_LANDING : SAFE_BELLY_LANDING;
 		if (impactCooldown > 0) impactCooldown--;
-		else if (impact > safe) onImpact(impact, safe);
+		else if (impact > safe) onImpact(impact, safe, new Vec3(velocity.x - dx, velocity.y - dy, velocity.z - dz));
 	}
 
 	/** Ticks before another impact can register: a crash counts once, not once per tick of scraping. */
@@ -1629,7 +1718,7 @@ public class ShipEntity extends Entity {
 	 * A crash: shields soak the impact energy first; anything left hurts everyone aboard
 	 * (crew in seats and people walking inside).
 	 */
-	private void onImpact(double impact, double safe) {
+	private void onImpact(double impact, double safe, Vec3 blocked) {
 		if (!(level() instanceof ServerLevel serverLevel)) return;
 		impactCooldown = 10;
 		// 1 b/t over the limit = 40 shield HP; scraping in on the belly is five times worse.
@@ -1641,6 +1730,8 @@ public class ShipEntity extends Entity {
 		serverLevel.playSound(null, BlockPos.containing(position()), net.minecraft.sounds.SoundEvents.ANVIL_LAND,
 				net.minecraft.sounds.SoundSource.BLOCKS, (float) Math.min(1.5, impact), absorbed > 0 ? 1.6f : 0.6f);
 		if (excess <= 0) return;
+		excess -= hullImpact(excess, blocked);
+		if (excess <= 1e-6) return;
 		float damage = (float) Math.min(30.0, excess / 4.0);
 		AABB inside = getBoundingBox().inflate(1.0);
 		for (Entity entity : serverLevel.getEntities(this, inside, e -> e instanceof LivingEntity)) {
@@ -1648,6 +1739,41 @@ public class ShipEntity extends Entity {
 				entity.hurtServer(serverLevel, serverLevel.damageSources().flyIntoWall(), damage);
 			}
 		}
+	}
+
+	/**
+	 * Impact armour (M8e-1): the blocks on the face that hit share the energy left after shields. Each
+	 * soaks up to its armour (alloy toughness or ship_stats {@code armor}); a block whose share is more
+	 * than its armour breaks off (dropped). The hull soaks at most {@code crumple} of the energy; the
+	 * rest reaches the crew. Returns the energy absorbed.
+	 */
+	private double hullImpact(double energy, Vec3 blocked) {
+		if (structure == null || blocked.lengthSqr() < 1e-9) return 0;
+		Direction face = localDirection(blocked);
+		List<BlockPos> skin = structure.outerFace(face);
+		if (skin.isEmpty()) return 0;
+		// Only the layer that sticks out furthest toward the impact touched it.
+		int extreme = Integer.MIN_VALUE;
+		for (BlockPos p : skin) extreme = Math.max(extreme, p.get(face.getAxis()) * face.getAxisDirection().getStep());
+		List<BlockPos> contact = new ArrayList<>();
+		for (BlockPos p : skin) if (p.get(face.getAxis()) * face.getAxisDirection().getStep() >= extreme) contact.add(p);
+		double share = energy / contact.size();
+		double absorbed = 0;
+		java.util.Set<BlockPos> broken = new java.util.HashSet<>();
+		for (BlockPos p : contact) {
+			ShipMaterials.Rating r = ratings.get(p);
+			double armor = r == null ? ShipStats.get(structure.get(p)).armor() : r.armor();
+			absorbed += Math.min(share, armor);
+			if (share > armor && !(structure.get(p).getBlock() instanceof HelmBlock)) broken.add(p);
+		}
+		absorbed = Math.min(absorbed, energy * HullTuning.get().crumple());
+		com.starwake.StarwakeMod.LOGGER.info("Ship {}: impact energy {} on {} contact blocks ({} face): hull soaked {}, tore off {}", getId(),
+				Math.round(energy), contact.size(), face, Math.round(absorbed), broken.size());
+		if (!broken.isEmpty()) {
+			messageAboard(Component.translatable("message.starwake.hull.smashed", broken.size()));
+			com.starwake.ship.edit.ShipEditing.destroy(this, broken, true);
+		}
+		return absorbed;
 	}
 
 	private double clip(Direction.Axis axis, double distance) {

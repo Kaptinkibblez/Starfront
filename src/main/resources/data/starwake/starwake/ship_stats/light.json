@@ -7,5 +7,7 @@
     "minecraft:glass_pane",
     "#c:glass_panes"
   ],
-  "mass": 0.2
+  "mass": 0.2,
+  "heat_limit": 250,
+  "armor": 0.5
 }

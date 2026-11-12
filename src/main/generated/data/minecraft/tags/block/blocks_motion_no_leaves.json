@@ -80,6 +80,7 @@
     "starwake:coke_oven",
     "starwake:smelter",
     "starwake:converter",
+    "starwake:arc_furnace",
     "starwake:reactor",
     "starwake:leach",
     "starwake:evaporator",
@@ -96,6 +97,9 @@
     "starwake:wire_drawer",
     "starwake:extrusion_press",
     "starwake:forging_press",
-    "starwake:heat_treat_furnace"
+    "starwake:heat_treat_furnace",
+    "starwake:crystal_puller",
+    "starwake:clean_fab",
+    "starwake:fabricator"
   ]
 }

@@ -33,7 +33,7 @@ public final class ModBlocks {
 	 * Hull Plating: the basic starship construction block (a test block in Milestone 1).
 	 * Iron-like hardness, mined with a stone pickaxe or better.
 	 */
-	public static final Block HULL_PLATING = register("hull_plating", Block::new,
+	public static final Block HULL_PLATING = register("hull_plating", com.starwake.ship.block.HullPlatingBlock::new,
 			BlockBehaviour.Properties.of()
 					.mapColor(MapColor.METAL)
 					.strength(5.0f, 6.0f)

@@ -2,5 +2,7 @@
   "blocks": [
     "*"
   ],
-  "mass": 1.0
+  "mass": 1.0,
+  "heat_limit": 1000,
+  "armor": 6
 }

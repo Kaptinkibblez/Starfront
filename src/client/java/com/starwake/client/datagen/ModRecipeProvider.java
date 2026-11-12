@@ -100,6 +100,20 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.HEAT_TREAT_FURNACE).pattern("BBB").pattern("CFC").pattern("IRI")
 						.define('B', Items.BRICKS).define('F', Items.FURNACE).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT)
 						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				// M8e-1 fabrication machines (provisional until 8i).
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModProcess.block(com.starwake.process.ProcessMachineBlockEntity.Process.ARC_FURNACE))
+						.pattern("CCC").pattern("BFB").pattern("IRI").define('C', Items.COAL_BLOCK).define('B', Items.BRICKS)
+						.define('F', com.starwake.registry.ModProcess.block(com.starwake.process.ProcessMachineBlockEntity.Process.SMELTER))
+						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModFabrication.CRYSTAL_PULLER).pattern("IGI").pattern("CFC").pattern("IRI")
+						.define('G', Items.GLASS).define('F', com.starwake.registry.ModMetalworks.INDUCTION_FURNACE).define('C', ModMachines.COPPER_CABLE)
+						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModFabrication.CLEAN_FAB).pattern("QGQ").pattern("CDC").pattern("IRI")
+						.define('Q', Items.QUARTZ_BLOCK).define('G', Items.GLASS).define('D', Items.DIAMOND).define('C', ModMachines.COPPER_CABLE)
+						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModFabrication.FABRICATOR).pattern("IPI").pattern("CTC").pattern("IRI")
+						.define('P', Items.PISTON).define('T', Items.CRAFTING_TABLE).define('C', ModMachines.COPPER_CABLE)
+						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				String[][] mouldPatterns = {{"B B", "BCB", "BBB"}, {"BCB", "BCB", "BBB"}, {"BCB", "B B", "BBB"}};
 				var moulds = com.starwake.registry.ModMetalworks.moulds();
 				for (int i = 0; i < moulds.size(); i++) {

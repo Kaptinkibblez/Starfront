@@ -1,0 +1,9 @@
+{
+ "machine": "chlorinator",
+ "equation": "Si + 3 HCl -> SiHCl3 + H2",
+ "priority": 30,
+ "draw": [
+  "HCl"
+ ],
+ "note": "Trichlorosilane boils at 32 C: it leaves the impurities behind."
+}

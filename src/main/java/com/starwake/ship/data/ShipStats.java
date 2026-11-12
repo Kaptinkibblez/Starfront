@@ -46,8 +46,8 @@ public final class ShipStats {
 	/** Resolved stats for one block. */
 	public record BlockStats(double mass, double thrust, double fuelBurn, int fuelCapacity, double powerOutput,
 			double heat, double cooling, double powerDraw, double shieldCapacity, double shieldRegen, double quantumSpool,
-			double jumpRange, double jumpSpool) {
-		public static final BlockStats DEFAULT = new BlockStats(1.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			double jumpRange, double jumpSpool, double heatLimit, double armor) {
+		public static final BlockStats DEFAULT = new BlockStats(1.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1000, 6);
 	}
 
 	/** One JSON file. */
@@ -66,7 +66,8 @@ public final class ShipStats {
 	/** Component fields (power, heat, shields, quantum), split out because codecs cap at 16 fields. */
 	public record Components(Optional<Double> powerOutput, Optional<Double> heat, Optional<Double> cooling,
 			Optional<Double> powerDraw, Optional<Double> shieldCapacity, Optional<Double> shieldRegen,
-			Optional<Double> quantumSpool, Optional<Double> jumpRange, Optional<Double> jumpSpool) {
+			Optional<Double> quantumSpool, Optional<Double> jumpRange, Optional<Double> jumpSpool, Optional<Double> heatLimit,
+			Optional<Double> armor) {
 		private static Codec<Double> nonNegative() {
 			return Codec.doubleRange(0.0, 1_000_000.0);
 		}
@@ -80,7 +81,9 @@ public final class ShipStats {
 				nonNegative().optionalFieldOf("shield_regen").forGetter(Components::shieldRegen),
 				nonNegative().optionalFieldOf("quantum_spool").forGetter(Components::quantumSpool),
 				nonNegative().optionalFieldOf("jump_range").forGetter(Components::jumpRange),
-				nonNegative().optionalFieldOf("jump_spool").forGetter(Components::jumpSpool)
+				nonNegative().optionalFieldOf("jump_spool").forGetter(Components::jumpSpool),
+				nonNegative().optionalFieldOf("heat_limit").forGetter(Components::heatLimit),
+				nonNegative().optionalFieldOf("armor").forGetter(Components::armor)
 		).apply(i, Components::new));
 	}
 
@@ -134,7 +137,9 @@ public final class ShipStats {
 				first(matches, e -> e.components().shieldRegen()).orElse(0.0),
 				first(matches, e -> e.components().quantumSpool()).orElse(0.0),
 				first(matches, e -> e.components().jumpRange()).orElse(0.0),
-				first(matches, e -> e.components().jumpSpool()).orElse(0.0));
+				first(matches, e -> e.components().jumpSpool()).orElse(0.0),
+				first(matches, e -> e.components().heatLimit()).orElse(d.heatLimit()),
+				first(matches, e -> e.components().armor()).orElse(d.armor()));
 	}
 
 	private static <T> Optional<T> first(List<Entry> matches, java.util.function.Function<Entry, Optional<T>> field) {

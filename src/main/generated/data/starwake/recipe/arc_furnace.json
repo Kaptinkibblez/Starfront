@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": "minecraft:bricks",
+    "C": "minecraft:coal_block",
+    "F": "starwake:smelter",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "CCC",
+    "BFB",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:arc_furnace"
+  }
+}

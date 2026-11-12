@@ -9,5 +9,7 @@
     "#minecraft:wooden_trapdoors",
     "#minecraft:fence_gates"
   ],
-  "mass": 0.5
+  "mass": 0.5,
+  "heat_limit": 300,
+  "armor": 3
 }

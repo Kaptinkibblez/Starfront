@@ -1,0 +1,16 @@
+{
+ "output": "starwake:pressure_vessel",
+ "order": 11,
+ "energy": 1200,
+ "inputs": [
+  {
+   "form": "plate",
+   "count": 4,
+   "main": true,
+   "min": {
+    "yield": 200,
+    "elongation": 12
+   }
+  }
+ ]
+}

@@ -1,0 +1,30 @@
+{
+ "output": "starwake:control_board",
+ "order": 40,
+ "energy": 3000,
+ "inputs": [
+  {
+   "item": "starwake:microchip",
+   "count": 4
+  },
+  {
+   "form": "wire",
+   "count": 2,
+   "min": {
+    "conductivity": 95
+   }
+  },
+  {
+   "form": "wire",
+   "count": 1,
+   "base": "Sn"
+  },
+  {
+   "element": "Au",
+   "count": 1,
+   "min": {
+    "purity": 99.9
+   }
+  }
+ ]
+}
