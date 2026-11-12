@@ -168,6 +168,32 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("wristcom.contracts.for", "for the %s");
 		builder.add("wristcom.contracts.abandon", "Abandon");
 		builder.add("entity.starwake.hub_npc", "Hub Crew");
+		// Power and logistics (M8b).
+		builder.add(com.starwake.registry.ModMachines.COMBUSTION_GENERATOR, "Combustion Generator");
+		builder.add(com.starwake.registry.ModMachines.ELECTRIC_FURNACE, "Electric Furnace");
+		builder.add(com.starwake.registry.ModMachines.SOLAR_PANEL, "Solar Panel");
+		builder.add(com.starwake.registry.ModMachines.BATTERY, "Battery Bank");
+		builder.add(com.starwake.registry.ModMachines.COPPER_CABLE, "Copper Cable");
+		builder.add(com.starwake.registry.ModMachines.ALUMINIUM_CABLE, "Aluminium HV Cable");
+		builder.add(com.starwake.registry.ModMachines.FLUID_PIPE, "Fluid Pipe");
+		builder.add(com.starwake.registry.ModMachines.FLUID_TANK, "Fluid Tank");
+		builder.add(com.starwake.registry.ModMachines.CONVEYOR, "Conveyor Belt");
+		builder.add("message.starwake.grid", "Grid: %s kW supply · %s kW demand · %s machines, %s cables");
+		builder.add("message.starwake.solar", "Solar %s kW (sun %s%%, starlight %s×)");
+		builder.add("message.starwake.battery", "Battery %s / %s kWh (%s%%)");
+		builder.add("message.starwake.pipe.extract", "Pipe side %s: extracting");
+		builder.add("message.starwake.pipe.connect", "Pipe side %s: connected");
+		builder.add("message.starwake.tank", "%s: %s / %s buckets");
+		builder.add("message.starwake.tank.empty_fluid", "Empty");
+		for (var d : net.minecraft.core.Direction.values()) {
+			builder.add("direction.starwake." + d.getSerializedName(), d.getSerializedName().substring(0, 1).toUpperCase() + d.getSerializedName().substring(1));
+		}
+		builder.add("screen.starwake.machine.energy", "%s / %s kJ");
+		builder.add("screen.starwake.machine.power_out", "Output %s kW");
+		builder.add("screen.starwake.machine.power_in", "Drawing %s kW");
+		builder.add("screen.starwake.machine.idle", "Idle");
+		builder.add("screen.starwake.machine.grid", "Grid: %s kW in · %s kW use");
+		builder.add("screen.starwake.machine.no_power", "No power");
 		// Metallurgy (M8a).
 		builder.add("itemGroup.starwake.materials", "Starwake: Materials");
 		for (var form : com.starwake.metal.MetalForm.values()) {

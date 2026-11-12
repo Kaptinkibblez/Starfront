@@ -18,5 +18,6 @@ public final class StarwakeDataGenerator implements DataGeneratorEntrypoint {
 		pack.addProvider(ModLanguageProvider::new);
 		pack.addProvider(ModBlockLootProvider::new);
 		pack.addProvider(ModBlockTagProvider::new);
+		pack.addProvider(ModRecipeProvider::new);
 	}
 }

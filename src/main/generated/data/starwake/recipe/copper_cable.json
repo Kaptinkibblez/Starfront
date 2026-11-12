@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "K": "minecraft:dried_kelp"
+  },
+  "pattern": [
+    "KKK",
+    "CCC",
+    "KKK"
+  ],
+  "result": {
+    "count": 8,
+    "id": "starwake:copper_cable"
+  }
+}

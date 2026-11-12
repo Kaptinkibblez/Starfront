@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "starwake:block/battery_top",
+    "side": "starwake:block/battery_side"
+  }
+}

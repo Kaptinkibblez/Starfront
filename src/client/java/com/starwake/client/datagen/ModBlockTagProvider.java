@@ -46,6 +46,8 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		builder(BlockTags.MINEABLE_WITH_HOE).add(key(ModPlanetBlocks.FERNWOOD_FRONDS), key(ModPlanetBlocks.FUNGAL_CAP));
 		builder(BlockTags.LEAVES).add(key(ModPlanetBlocks.FERNWOOD_FRONDS));
 		builder(BlockTags.LOGS).add(key(ModPlanetBlocks.FERNWOOD_LOG), key(ModPlanetBlocks.FUNGAL_STEM));
+		var machines = builder(BlockTags.MINEABLE_WITH_PICKAXE);
+		com.starwake.registry.ModMachines.all().forEach(block -> machines.add(key(block)));
 		var ores = builder(BlockTags.MINEABLE_WITH_PICKAXE);
 		var ironTier = builder(BlockTags.NEEDS_IRON_TOOL);
 		var stoneTier = builder(BlockTags.NEEDS_STONE_TOOL);
@@ -67,7 +69,9 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		// a full solid cube; non-solid blocks added later must opt out here.
 		var motion = builder(BlockTags.BLOCKS_MOTION_NO_LEAVES);
 		// Wings and landing gear aren't solid cubes, so they stay out.
-		ModBlocks.all().stream().filter(block -> block != ModBlocks.WING && block != ModBlocks.LANDING_GEAR
+		var thin = java.util.Set.of(com.starwake.registry.ModMachines.COPPER_CABLE, com.starwake.registry.ModMachines.ALUMINIUM_CABLE,
+				com.starwake.registry.ModMachines.FLUID_PIPE, com.starwake.registry.ModMachines.CONVEYOR, com.starwake.registry.ModMachines.SOLAR_PANEL);
+		ModBlocks.all().stream().filter(block -> block != ModBlocks.WING && block != ModBlocks.LANDING_GEAR && !thin.contains(block)
 				&& !ModPlanetBlocks.nonSolid().contains(block)).forEach(block -> motion.add(key(block)));
 		builder(BlockTags.SAND).add(key(ModPlanetBlocks.FINE_REGOLITH), key(ModPlanetBlocks.VOLCANIC_ASH));
 

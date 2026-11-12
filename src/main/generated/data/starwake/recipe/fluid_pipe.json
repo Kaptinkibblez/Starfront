@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "minecraft:copper_ingot"
+  },
+  "pattern": [
+    "CCC",
+    "   ",
+    "CCC"
+  ],
+  "result": {
+    "count": 8,
+    "id": "starwake:fluid_pipe"
+  }
+}

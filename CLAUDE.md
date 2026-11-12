@@ -269,6 +269,14 @@ commit. **Don't start the next milestone until the user confirms the current one
         tooltips, `/starwake metal`. *(Verified 2026-11-11: 304, Inconel 718 and Grade 2 Ti
         certify; low-Ni 304 reads off-spec naming Ni; 2024 without Mn off-spec; arbitrary
         Fe-Cr-Co estimated as stainless; vanilla iron = AISI 1010; tints and tooltips in game.)*
+  - [x] 8b. Power and logistics: electric grid (J/kW/kWh), copper and aluminium HV cables,
+        Combustion Generator, Solar Panel (sun + starlight), Battery Bank, Electric Furnace,
+        machine screens, Fluid Pipe (extract sides), Fluid Tank, Conveyor Belt, auto-eject,
+        provisional vanilla-material recipes. *(Verified 2026-11-12: coal -> generator (10 kW) ->
+        cable -> electric furnace (3 kW) smelting raw iron -> output onto a conveyor -> chest;
+        solar panels charging a battery; buckets fill a tank; a pipe with an extract side moved
+        5 buckets into a second tank. Action-bar readouts (solar, battery, tank, pipe) can't be
+        seen in the headless client: even `/title actionbar` doesn't render there.)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
 
 ---
@@ -688,8 +696,53 @@ normal gravity.
   Creative tab "Starwake: Materials" (every grade in every form). Admin:
   `/starwake metal give <form> <n> <Fe:72,Cr:18,...>`, `grade <id> [form] [n]`, `info`, `grades`.
 
+## How power and logistics work (Milestone 8b)
+
+- **Units:** energy in joules (long), rates in J/tick (1 kW = 50 J/tick), storage in kWh. Numbers
+  per block in `data/<ns>/starwake/machine/<block>.json` (`machine/MachineSpec`: power kW, buffer
+  kJ, io kW, capacity kWh (tanks: buckets), speed, fuel multiplier, cable rating kW, rate).
+- **Grid** (`machine/PowerNetworks`, per level, not saved): a network = connected cables +
+  `EnergyNode` block entities (machines touching each other connect too). Built by a bounded flood
+  fill (4096) when a node first asks (`networkOf` every node tick = a map lookup), dropped by
+  `invalidate` when a cable or node is placed, removed, loaded or unloaded. Each level tick per
+  network: generators -> consumers (proportional to need), then batteries cover the shortfall or
+  take the surplus; all flow capped at the weakest cable's rating. Stats per network for screens.
+- **Blocks** (`registry/ModMachines`): `CableBlock` (PipeBlock; copper 32 kW, aluminium 512 kW),
+  `MachineBlock` + `MachineBlockEntity` (inventory, energy buffer, layout of slot roles, synced
+  `MachineMenu` data, LIT, comparator = charge, auto-eject of outputs every 10 ticks into
+  neighbouring inventories or onto conveyors leading away), `CombustionGeneratorBlockEntity`
+  (furnace fuels x `fuel`, only lights when the buffer has room), `ElectricFurnaceBlockEntity`
+  (vanilla smelting at `speed`, draws `power`), `PowerBlock`/`PowerBlockEntity` (Solar Panel:
+  peak x daylight-detector sun model (full sun in space) x starlight = L / d^2 relative to the
+  Overworld under Solace; Battery Bank: storage). Machines are `WorldlyContainer`s, so hoppers and
+  Fabric item transfer work.
+- **Fluids** (`logistics/`): `FluidPipeBlock` (EnumProperty `PipeSide` per side: none/connected/
+  extract; use an arm touching a storage to toggle extract), a marker block entity that only
+  ticks with an extract side, `FluidNetworks` (pipe flood fill, endpoints, pumps `rate`
+  buckets/s per extract side into all other endpoints with `StorageUtil.move`).
+  `FluidTankBlock` (Fabric `SingleFluidStorage`, buckets via `FluidStorageUtil`, comparator).
+  Everything uses Fabric's `FluidStorage.SIDED`, so cauldrons and other mods' tanks connect.
+- **Conveyor** (`logistics/ConveyorBlock`): `entityInside` pushes anything on it at `rate` b/s and
+  centres it; at the end it inserts items into the `ItemStorage.SIDED` ahead (waiting if full).
+- **Screens** (`client/machine/MachineScreen`, no texture): slot wells, energy bar, arrow or flame,
+  power and grid totals. Data slots are shorts on the wire: 32-bit values use two slots.
+- Assets: `tools/machine_assets.py` (textures + element models: cable/pipe arms, panel, belt, tank);
+  datagen does blockstates (furnace-style LIT fronts, multipart cables/pipes, rotated conveyor),
+  loot, tags (thin blocks stay out of `blocks_motion_no_leaves`), lang and the provisional recipes
+  (`ModRecipeProvider`, vanilla materials until 8i).
+- Known limits: tanks don't render their fluid yet; no aluminium recipe until 8c makes aluminium.
+
 ## 26.3 gotchas (learned the hard way)
 
+- **Menu data slots sync as shorts** (`ClientboundContainerSetDataPacket` writes shorts): split
+  larger values across two slots.
+- Fuel burn time is a data component in 26.3: `ResolvableInt.getFromItem(stack,
+  DataComponents.COOKING_FUEL, CookingFuel::burnTime, lootContext, 0)`; `BaseContainerBlockEntity`
+  provides `getLootContext(level)`. Block entities that are `Container`s drop their contents on
+  removal automatically (`preRemoveSideEffects`).
+- Render layers come from texture alpha (no `BlockRenderLayerMap` needed for cutout/translucent).
+- The Friends List popup can reappear mid-test and swallow typed commands: check the chat log
+  after each batch and dismiss it (`ingame`).
 - Hex colours in data codecs: `ExtraCodecs.STRING_RGB_COLOR` ("#rrggbb"); `RGB_COLOR_CODEC` only
   takes ints or float triples. A bad entry in a dynamic registry aborts world loading.
 

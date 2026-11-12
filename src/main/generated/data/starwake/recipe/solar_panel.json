@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "starwake:copper_cable",
+    "G": "minecraft:glass",
+    "I": "minecraft:iron_ingot",
+    "Q": "minecraft:quartz",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "GGG",
+    "QRQ",
+    "ICI"
+  ],
+  "result": {
+    "count": 2,
+    "id": "starwake:solar_panel"
+  }
+}

@@ -40,6 +40,7 @@ public final class StarwakeMod implements ModInitializer {
 		ModBlocks.init();
 		com.starwake.registry.ModPlanetBlocks.init();
 		com.starwake.registry.ModHubBlocks.init();
+		com.starwake.registry.ModMachines.init();
 		com.starwake.worldgen.CraterFeature.init();
 		com.starwake.registry.ModSounds.init();
 		ModBlockEntities.init();
@@ -56,6 +57,9 @@ public final class StarwakeMod implements ModInitializer {
 		com.starwake.galaxy.GalaxyCommands.init();
 		net.fabricmc.fabric.api.event.registry.DynamicRegistries.registerSynced(com.starwake.trade.Faction.REGISTRY_KEY, com.starwake.trade.Faction.CODEC);
 		com.starwake.metal.Metallurgy.init();
+		com.starwake.machine.MachineSpec.init();
+		com.starwake.machine.PowerNetworks.init();
+		com.starwake.logistics.FluidNetworks.init();
 		com.starwake.metal.MetalCommands.init();
 		com.starwake.trade.TradeData.init();
 		com.starwake.trade.Economy.init();

@@ -1,0 +1,37 @@
+{
+ "textures": {
+  "particle": "starwake:block/aluminium_cable",
+  "c": "starwake:block/aluminium_cable"
+ },
+ "elements": [
+  {
+   "from": [
+    5,
+    5,
+    0
+   ],
+   "to": [
+    11,
+    11,
+    5
+   ],
+   "faces": {
+    "east": {
+     "texture": "#c"
+    },
+    "west": {
+     "texture": "#c"
+    },
+    "up": {
+     "texture": "#c"
+    },
+    "down": {
+     "texture": "#c"
+    },
+    "north": {
+     "texture": "#c"
+    }
+   }
+  }
+ ]
+}

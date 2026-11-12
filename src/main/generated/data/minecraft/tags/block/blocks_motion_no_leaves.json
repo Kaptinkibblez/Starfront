@@ -64,6 +64,10 @@
     "starwake:landing_pad",
     "starwake:commodity_terminal",
     "starwake:outfitter_terminal",
-    "starwake:contract_board"
+    "starwake:contract_board",
+    "starwake:combustion_generator",
+    "starwake:electric_furnace",
+    "starwake:battery",
+    "starwake:fluid_tank"
   ]
 }

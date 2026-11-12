@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "starwake:block/fluid_tank"
+    }
+  }
+}

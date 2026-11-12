@@ -17,6 +17,7 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 	@Override
 	public void generate() {
 		dropSelf(ModBlocks.HULL_PLATING);
+		com.starwake.registry.ModMachines.all().forEach(this::dropSelf);
 		dropSelf(ModBlocks.REGOLITH);
 		dropSelf(ModBlocks.RUST_SAND);
 		dropSelf(ModBlocks.HELM);

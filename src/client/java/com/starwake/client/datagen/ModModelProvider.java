@@ -53,6 +53,40 @@ public final class ModModelProvider extends FabricModelProvider {
 					.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side"))
 					.put(TextureSlot.TOP, TextureMapping.getBlockTexture(com.starwake.registry.ModHubBlocks.STATION_PANEL))));
 		}
+		// Power and logistics (M8b). Element models are hand-shaped (tools/machine_assets.py).
+		generators.createFurnace(com.starwake.registry.ModMachines.COMBUSTION_GENERATOR, TexturedModel.ORIENTABLE_ONLY_TOP);
+		generators.createFurnace(com.starwake.registry.ModMachines.ELECTRIC_FURNACE, TexturedModel.ORIENTABLE_ONLY_TOP);
+		generators.createTrivialBlock(com.starwake.registry.ModMachines.BATTERY, TexturedModel.COLUMN);
+		simpleModelBlock(generators, com.starwake.registry.ModMachines.SOLAR_PANEL, "solar_panel", "solar_panel");
+		simpleModelBlock(generators, com.starwake.registry.ModMachines.FLUID_TANK, "fluid_tank", "fluid_tank");
+		generators.blockStateOutput.accept(net.minecraft.client.data.models.blockstates.MultiVariantGenerator.dispatch(
+				com.starwake.registry.ModMachines.CONVEYOR, BlockModelGenerators.plainVariant(id("conveyor")))
+				.with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
+		generators.registerSimpleItemModel(com.starwake.registry.ModMachines.CONVEYOR, id("conveyor"));
+		for (String cable : new String[] {"copper_cable", "aluminium_cable"}) {
+			Block block = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath("starwake", cable));
+			var core = BlockModelGenerators.plainVariant(id(cable + "_core"));
+			var arm = BlockModelGenerators.plainVariant(id(cable + "_arm"));
+			var gen = net.minecraft.client.data.models.blockstates.MultiPartGenerator.multiPart(block).with(core);
+			for (var d : net.minecraft.core.Direction.values()) {
+				gen = gen.with(BlockModelGenerators.condition().term(net.minecraft.world.level.block.PipeBlock.PROPERTY_BY_DIRECTION.get(d), true), rotate(arm, d));
+			}
+			generators.blockStateOutput.accept(gen);
+			generators.registerSimpleItemModel(block, id(cable + "_inventory"));
+		}
+		{
+			Block pipe = com.starwake.registry.ModMachines.FLUID_PIPE;
+			var arm = BlockModelGenerators.plainVariant(id("fluid_pipe_arm"));
+			var extract = BlockModelGenerators.plainVariant(id("fluid_pipe_extract"));
+			var gen = net.minecraft.client.data.models.blockstates.MultiPartGenerator.multiPart(pipe).with(BlockModelGenerators.plainVariant(id("fluid_pipe_core")));
+			for (var d : net.minecraft.core.Direction.values()) {
+				var prop = com.starwake.logistics.FluidPipeBlock.SIDES.get(d);
+				gen = gen.with(BlockModelGenerators.condition().term(prop, com.starwake.logistics.PipeSide.CONNECTED, com.starwake.logistics.PipeSide.EXTRACT), rotate(arm, d));
+				gen = gen.with(BlockModelGenerators.condition().term(prop, com.starwake.logistics.PipeSide.EXTRACT), rotate(extract, d));
+			}
+			generators.blockStateOutput.accept(gen);
+			generators.registerSimpleItemModel(pipe, id("fluid_pipe_inventory"));
+		}
 		generators.createTrivialBlock(ModPlanetBlocks.MAT_TURF, TexturedModel.CUBE_BOTTOM_TOP.updateTexture(t -> t
 				.put(TextureSlot.TOP, TextureMapping.getBlockTexture(ModPlanetBlocks.MAT_TURF, "_top"))
 				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModPlanetBlocks.MAT_TURF, "_side"))
@@ -151,6 +185,29 @@ public final class ModModelProvider extends FabricModelProvider {
 		Identifier modelId = ModelTemplates.SLAB_BOTTOM.create(block, textures, generators.modelOutput);
 		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(modelId)));
 		generators.registerSimpleItemModel(block, modelId);
+	}
+
+	private static net.minecraft.resources.Identifier id(String model) {
+		return net.minecraft.resources.Identifier.fromNamespaceAndPath("starwake", "block/" + model);
+	}
+
+	/** A block whose blockstate and item use one hand-shaped model. */
+	private static void simpleModelBlock(BlockModelGenerators generators, Block block, String model, String item) {
+		generators.blockStateOutput.accept(net.minecraft.client.data.models.blockstates.MultiVariantGenerator.dispatch(block,
+				BlockModelGenerators.plainVariant(id(model))));
+		generators.registerSimpleItemModel(block, id(item));
+	}
+
+	/** An arm model (pointing north) turned to face d, like vanilla's chorus plant. */
+	private static net.minecraft.client.data.models.MultiVariant rotate(net.minecraft.client.data.models.MultiVariant arm, net.minecraft.core.Direction d) {
+		return switch (d) {
+			case NORTH -> arm;
+			case EAST -> arm.with(BlockModelGenerators.Y_ROT_90);
+			case SOUTH -> arm.with(BlockModelGenerators.Y_ROT_180);
+			case WEST -> arm.with(BlockModelGenerators.Y_ROT_270);
+			case UP -> arm.with(BlockModelGenerators.X_ROT_270);
+			case DOWN -> arm.with(BlockModelGenerators.X_ROT_90);
+		};
 	}
 
 	@Override
