@@ -4,7 +4,7 @@
   "key": {
     "B": "minecraft:cauldron",
     "C": "starwake:copper_cable",
-    "I": "minecraft:iron_ingot"
+    "I": "starwake:metal_plate"
   },
   "pattern": [
     "I I",

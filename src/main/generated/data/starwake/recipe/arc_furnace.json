@@ -5,7 +5,7 @@
     "B": "minecraft:bricks",
     "C": "minecraft:coal_block",
     "F": "starwake:smelter",
-    "I": "minecraft:iron_ingot",
+    "I": "starwake:metal_plate",
     "R": "minecraft:redstone"
   },
   "pattern": [

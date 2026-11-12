@@ -4,7 +4,7 @@
   "key": {
     "C": "starwake:copper_cable",
     "F": "minecraft:furnace",
-    "I": "minecraft:iron_ingot",
+    "I": "starwake:metal_plate",
     "P": "minecraft:piston",
     "R": "minecraft:redstone"
   },

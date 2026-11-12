@@ -1,0 +1,32 @@
+{
+ "output": "starwake:fusion_reactor",
+ "order": 82,
+ "energy": 80000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 8,
+   "min": {
+    "conductivity": 100
+   }
+  },
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 4,
+   "min": {
+    "conductivity": 90
+   }
+  },
+  {
+   "item": "starwake:pressure_vessel",
+   "count": 2,
+   "min": {
+    "service": 600
+   }
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 6
+  }
+ ]
+}

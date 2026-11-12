@@ -5,7 +5,7 @@
     "C": "starwake:copper_cable",
     "D": "minecraft:diamond",
     "G": "minecraft:glass",
-    "I": "minecraft:iron_ingot",
+    "I": "starwake:metal_plate",
     "Q": "minecraft:quartz_block",
     "R": "minecraft:redstone"
   },

@@ -606,6 +606,7 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("message.starwake.ship.crew_added", "%s is now crew");
 		builder.add("wristcom.app.starmap", "Starmap");
 		builder.add("wristcom.app.contracts", "Contracts");
+		builder.add("wristcom.app.codex", "Codex");
 		builder.add("wristcom.app.contracts.desc", "Jobs from faction contacts: deliveries, bounties, salvage. Accept, track and turn in contracts here.");
 		builder.add("wristcom.app.trade", "Trade");
 		builder.add("wristcom.app.trade.desc", "Commodity prices at known terminals, your best routes, and market history.");

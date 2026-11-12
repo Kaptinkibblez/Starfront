@@ -95,6 +95,21 @@ BLUEPRINTS.update({
     "material_leggings": gear("material_leggings", 7, 0, 66, 1700),
     "material_boots": gear("material_boots", 4, 0, 67, 1000),
 })
+# M8i: the nuclear machines are built from components here instead of crafted.
+BLUEPRINTS.update({
+    "gas_centrifuge": {"output": "starwake:gas_centrifuge", "order": 80, "energy": 8000,
+                       "inputs": [item("starwake:magnet_coil", 2), item("starwake:turbopump", 1, {"yield": 800}),
+                                  item("starwake:control_board", 2), item("starwake:structural_frame", 1)]},
+    "fission_reactor": {"output": "starwake:fission_reactor", "order": 81, "energy": 30000,
+                        "inputs": [item("starwake:pressure_vessel", 4, {"yield": 400}), item("starwake:heat_exchanger", 2),
+                                   item("starwake:turbopump", 1), item("starwake:control_board", 3), item("starwake:structural_frame", 2)]},
+    "fusion_reactor": {"output": "starwake:fusion_reactor", "order": 82, "energy": 80000,
+                       "inputs": [item("starwake:magnet_coil", 8, {"conductivity": 100}), item("starwake:heat_exchanger", 4, {"conductivity": 90}),
+                                  item("starwake:pressure_vessel", 2, {"service": 600}), item("starwake:control_board", 6)]},
+    "particle_accelerator": {"output": "starwake:particle_accelerator", "order": 83, "energy": 60000,
+                             "inputs": [item("starwake:magnet_coil", 8, {"conductivity": 98}), item("starwake:control_board", 6),
+                                        item("starwake:structural_frame", 4, {"yield": 400}), item("starwake:pressure_vessel", 1)]},
+})
 SUIT = {"item": "starwake:survey_suit", "count": 1, "main": True}
 BLUEPRINTS.update({
     "suit_lead_lining": {"output": "starwake:survey_suit", "order": 70, "energy": 1500, "upgrade": "lead_lining",

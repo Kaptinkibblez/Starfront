@@ -1,0 +1,30 @@
+{
+ "output": "starwake:fission_reactor",
+ "order": 81,
+ "energy": 30000,
+ "inputs": [
+  {
+   "item": "starwake:pressure_vessel",
+   "count": 4,
+   "min": {
+    "yield": 400
+   }
+  },
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 2
+  },
+  {
+   "item": "starwake:turbopump",
+   "count": 1
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 3
+  },
+  {
+   "item": "starwake:structural_frame",
+   "count": 2
+  }
+ ]
+}

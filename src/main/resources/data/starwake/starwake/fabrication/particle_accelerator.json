@@ -1,0 +1,29 @@
+{
+ "output": "starwake:particle_accelerator",
+ "order": 83,
+ "energy": 60000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 8,
+   "min": {
+    "conductivity": 98
+   }
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 6
+  },
+  {
+   "item": "starwake:structural_frame",
+   "count": 4,
+   "min": {
+    "yield": 400
+   }
+  },
+  {
+   "item": "starwake:pressure_vessel",
+   "count": 1
+  }
+ ]
+}

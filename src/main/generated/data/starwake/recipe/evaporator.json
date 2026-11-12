@@ -5,7 +5,7 @@
     "C": "starwake:copper_cable",
     "F": "minecraft:furnace",
     "G": "minecraft:glass",
-    "I": "minecraft:iron_ingot"
+    "I": "starwake:metal_plate"
   },
   "pattern": [
     "GGG",

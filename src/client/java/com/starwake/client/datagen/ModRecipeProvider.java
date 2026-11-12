@@ -80,10 +80,10 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.VACUUM_ARC_FURNACE).pattern("IGI").pattern("CFC").pattern("IRI")
 						.define('C', ModMachines.COPPER_CABLE).define('G', Items.GLASS).define('F', com.starwake.registry.ModMetalworks.INDUCTION_FURNACE)
-						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+						.define('I', com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE)).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.SINTER_PRESS).pattern("IPI").pattern("CFC").pattern("IRI")
 						.define('C', ModMachines.COPPER_CABLE).define('P', Items.PISTON).define('F', Items.FURNACE)
-						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+						.define('I', com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE)).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				// M8d-2 forming + heat treatment (provisional until 8i).
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.ROLLING_MILL).pattern("IBI").pattern("CBC").pattern("IRI")
 						.define('B', Items.IRON_BLOCK).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT).define('R', Items.REDSTONE)
@@ -92,42 +92,30 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 						.define('D', Items.DIAMOND).define('G', Items.GRINDSTONE).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT)
 						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.EXTRUSION_PRESS).pattern("IPI").pattern("CBC").pattern("IRI")
-						.define('P', Items.PISTON).define('B', Items.IRON_BLOCK).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT)
+						.define('P', Items.PISTON).define('B', Items.IRON_BLOCK).define('C', ModMachines.COPPER_CABLE).define('I', com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE))
 						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.FORGING_PRESS).pattern("IPI").pattern("CAC").pattern("IRI")
-						.define('P', Items.PISTON).define('A', Items.ANVIL).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT)
+						.define('P', Items.PISTON).define('A', Items.ANVIL).define('C', ModMachines.COPPER_CABLE).define('I', com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE))
 						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.HEAT_TREAT_FURNACE).pattern("BBB").pattern("CFC").pattern("IRI")
-						.define('B', Items.BRICKS).define('F', Items.FURNACE).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT)
+						.define('B', Items.BRICKS).define('F', Items.FURNACE).define('C', ModMachines.COPPER_CABLE).define('I', com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE))
 						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
-				// M8g nuclear machines (provisional until 8i).
-				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModNuclear.GAS_CENTRIFUGE).pattern("IPI").pattern("CMC").pattern("IRI")
-						.define('P', Items.PISTON).define('M', ModMachines.ELECTRIC_FURNACE).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT)
-						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
-				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModNuclear.FISSION_REACTOR).pattern("OIO").pattern("CBC").pattern("OIO")
-						.define('O', Items.OBSIDIAN).define('B', Items.IRON_BLOCK).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT)
-						.unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
-				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModNuclear.FUSION_REACTOR).pattern("ONO").pattern("CBC").pattern("ONO")
-						.define('O', Items.OBSIDIAN).define('N', Items.NETHER_STAR).define('B', Items.IRON_BLOCK).define('C', ModMachines.COPPER_CABLE)
-						.unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
-				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModNuclear.PARTICLE_ACCELERATOR).pattern("CCC").pattern("BDB").pattern("CCC")
-						.define('D', Items.DIAMOND_BLOCK).define('B', Items.IRON_BLOCK).define('C', ModMachines.COPPER_CABLE)
-						.unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				// M8g nuclear machines are fabricated from components (tools/fabrication.py), not crafted (M8i).
 				// M8f heavy-water column (provisional until 8i).
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModProcess.block(com.starwake.process.ProcessMachineBlockEntity.Process.ISOTOPE_COLUMN))
 						.pattern("IGI").pattern("IGI").pattern("CRC").define('G', Items.GLASS).define('C', ModMachines.COPPER_CABLE)
-						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+						.define('I', com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE)).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				// M8e-1 fabrication machines (provisional until 8i).
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModProcess.block(com.starwake.process.ProcessMachineBlockEntity.Process.ARC_FURNACE))
 						.pattern("CCC").pattern("BFB").pattern("IRI").define('C', Items.COAL_BLOCK).define('B', Items.BRICKS)
 						.define('F', com.starwake.registry.ModProcess.block(com.starwake.process.ProcessMachineBlockEntity.Process.SMELTER))
-						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+						.define('I', com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE)).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModFabrication.CRYSTAL_PULLER).pattern("IGI").pattern("CFC").pattern("IRI")
 						.define('G', Items.GLASS).define('F', com.starwake.registry.ModMetalworks.INDUCTION_FURNACE).define('C', ModMachines.COPPER_CABLE)
-						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+						.define('I', com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE)).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModFabrication.CLEAN_FAB).pattern("QGQ").pattern("CDC").pattern("IRI")
 						.define('Q', Items.QUARTZ_BLOCK).define('G', Items.GLASS).define('D', Items.DIAMOND).define('C', ModMachines.COPPER_CABLE)
-						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+						.define('I', com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE)).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModFabrication.FABRICATOR).pattern("IPI").pattern("CTC").pattern("IRI")
 						.define('P', Items.PISTON).define('T', Items.CRAFTING_TABLE).define('C', ModMachines.COPPER_CABLE)
 						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
@@ -145,11 +133,20 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 			}
 
+			private static final net.minecraft.world.item.Item PLATE = com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE);
+
 			private void machine(com.starwake.process.ProcessMachineBlockEntity.Process p, String a, String b, String c,
 					net.minecraft.world.item.Item special) {
 				var builder = shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModProcess.block(p)).pattern(a).pattern(b).pattern(c);
 				String all = a + b + c;
-				if (all.indexOf('I') >= 0) builder.define('I', Items.IRON_INGOT);
+				// M8i progression: wet chemistry and separation machines need metal plates (roll any ingot in the Rolling Mill).
+				boolean tier1 = java.util.EnumSet.of(com.starwake.process.ProcessMachineBlockEntity.Process.REACTOR,
+						com.starwake.process.ProcessMachineBlockEntity.Process.LEACH, com.starwake.process.ProcessMachineBlockEntity.Process.EVAPORATOR,
+						com.starwake.process.ProcessMachineBlockEntity.Process.CRYSTALLIZER, com.starwake.process.ProcessMachineBlockEntity.Process.ELECTROLYSIS,
+						com.starwake.process.ProcessMachineBlockEntity.Process.CHLORINATOR, com.starwake.process.ProcessMachineBlockEntity.Process.KROLL,
+						com.starwake.process.ProcessMachineBlockEntity.Process.AIR_SEPARATOR,
+						com.starwake.process.ProcessMachineBlockEntity.Process.SOLVENT_EXTRACTION).contains(p);
+				if (all.indexOf('I') >= 0) builder.define('I', tier1 ? PLATE : Items.IRON_INGOT);
 				if (all.indexOf('R') >= 0) builder.define('R', Items.REDSTONE);
 				if (all.indexOf('C') >= 0) builder.define('C', ModMachines.COPPER_CABLE);
 				if (all.indexOf('G') >= 0) builder.define('G', Items.GLASS);

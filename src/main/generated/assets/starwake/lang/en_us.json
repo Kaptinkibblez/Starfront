@@ -1050,6 +1050,7 @@
   "tooltip.starwake.wafer.p": "p-type (%s-doped)",
   "wristcom.app.cargo": "Cargo",
   "wristcom.app.cargo.desc": "Your ship's hold and personal inventory: what you carry, its value and where it came from.",
+  "wristcom.app.codex": "Codex",
   "wristcom.app.comms": "Comms",
   "wristcom.app.comms.desc": "Messages, hails and party chat with other pilots.",
   "wristcom.app.contracts": "Contracts",

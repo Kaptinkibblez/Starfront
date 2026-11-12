@@ -4,7 +4,7 @@
   "key": {
     "B": "minecraft:cauldron",
     "G": "minecraft:glass",
-    "I": "minecraft:iron_ingot",
+    "I": "starwake:metal_plate",
     "R": "minecraft:redstone"
   },
   "pattern": [

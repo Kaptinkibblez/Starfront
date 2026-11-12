@@ -4,7 +4,7 @@
   "key": {
     "C": "starwake:copper_cable",
     "G": "minecraft:glass",
-    "I": "minecraft:iron_ingot",
+    "I": "starwake:metal_plate",
     "R": "minecraft:redstone"
   },
   "pattern": [
