@@ -960,6 +960,7 @@ public class ShipEntity extends Entity {
 			if (lastTickPos != null && (movementThisTick().lengthSqr() > 0 || !orientation().equals(lastTickOrientation, 1.0e-7f))) {
 				carryEntities();
 			}
+			ShipFooting.carry(this); // walkers aboard (M9): placed from their position in our frame
 		}
 		// Measure against our own end-of-last-tick state: on the client, updates can be applied
 		// between ticks (packet handling), so in-tick snapshots would miss them.

@@ -488,7 +488,14 @@ commit. **Don't start the next milestone until the user confirms the current one
     - Audit findings (2026-11-12): 26.3 moved grass/podzol/mycelium out of `#minecraft:dirt` (into
       `#minecraft:grass_blocks`, under `#minecraft:substrate_overworld`), so ships built on grass swallowed the
       ground (fixed in `ship_excluded`); one test lost a Kestrel (blocks gone server-side, still drawn, no
-      entity; not reproduced yet).
+      entity; not reproduced yet; likely the plot-sharing bug fixed in S5).
+    - [x] **Ships rebuilt (S1-S6, 2026-11-12/13).** *(Verified: singleplayer + a dedicated server with two clients:
+      pilot climbs/flies at ~30 m/s while a second player walks aboard and stays in the cabin, no kicks; shipyard
+      migration of 6 old ships; real chest menu aboard (emeralds taken, plot chest emptied); furnace smelting
+      aboard and its ingots kept through disassembly; breaking/placing through the plot; wall impact stops the
+      hull flush with a small bounce, diagonal push slides along the wall; forced drop lands and settles without
+      jitter; parked ships sleep; prediction matches the server exactly in singleplayer.)* Details in "How ships
+      work after M9" below.
 
 ---
 
@@ -702,6 +709,58 @@ normal gravity.
     from the floating kick (`noBlocksAround`) and the "moved too quickly" check. A new pilot's
     view snaps to the nose (server `forceSetRotation` + client `facePilotForward`). The ship
     raycast used a mutable position (clicks hit the wrong block): fixed with `immutable()`.
+## How ships work after M9 (shipyard, contacts, prediction, walking)
+
+- **Shipyard** (`ship/yard/Shipyard`): every assembled ship keeps its blocks as real blocks in the void dimension
+  `starwake:shipyard` (datapack `dimension/shipyard.json`, type `shipyard`: no skylight, Y -256..255). Plot `i` is a
+  1024x1024 column at x, z >= 2^20 (`centre(i)` = ship-local (0,0,0)). Saved `State` (`starwake:shipyard`): next index,
+  free list, **owner UUID per plot** (only the owner may clear/free; a ship whose plot belongs to another becomes a new
+  plot from its snapshot). Ships renew a 5 s `starwake:ship_plot` ticket (loading + simulation + keep-dimension-active),
+  so block entities tick while the ship is loaded.
+  - The `ShipStructure` stays as a **snapshot** for physics, collision, rendering and clients. `ServerLevelShipyardMixin`
+    hooks `updatePOIOnBlockStateChange` (HEAD) -> `Shipyard.onBlockChanged` -> `ShipEntity.onPlotChange`; changes are
+    folded in once per tick (`applyPlotChanges`: block-entity NBT read back, detachment check, `applyEdit` resync).
+    On load a ship compares its bounds (+1) with the plot (`plotSynced`). Old ships migrate into a plot on first tick.
+  - Entities spawned in the shipyard (drops, XP) are recreated at the ship's real position (`Shipyard.relocate`), and
+    sounds/level events are replayed there. `PlayerMixin.isWithinBlockInteractionRange` measures reach to where a plot
+    block is on the flying ship, so vanilla menus stay open aboard.
+  - Interaction (`ShipInteraction.useInPlot`): Helm/Seat/fuel stay special; everything else is vanilla `useItemOn` /
+    `useWithoutItem` / `useOn` in the plot. Block items place with `ShipPlaceContext` (plot level, ship-local look).
+    Breaking (`ShipEditing.finishBreak`) and damage (`destroy`) remove plot blocks (`Shipyard.remove`), drops to the
+    player (container contents always). Assembly writes the plot (`Shipyard.write`), disassembly reads it back.
+  - Machines aboard read the real environment through `Shipyard.locate` (solar panels: sky and star of the ship's world;
+    process machines: that world's air; pumps: the biome under the ship).
+  - Admin/testing: `/starwake ship info [local]` (plot, helm, a cell snapshot vs plot), `pilot` (own + seat at the Helm),
+    `disassemble`. Plots are visible with `/execute in starwake:shipyard ...`.
+- **Contacts** (`ship/physics/ShipMotion`, our own design after VS2/Sable's ideas): the ship is a rigid body about its
+  **centre of mass**; probes = every corner of the outer hull blocks' collision boxes (`hullProbes`). Per substep (fast
+  ships substep, <= 0.4 blocks per step): detect probes inside terrain/other ships (normal = nearest face not buried
+  against a full neighbour) -> sequential impulses (8 iterations; Coulomb friction 0.7 on two fixed tangents, clamped
+  as a 2D vector; restitution 0.15 only for real impacts near the surface) -> integrate -> split-impulse push-out (4
+  iterations, capped 0.25 blocks / 0.02 rad per substep). Contacts can't add more than 0.3 b/t or 0.03 rad/t (overlaps
+  push apart gently). Other ships get equal and opposite impulses. Unpiloted grounded ships sleep. `Result` -> impact
+  damage (`onImpact`), touchdown rules, `grounded`. `ShipMotion.DEBUG` logs every solve.
+- **Flight** (S1): eye 1.4 above the Helm; seat hint replaces vanilla's dismount text; **joystick mode** (K;
+  `client/ship/FlightControls`, saved in `config/starwake-client.properties`): mouse deflects a virtual stick (HUD ring),
+  view locked to the nose, Alt free-look. Coupled Ctrl descends up to 25 m/s easing to 3 m/s in the last 15 m
+  (`clearance` probe). Unpiloted ships hover at a tenth of the hover burn, land on the reserve, fall when dry. Speed
+  caps 5 b/t (atmosphere, 1.25x boost) / 12.5 b/t (space), drag 0.992; chunks ~3 s ahead get a ticket. Landed ships
+  don't steer. Re-entry heating now needs > 2.5 b/t and, in an atmosphere, a descent.
+- **Prediction** (S5): the pilot's client flies its own copy: `ShipPhysicsPayload` (tuning, on join/reload) and
+  `ShipDynamicsPayload` (the server's rigid-body model) make the client simulation identical. Each client tick:
+  `ShipInputPayload(seq, input, controls, stick, look)` -> local `fly()` + `ShipMotion.step` -> history. The server
+  queues inputs and flies **one step per input** (max 5 per tick; flies on with the last input after 10 silent ticks),
+  then sends `ShipStatePayload(seq, state)`. The client adds the difference to its state and later predictions (> 4
+  blocks or 0.6 rad snaps). While predicting, the ship ignores server position/motion packets (custom
+  `InterpolationHandler`, `lerpMotion`) and keeps its own orientation (`predictedOrientation`). Observers use vanilla
+  per-tick tracking. `Planets.gravityOf/airDensityOf(Level)` work on clients.
+- **Walking aboard** (S6): the walker's client (ShipLocalMotion) sends `ShipFootingPayload(ship, local pos, onGround)`
+  every tick (-1 when stepping off); `ShipFooting.carry(ship)` places those players from the server's ship transform
+  after each ship tick, so other players see walkers glued to the deck.
+- Known limits: block-entity renderers (chest lids, signs) don't render aboard yet; rain renders through hulls; structure
+  changes resync the whole snapshot (fine for small changes, heavy for 65k-block ships with redstone clocks);
+  radiation from machines aboard isn't counted for nearby players; observers don't interpolate.
+
 ## How ship editing works (Milestone 4)
 
 - Server: `ship/edit/ShipEditing`. Owner + crew (`canPilot`) may edit; others get
@@ -1352,6 +1411,16 @@ normal gravity.
   can be copied back by the loot function `copy_components` (source `block_entity`): no BE code needed.
 - Fabric attachments: `AttachmentRegistry.create(id, b -> b.persistent(codec).syncWith(streamCodec,
   AttachmentSyncPredicate.targetOnly()))`; setting null removes it.
+
+- **26.3 grass tags:** grass/podzol/mycelium are `#minecraft:grass_blocks`, not `#minecraft:dirt`
+  (`#minecraft:substrate_overworld` has both).
+- A mixin **TAIL injection into `ServerLevel.updatePOIOnBlockStateChange` never fired**; HEAD does.
+- **Vanilla entity-motion packets (`lerpMotion`) overwrite a client entity's velocity**: a client-predicted entity must
+  ignore them (and position packets, via its `InterpolationHandler`).
+- **Client input arrives at the server in bursts** (slow client frames run several ticks at once): server-side stepping
+  for a predicted vehicle must consume one input per step, not "the latest input once per tick".
+- Sequential impulses: **accumulate friction on fixed tangent axes**; re-deriving the tangent each iteration while
+  accumulating a scalar fights itself (friction saturates and stops nothing).
 
 - **Fabric's `FluidVariant.of` rejects non-source fluids** ("Cannot convert flowing fluid"): a
   custom non-placeable fluid must return `isSource = true`.

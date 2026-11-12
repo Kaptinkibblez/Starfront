@@ -95,8 +95,20 @@ public final class ShipLocalMotion {
 		localPitch = (float) Math.toDegrees(Math.asin(Mth.clamp(-lookLocal.y, -1, 1)));
 	}
 
+	/** Whether the server currently has our footing (so stepping off is reported once). */
+	private static boolean footingSent;
+
 	/** End of the player's tick: enter a ship's frame when standing on or inside one. */
 	public static void afterTick(LocalPlayer player) {
+		// M9: tell the server where we stand in the ship's frame; it places us from its own copy of the ship.
+		if (ship != null) {
+			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.starwake.network.ShipFootingPayload(
+					ship.getId(), localPos.x, localPos.y, localPos.z, localOnGround));
+			footingSent = true;
+		} else if (footingSent) {
+			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.starwake.network.ShipFootingPayload(-1, 0, 0, 0, false));
+			footingSent = false;
+		}
 		if (ship != null || player.isPassenger() || player.getAbilities().flying || player.isSpectator()) return;
 		for (ShipEntity candidate : ShipCollisions.shipsIn(player.level())) {
 			if (candidate.structure() != null && candidate.isSupporting(player)) {
