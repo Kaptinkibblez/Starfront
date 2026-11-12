@@ -443,6 +443,15 @@ commit. **Don't start the next milestone until the user confirms the current one
         and the ingot gained Pu 60 ppm plus Cs, Ce, Mo, Ru, Nd, Zr, Xe; natural uranium stayed subcritical in
         light water and ran in heavy water; a bismuth target became a polonium sample; the fusion reactor ran
         on 1 mg D2 + 1.5 mg He3 and powered the accelerator into a mendelevium sample (Es + He).)*
+  - [x] 8h. Material gear and suit upgrades. Defaults chosen overnight: Fabricator-made pickaxe, axe, shovel,
+        sword and four armour pieces whose every stat comes from the main plate's alloy per stack (mining tier
+        from hardness, speed 3 + HV/50, durability from UTS x elongation x quality, damage + UTS/300; armour from
+        yield, toughness from UTS x elongation, knockback for dense alloys, a speed penalty by density), tinted
+        and named by the alloy; Survey Suit upgrades (lead lining halves external gamma, oxygen tank +5 min,
+        thermal layer -100/+240 C, armour insert +4), max 2 each. Weapons beyond the sword wait for M9.
+        *(Verified 2026-11-12 on a dedicated server: tempered 4140 pickaxe = diamond tier, speed 9.2, 1633
+        durability; mild-steel pickaxe = stone tier, 4.9, 848; Ti-6Al-4V chestplate 11.5 -> capped design (now
+        ~8.4) with 1.2 toughness and -1.1% speed; a suit took a lead lining from Pb plates; a third lining refused.)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
   - **User notes for M9 (2026-11-12):** conveyors move items the wrong way; ship flight is buggy
     all around (overhaul it); hub NPCs (guards/crew) add little value: **remove them**.
@@ -1262,6 +1271,22 @@ normal gravity.
   into the composition every 100 ppm (the composition resolves 10 ppm). Stops when its buffer is full.
 - `FusionReactorBlockEntity` (2 MW generator, D2/He3 tank, redstone shutdown); `AcceleratorBlockEntity` (2 MW
   consumer; target + beam slots, a beam item lasts 16 samples). Screens: `client/fab/NuclearScreen`.
+
+## How material gear and suit upgrades work (Milestone 8h)
+
+- `fab/MaterialCrafted`: items whose stats come from their material; `Blueprint.product` copies the main input's
+  composition/temper, calls `applyMaterial(stack, properties, quality)` and sets the tint colour.
+  `gear/MaterialGear` sets `minecraft:tool` (tier tag from HV, speed), `max_damage`, attribute modifiers (attack
+  damage/speed; armour, toughness, knockback, movement speed). Tool rules resolve tags through the frozen
+  `BuiltInRegistries.BLOCK` (the bootstrap lookup throws after registry freeze). Items: `registry/ModGear`
+  (`material_pickaxe|axe|shovel|sword|helmet|chestplate|leggings|boots`; iron-like defaults until fabricated;
+  worn armour uses the vanilla iron look). Names "<alloy> Pickaxe".
+- Suit upgrades (`gear/SuitUpgrades`, component `starwake:suit_upgrades`): blueprints with an `upgrade` field
+  return the main input (the suit) with it fitted (`Blueprint.match` skips a suit already at the limit).
+  `SurveySuitItem.maxOxygen/minTemperature/maxTemperature/protectsFrom(stack, t)`; `Radiation.rate` multiplies
+  external gamma by `SuitUpgrades.shielding`.
+- `tools/fabrication.py` writes only its own blueprints (the Mk parts come from `tools/ship_parts.py` into the
+  same folder; it used to wipe them).
 
 ## 26.3 gotchas (learned the hard way)
 

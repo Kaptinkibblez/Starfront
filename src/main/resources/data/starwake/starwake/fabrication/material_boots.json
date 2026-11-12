@@ -1,0 +1,16 @@
+{
+ "output": "starwake:material_boots",
+ "count": 1,
+ "order": 67,
+ "energy": 1000,
+ "inputs": [
+  {
+   "form": "plate",
+   "count": 4,
+   "main": true,
+   "min": {
+    "yield": 150
+   }
+  }
+ ]
+}

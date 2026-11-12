@@ -1,0 +1,20 @@
+{
+ "output": "starwake:material_pickaxe",
+ "count": 1,
+ "order": 60,
+ "energy": 800,
+ "inputs": [
+  {
+   "form": "plate",
+   "count": 3,
+   "main": true,
+   "min": {
+    "yield": 150
+   }
+  },
+  {
+   "form": "rod",
+   "count": 2
+  }
+ ]
+}

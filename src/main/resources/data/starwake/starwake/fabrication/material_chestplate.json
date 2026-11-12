@@ -1,0 +1,16 @@
+{
+ "output": "starwake:material_chestplate",
+ "count": 1,
+ "order": 65,
+ "energy": 2000,
+ "inputs": [
+  {
+   "form": "plate",
+   "count": 8,
+   "main": true,
+   "min": {
+    "yield": 150
+   }
+  }
+ ]
+}

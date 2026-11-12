@@ -137,13 +137,88 @@ def control_board():
     return im
 
 
+# M8h gear: grey heads/plates (tinted by the alloy's colour in game) and untinted wooden/grip handles.
+def grey(v):
+    return "#%02x%02x%02x" % (v, v, v)
+
+
+def handle(points):
+    im = new()
+    for (x, y) in points:
+        px(im, x, y, "#6a4a2a")
+        px(im, x + 1, y, "#4a3420")
+    return im
+
+
+def diag(a, b):
+    return [(a + i, b - i) for i in range(9)]
+
+
+def pickaxe_head():
+    im = new()
+    for i in range(11):
+        x, y = 2 + i, 3 + abs(5 - i) // 2
+        px(im, x, y - 1, grey(230))
+        px(im, x, y, grey(190))
+    return im
+
+
+def axe_head():
+    im = new()
+    for y in range(2, 9):
+        for x in range(8, 14):
+            if (x - 8) + (8 - y) // 2 < 6:
+                px(im, x, y, grey(215 - (x - 8) * 8))
+    return im
+
+
+def shovel_head():
+    im = new()
+    for y in range(1, 7):
+        for x in range(9, 15):
+            if abs((x - 11.5) + (y - 3.5)) < 3:
+                px(im, x, y, grey(220 - y * 6))
+    return im
+
+
+def sword_blade():
+    im = new()
+    for i in range(10):
+        px(im, 5 + i, 10 - i, grey(235))
+        px(im, 6 + i, 10 - i, grey(185))
+    px(im, 4, 11, grey(160)); px(im, 6, 13, grey(160)); px(im, 3, 10, grey(160)); px(im, 7, 14, grey(160))
+    return im
+
+
+def armor(kind):
+    im = new()
+    shapes = {
+        "helmet": [(x, y) for y in range(3, 10) for x in range(3, 13) if not (y > 6 and 5 < x < 10)],
+        "chestplate": [(x, y) for y in range(2, 15) for x in range(2, 14) if not (y < 5 and 5 < x < 10) and not (y > 4 and (x < 4 or x > 11) and y > 8)],
+        "leggings": [(x, y) for y in range(2, 15) for x in range(3, 13) if not (y > 5 and 6 < x < 9)],
+        "boots": [(x, y) for y in range(7, 14) for x in range(2, 14) if not (6 < x < 9) and not (y < 10 and (x < 4 or x > 11))],
+    }
+    for (x, y) in shapes[kind]:
+        px(im, x, y, grey(205 - (y % 4) * 8))
+    return im
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     items = dict(silicon_wafer=wafer, microchip=microchip, pressure_vessel=pressure_vessel, structural_frame=structural_frame,
                  combustion_chamber=combustion_chamber, nozzle=nozzle, turbopump=turbopump, heat_exchanger=heat_exchanger,
                  magnet_coil=magnet_coil, control_board=control_board)
+    items.update(material_pickaxe=pickaxe_head, material_axe=axe_head, material_shovel=shovel_head, material_sword=sword_blade,
+                 material_helmet=lambda: armor("helmet"), material_chestplate=lambda: armor("chestplate"),
+                 material_leggings=lambda: armor("leggings"), material_boots=lambda: armor("boots"))
     for name, fn in items.items():
         fn().save(os.path.join(OUT, name + ".png"))
+    for name in ("material_pickaxe", "material_axe", "material_shovel"):
+        handle(diag(2, 14)).save(os.path.join(OUT, name + "_handle.png"))
+    im = new()
+    for (x, y) in [(2, 13), (3, 12), (1, 14)]:
+        px(im, x, y, "#4a3420")
+    im.save(os.path.join(OUT, "material_sword_handle.png"))
     print(f"{len(items)} fabrication textures")
 
 

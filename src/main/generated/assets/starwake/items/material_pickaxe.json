@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "starwake:item/material_pickaxe",
+    "tints": [
+      {
+        "type": "minecraft:custom_model_data",
+        "default": 11579568
+      },
+      {
+        "type": "minecraft:constant",
+        "value": -1
+      }
+    ]
+  }
+}

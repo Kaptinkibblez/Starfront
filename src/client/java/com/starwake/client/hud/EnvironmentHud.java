@@ -89,14 +89,14 @@ public final class EnvironmentHud {
 			g.text(font, Component.translatable("hud.starwake.env.cabin"), x, y + 12, GOOD);
 		} else if (!suit.isEmpty()) {
 			int oxygen = SurveySuitItem.oxygen(suit);
-			float f = oxygen / (float) SurveySuitItem.MAX_OXYGEN;
+			float f = oxygen / (float) SurveySuitItem.maxOxygen(suit);
 			g.text(font, Component.translatable("hud.starwake.env.suit"), x, y + 12, DIM);
 			int seconds = oxygen / 20;
 			String left = String.format("%d:%02d", seconds / 60, seconds % 60);
 			g.text(font, left, x + width - font.width(left), y + 12, f < 0.2f ? BAD : TEXT);
 			g.fill(x, y + 23, x + width, y + 27, 0x60FFFFFF);
 			g.fill(x, y + 23, x + Math.round(width * f), y + 27, f < 0.2f ? BAD : CYAN);
-			if (!SurveySuitItem.protectsFrom(hazards.temperature())) {
+			if (!SurveySuitItem.protectsFrom(suit, hazards.temperature())) {
 				g.text(font, Component.translatable("hud.starwake.env.suit_rating"), x, y + 29 - 1, BAD);
 			}
 		}

@@ -43,6 +43,7 @@ public final class ModCreativeTabs {
 					output.accept(ModFabrication.SILICON_WAFER);
 					output.accept(ModFabrication.MICROCHIP);
 					ModFabrication.components().forEach(output::accept);
+					ModGear.all().forEach(output::accept);
 				})
 				.build());
 		// The periodic table, in atomic-number order (vanilla ingots for Fe, Cu, Au).

@@ -1,0 +1,24 @@
+{
+ "output": "starwake:survey_suit",
+ "order": 72,
+ "energy": 2000,
+ "upgrade": "thermal_layer",
+ "inputs": [
+  {
+   "item": "starwake:survey_suit",
+   "count": 1,
+   "main": true
+  },
+  {
+   "form": "plate",
+   "count": 2,
+   "min": {
+    "service": 900
+   }
+  },
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 1
+  }
+ ]
+}

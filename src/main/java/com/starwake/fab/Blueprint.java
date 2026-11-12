@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * capped at {@link #QUALITY_CAP}; the product's quality is the lowest score of its inputs, including the
  * qualities of component inputs. 1.0 = just meets the design; Mk parts turn the margin into a bonus (8e-2).
  */
-public record Blueprint(Identifier output, int count, int order, double energy, List<Input> inputs) {
+public record Blueprint(Identifier output, int count, int order, double energy, List<Input> inputs, Optional<String> upgrade) {
 	public static final ResourceKey<Registry<Blueprint>> REGISTRY_KEY = ResourceKey.createRegistryKey(StarwakeMod.id("fabrication"));
 	public static final double QUALITY_CAP = 1.5;
 
@@ -120,7 +120,8 @@ public record Blueprint(Identifier output, int count, int order, double energy, 
 			Codec.intRange(1, 64).optionalFieldOf("count", 1).forGetter(Blueprint::count),
 			Codec.INT.optionalFieldOf("order", 0).forGetter(Blueprint::order),
 			Codec.DOUBLE.optionalFieldOf("energy", 100.0).forGetter(Blueprint::energy),
-			Input.CODEC.listOf().fieldOf("inputs").forGetter(Blueprint::inputs)
+			Input.CODEC.listOf().fieldOf("inputs").forGetter(Blueprint::inputs),
+			Codec.STRING.optionalFieldOf("upgrade").forGetter(Blueprint::upgrade)
 	).apply(i, Blueprint::new));
 
 	/** A material property of a stack (NaN when it has no material). Purity = wt% of the base element. */
@@ -169,7 +170,11 @@ public record Blueprint(Identifier output, int count, int order, double energy, 
 			int failed = -2;
 			// Best margin first, so a strong alloy is used where it matters.
 			List<Integer> order = new ArrayList<>();
-			for (int i = 0; i < slots.size(); i++) if (free[i] > 0 && in.kind(slots.get(i))) order.add(i);
+			for (int i = 0; i < slots.size(); i++) {
+				// An upgrade can't be fitted past its limit (M8h).
+				if (in.main() && upgrade.isPresent() && !com.starwake.gear.SuitUpgrades.canAdd(slots.get(i), upgrade.get())) continue;
+				if (free[i] > 0 && in.kind(slots.get(i))) order.add(i);
+			}
 			order.sort((a, b) -> Double.compare(orOne(in.quality(slots.get(b))), orOne(in.quality(slots.get(a)))));
 			double q = Double.NaN;
 			for (int i : order) {
@@ -213,6 +218,12 @@ public record Blueprint(Identifier output, int count, int order, double energy, 
 
 	/** The product for a complete match: output x count with the main input's material and the quality. */
 	public ItemStack product(List<ItemStack> slots, Match match) {
+		if (upgrade.isPresent() && match.mainSlot() >= 0) {
+			// Upgrade blueprints (M8h): the main input (the Survey Suit) comes back with the upgrade fitted.
+			ItemStack out = slots.get(match.mainSlot()).copyWithCount(1);
+			com.starwake.gear.SuitUpgrades.add(out, upgrade.get());
+			return out;
+		}
 		ItemStack out = new ItemStack(BuiltInRegistries.ITEM.getValue(output), count);
 		if (match.mainSlot() >= 0) {
 			ItemStack main = slots.get(match.mainSlot());
@@ -221,6 +232,17 @@ public record Blueprint(Identifier output, int count, int order, double energy, 
 			if (!t.state().isEmpty()) out.set(ModComponents.TEMPER, t.withProgress(0));
 		}
 		out.set(ModComponents.QUALITY, (float) (Math.round(match.quality() * 100) / 100.0));
+		// Tools, weapons, armour (M8h): stats from the main input's material.
+		if (out.getItem() instanceof MaterialCrafted crafted && match.mainSlot() >= 0) {
+			ItemStack main = slots.get(match.mainSlot());
+			MetalItems.compositionOf(main).ifPresent(c -> {
+				crafted.applyMaterial(out, Tempers.properties(Metallurgy.analyze(c), Tempers.of(main), MetalItems.formOf(main).orElse(MetalForm.PLATE)),
+						match.quality());
+				// The alloy's colour tints the item (like metal items).
+				out.set(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA, new net.minecraft.world.item.component.CustomModelData(
+						List.of(), List.of(), List.of(), List.of(Metallurgy.analyze(c).color())));
+			});
+		}
 		return out;
 	}
 

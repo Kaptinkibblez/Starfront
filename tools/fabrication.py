@@ -76,11 +76,41 @@ BLUEPRINTS = {
                                  form("wire", 1, base="Sn"), element("Au", 1, mn={"purity": 99.9})]},
 }
 
+# M8h: tools, weapons and armour take every stat from the main input's alloy (MaterialGear); suit upgrades
+# return the Survey Suit with the upgrade fitted.
+def gear(name, plates, rods, order, energy):
+    inputs = [form("plate", plates, main=True, mn={"yield": 150})]
+    if rods:
+        inputs.append(form("rod", rods))
+    return {"output": "starwake:" + name, "count": 1, "order": order, "energy": energy, "inputs": inputs}
+
+
+BLUEPRINTS.update({
+    "material_pickaxe": gear("material_pickaxe", 3, 2, 60, 800),
+    "material_axe": gear("material_axe", 3, 2, 61, 800),
+    "material_shovel": gear("material_shovel", 1, 2, 62, 500),
+    "material_sword": gear("material_sword", 2, 1, 63, 700),
+    "material_helmet": gear("material_helmet", 5, 0, 64, 1200),
+    "material_chestplate": gear("material_chestplate", 8, 0, 65, 2000),
+    "material_leggings": gear("material_leggings", 7, 0, 66, 1700),
+    "material_boots": gear("material_boots", 4, 0, 67, 1000),
+})
+SUIT = {"item": "starwake:survey_suit", "count": 1, "main": True}
+BLUEPRINTS.update({
+    "suit_lead_lining": {"output": "starwake:survey_suit", "order": 70, "energy": 1500, "upgrade": "lead_lining",
+                         "inputs": [SUIT, form("plate", 4, base="Pb", mn={"density": 11})]},
+    "suit_oxygen_tank": {"output": "starwake:survey_suit", "order": 71, "energy": 1000, "upgrade": "oxygen_tank",
+                         "inputs": [SUIT, item("starwake:pressure_vessel", 1)]},
+    "suit_thermal_layer": {"output": "starwake:survey_suit", "order": 72, "energy": 2000, "upgrade": "thermal_layer",
+                           "inputs": [SUIT, form("plate", 2, mn={"service": 900}), item("starwake:heat_exchanger", 1)]},
+    "suit_armor_insert": {"output": "starwake:survey_suit", "order": 73, "energy": 1500, "upgrade": "armor_insert",
+                          "inputs": [SUIT, form("plate", 4, mn={"yield": 800})]},
+})
+
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    for f in os.listdir(OUT):
-        os.remove(os.path.join(OUT, f))
+    # Only this tool's files: tools/ship_parts.py writes the Mk part blueprints into the same folder.
     for name, bp in BLUEPRINTS.items():
         with open(os.path.join(OUT, name + ".json"), "w") as fh:
             json.dump(bp, fh, indent=1)

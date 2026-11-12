@@ -95,7 +95,7 @@ public final class PlanetHazards {
 		// Temperature.
 		if (cabin) return;
 		float t = hazards.temperature();
-		boolean suited = !suit.isEmpty() && SurveySuitItem.protectsFrom(t);
+		boolean suited = !suit.isEmpty() && SurveySuitItem.protectsFrom(suit, t);
 		if (suited) return;
 		if (hazards.cold()) {
 			// Keep the player at the vanilla freeze threshold: frost overlay, slowness, freeze damage.
@@ -111,7 +111,7 @@ public final class PlanetHazards {
 		if (inPressurizedCabin(player)) return Shelter.CABIN;
 		ItemStack suit = suit(player);
 		if (!suit.isEmpty() && (SurveySuitItem.oxygen(suit) > 0 || (hazards.breathable() && !hazards.toxic()))
-				&& SurveySuitItem.protectsFrom(hazards.temperature())) {
+				&& SurveySuitItem.protectsFrom(suit, hazards.temperature())) {
 			return Shelter.SUIT;
 		}
 		return Shelter.NONE;

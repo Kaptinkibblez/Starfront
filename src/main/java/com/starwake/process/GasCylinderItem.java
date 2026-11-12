@@ -100,7 +100,7 @@ public class GasCylinderItem extends Item {
 		Fill fill = fill(stack);
 		ItemStack suit = player.getItemBySlot(EquipmentSlot.CHEST);
 		if (fill == null || !fill.species().equals("O2") || !(suit.getItem() instanceof SurveySuitItem)) return InteractionResult.PASS;
-		int missing = SurveySuitItem.MAX_OXYGEN - SurveySuitItem.oxygen(suit);
+		int missing = SurveySuitItem.maxOxygen(suit) - SurveySuitItem.oxygen(suit);
 		if (missing <= 0) return InteractionResult.PASS;
 		if (player instanceof ServerPlayer) {
 			long need = (long) Math.ceil(missing * O2_PER_TICK * Chemicals.KG);

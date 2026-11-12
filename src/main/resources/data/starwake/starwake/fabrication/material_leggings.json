@@ -1,0 +1,16 @@
+{
+ "output": "starwake:material_leggings",
+ "count": 1,
+ "order": 66,
+ "energy": 1700,
+ "inputs": [
+  {
+   "form": "plate",
+   "count": 7,
+   "main": true,
+   "min": {
+    "yield": 150
+   }
+  }
+ ]
+}

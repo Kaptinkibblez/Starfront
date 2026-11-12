@@ -186,6 +186,9 @@ public final class Radiation {
 			double g = perItem(item.getItem())[1] * item.getItem().getCount();
 			if (g > 0) rate += g / Math.max(0.25, item.position().distanceToSqr(eye));
 		}
+		// M8h: lead linings in a worn Survey Suit cut the external gamma (not inhaled radon).
+		ItemStack suit = com.starwake.planet.PlanetHazards.suit(player);
+		if (!suit.isEmpty()) rate *= com.starwake.gear.SuitUpgrades.shielding(suit);
 		rate += GasHazards.inhaledActivity(player) * RADON_SV_H_PER_BQ_M3;
 		return rate;
 	}

@@ -29,26 +29,45 @@ public class SurveySuitItem extends Item {
 	}
 
 	public static void setOxygen(ItemStack stack, int ticks) {
-		stack.set(ModComponents.OXYGEN, Mth.clamp(ticks, 0, MAX_OXYGEN));
+		stack.set(ModComponents.OXYGEN, Mth.clamp(ticks, 0, maxOxygen(stack)));
 	}
 
+	/** Oxygen capacity in ticks: 5 minutes, plus 5 per fitted oxygen tank (M8h). */
+	public static int maxOxygen(ItemStack stack) {
+		return MAX_OXYGEN * (1 + com.starwake.gear.SuitUpgrades.count(stack, "oxygen_tank"));
+	}
+
+	public static float minTemperature(ItemStack stack) {
+		return MIN_TEMPERATURE - 100 * com.starwake.gear.SuitUpgrades.count(stack, "thermal_layer");
+	}
+
+	public static float maxTemperature(ItemStack stack) {
+		return MAX_TEMPERATURE + 240 * com.starwake.gear.SuitUpgrades.count(stack, "thermal_layer");
+	}
+
+	/** Base suit rating (no upgrades). */
 	public static boolean protectsFrom(float temperature) {
 		return temperature >= MIN_TEMPERATURE && temperature <= MAX_TEMPERATURE;
 	}
 
+	/** This suit's rating, thermal layers included (M8h). */
+	public static boolean protectsFrom(ItemStack stack, float temperature) {
+		return temperature >= minTemperature(stack) && temperature <= maxTemperature(stack);
+	}
+
 	@Override
 	public boolean isBarVisible(ItemStack stack) {
-		return oxygen(stack) < MAX_OXYGEN;
+		return oxygen(stack) < maxOxygen(stack);
 	}
 
 	@Override
 	public int getBarWidth(ItemStack stack) {
-		return Math.round(13.0f * oxygen(stack) / MAX_OXYGEN);
+		return Math.round(13.0f * oxygen(stack) / maxOxygen(stack));
 	}
 
 	@Override
 	public int getBarColor(ItemStack stack) {
-		return oxygen(stack) < MAX_OXYGEN / 5 ? 0xFF5050 : 0x55D8FF;
+		return oxygen(stack) < maxOxygen(stack) / 5 ? 0xFF5050 : 0x55D8FF;
 	}
 
 	@Override
@@ -58,6 +77,9 @@ public class SurveySuitItem extends Item {
 		int seconds = oxygen(stack) / 20;
 		builder.accept(Component.translatable("item.starwake.survey_suit.oxygen", seconds / 60, String.format("%02d", seconds % 60))
 				.withColor(0xFF7FC8E8));
+		for (String u : com.starwake.gear.SuitUpgrades.of(stack)) {
+			builder.accept(Component.translatable("item.starwake.survey_suit.upgrade." + u).withColor(0xFFE8C860));
+		}
 		builder.accept(Component.translatable("item.starwake.survey_suit.rating", (int) MIN_TEMPERATURE, (int) MAX_TEMPERATURE)
 				.withColor(0xFF8A8A8A));
 	}

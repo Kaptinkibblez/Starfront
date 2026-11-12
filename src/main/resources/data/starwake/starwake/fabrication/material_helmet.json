@@ -1,0 +1,16 @@
+{
+ "output": "starwake:material_helmet",
+ "count": 1,
+ "order": 64,
+ "energy": 1200,
+ "inputs": [
+  {
+   "form": "plate",
+   "count": 5,
+   "main": true,
+   "min": {
+    "yield": 150
+   }
+  }
+ ]
+}

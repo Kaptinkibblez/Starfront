@@ -277,6 +277,24 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(com.starwake.registry.ModMetalworks.EXTRUSION_PRESS, "Extrusion Press");
 		builder.add(com.starwake.registry.ModMetalworks.FORGING_PRESS, "Forging Press");
 		builder.add(com.starwake.registry.ModMetalworks.HEAT_TREAT_FURNACE, "Heat Treatment Furnace");
+		// Material gear and suit upgrades (M8h).
+		builder.add(com.starwake.registry.ModGear.PICKAXE, "Pickaxe");
+		builder.add(com.starwake.registry.ModGear.AXE, "Axe");
+		builder.add(com.starwake.registry.ModGear.SHOVEL, "Shovel");
+		builder.add(com.starwake.registry.ModGear.SWORD, "Sword");
+		builder.add(com.starwake.registry.ModGear.HELMET, "Helmet");
+		builder.add(com.starwake.registry.ModGear.CHESTPLATE, "Chestplate");
+		builder.add(com.starwake.registry.ModGear.LEGGINGS, "Leggings");
+		builder.add(com.starwake.registry.ModGear.BOOTS, "Boots");
+		for (var item : com.starwake.registry.ModGear.all()) {
+			String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getPath();
+			String word = path.substring("material_".length());
+			builder.add("item.starwake." + path + ".of", "%s " + word.substring(0, 1).toUpperCase() + word.substring(1));
+		}
+		builder.add("item.starwake.survey_suit.upgrade.lead_lining", "Lead lining (gamma x0.5)");
+		builder.add("item.starwake.survey_suit.upgrade.oxygen_tank", "Extra oxygen tank (+5 min)");
+		builder.add("item.starwake.survey_suit.upgrade.thermal_layer", "Thermal layer (-100 / +240 C)");
+		builder.add("item.starwake.survey_suit.upgrade.armor_insert", "Armour insert (+4 armour)");
 		// Nuclear (M8g).
 		builder.add(com.starwake.registry.ModNuclear.GAS_CENTRIFUGE, "Gas Centrifuge");
 		builder.add(com.starwake.registry.ModNuclear.FISSION_REACTOR, "Fission Reactor");

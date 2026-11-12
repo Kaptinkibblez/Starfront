@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "starwake:item/material_pickaxe",
+    "layer1": "starwake:item/material_pickaxe_handle"
+  }
+}

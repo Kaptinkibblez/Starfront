@@ -1,0 +1,20 @@
+{
+ "output": "starwake:material_sword",
+ "count": 1,
+ "order": 63,
+ "energy": 700,
+ "inputs": [
+  {
+   "form": "plate",
+   "count": 2,
+   "main": true,
+   "min": {
+    "yield": 150
+   }
+  },
+  {
+   "form": "rod",
+   "count": 1
+  }
+ ]
+}

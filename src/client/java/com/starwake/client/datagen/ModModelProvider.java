@@ -251,6 +251,20 @@ public final class ModModelProvider extends FabricModelProvider {
 			generators.itemModelOutput.accept(item, net.minecraft.client.data.models.model.ItemModelUtils.tintedModel(model,
 					new net.minecraft.client.color.item.CustomModelDataSource(0, 0xB0B0B0)));
 		}
+		// Material gear (M8h): head/plate tinted by the alloy (custom model data), handle untinted.
+		for (var item : com.starwake.registry.ModGear.all()) {
+			String name = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getPath();
+			var head = new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.fromNamespaceAndPath("starwake", "item/" + name));
+			net.minecraft.resources.Identifier model;
+			if (item instanceof com.starwake.gear.MaterialToolItem) {
+				var grip = new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.fromNamespaceAndPath("starwake", "item/" + name + "_handle"));
+				model = ModelTemplates.TWO_LAYERED_ITEM.create(item, net.minecraft.client.data.models.model.TextureMapping.layered(head, grip), generators.modelOutput);
+			} else {
+				model = ModelTemplates.FLAT_ITEM.create(item, net.minecraft.client.data.models.model.TextureMapping.layer0(head), generators.modelOutput);
+			}
+			generators.itemModelOutput.accept(item, net.minecraft.client.data.models.model.ItemModelUtils.tintedModel(model,
+					new net.minecraft.client.color.item.CustomModelDataSource(0, 0xB0B0B0), new net.minecraft.client.color.item.Constant(-1)));
+		}
 		// Element items: textures/item/element/<name>_<form>.png (tools/periodic_table.py).
 		for (var element : com.starwake.chem.Chemistry.elements()) {
 			if (!element.item().getNamespace().equals("starwake")) continue;

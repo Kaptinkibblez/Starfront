@@ -1,0 +1,20 @@
+{
+ "output": "starwake:survey_suit",
+ "order": 73,
+ "energy": 1500,
+ "upgrade": "armor_insert",
+ "inputs": [
+  {
+   "item": "starwake:survey_suit",
+   "count": 1,
+   "main": true
+  },
+  {
+   "form": "plate",
+   "count": 4,
+   "min": {
+    "yield": 800
+   }
+  }
+ ]
+}

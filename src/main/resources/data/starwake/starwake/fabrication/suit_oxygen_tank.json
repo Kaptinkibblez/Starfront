@@ -1,0 +1,17 @@
+{
+ "output": "starwake:survey_suit",
+ "order": 71,
+ "energy": 1000,
+ "upgrade": "oxygen_tank",
+ "inputs": [
+  {
+   "item": "starwake:survey_suit",
+   "count": 1,
+   "main": true
+  },
+  {
+   "item": "starwake:pressure_vessel",
+   "count": 1
+  }
+ ]
+}

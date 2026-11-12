@@ -1,0 +1,21 @@
+{
+ "output": "starwake:survey_suit",
+ "order": 70,
+ "energy": 1500,
+ "upgrade": "lead_lining",
+ "inputs": [
+  {
+   "item": "starwake:survey_suit",
+   "count": 1,
+   "main": true
+  },
+  {
+   "form": "plate",
+   "count": 4,
+   "base": "Pb",
+   "min": {
+    "density": 11
+   }
+  }
+ ]
+}
