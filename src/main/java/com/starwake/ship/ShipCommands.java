@@ -55,6 +55,11 @@ public final class ShipCommands {
 										.then(Commands.argument("fuel", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
 												.then(Commands.argument("fusion", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
 														.executes(ShipCommands::refuel))))
+								.then(Commands.literal("disassemble").executes(ShipCommands::disassemble))
+								.then(Commands.literal("info")
+										.executes(ctx -> info(ctx, null))
+										.then(Commands.argument("local", BlockPosArgument.blockPos())
+												.executes(ctx -> info(ctx, BlockPosArgument.getBlockPos(ctx, "local")))))
 								.then(Commands.literal("drift")
 										.then(Commands.argument("velocity", Vec3Argument.vec3(false))
 												.executes(ShipCommands::drift)))
@@ -172,6 +177,51 @@ public final class ShipCommands {
 		source.sendSuccess(() -> Component.literal("Ship " + ship.getId() + ": fuel " + ship.fuel() + "/" + ship.fuelCapacity() + ", fusion "
 				+ ship.fusion() + "/" + ship.fusionCapacity()), false);
 		return 1;
+	}
+
+	/** Testing (M9): disassembles the nearest ship (the same rules as the console button). */
+	private static int disassemble(CommandContext<CommandSourceStack> ctx) {
+		CommandSourceStack source = ctx.getSource();
+		ShipEntity ship = null;
+		for (ShipEntity s : ShipCollisions.shipsIn(source.getLevel())) {
+			if (ship == null || s.distanceToSqr(source.getPosition()) < ship.distanceToSqr(source.getPosition())) ship = s;
+		}
+		if (ship == null) {
+			source.sendFailure(Component.translatable("commands.starwake.ship.none_nearby"));
+			return 0;
+		}
+		Component failure = ShipAssembler.disassemble(ship);
+		if (failure != null) {
+			source.sendFailure(failure);
+			return 0;
+		}
+		source.sendSuccess(() -> Component.literal("Disassembled"), false);
+		return 1;
+	}
+
+	/** Testing (M9): the nearest ship's plot, Helm, block count and (optionally) one local cell, snapshot vs plot. */
+	private static int info(CommandContext<CommandSourceStack> ctx, @org.jspecify.annotations.Nullable BlockPos local) {
+		CommandSourceStack source = ctx.getSource();
+		ShipEntity ship = null;
+		for (ShipEntity s : ShipCollisions.shipsIn(source.getLevel())) {
+			if (ship == null || s.distanceToSqr(source.getPosition()) < ship.distanceToSqr(source.getPosition())) ship = s;
+		}
+		if (ship == null || ship.structure() == null) {
+			source.sendFailure(Component.translatable("commands.starwake.ship.none_nearby"));
+			return 0;
+		}
+		ShipEntity found = ship;
+		StringBuilder text = new StringBuilder("Ship " + ship.getId() + ": plot " + ship.plot() + " (centre "
+				+ com.starwake.ship.yard.Shipyard.centre(Math.max(0, ship.plot())).toShortString() + "), helm " + ship.helmLocal().toShortString()
+				+ ", " + ship.structure().entries().size() + " blocks");
+		if (local != null) {
+			var yard = com.starwake.ship.yard.Shipyard.level(source.getServer());
+			var snapshot = ship.structure().get(local);
+			var real = yard == null ? null : yard.getBlockState(com.starwake.ship.yard.Shipyard.toPlot(ship.plot(), local));
+			text.append("; ").append(local.toShortString()).append(" snapshot=").append(snapshot).append(" plot=").append(real);
+		}
+		source.sendSuccess(() -> Component.literal(text.toString()), false);
+		return found.getId();
 	}
 
 	private static int drift(CommandContext<CommandSourceStack> ctx) {

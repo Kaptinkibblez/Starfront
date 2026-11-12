@@ -364,17 +364,112 @@ public class ShipEntity extends Entity {
 	// Live interior: changing blocks and containers on an assembled ship
 	// =========================================================================================
 
-	/** Containers opened aboard, shared between viewers so two players can't duplicate items. */
-	private final Map<BlockPos, net.minecraft.world.SimpleContainer> containers = new HashMap<>();
+	// =========================================================================================
+	// Shipyard plot (M9): the ship's blocks live as real blocks in a plot of starwake:shipyard
+	// =========================================================================================
 
-	/** Server: changes one block's state (e.g. a door) and re-syncs the ship to watchers. */
-	public void updateBlock(BlockPos local, BlockState state) {
+	/** This ship's plot index in the shipyard, or -1 before the first server tick of an old (pre-M9) ship. */
+	private int plot = -1;
+	/** Whether the snapshot has been checked against the plot since this entity loaded. */
+	private boolean plotSynced;
+	/** Plot changes heard this tick (local -> new state), folded into the snapshot once per tick. */
+	private final Map<BlockPos, BlockState> plotChanges = new java.util.LinkedHashMap<>();
+
+	public int plot() {
+		return plot;
+	}
+
+	public void setPlot(int plot) {
+		this.plot = plot;
+	}
+
+	/** A block in our plot changed (Shipyard listener). Changes that match the snapshot are ignored. */
+	public void onPlotChange(BlockPos local, BlockState state) {
 		if (structure == null) return;
-		setStructure(structure.with(local, state, structure.blockEntity(local)));
-		var payload = new com.starwake.network.ShipStructurePayload(getId(), structure);
-		for (ServerPlayer player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(this)) {
-			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
+		BlockState known = structure.get(local);
+		if (state.isAir() ? known == null : state.equals(known)) {
+			plotChanges.remove(local);
+			return;
 		}
+		plotChanges.put(local.immutable(), state);
+	}
+
+	/**
+	 * Server, every tick: claims a plot for ships from before M9 (writing their stored blocks into it), keeps the
+	 * plot's chunks loaded and ticking, and folds the tick's plot changes into the snapshot.
+	 */
+	private void tickPlot() {
+		if (!(level() instanceof ServerLevel world) || structure == null) return;
+		ServerLevel yard = com.starwake.ship.yard.Shipyard.level(world.getServer());
+		if (yard == null) return;
+		if (plot < 0) {
+			plot = com.starwake.ship.yard.Shipyard.allocate(world.getServer());
+			com.starwake.ship.yard.Shipyard.write(yard, plot, structure.entries());
+			com.starwake.StarwakeMod.LOGGER.info("Ship {} moved into shipyard plot {} ({} blocks)", getId(), plot, structure.entries().size());
+		}
+		com.starwake.ship.yard.Shipyard.track(this, plot);
+		if (tickCount % 40 == 1) com.starwake.ship.yard.Shipyard.ticket(yard, plot, structure);
+		if (!plotSynced && yard.isLoaded(com.starwake.ship.yard.Shipyard.toPlot(plot, helmLocal))) {
+			// First tick with the plot loaded: pick up anything that changed while nobody was listening.
+			plotSynced = true;
+			BlockPos lo = structure.min().offset(-1, -1, -1), hi = structure.max().offset(1, 1, 1);
+			for (BlockPos local : BlockPos.betweenClosed(lo, hi)) {
+				BlockState real = yard.getBlockState(com.starwake.ship.yard.Shipyard.toPlot(plot, local));
+				if (!real.isAir() || structure.get(local) != null) onPlotChange(local, real);
+			}
+		}
+		applyPlotChanges(yard);
+	}
+
+	private void applyPlotChanges(ServerLevel yard) {
+		if (plotChanges.isEmpty() || structure == null) return;
+		Map<BlockPos, ShipStructure.@Nullable Entry> changes = new java.util.LinkedHashMap<>();
+		boolean removed = false;
+		for (var change : plotChanges.entrySet()) {
+			BlockPos local = change.getKey();
+			BlockState state = change.getValue();
+			if (state.isAir()) {
+				changes.put(local, null);
+				removed |= structure.get(local) != null;
+			} else {
+				var be = yard.getBlockEntity(com.starwake.ship.yard.Shipyard.toPlot(plot, local));
+				changes.put(local, new ShipStructure.Entry(local, state,
+						be == null ? java.util.Optional.empty() : java.util.Optional.of(be.saveWithFullMetadata(yard.registryAccess()))));
+			}
+		}
+		plotChanges.clear();
+		ShipStructure next = structure.withChanges(changes);
+		if (removed) {
+			// Something was taken out: whatever no longer connects to the Helm breaks away.
+			java.util.Set<BlockPos> detached = com.starwake.ship.edit.ShipEditing.detached(next, helmLocal);
+			if (!detached.isEmpty() && level() instanceof ServerLevel world) {
+				ShipStructure loose = new ShipStructure(com.starwake.ship.yard.Shipyard.read(yard, plot, detached), next.pivot());
+				com.starwake.ship.yard.Shipyard.clear(yard, plot, detached);
+				com.starwake.ship.edit.ShipEditing.dropDebris(this, world, loose, detached, null);
+				next = next.without(detached);
+			}
+		}
+		if (next.entries().isEmpty()) {
+			discard();
+			return;
+		}
+		applyEdit(next);
+	}
+
+	@Override
+	public void remove(RemovalReason reason) {
+		if (!level().isClientSide() && plot >= 0 && level().getServer() != null) {
+			com.starwake.ship.yard.Shipyard.untrack(this, plot);
+			if (reason.shouldDestroy()) {
+				// The ship is gone for good (disassembled after its blocks were copied out, or destroyed): free the plot.
+				ServerLevel yard = com.starwake.ship.yard.Shipyard.level(level().getServer());
+				if (yard != null && structure != null) {
+					com.starwake.ship.yard.Shipyard.clear(yard, plot, structure.entries().stream().map(ShipStructure.Entry::pos).toList());
+				}
+				com.starwake.ship.yard.Shipyard.free(level().getServer(), plot);
+			}
+		}
+		super.remove(reason);
 	}
 
 	/**
@@ -388,7 +483,6 @@ public class ShipEntity extends Entity {
 			BlockPos seat = seatOf(passenger);
 			if (seat != null && next.get(seat) == null) passenger.stopRiding();
 		}
-		containers.keySet().removeIf(pos -> next.get(pos) == null);
 		setStructure(next);
 		int capacity = 0;
 		for (ShipStructure.Entry entry : next.entries()) {
@@ -417,43 +511,6 @@ public class ShipEntity extends Entity {
 	/** World box around a local block cell at the current pose. */
 	public AABB worldBoxOf(BlockPos local) {
 		return worldBox(new AABB(local), 1.0);
-	}
-
-	/**
-	 * Server: the inventory of a container block aboard (chest, barrel...), backed by the block
-	 * entity data stored in the structure. Changes are written straight back, so they persist
-	 * with the ship and survive disassembly.
-	 */
-	public net.minecraft.world.SimpleContainer container(BlockPos local, int size) {
-		return containers.computeIfAbsent(local.immutable(), pos -> {
-			var registries = level().registryAccess();
-			var items = net.minecraft.core.NonNullList.withSize(size, net.minecraft.world.item.ItemStack.EMPTY);
-			structure.blockEntity(pos).ifPresent(tag -> net.minecraft.world.ContainerHelper.loadAllItems(
-					net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, registries, tag), items));
-			var container = new net.minecraft.world.SimpleContainer(size) {
-				@Override
-				public void setChanged() {
-					super.setChanged();
-					saveContainer(pos, this);
-				}
-			};
-			for (int i = 0; i < size; i++) container.setItem(i, items.get(i));
-			return container;
-		});
-	}
-
-	private void saveContainer(BlockPos local, net.minecraft.world.SimpleContainer container) {
-		if (structure == null) return;
-		var registries = level().registryAccess();
-		var items = net.minecraft.core.NonNullList.withSize(container.getContainerSize(), net.minecraft.world.item.ItemStack.EMPTY);
-		for (int i = 0; i < items.size(); i++) items.set(i, container.getItem(i));
-		var output = net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, registries);
-		net.minecraft.world.ContainerHelper.saveAllItems(output, items, true);
-		var tag = structure.blockEntity(local).map(net.minecraft.nbt.CompoundTag::copy).orElseGet(net.minecraft.nbt.CompoundTag::new);
-		tag.remove("Items");
-		tag.merge(output.buildResult());
-		// Block-entity data never goes to clients, so no re-sync is needed.
-		structure = structure.with(local, structure.get(local), java.util.Optional.of(tag));
 	}
 
 	@Override
@@ -859,6 +916,8 @@ public class ShipEntity extends Entity {
 
 	/** @return true if the ship was transferred to another dimension (stop ticking it) */
 	private boolean serverTick() {
+		tickPlot();
+		if (isRemoved()) return true;
 		ShipPhysics physics = ShipPhysics.get();
 		shipRiders = findShipRiders();
 		Player pilot = pilot();
@@ -1595,6 +1654,10 @@ public class ShipEntity extends Entity {
 				return;
 			}
 		}
+		for (BlockPos pos : gear) {
+			BlockState state = structure.get(pos);
+			if (state != null) com.starwake.ship.yard.Shipyard.set(this, pos, state); // the plot follows (M9)
+		}
 		var payload = new com.starwake.network.ShipStructurePayload(getId(), structure);
 		for (ServerPlayer player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(this)) {
 			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
@@ -2207,6 +2270,7 @@ public class ShipEntity extends Entity {
 		input.read("orientation", ExtraCodecs.QUATERNIONF).ifPresent(q -> entityData.set(ORIENTATION, new Quaternionf(q)));
 		int frame = input.getIntOr("frame", 1);
 		input.read("structure", ShipStructure.CODEC).ifPresent(this::setStructure);
+		plot = input.getIntOr("plot", -1);
 		if (frame < FRAME_VERSION && structure != null) {
 			// Ships saved before 3d stored the min corner as their position.
 			setPos(getX() + pivot.x, getY() + pivot.y, getZ() + pivot.z);
@@ -2275,5 +2339,6 @@ public class ShipEntity extends Entity {
 		if (structure != null) {
 			output.store("structure", ShipStructure.CODEC, structure);
 		}
+		output.putInt("plot", plot);
 	}
 }

@@ -93,15 +93,17 @@ public class WaterSourceBlockEntity extends MachineBlockEntity {
 
 	/** What 1 kg of water from this spot contains (species -> mass fraction). */
 	public static Map<String, Double> waterAt(ServerLevel level, BlockPos pos) {
-		var biome = level.getBiome(pos);
+		var at = com.starwake.ship.yard.Shipyard.locate(level, pos); // aboard a ship: the water under it (M9)
+		var biome = at.level().getBiome(at.pos());
 		String feed = biome.is(SEAWATER) ? "seawater" : biome.is(SALT_LAKE) ? "salt_lake_brine" : biome.is(ACID_WATER) ? "acid_lake_water" : null;
 		if (feed == null) return Map.of("H2O", 1.0);
 		return Species.feed(StarwakeMod.id(feed)).map(f -> f.assay().masses(1.0)).orElse(Map.of("H2O", 1.0));
 	}
 
 	private boolean humidAir(ServerLevel level) {
-		Hazards hazards = Planets.forDimension(level.registryAccess(), level.dimension()).map(p -> p.planet().hazards()).orElse(Hazards.EARTHLIKE);
-		return hazards.breathable() && hazards.temperature() > 0 && !SolarSystem.isSpace(level.dimension());
+		var dim = com.starwake.ship.yard.Shipyard.locate(level, worldPosition).level().dimension();
+		Hazards hazards = Planets.forDimension(level.registryAccess(), dim).map(p -> p.planet().hazards()).orElse(Hazards.EARTHLIKE);
+		return hazards.breathable() && hazards.temperature() > 0 && !SolarSystem.isSpace(dim);
 	}
 
 	@Override

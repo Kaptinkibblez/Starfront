@@ -99,6 +99,23 @@ public class PowerBlockEntity extends BlockEntity implements EnergyNode {
 	}
 
 	private void measure(ServerLevel level) {
+		// M9: a panel aboard a ship sees the sky where the ship really is; it's lit if nothing aboard covers it.
+		var at = com.starwake.ship.yard.Shipyard.locate(level, worldPosition);
+		if (at.ship() != null && at.level() instanceof ServerLevel world) {
+			BlockPos up = at.pos().above();
+			boolean open = level.getBlockState(worldPosition.above()).isAir();
+			if (!open) sun = 0;
+			else if (SolarSystem.isSpace(world.dimension())) sun = 1;
+			else {
+				int sky = world.getBrightness(net.minecraft.world.level.LightLayer.SKY, up) - world.getSkyDarken();
+				float angle = world.environmentAttributes().getValue(EnvironmentAttributes.SUN_ANGLE, up) * (float) (Math.PI / 180.0);
+				float offset = angle < (float) Math.PI ? 0.0F : (float) (Math.PI * 2);
+				angle += (offset - angle) * 0.2F;
+				sun = Mth.clamp(Math.max(0, sky) / 15.0 * Mth.cos(angle), 0, 1);
+			}
+			starlight = starlight(world, Vec3.atCenterOf(at.pos()));
+			return;
+		}
 		BlockPos above = worldPosition.above();
 		if (!level.canSeeSky(above)) {
 			sun = 0;

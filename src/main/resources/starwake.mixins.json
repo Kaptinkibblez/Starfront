@@ -5,7 +5,8 @@
 	"mixins": [
 		"EntityCollideMixin",
 		"PlayerMixin",
-		"ServerGamePacketListenerImplMixin"
+		"ServerGamePacketListenerImplMixin",
+		"ServerLevelShipyardMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -19,16 +19,14 @@ import org.joml.Vector3f;
  * those are ship-local, so stairs, thrusters, logs and doors face the right way relative to
  * the ship at any attitude.
  *
- * Positions are ship-local shifted by {@code offset} (a world cell near the ship), so the odd
- * block that peeks at its neighbours in the level reads loaded chunks around the ship rather
- * than wherever the local coordinates would land. (Neighbour-shaped blocks such as fences and
- * panes therefore don't connect to ship blocks yet: a known Milestone 4 limit.)
+ * Since M9 placement happens in the ship's shipyard plot: positions are ship-local shifted by the plot
+ * centre, in the shipyard level, so blocks see their real neighbours aboard (fences and panes connect).
  */
 public class ShipPlaceContext extends BlockPlaceContext {
 	private final Vec3 localLook;
 
-	private ShipPlaceContext(Player player, InteractionHand hand, ItemStack stack, BlockHitResult hit, Vec3 localLook) {
-		super(player.level(), player, hand, stack, hit);
+	private ShipPlaceContext(net.minecraft.world.level.Level level, Player player, InteractionHand hand, ItemStack stack, BlockHitResult hit, Vec3 localLook) {
+		super(level, player, hand, stack, hit);
 		this.localLook = localLook;
 	}
 
@@ -40,11 +38,17 @@ public class ShipPlaceContext extends BlockPlaceContext {
 	 */
 	public static ShipPlaceContext create(ShipEntity ship, Player player, InteractionHand hand, BlockPos local, Direction face,
 			Vec3 hitLocal, BlockPos offset) {
+		return create(ship, player.level(), player, hand, local, face, hitLocal, offset);
+	}
+
+	/** M9: placement into the ship's shipyard plot ({@code level} = the shipyard, {@code offset} = the plot centre). */
+	public static ShipPlaceContext create(ShipEntity ship, net.minecraft.world.level.Level level, Player player, InteractionHand hand,
+			BlockPos local, Direction face, Vec3 hitLocal, BlockPos offset) {
 		Vec3 view = player.getViewVector(1.0f);
 		Vector3f l = ship.orientation().transformInverse(new Vector3f((float) view.x, (float) view.y, (float) view.z));
 		BlockHitResult hit = new BlockHitResult(hitLocal.add(offset.getX(), offset.getY(), offset.getZ()), face,
 				local.offset(offset), false);
-		return new ShipPlaceContext(player, hand, player.getItemInHand(hand), hit, new Vec3(l.x, l.y, l.z));
+		return new ShipPlaceContext(level, player, hand, player.getItemInHand(hand), hit, new Vec3(l.x, l.y, l.z));
 	}
 
 	@Override

@@ -157,6 +157,17 @@ public final class ShipStructure {
 		return new ShipStructure(updated, pivot);
 	}
 
+	/**
+	 * M9: a copy with many cells changed at once (a tick's worth of shipyard changes): a null entry removes the
+	 * cell, anything else adds or replaces it. Keeps the pivot.
+	 */
+	public ShipStructure withChanges(Map<BlockPos, @Nullable Entry> changes) {
+		List<Entry> updated = new ArrayList<>(entries.size() + changes.size());
+		for (Entry entry : entries) if (!changes.containsKey(entry.pos())) updated.add(entry);
+		for (Entry entry : changes.values()) if (entry != null) updated.add(entry);
+		return new ShipStructure(updated, pivot);
+	}
+
 	public Optional<CompoundTag> blockEntity(BlockPos local) {
 		for (Entry entry : entries) {
 			if (entry.pos().equals(local)) return entry.blockEntity();

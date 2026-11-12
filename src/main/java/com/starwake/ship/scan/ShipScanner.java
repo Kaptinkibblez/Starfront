@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public final class ShipScanner {
 	/** Hard cap on scanned blocks, to stop runaway scans (e.g. a ship touching a stone house). */
-	public static final int MAX_BLOCKS = 4096;
+	public static final int MAX_BLOCKS = 65536;
 
 	public static final TagKey<Block> EXCLUDED = TagKey.create(Registries.BLOCK, StarwakeMod.id("ship_excluded"));
 

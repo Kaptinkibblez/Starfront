@@ -58,7 +58,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ShipEditing {
 	/** Same cap as the scanner: ships stay under this many blocks. */
-	public static final int MAX_BLOCKS = 4096;
+	public static final int MAX_BLOCKS = com.starwake.ship.scan.ShipScanner.MAX_BLOCKS;
 
 	/** A mining job a player started: which ship and block, and when. */
 	private record Mining(int shipId, BlockPos local, long startTick) {}
@@ -120,14 +120,20 @@ public final class ShipEditing {
 			}
 		}
 
+		// M9: the block really sits in the ship's shipyard plot; break it there.
+		ServerLevel yard = com.starwake.ship.yard.Shipyard.level(level.getServer());
+		if (yard == null || ship.plot() < 0) return;
+		BlockPos plotPos = com.starwake.ship.yard.Shipyard.toPlot(ship.plot(), local);
 		BlockPos cell = worldCell(ship, local);
 		ItemStack tool = player.getMainHandItem();
+		BlockEntity blockEntity = yard.getBlockEntity(plotPos);
 		if (!creative) {
-			List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, level, cell, storedBlockEntity(level, cell, state, structure.blockEntity(local)), player, tool));
-			drops.addAll(containerContents(ship, local));
-			tool.mineBlock(level, state, cell, player);
+			List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, yard, plotPos, blockEntity, player, tool));
+			tool.mineBlock(yard, state, plotPos, player);
 			for (ItemStack drop : drops) give(player, drop);
 		}
+		// A container's contents always come out (vanilla spills them even in creative).
+		for (ItemStack item : contentsOf(blockEntity)) give(player, item);
 		level.levelEvent(2001, cell, Block.getId(state)); // break particles + sound for everyone
 
 		Set<BlockPos> removed = new HashSet<>();
@@ -138,22 +144,17 @@ public final class ShipEditing {
 			BlockState otherState = structure.get(other);
 			if (otherState != null && otherState.is(state.getBlock())) removed.add(other);
 		}
-		ShipStructure next = structure.without(removed);
-		Set<BlockPos> detached = detached(next, ship.helmLocal());
-		if (!detached.isEmpty()) {
-			dropDebris(ship, level, next, detached, player);
-			next = next.without(detached);
-		}
-		ship.applyEdit(next);
+		// The ship hears about it through the shipyard (snapshot, detached parts, clients) at its next tick.
+		for (BlockPos cellLocal : removed) com.starwake.ship.yard.Shipyard.remove(ship, cellLocal);
 	}
 
-	/** Contents of a container block aboard (chest, barrel), as items. */
-	private static List<ItemStack> containerContents(ShipEntity ship, BlockPos local) {
+	/** Contents of a container block (chest, barrel, machine), as items. */
+	private static List<ItemStack> contentsOf(@Nullable BlockEntity blockEntity) {
 		List<ItemStack> items = new ArrayList<>();
-		if (ship.structure() == null || ship.structure().blockEntity(local).isEmpty()) return items;
-		var container = ship.container(local, 27);
-		for (int i = 0; i < container.getContainerSize(); i++) {
-			if (!container.getItem(i).isEmpty()) items.add(container.getItem(i).copy());
+		if (blockEntity instanceof net.minecraft.world.Container container) {
+			for (int i = 0; i < container.getContainerSize(); i++) {
+				if (!container.getItem(i).isEmpty()) items.add(container.getItem(i).copy());
+			}
 		}
 		return items;
 	}
@@ -163,7 +164,7 @@ public final class ShipEditing {
 	}
 
 	/** Blocks no longer connected (6-neighbour) to the Helm. */
-	private static Set<BlockPos> detached(ShipStructure structure, BlockPos helm) {
+	public static Set<BlockPos> detached(ShipStructure structure, BlockPos helm) {
 		Set<BlockPos> reached = new HashSet<>();
 		ArrayDeque<BlockPos> queue = new ArrayDeque<>();
 		if (structure.get(helm) != null) {
@@ -188,7 +189,7 @@ public final class ShipEditing {
 	 * Detached blocks leave the ship: placed into the world where they are if the ship is parked
 	 * level on a planet and the cells are free; otherwise dropped as items there.
 	 */
-	private static void dropDebris(ShipEntity ship, ServerLevel level, ShipStructure structure, Set<BlockPos> detached, @Nullable ServerPlayer player) {
+	public static void dropDebris(ShipEntity ship, ServerLevel level, ShipStructure structure, Set<BlockPos> detached, @Nullable ServerPlayer player) {
 		boolean parked = !SpaceTravel.isSpace(level) && ship.isAxisAligned() && ship.lastMove().lengthSqr() < 0.0025;
 		Rotation rotation = parked ? ship.cardinalRotation() : Rotation.NONE;
 		for (BlockPos local : detached) {
@@ -206,8 +207,9 @@ public final class ShipEditing {
 					}
 				});
 			} else {
-				List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, level, cell, storedBlockEntity(level, cell, state, data)));
-				drops.addAll(containerContents(ship, local));
+				BlockEntity stored = storedBlockEntity(level, cell, state, data);
+				List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, level, cell, stored));
+				drops.addAll(contentsOf(stored));
 				Vec3 at = ship.blockCenter(local);
 				for (ItemStack drop : drops) {
 					ItemEntity item = new ItemEntity(level, at.x, at.y, at.z, drop);
@@ -227,16 +229,18 @@ public final class ShipEditing {
 	public static void destroy(ShipEntity ship, Set<BlockPos> cells, boolean drop) {
 		ShipStructure structure = ship.structure();
 		if (structure == null || !(ship.level() instanceof ServerLevel level)) return;
-		Set<BlockPos> removed = new HashSet<>();
+		ServerLevel yard = com.starwake.ship.yard.Shipyard.level(level.getServer());
+		if (yard == null || ship.plot() < 0) return;
 		for (BlockPos local : cells) {
 			BlockState state = structure.get(local);
 			if (state == null || state.getBlock() instanceof HelmBlock) continue;
-			removed.add(local.immutable());
 			BlockPos cell = worldCell(ship, local);
 			level.levelEvent(2001, cell, Block.getId(state));
 			if (drop) {
-				List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, level, cell, storedBlockEntity(level, cell, state, structure.blockEntity(local))));
-				drops.addAll(containerContents(ship, local));
+				BlockPos plotPos = com.starwake.ship.yard.Shipyard.toPlot(ship.plot(), local);
+				BlockEntity blockEntity = yard.getBlockEntity(plotPos);
+				List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, yard, plotPos, blockEntity));
+				drops.addAll(contentsOf(blockEntity));
 				Vec3 at = ship.blockCenter(local);
 				for (ItemStack stack : drops) {
 					ItemEntity item = new ItemEntity(level, at.x, at.y, at.z, stack);
@@ -244,30 +248,15 @@ public final class ShipEditing {
 					level.addFreshEntity(item);
 				}
 			}
+			// Detached parts are dealt with when the ship folds the change in (next tick).
+			com.starwake.ship.yard.Shipyard.remove(ship, local);
 		}
-		if (removed.isEmpty()) return;
-		ShipStructure next = structure.without(removed);
-		Set<BlockPos> detached = detached(next, ship.helmLocal());
-		if (!detached.isEmpty()) {
-			dropDebris(ship, level, next, detached, null);
-			next = next.without(detached);
-		}
-		ship.applyEdit(next);
 	}
 
 	/** A throwaway block entity loaded from a ship block's saved NBT, so loot tables can copy its components. */
 	private static @Nullable BlockEntity storedBlockEntity(ServerLevel level, BlockPos cell, BlockState state, Optional<CompoundTag> data) {
 		if (data.isEmpty()) return null;
 		return BlockEntity.loadStatic(cell, state, data.get(), level.registryAccess());
-	}
-
-	/** Block-entity NBT for a block placed on a ship from an item (its components: hull alloy and the like). */
-	private static Optional<CompoundTag> placedData(net.minecraft.world.level.Level level, BlockState state, ItemStack stack) {
-		if (!(state.getBlock() instanceof net.minecraft.world.level.block.EntityBlock entityBlock)) return Optional.empty();
-		BlockEntity be = entityBlock.newBlockEntity(BlockPos.ZERO, state);
-		if (be == null) return Optional.empty();
-		be.applyComponentsFromItemStack(stack);
-		return Optional.of(be.saveWithFullMetadata(level.registryAccess()));
 	}
 
 	// =========================================================================================
@@ -300,35 +289,33 @@ public final class ShipEditing {
 			return true;
 		}
 
-		BlockPos offset = BlockPos.containing(ship.position()).subtract(BlockPos.containing(ship.pivot()));
-		ShipPlaceContext context = ShipPlaceContext.create(ship, player, hand, clicked, face, hitLocal, offset);
+		ServerLevel yard = player.level().getServer() == null ? null : com.starwake.ship.yard.Shipyard.level(player.level().getServer());
+		if (yard == null || ship.plot() < 0) return true;
+		// M9: placing happens for real in the ship's shipyard plot, with ship-local look directions.
+		ShipPlaceContext context = ShipPlaceContext.create(ship, yard, player, hand, clicked, face, hitLocal,
+				com.starwake.ship.yard.Shipyard.centre(ship.plot()));
 		BlockState state = block.getStateForPlacement(context);
 		if (state == null) return true;
-
 		List<BlockPos> cells = new ArrayList<>(List.of(target));
-		List<BlockState> states = new ArrayList<>(List.of(state));
 		if (state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)) {
-			BlockPos upper = target.above();
-			if (structure.get(upper) != null) return true;
-			cells.add(upper);
-			states.add(state.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER));
+			if (structure.get(target.above()) != null) return true;
+			cells.add(target.above());
 		}
 		// Don't place a solid block into someone.
-		for (int i = 0; i < cells.size(); i++) {
-			if (states.get(i).getCollisionShape(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, BlockPos.ZERO).isEmpty()) continue;
-			AABB box = ship.worldBoxOf(cells.get(i)).deflate(0.05);
-			List<Entity> inside = player.level().getEntities(ship, box, e -> !e.isSpectator() && e.isPickable() && !(e instanceof ShipEntity));
-			if (!inside.isEmpty()) return true;
+		if (!state.getCollisionShape(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, BlockPos.ZERO).isEmpty()) {
+			for (BlockPos cell : cells) {
+				AABB box = ship.worldBoxOf(cell).deflate(0.05);
+				List<Entity> inside = player.level().getEntities(ship, box, e -> !e.isSpectator() && e.isPickable() && !(e instanceof ShipEntity));
+				if (!inside.isEmpty()) return true;
+			}
 		}
-
-		ShipStructure next = structure;
-		Optional<CompoundTag> data = placedData(player.level(), state, stack);
-		for (int i = 0; i < cells.size(); i++) next = next.plus(cells.get(i), states.get(i), i == 0 ? data : Optional.empty());
-		ship.applyEdit(next);
-		if (!player.isCreative()) stack.shrink(1);
-		var sound = state.getSoundType();
-		player.level().playSound(null, worldCell(ship, target), sound.getPlaceSound(), SoundSource.BLOCKS,
-				(sound.getVolume() + 1.0f) / 2.0f, sound.getPitch() * 0.8f);
+		var result = blockItem.place(context);
+		if (result.consumesAction()) {
+			BlockState placed = yard.getBlockState(com.starwake.ship.yard.Shipyard.toPlot(ship.plot(), target));
+			var sound = placed.getSoundType();
+			player.level().playSound(null, worldCell(ship, target), sound.getPlaceSound(), SoundSource.BLOCKS,
+					(sound.getVolume() + 1.0f) / 2.0f, sound.getPitch() * 0.8f);
+		}
 		return true;
 	}
 

@@ -94,6 +94,7 @@ public final class StarwakeMod implements ModInitializer {
 		com.starwake.ship.data.ShipBlueprints.init();
 		ShipCollisions.init();
 		ShipInteraction.init();
+		com.starwake.ship.yard.Shipyard.init();
 		SpaceTravel.init();
 		ModNetworking.init();
 		ShipCommands.init();

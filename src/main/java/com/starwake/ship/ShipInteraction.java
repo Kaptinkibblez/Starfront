@@ -23,6 +23,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
 
 /**
  * Server side of interacting with an assembled ship: syncing its blocks to clients, and
@@ -39,37 +42,50 @@ public final class ShipInteraction {
 		});
 	}
 
-	/** Doors (both halves), trapdoors and gates swing open and shut aboard a flying ship. */
-	private static void toggleOpen(ShipEntity ship, BlockPos local, BlockState state) {
-		boolean open = !state.getValue(BlockStateProperties.OPEN);
-		ship.updateBlock(local, state.setValue(BlockStateProperties.OPEN, open));
-		if (state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)) {
-			BlockPos other = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER ? local.above() : local.below();
-			BlockState otherState = ship.structure().get(other);
-			if (otherState != null && otherState.hasProperty(BlockStateProperties.OPEN)) {
-				ship.updateBlock(other, otherState.setValue(BlockStateProperties.OPEN, open));
+	/** Fuel items and propellant gas cylinders top up the ship's shared tanks (M3/M8f). */
+	private static boolean isFuel(ItemStack stack) {
+		var gas = stack.get(com.starwake.registry.ModComponents.GAS);
+		return ShipFuels.unitsFor(stack) > 0 || gas != null && com.starwake.ship.fuel.Propellants.SPECIES.contains(gas.species());
+	}
+
+	/**
+	 * M9: everything else is vanilla, done for real in the ship's shipyard plot: the block is used first (doors,
+	 * chests, machines, levers: their menus stay open because reach is measured on the flying ship), unless the
+	 * player sneaks with something in hand; then the held item is used on it. Block items build onto the ship
+	 * with ship-local orientation ({@link com.starwake.ship.edit.ShipEditing#place}).
+	 */
+	private static void useInPlot(ServerPlayer player, ShipEntity ship, ShipInteractPayload payload) {
+		ServerLevel yard = com.starwake.ship.yard.Shipyard.level(player.level().getServer());
+		if (yard == null || ship.plot() < 0) return;
+		BlockPos plotPos = com.starwake.ship.yard.Shipyard.toPlot(ship.plot(), payload.local());
+		Vec3 hit = com.starwake.ship.yard.Shipyard.toPlot(ship.plot(), payload.hit());
+		BlockHitResult hitResult = new BlockHitResult(hit, payload.face(), plotPos, false);
+		BlockState state = yard.getBlockState(plotPos);
+		boolean handsFull = !player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty();
+		boolean suppressUse = player.isSecondaryUseActive() && handsFull;
+		for (InteractionHand hand : InteractionHand.values()) {
+			ItemStack stack = player.getItemInHand(hand);
+			if (!suppressUse) {
+				InteractionResult result = state.useItemOn(stack, yard, player, hand, hitResult);
+				if (result.consumesAction()) {
+					return;
+				}
+				if (result instanceof InteractionResult.TryEmptyHandInteraction && hand == InteractionHand.MAIN_HAND) {
+					result = state.useWithoutItem(yard, player, hitResult);
+					if (result.consumesAction()) {
+						return;
+					}
+				}
+			}
+			if (stack.getItem() instanceof net.minecraft.world.item.BlockItem) {
+				if (com.starwake.ship.edit.ShipEditing.place(player, ship, hand, payload.local(), payload.face(), payload.hit())) return;
+			} else if (!stack.isEmpty()) {
+				InteractionResult result = stack.useOn(new net.minecraft.world.item.context.UseOnContext(yard, player, hand, stack, hitResult) {});
+				if (result.consumesAction()) {
+					return;
+				}
 			}
 		}
-		ship.level().playSound(null, BlockPos.containing(ship.blockCenter(local)),
-				open ? SoundEvents.WOODEN_DOOR_OPEN : SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.BLOCKS, 1.0f, 1.0f);
-	}
-
-	/** Chests and barrels aboard open a normal 27-slot inventory backed by the ship's data. */
-	private static void openContainer(ServerPlayer player, ShipEntity ship, BlockPos local, BlockState state) {
-		var container = ship.container(local, 27);
-		player.openMenu(new SimpleMenuProvider((id, inventory, p) -> ChestMenu.threeRows(id, inventory, container),
-				state.getBlock().getName()));
-		ship.level().playSound(null, BlockPos.containing(ship.blockCenter(local)),
-				state.getBlock() instanceof BarrelBlock ? SoundEvents.BARREL_OPEN : SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.5f, 1.0f);
-	}
-
-	/** Blocks a right-click uses rather than builds against. */
-	private static boolean isUsable(BlockState state, ServerPlayer player) {
-		return state.getBlock() instanceof HelmBlock || state.getBlock() instanceof com.starwake.ship.block.SeatBlock
-				|| (state.getBlock() instanceof FuelTankBlock && ShipFuels.unitsFor(player.getMainHandItem()) > 0)
-				|| (state.hasProperty(BlockStateProperties.OPEN)
-						&& (state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS) || state.is(BlockTags.FENCE_GATES)))
-				|| state.getBlock() instanceof ChestBlock || state.getBlock() instanceof BarrelBlock;
 	}
 
 	public static void handle(ServerPlayer player, ShipInteractPayload payload) {
@@ -84,15 +100,6 @@ public final class ShipInteraction {
 			return;
 		}
 
-		// Milestone 4: sneak + block in hand always builds; otherwise blocks you can't use build too.
-		boolean holdingBlock = player.getMainHandItem().getItem() instanceof net.minecraft.world.item.BlockItem
-				|| player.getOffhandItem().getItem() instanceof net.minecraft.world.item.BlockItem;
-		if (holdingBlock && (player.isSecondaryUseActive() || !isUsable(state, player))) {
-			for (var hand : net.minecraft.world.InteractionHand.values()) {
-				if (com.starwake.ship.edit.ShipEditing.place(player, ship, hand, payload.local(), payload.face(), payload.hit())) return;
-			}
-			return;
-		}
 		boolean helm = state.getBlock() instanceof HelmBlock;
 		// Ownership: the Helm needs owner/crew (an ownerless ship is claimed by its first pilot);
 		// everything else is open unless the owner locked the ship. Fuelling is always allowed.
@@ -100,7 +107,7 @@ public final class ShipInteraction {
 			player.sendOverlayMessage(Component.translatable("message.starwake.ship.not_yours", ship.ownerName()));
 			return;
 		}
-		if (!helm && !(state.getBlock() instanceof FuelTankBlock) && !ship.canUse(player)) {
+		if (!helm && !(state.getBlock() instanceof FuelTankBlock && isFuel(player.getMainHandItem())) && !ship.canUse(player)) {
 			player.sendOverlayMessage(Component.translatable("message.starwake.ship.locked", ship.ownerName()));
 			return;
 		}
@@ -109,7 +116,7 @@ public final class ShipInteraction {
 			if (!ship.seat(player, payload.local())) {
 				player.sendOverlayMessage(Component.translatable("message.starwake.helm_taken"));
 			}
-		} else if (state.getBlock() instanceof FuelTankBlock) {
+		} else if (state.getBlock() instanceof FuelTankBlock && isFuel(player.getMainHandItem())) {
 			ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
 			// M8f: pour a Gas Cylinder of propellant (H2, O2, CH4) or fusion fuel (D2, He3) into the ship's tanks.
 			var gas = stack.get(com.starwake.registry.ModComponents.GAS);
@@ -129,13 +136,8 @@ public final class ShipInteraction {
 			}
 			player.sendOverlayMessage(Component.translatable("message.starwake.fuel_tank.gauge_fusion", ship.fuel(), ship.fuelCapacity(),
 					ship.fusion(), ship.fusionCapacity()));
-		} else if (state.hasProperty(BlockStateProperties.OPEN)
-				&& (state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS) || state.is(BlockTags.FENCE_GATES))) {
-			toggleOpen(ship, payload.local(), state);
-		} else if (state.getBlock() instanceof ChestBlock || state.getBlock() instanceof BarrelBlock) {
-			openContainer(player, ship, payload.local(), state);
 		} else {
-			// Nothing to use here (vanilla is silent too); hold a block to build against it.
+			useInPlot(player, ship, payload);
 		}
 	}
 }

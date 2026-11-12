@@ -85,6 +85,13 @@ public final class ShipAssembler {
 
 		ShipEntity ship = ModEntities.SHIP.create(level, EntitySpawnReason.TRIGGERED);
 		if (ship == null) return null;
+		// M9: the blocks move into a shipyard plot as real blocks (block entities restored there).
+		ServerLevel yard = com.starwake.ship.yard.Shipyard.level(level.getServer());
+		if (yard != null) {
+			int plot = com.starwake.ship.yard.Shipyard.allocate(level.getServer());
+			com.starwake.ship.yard.Shipyard.write(yard, plot, entries);
+			ship.setPlot(plot);
+		}
 		ship.initialize(new ShipStructure(entries), helm.subtract(min), forward, fuel, capacity);
 		ship.addFusion(fusion);
 		// The entity position is the pivot (structure centre), not the min corner.
@@ -152,7 +159,13 @@ public final class ShipAssembler {
 		ship.ejectPassengers();
 
 		int fuel = ship.fuel();
+		// M9: the blocks come back from the ship's shipyard plot, with their block entities as they are now.
 		List<ShipStructure.Entry> entries = ship.structure().entries();
+		ServerLevel yard = com.starwake.ship.yard.Shipyard.level(level.getServer());
+		if (yard != null && ship.plot() >= 0) {
+			List<ShipStructure.Entry> fresh = com.starwake.ship.yard.Shipyard.read(yard, ship.plot(), entries.stream().map(ShipStructure.Entry::pos).toList());
+			if (fresh.size() == entries.size()) entries = fresh;
+		}
 		for (int i = 0; i < entries.size(); i++) {
 			ShipStructure.Entry entry = entries.get(i);
 			BlockPos target = targets.get(i);

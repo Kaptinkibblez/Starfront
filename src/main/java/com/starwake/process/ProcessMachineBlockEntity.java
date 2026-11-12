@@ -337,13 +337,18 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		}
 	}
 
+	/** The dimension whose air this machine breathes: a machine aboard a ship uses wherever the ship really is (M9). */
+	private net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> envDimension() {
+		return com.starwake.ship.yard.Shipyard.locate(level, worldPosition).level().dimension();
+	}
+
 	private boolean ready() {
 		if (buffers.values().stream().anyMatch(b -> total(b) > BUFFER_LIMIT)) return false;
 		boolean hasCharge = process.charge > 0 && !items.get(0).isEmpty() && acceptsCharge(process, items.get(0));
 		boolean hasFeed = process.inletFeed > 0 && inlet != null && inlet.totalKg() > 0.05;
 		if (process.mode == Mode.AIR) {
 			// Piped-in gas (natural gas from a well) first, else the planet's air.
-			return level != null && (hasFeed || !com.starwake.planet.Atmospheres.of(level.dimension()).isEmpty())
+			return level != null && (hasFeed || !com.starwake.planet.Atmospheres.of(envDimension()).isEmpty())
 					&& gasTank.totalKg() < gasTank.capacityKg() - 1;
 		}
 		if (process.mode == Mode.SX) {
@@ -417,9 +422,9 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 				// One cycle processes `rate` kg of air (less where it's thin); 0.4 MJ per kg (cryogenic).
 				double kg;
 				if (pool.isEmpty()) {
-					double density = com.starwake.planet.Planets.airDensityOf(level.dimension());
+					double density = com.starwake.planet.Planets.airDensityOf(envDimension());
 					double air = spec().rate() * Math.min(1, density);
-					com.starwake.planet.Atmospheres.of(level.dimension()).forEach((k, v) -> pool.merge(k, v * air, Double::sum));
+					com.starwake.planet.Atmospheres.of(envDimension()).forEach((k, v) -> pool.merge(k, v * air, Double::sum));
 					kg = air;
 				} else {
 					kg = total(pool);
@@ -725,8 +730,9 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		private final boolean air;
 
 		Supply(ServerLevel level) {
-			Hazards hazards = Planets.forDimension(level.registryAccess(), level.dimension()).map(p -> p.planet().hazards()).orElse(Hazards.EARTHLIKE);
-			this.air = hazards.breathable() && !com.starwake.galaxy.SolarSystem.isSpace(level.dimension());
+			var dim = envDimension();
+			Hazards hazards = Planets.forDimension(level.registryAccess(), dim).map(p -> p.planet().hazards()).orElse(Hazards.EARTHLIKE);
+			this.air = hazards.breathable() && !com.starwake.galaxy.SolarSystem.isSpace(dim);
 		}
 
 		boolean air() {
