@@ -50,7 +50,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  */
 public class ProcessMachineBlockEntity extends MachineBlockEntity {
 	/** How a machine works out a cycle. */
-	public enum Mode { CRUSH, SEPARATE, PYRO, DRY, WET, EVAPORATE, ELECTRO, AIR, SX }
+	public enum Mode { CRUSH, SEPARATE, PYRO, DRY, WET, EVAPORATE, ELECTRO, AIR, SX, ISOTOPE }
 
 	public enum Process {
 		CRUSHER("crusher", Mode.CRUSH, 1, false, 0, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.CRUSHED_ORE, false, false, false, 0),
@@ -82,6 +82,8 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 				true, true, false, 1),
 		// M8c-3a: cryogenic air separation of whatever the planet's air holds.
 		AIR_SEPARATOR("air_separator", Mode.AIR, 0, false, 0, outs(), BulkItem.Kind.CRYSTALS, true, true, true, 1),
+		// M8f: heavy-water plant (Girdler-sulfide / water distillation): 10 kg of water per cycle -> its D2O.
+		ISOTOPE_COLUMN("isotope_column", Mode.ISOTOPE, 0, false, 0, outs(), BulkItem.Kind.CRYSTALS, true, false, true, 10),
 		// M8c-3b: counter-current solvent-extraction battery (extract -> gas-side tank, raffinate -> liquid tank).
 		SOLVENT_EXTRACTION("solvent_extraction", Mode.SX, 0, false, 0, outs(), BulkItem.Kind.CRYSTALS, true, true, true, 1);
 
@@ -171,6 +173,7 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 				new int[] {126, 140, 154}));
 		LAYOUTS.put(Process.CHLORINATOR, layout(List.of(xy(34, 18), xy(34, 42), xy(92, 28)), 2, xy(58, 33), new int[] {126, 140, 154}));
 		LAYOUTS.put(Process.AIR_SEPARATOR, layout(List.of(), 0, xy(80, 33), new int[] {40, 126, 148}));
+		LAYOUTS.put(Process.ISOTOPE_COLUMN, layout(List.of(), 0, xy(80, 33), new int[] {40, -1, 148}));
 		LAYOUTS.put(Process.SOLVENT_EXTRACTION, layout(List.of(), 0, xy(60, 28), new int[] {30, 140, 156}));
 		LAYOUTS.put(Process.KROLL, layout(List.of(xy(34, 28), xy(92, 18), xy(92, 42)), 1, xy(58, 33), new int[] {126, 140, -1}));
 		LAYOUTS.put(Process.ARC_FURNACE, layout(List.of(xy(24, 18), xy(24, 42), xy(76, 18), xy(76, 42), xy(96, 30)), 2, xy(46, 22),
@@ -196,6 +199,8 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 	private static final double BUFFER_LIMIT = 6;
 	/** Cryogenic air separation, J per kg of air processed (~0.11 kWh). */
 	private static final double AIR_SEPARATION_J_PER_KG = 0.4e6;
+	/** Heavy water in natural water (D/H = 1.5576e-4), kg D2O per kg H2O; separation energy per kg of feed (M8f). */
+	public static final double D2O_PER_KG_WATER = 1.5576e-4 * 20.028 / 18.015, ISOTOPE_J_PER_KG = 1.5e6;
 
 	private final Process process;
 	private final Map<ProcessEngine.Out, Map<String, Double>> buffers = new EnumMap<>(ProcessEngine.Out.class);
@@ -425,6 +430,16 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 					out.computeIfAbsent(o, k -> new HashMap<>()).put(e.getKey(), e.getValue());
 				}
 				joules = kg * AIR_SEPARATION_J_PER_KG;
+			}
+			case ISOTOPE -> {
+				// Natural water holds 1.56e-4 D per H: a cycle concentrates all of it as D2O (1.73e-4 kg per kg of
+				// water); heavy water already in the feed is kept. Depleted water is discharged. 1.5 MJ per kg of
+				// feed (~2.4 kWh per g of D2O, like a real Girdler-sulfide plant).
+				double water = pool.getOrDefault("H2O", 0.0);
+				double d2o = pool.getOrDefault("D2O", 0.0) + water * D2O_PER_KG_WATER;
+				out = new EnumMap<>(ProcessEngine.Out.class);
+				if (d2o > 0) out.computeIfAbsent(ProcessEngine.Out.LIQUID, k -> new HashMap<>()).put("D2O", d2o);
+				joules = total(pool) * ISOTOPE_J_PER_KG;
 			}
 			case SX -> {
 				out = solventExtract(pool);

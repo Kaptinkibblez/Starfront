@@ -148,7 +148,7 @@ public final class SpaceHud {
 		graphics.fill(x + 34, y + 12, x + width, y + 18, 0x60FFFFFF);
 		graphics.fill(x + 34, y + 12, x + 34 + (int) ((width - 34) * spool), y + 18, spool >= 1 ? GOOD : QT);
 		if (target != null) {
-			graphics.text(font, "FUEL " + ship.quantumInfo() + " / " + ship.fuel(), x, y + 22,
+			graphics.text(font, "FUSION " + ship.quantumInfo() + " / " + ship.fusion(), x, y + 22,
 					(state & ShipEntity.QT_NO_FUEL) != 0 ? BAD : TEXT);
 		}
 
@@ -229,7 +229,7 @@ public final class SpaceHud {
 		graphics.fill(x + 34, y + 12, x + width, y + 18, 0x60FFFFFF);
 		graphics.fill(x + 34, y + 12, x + 34 + (int) ((width - 34) * spool), y + 18, spool >= 1 ? GOOD : JUMP);
 		if (target != null) {
-			graphics.text(font, "FUEL " + ship.jumpInfo() + " / " + ship.fuel(), x, y + 22, (state & ShipEntity.JD_NO_FUEL) != 0 ? BAD : TEXT);
+			graphics.text(font, "FUSION " + ship.jumpInfo() + " / " + ship.fusion(), x, y + 22, (state & ShipEntity.JD_NO_FUEL) != 0 ? BAD : TEXT);
 		}
 		Component status;
 		int color;

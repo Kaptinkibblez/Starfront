@@ -111,6 +111,13 @@ public final class ShipInteraction {
 			}
 		} else if (state.getBlock() instanceof FuelTankBlock) {
 			ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
+			// M8f: pour a Gas Cylinder of propellant (H2, O2, CH4) or fusion fuel (D2, He3) into the ship's tanks.
+			var gas = stack.get(com.starwake.registry.ModComponents.GAS);
+			if (gas != null && com.starwake.ship.fuel.Propellants.SPECIES.contains(gas.species())) {
+				double kg = gas.amount() / (double) com.starwake.process.Chemicals.KG;
+				ship.addPropellant(gas.species(), kg);
+				stack.remove(com.starwake.registry.ModComponents.GAS);
+			}
 			int units = ShipFuels.unitsFor(stack);
 			if (units > 0) {
 				int room = (ship.fuelCapacity() - ship.fuel()) / units;
@@ -120,7 +127,8 @@ public final class ShipInteraction {
 					ship.addFuel(items * units);
 				}
 			}
-			player.sendOverlayMessage(Component.translatable("message.starwake.fuel_tank.gauge", ship.fuel(), ship.fuelCapacity()));
+			player.sendOverlayMessage(Component.translatable("message.starwake.fuel_tank.gauge_fusion", ship.fuel(), ship.fuelCapacity(),
+					ship.fusion(), ship.fusionCapacity()));
 		} else if (state.hasProperty(BlockStateProperties.OPEN)
 				&& (state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS) || state.is(BlockTags.FENCE_GATES))) {
 			toggleOpen(ship, payload.local(), state);

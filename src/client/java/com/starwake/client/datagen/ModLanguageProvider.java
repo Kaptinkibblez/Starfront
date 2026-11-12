@@ -205,7 +205,7 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 				java.util.Map.entry("crystallizer", "Crystallizer"), java.util.Map.entry("electrolysis", "Electrolysis Cell"),
 				java.util.Map.entry("chlorinator", "Chlorinator"), java.util.Map.entry("kroll", "Kroll Reactor"),
 				java.util.Map.entry("air_separator", "Air Separation Unit"), java.util.Map.entry("solvent_extraction", "Solvent Extraction Battery"),
-				java.util.Map.entry("arc_furnace", "Submerged Arc Furnace"));
+				java.util.Map.entry("arc_furnace", "Submerged Arc Furnace"), java.util.Map.entry("isotope_column", "Isotope Column"));
 		for (var p : com.starwake.process.ProcessMachineBlockEntity.Process.values()) {
 			builder.add(com.starwake.registry.ModProcess.block(p), machines.get(p.machine));
 		}
@@ -319,6 +319,10 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("screen.starwake.semiconductor.argon", "Argon inlet ->");
 		builder.add("hud.starwake.hull_temp", "SKIN %s C / %s");
 		builder.add("hud.starwake.hull_burning", "HULL BURNING %s C > %s");
+		builder.add("console.starwake.ship.fusion", "Fusion fuel (D + He-3): %s / %s units (0.1 mg each)");
+		builder.add("message.starwake.fuel_tank.gauge_fusion", "Fuel %s / %s · Fusion %s / %s");
+		builder.add("screen.starwake.machine.tank.isotope_column.inlet", "Water in");
+		builder.add("screen.starwake.machine.tank.isotope_column.liquid", "Heavy water out");
 		builder.add("message.starwake.hull.burned", "Re-entry heat burned off %s hull blocks!");
 		builder.add("message.starwake.hull.smashed", "Impact tore off %s hull blocks!");
 		builder.add("screen.starwake.forming.hot", "Mode: HOT");

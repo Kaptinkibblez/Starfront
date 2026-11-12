@@ -160,6 +160,7 @@ public class ShipApp implements WristcomApp {
 				{"Role", pilot ? "Pilot" : "Crew"},
 				{"Blocks", ship.structure() == null ? "-" : Integer.toString(ship.structure().entries().size())},
 				{"Fuel", ship.fuel() + " / " + ship.fuelCapacity()},
+				{"Fusion", ship.fusion() + " / " + ship.fusionCapacity()},
 				{"Shields", Math.round(ship.shield()) + " / " + Math.round(ship.shieldMax())},
 				{"Engines", Math.round(ship.engineFactor() * 100) + "% power"},
 				{"Plants", ship.thermalFactor() < 0.999f ? "OVERHEATING " + Math.round(ship.thermalFactor() * 100) + "%" : "nominal"},

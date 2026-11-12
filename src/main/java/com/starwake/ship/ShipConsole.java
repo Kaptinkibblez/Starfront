@@ -48,6 +48,8 @@ public final class ShipConsole {
 				String.format("%.2f", gravity)));
 		add(status, lines, ship.fuel() > 0 ? PreflightReport.Status.PASS : PreflightReport.Status.FAIL,
 				Component.translatable("console.starwake.ship.fuel", ship.fuel(), ship.fuelCapacity()));
+		add(status, lines, ship.fusion() > 0 ? PreflightReport.Status.PASS : PreflightReport.Status.WARN,
+				Component.translatable("console.starwake.ship.fusion", ship.fusion(), ship.fusionCapacity()));
 		boolean stationary = ship.getDeltaMovement().lengthSqr() < 1.0e-4;
 		boolean inSpace = SpaceTravel.isSpace(ship.level());
 		var systems = ship.systems();
@@ -66,7 +68,7 @@ public final class ShipConsole {
 			// Quantum routes, nearest first: distance, travel time and fuel, like a nav computer.
 			for (SpaceTravel.Route route : SpaceTravel.destinations(ship)) {
 				var problem = route.tooClose() ? "too_close" : route.obstruction() != null ? "obstructed"
-						: route.fuel() > ship.fuel() ? "no_fuel" : null;
+						: route.fuel() > ship.fusion() ? "no_fuel" : null;
 				add(status, lines, problem == null ? PreflightReport.Status.PASS : PreflightReport.Status.WARN,
 						Component.translatable("console.starwake.ship.route", route.target().displayName(),
 								com.starwake.galaxy.SolarSystem.formatDistance(route.distance()),

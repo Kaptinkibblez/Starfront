@@ -420,6 +420,17 @@ commit. **Don't start the next milestone until the user confirms the current one
         test ship lift 2.44x weight with Mk I mains, 6.51x with Mk III, 8.67x with Mk III at quality 1.5 (mass
         255.5 -> 246.5 -> 243.1 t); a Thruster Mk II fabricated from a 718 chamber, Inconel 625 nozzle, 718
         turbopump and a control board (quality 1.0 = the weakest component); a 718 nozzle refused (950 C gate).)*
+  - [x] 8f. Real propellants and fusion fuel. Defaults chosen overnight: fuel tanks take H2, O2, CH4, D2 and
+        He3 from pipes and Gas Cylinders and burn matching pairs into units (hydrolox O/F 6 = 150 units/kg,
+        methalox O/F 3.6 = 120 units/kg); thrusters keep burning propellant units; quantum and jump drives now
+        burn **fusion units** (D + He-3 at the atom ratio, 1 unit = 0.1 mg) from a separate pool (10x the
+        propellant capacity); coal/blaze items stay as a provisional fallback until 8i; heavy water from a new
+        Isotope Column (natural D/H, ~2.4 kWh per g of D2O), D2 by alkaline electrolysis of D2O, He-3 from
+        primordial helium on noble-gas-rich (crystal) worlds through the ASU. *(Verified 2026-11-12 on a
+        dedicated server: 10 kg of water -> 1.73 g D2O per cycle; 0.2 kg D2O -> 0.0402 kg D2 + 0.16 kg O2; a
+        Fluid Tank of 1 kg H2 + 6 kg O2 + 1 g D2 + 1.5 g He3 piped into a Fuel Tank -> 1049 fuel units and
+        fusion filled to its 20000 cap, leftovers kept; a tank's 777 fusion units moved into the assembled
+        ship; `/starwake ship refuel` adds both.)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
   - **User notes for M9 (2026-11-12):** conveyors move items the wrong way; ship flight is buggy
     all around (overhaul it); hub NPCs (guards/crew) add little value: **remove them**.
@@ -1208,6 +1219,23 @@ normal gravity.
   chamber >= 700/950 C, turbopump yield >= 800/1000 MPa, coils >= 98/100% IACS, tanks >= 400/800 MPa...).
   `tools/mk_textures.py` derives the tier textures (gold band = Mk II, darker + two cyan bands = Mk III).
 
+## How propellants and fusion fuel work (Milestone 8f)
+
+- `ship/fuel/Propellants`: species H2, O2, CH4, D2, He3; `convert(buffer, fuelRoom, fusionRoom)` burns pairs
+  (hydrolox O/F 6.0 at 150 units/kg of mixture, methalox O/F 3.6 at 120; D2 + He3 at 2 x 3.016 / 4.028 by mass,
+  1 fusion unit = 1e-7 kg). `fusionCapacity(fuelCapacity)` = 10x.
+- `FuelTankBlockEntity`: insert-only `ChemicalTank` ("gases", 40 kg) exposed through `FluidStorage.SIDED` (pipes,
+  sneak-use with a Gas Cylinder); its change callback converts pairs into `fuel`/`fusion` (guarded against
+  re-entry). Assembly drains both into the ship; disassembly pours both back.
+- `ShipEntity`: synced `FUSION`, `fusionCapacity()` = 10 x fuel capacity, `useFusion`/`addFusion`, a saved
+  `propellantBuffer` for gas poured into a flying ship's tanks (`ShipInteraction`: right-click a fuel tank aboard
+  with a Gas Cylinder). Quantum routes and jumps check and spend fusion units (`QT_NO_FUEL`/`JD_NO_FUEL` now
+  mean "no fusion fuel"); the console, Space HUD and Ship app show it. Admin: `/starwake ship refuel <fuel> <fusion>`.
+- Chemistry: species `D2O` (kind water), `D2`, `He3` are written as their element (so reactions balance) with a
+  `molar` override (real isotopic mass). `Process.ISOTOPE_COLUMN` (Mode ISOTOPE, 50 kW): 10 kg of inlet water per
+  cycle -> its D2O (1.73e-4 kg/kg) to the liquid outlet, 1.5 MJ/kg. Electrolysis `2 D2O -> 2 D2 + O2` (KOH).
+  Crystal-world air carries He3 = He x 1.66e-4 by atoms (protosolar).
+
 ## 26.3 gotchas (learned the hard way)
 
 - **`Component.translatable(key, fallback)` treats the second argument as a format arg**, not a
@@ -1215,6 +1243,9 @@ normal gravity.
 - Fabric `FluidStorageUtil.interactWithFluidStorage` tries "fill the hand" then "empty the hand", and
   a held right-click repeats every 4 ticks, so a container item toggles back and forth. For
   multi-use items pick one direction per gesture (we fill on use, empty on sneak-use).
+- **An unknown species `kind` breaks the whole species table** (enum `valueOf` throws on first use, and every
+  ChemicalTank then fails to load: "An unexpected error occurred" on `/data merge`). `tools/chemistry_process.py`
+  now asserts kinds, and `StarwakeMod` loads the table at startup.
 - **`MachineBlockEntity.layout()` runs inside the superclass constructor**: subclass fields aren't set yet, so
   derive anything it needs from `getBlockState()`. `ItemStack.EMPTY.getMaxStackSize()` is 1, so "room in the
   output" checks must test `isEmpty()` first.

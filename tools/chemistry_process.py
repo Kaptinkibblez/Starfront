@@ -32,13 +32,20 @@ ELEMENTS = {e["symbol"]: e for e in json.load(open(os.path.join(BUNDLE, "element
 SPECIES = []
 
 
-def sp(id, name, kind, density, mp, bp, flags=(), toxicity=0.0, color="#8a8a8a", formula=None, solubility=None):
+# Must match com.starwake.process.Species.Kind: an unknown kind makes the whole species table fail to load.
+KINDS = {"metal", "element", "sulfide", "oxide", "silicate", "carbonate", "sulfate", "phosphate", "halide", "gas", "organic", "carbon", "water"}
+
+
+def sp(id, name, kind, density, mp, bp, flags=(), toxicity=0.0, color="#8a8a8a", formula=None, solubility=None, molar=None):
     """solubility: kg per kg of water at 25 C for "soluble" species (None = unlimited); beyond it the
     excess crystallises (evaporators, precipitation in reactors)."""
+    assert kind in KINDS, f"{id}: unknown kind {kind} (Species.Kind in Java)"
     SPECIES.append({"id": id, "name": name, "formula": formula or id, "kind": kind, "density": density, "melting": mp,
                     "boiling": bp, "flags": list(flags), "toxicity": toxicity, "color": color})
     if solubility is not None:
         SPECIES[-1]["solubility"] = solubility
+    if molar is not None:
+        SPECIES[-1]["molar"] = molar  # isotopes (M8f): written as the element, weighed as the isotope
 
 
 # Standard electrode potentials E0 (V, M^n+/M): in electrorefining, nobler elements than the metal
@@ -160,6 +167,11 @@ sp("FeSO4", "Iron(II) sulfate", "sulfate", 3.65, 680, 9999, flags=["soluble"], c
 sp("CoSO4", "Cobalt sulfate", "sulfate", 3.71, 735, 9999, flags=["soluble"], color="#c83a6a")
 sp("Na2SO4", "Sodium sulfate", "sulfate", 2.66, 884, 1429, flags=["soluble"], color="#f2f2f2", solubility=0.28)
 sp("PbSO4", "Anglesite", "sulfate", 6.29, 1087, 9999, color="#e8e8e8")
+# M8f: isotopes for fusion fuel. Formulas use the element (so reactions balance by element); "molar"
+# gives the real isotopic molar mass, so every reaction is mass-exact.
+sp("D2O", "Heavy water", "water", 1.107, 3.8, 101.4, color="#cfe6ff", formula="H2O", molar=20.028)
+sp("D2", "Deuterium", "gas", 0.00018, -254, -249, color="#d8ecff", formula="H2", molar=4.028)
+sp("He3", "Helium-3", "gas", 0.00013, -272, -270, color="#f0e8ff", formula="He", molar=3.016)
 sp("SiHCl3", "Trichlorosilane", "halide", 1.34, -126, 32, flags=["toxic"], toxicity=0.5, color="#f4f4ec")
 sp("TiCl4", "Titanium tetrachloride", "halide", 1.73, -24, 136, flags=["toxic"], toxicity=0.6, color="#e8e8a8")
 sp("MgCl2", "Magnesium chloride", "halide", 2.32, 714, 1412, flags=["soluble"], color="#f0f0f0", solubility=0.54)
@@ -661,6 +673,9 @@ rx("roaster", "reduce_iridium_salt", "(NH4)2IrCl6 + 2 H2 -> Ir + 2 NH4Cl + 4 HCl
 # M8e-1: electronic-grade silicon. Submerged-arc carbothermic reduction (metallurgical Si, ~98-99%: the
 # coke's ash brings Fe/Al/Ca), hydrochlorination to trichlorosilane (it distils off; the iron and other
 # impurities stay behind as chlorides or metal), then Siemens deposition with hydrogen (HCl recycled).
+# M8f: heavy water -> deuterium (alkaline electrolysis, like water).
+rx("electrolysis", "electrolyse_heavy_water", "2 D2O -> 2 D2 + O2", 6, "Deuterium for D-He3 fusion fuel.", electrons=4, voltage=2.0,
+   catalyst="KOH")
 rx("arc_furnace", "reduce_silica_carbon", "SiO2 + 2 C -> Si + 2 CO", 10, "Metallurgical silicon in a submerged-arc furnace (~2000 C).",
    draw=["C"])
 rx("arc_furnace", "reduce_hematite_arc", "Fe2O3 + 3 C -> 2 Fe + 3 CO", 11, "Iron oxide in the quartz and coke ash ends up in the silicon.",
@@ -781,7 +796,9 @@ ATMOSPHERES = {
     "frozen": {"N2": 0.94, "CH4": 0.05, "Ar": 0.009, "H2": 0.0001, "Ne": 0.0002},
     "toxic": {"CO2": 0.85, "N2": 0.08, "SO2": 0.04, "Ar": 0.012, "HCl": 0.01, "H2O": 0.005, "CO": 0.003},
     "volcanic": {"CO2": 0.55, "H2O": 0.2, "SO2": 0.12, "N2": 0.1, "Ar": 0.015, "HCl": 0.01, "CO": 0.005},
-    "crystal": {"N2": 0.75, "Ar": 0.18, "Ne": 0.04, "He": 0.02, "Kr": 0.002, "Xe": 0.0005},
+    # Noble-gas-rich worlds kept primordial helium: He-3/He-4 = 1.66e-4 by atoms (protosolar), 2.5e-6 of the air by
+    # mass; Earth's crustal helium has 1.38e-6 (M8f fusion fuel comes from the former).
+    "crystal": {"N2": 0.75, "Ar": 0.18, "Ne": 0.04, "He": 0.02, "He3": 0.02 * 1.66e-4 * 3.016 / 4.003, "Kr": 0.002, "Xe": 0.0005},
     "barren": {"Ar": 0.7, "He": 0.2, "Ne": 0.1},
 }
 

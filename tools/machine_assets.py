@@ -432,6 +432,13 @@ def process_textures():
         rect(im, 9, 8, 12, 9, "#ff5a3a" if on else "#5a5e66")
         rect(im, 6, 10, 12, 10, "#7a8088")
 
+    def isotope_column(im, on):
+        rect(im, 6, 0, 9, 15, "#b8c4d0")
+        for y in range(2, 15, 3):
+            rect(im, 5, y, 10, y, "#6a7480")
+        rect(im, 7, 4, 8, 12, "#7ab8ff" if on else "#3a4a5a")
+
+    front("isotope_column", "#5a6672", isotope_column)
     front("arc_furnace", "#5a5650", arc_furnace)
     front("crystal_puller", "#606a74", crystal_puller)
     front("clean_fab", "#b8c0c8", clean_fab)

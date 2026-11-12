@@ -81,6 +81,8 @@ public class ShipEntity extends Entity {
 	private static final EntityDataAccessor<String> SEATS = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
 	// Ship systems state for the client HUD (computed server-side, where ship stats data lives).
 	private static final EntityDataAccessor<Integer> FUEL_CAPACITY = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
+	/** M8f: fusion fuel (D + He-3) units for the quantum and jump drives; capacity is 10 x the propellant capacity. */
+	private static final EntityDataAccessor<Integer> FUSION = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> SHIELD = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Float> SHIELD_MAX = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	/** M8e-1: skin temperature of the leading face (C, 0 = not heating) and the weakest heat limit on it. */
@@ -392,6 +394,7 @@ public class ShipEntity extends Entity {
 		fuelCapacity = capacity;
 		entityData.set(FUEL_CAPACITY, capacity);
 		if (fuel() > capacity) entityData.set(FUEL, capacity);
+		if (fusion() > fusionCapacity()) entityData.set(FUSION, fusionCapacity());
 		var payload = new com.starwake.network.ShipStructurePayload(getId(), next);
 		for (ServerPlayer player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(this)) {
 			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
@@ -456,6 +459,7 @@ public class ShipEntity extends Entity {
 		builder.define(ORIENTATION, new Quaternionf());
 		builder.define(SEATS, "");
 		builder.define(FUEL_CAPACITY, 0);
+		builder.define(FUSION, 0);
 		builder.define(SHIELD, 0f);
 		builder.define(SHIELD_MAX, 0f);
 		builder.define(SKIN_TEMP, 0f);
@@ -561,6 +565,42 @@ public class ShipEntity extends Entity {
 	/** Admin/testing: constant spin (yaw, pitch, roll in degrees/second about the ship's own axes). Not saved. */
 	public void setSpin(Vec3 spin) { this.spin = spin; }
 	public void setControls(int controls) { this.controls = controls; }
+
+	public int fusion() {
+		return entityData.get(FUSION);
+	}
+
+	public int fusionCapacity() {
+		return com.starwake.ship.fuel.Propellants.fusionCapacity(fuelCapacity());
+	}
+
+	public void useFusion(int amount) {
+		entityData.set(FUSION, Math.max(0, fusion() - amount));
+	}
+
+	/** Adds fusion units up to capacity; returns the amount added. */
+	public int addFusion(int amount) {
+		int added = Math.max(0, Math.min(amount, fusionCapacity() - fusion()));
+		entityData.set(FUSION, fusion() + added);
+		return added;
+	}
+
+	/** Gases poured into the ship's tanks that are waiting for their partner (M8f), kg by species. Saved. */
+	private final Map<String, Double> propellantBuffer = new HashMap<>();
+
+	/** Pours kg of a propellant gas into the ship's tanks; matching pairs burn into fuel / fusion units. Returns kg accepted. */
+	public double addPropellant(String species, double kg) {
+		if (!com.starwake.ship.fuel.Propellants.SPECIES.contains(species)) return 0;
+		propellantBuffer.merge(species, kg, Double::sum);
+		int[] made = com.starwake.ship.fuel.Propellants.convert(propellantBuffer, fuelCapacity - fuel(), fusionCapacity() - fusion());
+		addFuel(made[0]);
+		addFusion(made[1]);
+		return kg;
+	}
+
+	public Map<String, Double> propellantBuffer() {
+		return propellantBuffer;
+	}
 
 	/** Removes up to {@code amount} fuel. */
 	public void useFuel(int amount) {
@@ -1077,7 +1117,7 @@ public class ShipEntity extends Entity {
 			if (Math.acos(Mth.clamp(nose.dot(dir), -1, 1)) < Math.toRadians(physics.quantumAlignDegrees())) state |= QT_ALIGNED;
 			if (route.obstruction() != null) state |= QT_OBSTRUCTED;
 			if (route.tooClose()) state |= QT_TOO_CLOSE;
-			if (fuel() < route.fuel()) state |= QT_NO_FUEL;
+			if (fusion() < route.fuel()) state |= QT_NO_FUEL;
 			entityData.set(QT_TARGET, target.key().identifier().toString());
 			entityData.set(QT_INFO, route.fuel());
 		}
@@ -1101,7 +1141,7 @@ public class ShipEntity extends Entity {
 		}
 		var target = com.starwake.galaxy.SolarSystem.get(level().registryAccess(), quantumTarget).orElseThrow();
 		SpaceTravel.Route route = SpaceTravel.route(this, target);
-		useFuel(route.fuel());
+		useFusion(route.fuel());
 		jump = new QuantumJump(target.key(), position(), route.arrival(), 0);
 		quantumMode = false;
 		entityData.set(QUANTUM, -1f);
@@ -1228,7 +1268,7 @@ public class ShipEntity extends Entity {
 			if (Math.acos(Mth.clamp(nose.dot(dir), -1, 1)) < Math.toRadians(tuning.alignDegrees())) state |= JD_ALIGNED;
 			if (ly > systems.jumpRange()) state |= JD_RANGE;
 			int fuel = tuning.fuel(ly);
-			if (fuel() < fuel) state |= JD_NO_FUEL;
+			if (fusion() < fuel) state |= JD_NO_FUEL;
 			for (var body : com.starwake.galaxy.SolarSystem.bodies(level())) {
 				double clearance = body.body().star() ? body.body().radius() * tuning.starWell() : body.body().entryRadius() * tuning.planetWell();
 				if (position().distanceTo(body.body().position()) < clearance) state |= JD_WELL;
@@ -1257,7 +1297,7 @@ public class ShipEntity extends Entity {
 		var there = com.starwake.galaxy.Galaxy.star(jumpTarget).orElseThrow();
 		double ly = here.distanceTo(there);
 		var tuning = com.starwake.ship.data.JumpTuning.get();
-		useFuel(tuning.fuel(ly));
+		useFusion(tuning.fuel(ly));
 		jumpDirection = there.position().subtract(here.position()).normalize();
 		jumpTotal = tuning.ticks(ly);
 		jumpTicks = jumpTotal;
@@ -2064,6 +2104,10 @@ public class ShipEntity extends Entity {
 		allocation = input.read("power", PowerAllocation.CODEC).orElse(PowerAllocation.DEFAULT);
 		entityData.set(SHIELD, (float) input.getDoubleOr("shield", 0));
 		entityData.set(FUEL, input.getIntOr("fuel", 0));
+		entityData.set(FUSION, input.getIntOr("fusion", 0));
+		propellantBuffer.clear();
+		input.read("propellants", com.mojang.serialization.Codec.unboundedMap(com.mojang.serialization.Codec.STRING,
+				com.mojang.serialization.Codec.DOUBLE)).ifPresent(propellantBuffer::putAll);
 		orbiting = input.read("orbiting", Level.RESOURCE_KEY_CODEC).orElse(null);
 		decoupled = input.getBooleanOr("decoupled", false);
 		owner = input.read("owner", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
@@ -2109,6 +2153,9 @@ public class ShipEntity extends Entity {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		output.putInt("frame", FRAME_VERSION);
 		output.putInt("fuel", fuel());
+		output.putInt("fusion", fusion());
+		if (!propellantBuffer.isEmpty()) output.store("propellants", com.mojang.serialization.Codec.unboundedMap(com.mojang.serialization.Codec.STRING,
+				com.mojang.serialization.Codec.DOUBLE), propellantBuffer);
 		output.putInt("fuel_capacity", fuelCapacity);
 		output.store("power", PowerAllocation.CODEC, allocation);
 		output.putDouble("shield", entityData.get(SHIELD));

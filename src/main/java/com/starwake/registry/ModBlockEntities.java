@@ -15,5 +15,8 @@ public final class ModBlockEntities {
 
 	private ModBlockEntities() {}
 
-	public static void init() {}
+	public static void init() {
+		// M8f: pipes and Gas Cylinders feed propellant and fusion gases into fuel tanks.
+		net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage.SIDED.registerForBlockEntity((be, side) -> be.fluidStorage(), FUEL_TANK);
+	}
 }

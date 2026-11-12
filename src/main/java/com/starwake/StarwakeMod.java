@@ -65,6 +65,7 @@ public final class StarwakeMod implements ModInitializer {
 		com.starwake.machine.PowerNetworks.init();
 		com.starwake.logistics.FluidNetworks.init();
 		com.starwake.process.Reactions.init();
+		com.starwake.process.Species.all(); // load the bundled table now: a bad entry should fail at startup, not in a tank
 		com.starwake.process.GasHazards.init();
 		com.starwake.planet.Atmospheres.init();
 		com.starwake.metal.Melt.init();

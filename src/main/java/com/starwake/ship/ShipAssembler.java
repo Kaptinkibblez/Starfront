@@ -63,7 +63,7 @@ public final class ShipAssembler {
 		BoundingBox box = BoundingBox.encapsulatingPositions(scan.blocks()).orElseThrow();
 		BlockPos min = new BlockPos(box.minX(), box.minY(), box.minZ());
 		List<ShipStructure.Entry> entries = new ArrayList<>(scan.blocks().size());
-		int fuel = 0, capacity = 0;
+		int fuel = 0, capacity = 0, fusion = 0;
 
 		for (BlockPos pos : scan.blocks()) {
 			BlockState state = level.getBlockState(pos);
@@ -72,6 +72,7 @@ public final class ShipAssembler {
 			if (blockEntity instanceof FuelTankBlockEntity tank) {
 				capacity += tank.capacity();
 				fuel += tank.drain(); // fuel moves into the ship's shared pool
+				fusion += tank.drainFusion();
 			}
 			if (blockEntity != null) {
 				data = Optional.of(blockEntity.saveWithFullMetadata(level.registryAccess()));
@@ -85,6 +86,7 @@ public final class ShipAssembler {
 		ShipEntity ship = ModEntities.SHIP.create(level, EntitySpawnReason.TRIGGERED);
 		if (ship == null) return null;
 		ship.initialize(new ShipStructure(entries), helm.subtract(min), forward, fuel, capacity);
+		ship.addFusion(fusion);
 		// The entity position is the pivot (structure centre), not the min corner.
 		ship.setPos(min.getX() + ship.pivot().x, min.getY() + ship.pivot().y, min.getZ() + ship.pivot().z);
 		if (SpaceTravel.isSpace(level)) {
@@ -163,11 +165,13 @@ public final class ShipAssembler {
 				}
 			});
 		}
-		// Pour the ship's fuel back into its tanks.
+		// Pour the ship's fuel (and fusion fuel, M8f) back into its tanks.
+		int fusion = ship.fusion();
 		for (BlockPos target : targets) {
-			if (fuel <= 0) break;
+			if (fuel <= 0 && fusion <= 0) break;
 			if (level.getBlockEntity(target) instanceof FuelTankBlockEntity tank) {
 				fuel -= tank.refill(fuel);
+				fusion -= tank.refillFusion(fusion);
 			}
 		}
 		// Nudge everyone aboard up slightly so nobody is left inside a block after snapping.

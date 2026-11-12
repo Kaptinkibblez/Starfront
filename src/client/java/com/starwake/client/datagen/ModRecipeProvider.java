@@ -100,6 +100,10 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModMetalworks.HEAT_TREAT_FURNACE).pattern("BBB").pattern("CFC").pattern("IRI")
 						.define('B', Items.BRICKS).define('F', Items.FURNACE).define('C', ModMachines.COPPER_CABLE).define('I', Items.IRON_INGOT)
 						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
+				// M8f heavy-water column (provisional until 8i).
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModProcess.block(com.starwake.process.ProcessMachineBlockEntity.Process.ISOTOPE_COLUMN))
+						.pattern("IGI").pattern("IGI").pattern("CRC").define('G', Items.GLASS).define('C', ModMachines.COPPER_CABLE)
+						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);
 				// M8e-1 fabrication machines (provisional until 8i).
 				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModProcess.block(com.starwake.process.ProcessMachineBlockEntity.Process.ARC_FURNACE))
 						.pattern("CCC").pattern("BFB").pattern("IRI").define('C', Items.COAL_BLOCK).define('B', Items.BRICKS)

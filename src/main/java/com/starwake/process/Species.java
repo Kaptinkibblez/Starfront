@@ -97,6 +97,8 @@ public final class Species {
 			Map<String, Double> atoms = parse(formula);
 			double molar = 0;
 			for (var e : atoms.entrySet()) molar += Chemistry.element(e.getKey()).map(Chemistry.Element::mass).orElse(0.0) * e.getValue();
+			// Isotopes (M8f: D2O, D2, He3) are written as their element but weighed as the isotope.
+			if (o.has("molar")) molar = o.get("molar").getAsDouble();
 			Map<String, Double> fractions = new LinkedHashMap<>();
 			for (var e : atoms.entrySet()) {
 				double m = Chemistry.element(e.getKey()).map(Chemistry.Element::mass).orElse(0.0) * e.getValue();

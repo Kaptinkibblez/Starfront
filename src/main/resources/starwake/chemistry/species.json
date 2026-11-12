@@ -1307,6 +1307,45 @@
   "color": "#e8e8e8"
  },
  {
+  "id": "D2O",
+  "name": "Heavy water",
+  "formula": "H2O",
+  "kind": "water",
+  "density": 1.107,
+  "melting": 3.8,
+  "boiling": 101.4,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#cfe6ff",
+  "molar": 20.028
+ },
+ {
+  "id": "D2",
+  "name": "Deuterium",
+  "formula": "H2",
+  "kind": "gas",
+  "density": 0.00018,
+  "melting": -254,
+  "boiling": -249,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#d8ecff",
+  "molar": 4.028
+ },
+ {
+  "id": "He3",
+  "name": "Helium-3",
+  "formula": "He",
+  "kind": "gas",
+  "density": 0.00013,
+  "melting": -272,
+  "boiling": -270,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0e8ff",
+  "molar": 3.016
+ },
+ {
   "id": "SiHCl3",
   "name": "Trichlorosilane",
   "formula": "SiHCl3",

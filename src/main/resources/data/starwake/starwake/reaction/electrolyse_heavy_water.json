@@ -1,0 +1,9 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 D2O -> 2 D2 + O2",
+ "priority": 6,
+ "electrons": 4,
+ "voltage": 2.0,
+ "catalyst": "KOH",
+ "note": "Deuterium for D-He3 fusion fuel."
+}

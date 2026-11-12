@@ -51,6 +51,10 @@ public final class ShipCommands {
 												.executes(ctx -> crew(ctx, true))))
 										.then(Commands.literal("remove").then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
 												.executes(ctx -> crew(ctx, false)))))
+								.then(Commands.literal("refuel")
+										.then(Commands.argument("fuel", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
+												.then(Commands.argument("fusion", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
+														.executes(ShipCommands::refuel))))
 								.then(Commands.literal("drift")
 										.then(Commands.argument("velocity", Vec3Argument.vec3(false))
 												.executes(ShipCommands::drift)))
@@ -146,6 +150,30 @@ public final class ShipCommands {
 	}
 
 	/** Makes the nearest ship (within 64 blocks) cruise at a fixed velocity while unpiloted. */
+	/** Admin (M8f): adds propellant and fusion units to the nearest ship (up to capacity). */
+	private static int refuel(CommandContext<CommandSourceStack> ctx) {
+		int fuel = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "fuel");
+		int fusion = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "fusion");
+		CommandSourceStack source = ctx.getSource();
+		ShipEntity nearest = null;
+		for (ShipEntity ship : ShipCollisions.shipsIn(source.getLevel())) {
+			if (ship.distanceToSqr(source.getPosition()) < 64 * 64
+					&& (nearest == null || ship.distanceToSqr(source.getPosition()) < nearest.distanceToSqr(source.getPosition()))) {
+				nearest = ship;
+			}
+		}
+		if (nearest == null) {
+			source.sendFailure(Component.translatable("commands.starwake.ship.none_nearby"));
+			return 0;
+		}
+		nearest.addFuel(fuel);
+		nearest.addFusion(fusion);
+		ShipEntity ship = nearest;
+		source.sendSuccess(() -> Component.literal("Ship " + ship.getId() + ": fuel " + ship.fuel() + "/" + ship.fuelCapacity() + ", fusion "
+				+ ship.fusion() + "/" + ship.fusionCapacity()), false);
+		return 1;
+	}
+
 	private static int drift(CommandContext<CommandSourceStack> ctx) {
 		Vec3 velocity = Vec3Argument.getVec3(ctx, "velocity");
 		CommandSourceStack source = ctx.getSource();
