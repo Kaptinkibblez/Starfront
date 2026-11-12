@@ -466,6 +466,29 @@ commit. **Don't start the next milestone until the user confirms the current one
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
   - **User notes for M9 (2026-11-12):** conveyors move items the wrong way; ship flight is buggy
     all around (overhaul it); hub NPCs (guards/crew) add little value: **remove them**.
+  - **M9 plan (user, 2026-11-12):** go through every system one by one (ships, planets/space/galaxy,
+    industry, trade/UI/multiplayer/config) with **audit -> ask -> fix**; ask about nearly everything; one jar
+    at the end (0.9.0). Also: **more distinct, higher-quality block models and item sprites**. Other mods
+    (VS2, Sable, Create Aeronautics, Rayon...) are **references for design only; we write our own code**
+    (Sable = PolyForm Shield, Aeronautics = custom/ARR, VS2 = LGPL-3.0; Starwake is ARR).
+  - **M9 ships (decisions 2026-11-12):**
+    - *Shipyard:* ship blocks move into **real chunks in one hidden `starwake:shipyard` dimension** (VS #319's
+      never-built "store ships outside every world" idea): crossings move only the ship entity; machines,
+      redstone and every block run aboard; machines read the environment of where the ship really is. Old
+      ships are migrated. Size cap **65,536 blocks**.
+    - *Flight feel:* Star Citizen, refined. Mouse-aim **and** a joystick mode (mouse = turn rates, view locked
+      to the nose), toggled by a key and remembered. Top speeds raised (~100 m/s atmosphere, ~250 m/s space).
+    - *Unpiloted ships* hover at an **idle burn (~1/10 of takeoff)**; out of fuel they land if the ground is
+      near, else fall. *Descent (Ctrl, coupled):* up to ~25 m/s, easing to ~3 m/s in the last 15 m.
+    - *Netcode:* the **pilot's client predicts** the flight, the server corrects smoothly; others interpolate.
+    - *Contacts:* **rigid-body contact solver** (our own): rotated block boxes vs terrain/ships, friction,
+      a little bounce; ships slide, tip onto gear and settle.
+    - *Walking aboard:* players are tracked **in ship coordinates on both server and client**.
+    - *Pilot view:* eye raised above the dash; vanilla's "Shift to dismount" replaced by our own hint.
+    - Audit findings (2026-11-12): 26.3 moved grass/podzol/mycelium out of `#minecraft:dirt` (into
+      `#minecraft:grass_blocks`, under `#minecraft:substrate_overworld`), so ships built on grass swallowed the
+      ground (fixed in `ship_excluded`); one test lost a Kestrel (blocks gone server-side, still drawn, no
+      entity; not reproduced yet).
 
 ---
 
