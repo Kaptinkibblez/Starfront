@@ -1,0 +1,8 @@
+{
+ "machine": "smelter",
+ "equation": "Bi2O3 + 3 C -> 2 Bi + 3 CO",
+ "priority": 28,
+ "draw": [
+  "C"
+ ]
+}

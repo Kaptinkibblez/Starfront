@@ -379,6 +379,7 @@
    "CaCO3": 0.0277,
    "KAlSi3O8": 0.04155,
    "Ra": 0.0,
+   "Rn": 0.0,
    "Po": 0.0,
    "Pa": 0.0,
    "Th": 0.003,
@@ -513,6 +514,53 @@
    "SiO2": 0.04968,
    "Br": 0.0003,
    "I": 2e-05
+  }
+ },
+ "starwake:seawater": {
+  "mass": 1.0,
+  "assay": {
+   "H2O": 0.965,
+   "NaCl": 0.0272,
+   "MgCl2": 0.0038,
+   "MgSO4": 0.0017,
+   "CaSO4": 0.0013,
+   "K2SO4": 0.00086,
+   "CaCO3": 0.00012,
+   "NaBr": 8.4e-05,
+   "H3BO3": 2.6e-05,
+   "SrCl2": 1.5e-05,
+   "LiCl": 1e-06,
+   "NaI": 7e-08,
+   "U": 3.3e-09
+  }
+ },
+ "starwake:salt_lake_brine": {
+  "mass": 1.0,
+  "assay": {
+   "H2O": 0.715,
+   "NaCl": 0.2,
+   "KCl": 0.03,
+   "MgCl2": 0.025,
+   "Na2SO4": 0.012,
+   "LiCl": 0.0095,
+   "H3BO3": 0.004,
+   "CaSO4": 0.002,
+   "NaBr": 0.0005,
+   "Rb": 2e-05,
+   "Cs": 2e-06
+  }
+ },
+ "starwake:acid_lake_water": {
+  "mass": 1.0,
+  "assay": {
+   "H2O": 0.88,
+   "H2SO4": 0.065,
+   "HCl": 0.02,
+   "FeSO4": 0.015,
+   "NaCl": 0.012,
+   "ZnSO4": 0.003,
+   "CuSO4": 0.002,
+   "MgSO4": 0.003
   }
  },
  "minecraft:ice": {

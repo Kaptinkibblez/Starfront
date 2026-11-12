@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "starwake:planet/toxic_acid_sea", "required": false},
+    {"id": "starwake:planet/toxic_sulfur_flats", "required": false}
+  ]
+}

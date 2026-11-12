@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": "minecraft:blue_ice",
+    "C": "starwake:copper_cable",
+    "G": "minecraft:glass",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "GBG",
+    "ICI",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:air_separator"
+  }
+}

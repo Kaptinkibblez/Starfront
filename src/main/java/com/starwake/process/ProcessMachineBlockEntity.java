@@ -50,7 +50,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  */
 public class ProcessMachineBlockEntity extends MachineBlockEntity {
 	/** How a machine works out a cycle. */
-	public enum Mode { CRUSH, SEPARATE, PYRO, DRY, WET, EVAPORATE, ELECTRO }
+	public enum Mode { CRUSH, SEPARATE, PYRO, DRY, WET, EVAPORATE, ELECTRO, AIR }
 
 	public enum Process {
 		CRUSHER("crusher", Mode.CRUSH, 1, false, 0, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.CRUSHED_ORE, false, false, false, 0),
@@ -67,15 +67,18 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		CONVERTER("converter", Mode.PYRO, 1, false, 1, outs(ProcessEngine.Out.METAL, ProcessEngine.Out.SLAG, ProcessEngine.Out.FLUE),
 				BulkItem.Kind.SLAG, true, true, false, 0),
 		// M8c-2: wet chemistry and electrochemistry.
-		REACTOR("reactor", Mode.WET, 2, true, 0, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.CRYSTALS, true, true, true, 1),
+		REACTOR("reactor", Mode.WET, 2, true, 1, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.CRYSTALS, true, true, true, 1),
 		LEACH("leach", Mode.WET, 1, false, 0, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.RESIDUE, true, true, true, 1),
-		EVAPORATOR("evaporator", Mode.EVAPORATE, 0, false, 0, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.CRYSTALS, true, true, true, 2),
+		EVAPORATOR("evaporator", Mode.EVAPORATE, 0, false, 0, outs(ProcessEngine.Out.PRIMARY, ProcessEngine.Out.SECONDARY,
+				ProcessEngine.Out.BITTERN), BulkItem.Kind.CRYSTALS, true, true, true, 2),
 		CRYSTALLIZER("crystallizer", Mode.WET, 0, false, 0, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.CRYSTALS, true, false, true, 1),
 		ELECTROLYSIS("electrolysis", Mode.ELECTRO, 2, true, 1, outs(ProcessEngine.Out.METAL, ProcessEngine.Out.PRIMARY), BulkItem.Kind.SLIMES,
 				true, true, true, 1),
 		CHLORINATOR("chlorinator", Mode.DRY, 1, false, 1, outs(ProcessEngine.Out.PRIMARY), BulkItem.Kind.RESIDUE, true, true, true, 0),
 		KROLL("kroll", Mode.DRY, 0, false, 1, outs(ProcessEngine.Out.METAL, ProcessEngine.Out.PRIMARY), BulkItem.Kind.CRYSTALS,
-				true, false, false, 1);
+				true, false, false, 1),
+		// M8c-3a: cryogenic air separation of whatever the planet's air holds.
+		AIR_SEPARATOR("air_separator", Mode.AIR, 0, false, 0, outs(), BulkItem.Kind.CRYSTALS, false, true, true, 0);
 
 		public final String machine;
 		public final Mode mode;
@@ -155,13 +158,14 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 				xy(116, 30)), 3, xy(46, 22), new int[] {-1, 140, 154}));
 		LAYOUTS.put(Process.CONVERTER, layout(List.of(xy(24, 18), xy(24, 42), xy(76, 18), xy(76, 42), xy(96, 30)), 2, xy(46, 22),
 				new int[] {126, 140, -1}));
-		LAYOUTS.put(Process.REACTOR, layout(List.of(xy(34, 18), xy(34, 42), xy(92, 28)), 2, xy(58, 33), new int[] {126, 140, 154}));
+		LAYOUTS.put(Process.REACTOR, layout(List.of(xy(24, 18), xy(24, 42), xy(44, 42), xy(92, 28)), 3, xy(58, 22), new int[] {126, 140, 154}));
 		LAYOUTS.put(Process.LEACH, layout(List.of(xy(34, 28), xy(92, 28)), 1, xy(58, 33), new int[] {126, 140, 154}));
-		LAYOUTS.put(Process.EVAPORATOR, layout(List.of(xy(92, 28)), 0, xy(58, 33), new int[] {126, 140, 154}));
+		LAYOUTS.put(Process.EVAPORATOR, layout(List.of(xy(80, 18), xy(80, 40), xy(100, 29)), 0, xy(50, 33), new int[] {126, 140, 154}));
 		LAYOUTS.put(Process.CRYSTALLIZER, layout(List.of(xy(92, 28)), 0, xy(58, 33), new int[] {126, -1, 154}));
 		LAYOUTS.put(Process.ELECTROLYSIS, layout(List.of(xy(24, 18), xy(24, 42), xy(44, 42), xy(92, 18), xy(92, 42)), 3, xy(58, 22),
 				new int[] {126, 140, 154}));
 		LAYOUTS.put(Process.CHLORINATOR, layout(List.of(xy(34, 18), xy(34, 42), xy(92, 28)), 2, xy(58, 33), new int[] {126, 140, 154}));
+		LAYOUTS.put(Process.AIR_SEPARATOR, layout(List.of(), 0, xy(80, 33), new int[] {-1, 126, 148}));
 		LAYOUTS.put(Process.KROLL, layout(List.of(xy(34, 28), xy(92, 18), xy(92, 42)), 1, xy(58, 33), new int[] {126, -1, -1}));
 	}
 
@@ -182,6 +186,8 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 	private static final Codec<List<Map<String, Double>>> LOTS_CODEC = Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).listOf();
 	/** Stall when any buffer holds this much (outputs blocked). */
 	private static final double BUFFER_LIMIT = 6;
+	/** Cryogenic air separation, J per kg of air processed (~0.11 kWh). */
+	private static final double AIR_SEPARATION_J_PER_KG = 0.4e6;
 
 	private final Process process;
 	private final Map<ProcessEngine.Out, Map<String, Double>> buffers = new EnumMap<>(ProcessEngine.Out.class);
@@ -316,6 +322,9 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		if (buffers.values().stream().anyMatch(b -> total(b) > BUFFER_LIMIT)) return false;
 		boolean hasCharge = process.charge > 0 && !items.get(0).isEmpty() && acceptsCharge(process, items.get(0));
 		boolean hasFeed = process.inletFeed > 0 && inlet != null && inlet.totalKg() > 0.05;
+		if (process.mode == Mode.AIR) {
+			return level != null && !com.starwake.planet.Atmospheres.of(level.dimension()).isEmpty() && gasTank.totalKg() < gasTank.capacityKg() - 1;
+		}
 		boolean go = switch (process.charge) {
 			case 1 -> hasCharge;
 			case 2 -> hasCharge || hasFeed;
@@ -323,8 +332,9 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		};
 		if (!go) return false;
 		if (process == Process.ELECTROLYSIS && hasCharge && metal(items.get(0))) {
-			// Electrorefining needs an acid sulfate electrolyte in the cell.
-			if (inlet == null || inlet.contents().keySet().stream().noneMatch(s -> s.equals("H2SO4") || s.endsWith("SO4"))) return false;
+			// Electrorefining needs an electrolyte in the cell (acid sulfate, nitrate, chloride...).
+			if (inlet == null || inlet.contents().keySet().stream().noneMatch(s -> !s.equals("H2O")
+					&& Species.get(s).map(Species.Info::soluble).orElse(false))) return false;
 		}
 		if (process.charge == 0 && process.reagents > 0) {
 			boolean reagent = !lots.isEmpty();
@@ -375,6 +385,18 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 				}
 				out = ProcessEngine.separate(sep, pool, frother);
 			}
+			case AIR -> {
+				// One cycle processes `rate` kg of air (less where it's thin); 0.4 MJ per kg (cryogenic).
+				double density = com.starwake.planet.Planets.airDensityOf(level.dimension());
+				double kg = spec().rate() * Math.min(1, density);
+				com.starwake.planet.Atmospheres.of(level.dimension()).forEach((k, v) -> pool.merge(k, v * kg, Double::sum));
+				out = new EnumMap<>(ProcessEngine.Out.class);
+				for (var e : pool.entrySet()) {
+					ProcessEngine.Out o = e.getKey().equals("H2O") ? ProcessEngine.Out.LIQUID : ProcessEngine.Out.GAS;
+					out.computeIfAbsent(o, k -> new HashMap<>()).put(e.getKey(), e.getValue());
+				}
+				joules = kg * AIR_SEPARATION_J_PER_KG;
+			}
 			case EVAPORATE -> {
 				out = ProcessEngine.evaporate(pool);
 				joules = pool.getOrDefault("H2O", 0.0) * ProcessEngine.EVAPORATION_J_PER_KG;
@@ -401,13 +423,15 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 				boolean metalOut = List.of(process.outputs).contains(ProcessEngine.Out.METAL);
 				out = ProcessEngine.route(pool, spec().temperature(), process.pyro(), process == Process.SMELTER, supply.air(), supply);
 				if (!process.pyro() && metalOut) {
-					// Kroll: metal products are a sponge, not a calcine.
-					Map<String, Double> primary = out.getOrDefault(ProcessEngine.Out.PRIMARY, new HashMap<>());
-					for (var it = primary.entrySet().iterator(); it.hasNext(); ) {
-						var e = it.next();
-						if (Species.get(e.getKey()).map(Species.Info::metallic).orElse(false)) {
-							out.computeIfAbsent(ProcessEngine.Out.METAL, k -> new HashMap<>()).merge(e.getKey(), e.getValue(), Double::sum);
-							it.remove();
+					// Kroll: metal products are a sponge (or a condensed vapour, like potassium), not a calcine.
+					for (ProcessEngine.Out o : List.of(ProcessEngine.Out.PRIMARY, ProcessEngine.Out.FLUE, ProcessEngine.Out.CONDENSATE)) {
+						Map<String, Double> part = out.getOrDefault(o, new HashMap<>());
+						for (var it = part.entrySet().iterator(); it.hasNext(); ) {
+							var e = it.next();
+							if (Species.get(e.getKey()).map(Species.Info::metallic).orElse(false)) {
+								out.computeIfAbsent(ProcessEngine.Out.METAL, k -> new HashMap<>()).merge(e.getKey(), e.getValue(), Double::sum);
+								it.remove();
+							}
 						}
 					}
 				}
@@ -435,6 +459,7 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 
 	/** Phases without their own slot fall back to one that exists (e.g. condensate in a converter). */
 	private ProcessEngine.Out outputFor(ProcessEngine.Out out) {
+		if (process.outputs.length == 0) return out;
 		for (ProcessEngine.Out o : process.outputs) if (o == out) return out;
 		boolean hasMetal = List.of(process.outputs).contains(ProcessEngine.Out.METAL);
 		if ((out == ProcessEngine.Out.CONDENSATE || out == ProcessEngine.Out.MATTE) && hasMetal) return ProcessEngine.Out.METAL;
@@ -482,6 +507,9 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 	}
 
 	private ItemStack make(ProcessEngine.Out out, Map<String, Double> buffer) {
+		ItemStack element = elementProduct(out, buffer);
+		if (!element.isEmpty()) return element;
+		if (process == Process.EVAPORATOR) return BulkItem.stack(ModProcess.bulk(BulkItem.Kind.CRYSTALS), Assay.of(buffer), 1);
 		if (out == ProcessEngine.Out.METAL || out == ProcessEngine.Out.CONDENSATE) {
 			Map<String, Double> elements = new HashMap<>();
 			buffer.forEach((s, kg) -> Species.get(s).ifPresent(info -> info.elements().forEach((el, f) -> elements.merge(el, f * kg, Double::sum))));
@@ -495,6 +523,37 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 			default -> BulkItem.Kind.SLAG;
 		};
 		return BulkItem.stack(ModProcess.bulk(kind), Assay.of(buffer), 1);
+	}
+
+	/**
+	 * Refined elements are purity-tracked products (M8c-3a): a solid output that is mostly one element
+	 * (cemented cadmium, hydrogen-reduced germanium or molybdenum, precipitated selenium) comes out as
+	 * that element's item (non-metals) or as metal dust (metals), carrying its full composition.
+	 */
+	private ItemStack elementProduct(ProcessEngine.Out out, Map<String, Double> buffer) {
+		if (out == ProcessEngine.Out.METAL || out == ProcessEngine.Out.CONDENSATE) return ItemStack.EMPTY;
+		String main = null;
+		double most = 0, total = total(buffer);
+		for (var e : buffer.entrySet()) {
+			if (e.getValue() > most) {
+				most = e.getValue();
+				main = e.getKey();
+			}
+		}
+		if (main == null || most < 0.5 * total) return ItemStack.EMPTY;
+		Species.Info info = Species.get(main).orElse(null);
+		if (info == null || info.kind() != Species.Kind.METAL && info.kind() != Species.Kind.ELEMENT) return ItemStack.EMPTY;
+		Map<String, Double> elements = new HashMap<>();
+		buffer.forEach((sp, kg) -> Species.get(sp).ifPresent(i -> i.elements().forEach((el, f) -> elements.merge(el, f * kg, Double::sum))));
+		Composition comp = Composition.of(elements);
+		var element = com.starwake.chem.Chemistry.element(main).orElse(null);
+		if (info.kind() == Species.Kind.ELEMENT && element != null && element.form().equals("powder")) {
+			ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(element.item()));
+			stack.set(ModComponents.COMPOSITION, comp);
+			return stack;
+		}
+		if (info.kind() == Species.Kind.METAL) return MetalItems.stack(MetalForm.DUST, comp, 1);
+		return ItemStack.EMPTY;
 	}
 
 	// --- Reagent supply ----------------------------------------------------------------------------------
@@ -566,6 +625,18 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 			}
 			return left;
 		}
+	}
+
+	/** Everything inside (kg per species): buffers, the running cycle, reagent lots and tanks. For radiation. */
+	public Map<String, Double> contents() {
+		Map<String, Double> all = new HashMap<>();
+		buffers.values().forEach(b -> b.forEach((k, v) -> all.merge(k, v, Double::sum)));
+		if (pending != null) pending.values().forEach(b -> b.forEach((k, v) -> all.merge(k, v, Double::sum)));
+		lots.forEach(l -> l.forEach((k, v) -> all.merge(k, v, Double::sum)));
+		for (ChemicalTank t : new ChemicalTank[] {inlet, gasTank, liquidTank}) {
+			if (t != null) t.contents().forEach((k, v) -> all.merge(k, v / (double) Chemicals.KG, Double::sum));
+		}
+		return all;
 	}
 
 	// --- Screen data, removal, save -----------------------------------------------------------------------

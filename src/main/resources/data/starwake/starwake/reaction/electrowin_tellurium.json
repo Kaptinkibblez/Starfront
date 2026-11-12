@@ -1,0 +1,11 @@
+{
+ "machine": "electrolysis",
+ "equation": "Na2TeO3 + H2O -> Te + 2 NaOH + O2",
+ "priority": 35,
+ "draw": [
+  "H2O"
+ ],
+ "electrons": 4,
+ "voltage": 2.5,
+ "note": "Tellurium from caustic leach liquor."
+}

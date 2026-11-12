@@ -1,0 +1,9 @@
+{
+ "machine": "kroll",
+ "equation": "KCl + Na -> NaCl + K",
+ "priority": 12,
+ "draw": [
+  "Na"
+ ],
+ "note": "Sodium reduction; potassium distils off."
+}

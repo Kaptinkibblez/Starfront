@@ -57,11 +57,19 @@ public final class ModProcess {
 		}
 	}
 
+	public static final com.starwake.process.GasCylinderItem GAS_CYLINDER;
+
+	static {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, StarwakeMod.id("gas_cylinder"));
+		GAS_CYLINDER = Registry.register(BuiltInRegistries.ITEM, key, new com.starwake.process.GasCylinderItem(new Item.Properties().setId(key).stacksTo(1)));
+	}
+
 	private ModProcess() {}
 
 	public static void init() {
 		Chemicals.init();
 		FluidStorage.SIDED.registerForBlockEntity((be, side) -> be.fluidStorage(), PROCESS_MACHINE_BE);
+		FluidStorage.ITEM.registerForItems((stack, context) -> new com.starwake.process.GasCylinderItem.Storage(context), GAS_CYLINDER);
 	}
 
 	public static Block block(Process p) {

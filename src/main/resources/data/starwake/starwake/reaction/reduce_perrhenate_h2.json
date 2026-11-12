@@ -1,0 +1,9 @@
+{
+ "machine": "roaster",
+ "equation": "2 NH4ReO4 + 7 H2 -> 2 Re + 2 NH3 + 8 H2O",
+ "priority": 52,
+ "draw": [
+  "H2"
+ ],
+ "note": "Rhenium metal powder."
+}

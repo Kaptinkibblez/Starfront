@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "In2(SO4)3 + 3 Zn -> 3 ZnSO4 + 2 In",
+ "priority": 52,
+ "draw": [
+  "Zn"
+ ],
+ "note": "Zinc dust cements indium."
+}

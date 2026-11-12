@@ -203,7 +203,8 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 				java.util.Map.entry("smelter", "Electric Smelter"), java.util.Map.entry("converter", "Converter"),
 				java.util.Map.entry("reactor", "Chemical Reactor"), java.util.Map.entry("leach", "Leach Tank"), java.util.Map.entry("evaporator", "Evaporator"),
 				java.util.Map.entry("crystallizer", "Crystallizer"), java.util.Map.entry("electrolysis", "Electrolysis Cell"),
-				java.util.Map.entry("chlorinator", "Chlorinator"), java.util.Map.entry("kroll", "Kroll Reactor"));
+				java.util.Map.entry("chlorinator", "Chlorinator"), java.util.Map.entry("kroll", "Kroll Reactor"),
+				java.util.Map.entry("air_separator", "Air Separation Unit"));
 		for (var p : com.starwake.process.ProcessMachineBlockEntity.Process.values()) {
 			builder.add(com.starwake.registry.ModProcess.block(p), machines.get(p.machine));
 		}
@@ -224,6 +225,20 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 			builder.add("item.starwake.bulk_" + k + ".of", v[1]);
 		});
 		builder.add("fluid.starwake.chemical", "Chemical");
+		// M8c-3a.
+		builder.add(com.starwake.registry.ModProcess.GAS_CYLINDER, "Gas Cylinder");
+		builder.add("item.starwake.gas_cylinder.empty", "Empty Gas Cylinder");
+		builder.add("item.starwake.gas_cylinder.of", "Gas Cylinder (%s)");
+		builder.add("item.starwake.gas_cylinder.contents", "%s / %s kg");
+		builder.add("item.starwake.gas_cylinder.suit", "Use while wearing a Survey Suit to refill its oxygen");
+		builder.add("item.starwake.gas_cylinder.help", "Use on a tank or machine to fill; sneak-use to empty");
+		builder.add("message.starwake.pipe.filter", "Pipe filter: %s");
+		builder.add("message.starwake.pipe.filter_any", "anything");
+		builder.add("process.starwake.tooltip.radioactive", "☢ %s · %s at 1 m");
+		builder.add("hud.starwake.rad.rate", "☢ Dose rate");
+		builder.add("hud.starwake.rad.dose", "Acute dose");
+		builder.add("death.attack.starwake.radiation", "%1$s died of radiation sickness");
+		builder.add("death.attack.starwake.radiation.player", "%1$s died of radiation sickness while fighting %2$s");
 		builder.add("process.starwake.tooltip.feed", "%s kg chunk, made of:");
 		builder.add("process.starwake.tooltip.more", "  ... %s more");
 		builder.add("process.starwake.tooltip.elements", "Contains: %s");

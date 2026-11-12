@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "starwake:block/air_separator_front",
+    "side": "starwake:block/air_separator_side",
+    "top": "starwake:block/air_separator_top"
+  }
+}

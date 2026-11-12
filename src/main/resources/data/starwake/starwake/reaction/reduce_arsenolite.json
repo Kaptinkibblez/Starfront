@@ -1,0 +1,9 @@
+{
+ "machine": "smelter",
+ "equation": "As2O3 + 3 C -> 2 As + 3 CO",
+ "priority": 27,
+ "draw": [
+  "C"
+ ],
+ "note": "Arsenic sublimes and condenses as grey arsenic."
+}

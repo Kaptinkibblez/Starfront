@@ -1,0 +1,9 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 LiCl -> 2 Li + Cl2",
+ "priority": 13,
+ "electrons": 2,
+ "voltage": 7.0,
+ "anhydrous": true,
+ "note": "Molten LiCl-KCl cell (450 C)."
+}

@@ -1,4 +1,4 @@
 {
   "replace": false,
-  "values": ["starwake:hypoxia", "starwake:toxic_atmosphere", "starwake:extreme_heat"]
+  "values": ["starwake:hypoxia", "starwake:toxic_atmosphere", "starwake:extreme_heat", "starwake:radiation"]
 }

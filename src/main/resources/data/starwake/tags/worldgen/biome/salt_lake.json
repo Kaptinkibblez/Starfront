@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "starwake:planet/desert_salt_flats", "required": false},
+    {"id": "starwake:planet/desert_dunes", "required": false},
+    {"id": "starwake:planet/desert_mesas", "required": false},
+    {"id": "starwake:planet/desert_canyons", "required": false}
+  ]
+}

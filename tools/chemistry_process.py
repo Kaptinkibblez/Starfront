@@ -32,9 +32,13 @@ ELEMENTS = {e["symbol"]: e for e in json.load(open(os.path.join(BUNDLE, "element
 SPECIES = []
 
 
-def sp(id, name, kind, density, mp, bp, flags=(), toxicity=0.0, color="#8a8a8a", formula=None):
+def sp(id, name, kind, density, mp, bp, flags=(), toxicity=0.0, color="#8a8a8a", formula=None, solubility=None):
+    """solubility: kg per kg of water at 25 C for "soluble" species (None = unlimited); beyond it the
+    excess crystallises (evaporators, precipitation in reactors)."""
     SPECIES.append({"id": id, "name": name, "formula": formula or id, "kind": kind, "density": density, "melting": mp,
                     "boiling": bp, "flags": list(flags), "toxicity": toxicity, "color": color})
+    if solubility is not None:
+        SPECIES[-1]["solubility"] = solubility
 
 
 # Standard electrode potentials E0 (V, M^n+/M): in electrorefining, nobler elements than the metal
@@ -117,10 +121,10 @@ sp("BaSO4", "Barite", "sulfate", 4.48, 1580, 9999, color="#e8e0d8")
 sp("SrSO4", "Celestine", "sulfate", 3.96, 1605, 9999, color="#c8d8e8")
 sp("CaF2", "Fluorite", "halide", 3.18, 1418, 2533, color="#8a5ac8")
 sp("Ca5(PO4)3F", "Fluorapatite", "phosphate", 3.19, 1660, 9999, color="#5a8a7a")
-sp("KCl", "Sylvite", "halide", 1.98, 770, 1420, flags=["soluble"], color="#e8c8c8")
-sp("NaCl", "Halite", "halide", 2.16, 801, 1465, flags=["soluble"], color="#efefef")
+sp("KCl", "Sylvite", "halide", 1.98, 770, 1420, flags=["soluble"], color="#e8c8c8", solubility=0.34)
+sp("NaCl", "Halite", "halide", 2.16, 801, 1465, flags=["soluble"], color="#efefef", solubility=0.36)
 sp("Na2B4O7(H2O)10", "Borax", "sulfate", 1.71, 75, 9999, color="#efefef")
-sp("NaNO3", "Nitratine", "sulfate", 2.26, 308, 380, flags=["soluble"], color="#efefef")
+sp("NaNO3", "Nitratine", "sulfate", 2.26, 308, 380, flags=["soluble"], color="#efefef", solubility=0.91)
 sp("CaSO4(H2O)2", "Gypsum", "sulfate", 2.32, 150, 9999, color="#f2f0ea")
 # Gases and vapours (room-temperature gases go to gas outlets)
 sp("O2", "Oxygen", "gas", 0.0014, -218, -183, color="#a8d8ff")
@@ -147,19 +151,46 @@ sp("NaOH", "Sodium hydroxide", "oxide", 2.13, 318, 1388, flags=["soluble", "toxi
 sp("KOH", "Potassium hydroxide", "oxide", 2.04, 406, 1327, flags=["soluble", "toxic"], toxicity=0.4, color="#f0f0f0")
 sp("NaAl(OH)4", "Sodium aluminate", "oxide", 1.5, 1650, 9999, flags=["soluble"], color="#efefe8")
 sp("Na3AlF6", "Cryolite", "halide", 2.95, 1012, 9999, color="#e8e8f0")
-sp("CaSO4", "Anhydrite", "sulfate", 2.97, 1460, 9999, color="#efece4")
+sp("CaSO4", "Anhydrite", "sulfate", 2.97, 1460, 9999, flags=["soluble"], color="#efece4", solubility=0.0024)
 sp("CuSO4", "Copper sulfate", "sulfate", 3.6, 590, 9999, flags=["soluble"], color="#2a6aff")
 sp("CuO", "Tenorite", "oxide", 6.31, 1326, 2000, color="#1e1e1e")
 sp("ZnSO4", "Zinc sulfate", "sulfate", 3.54, 680, 9999, flags=["soluble"], color="#efefef")
 sp("NiSO4", "Nickel sulfate", "sulfate", 3.68, 840, 9999, flags=["soluble"], color="#3aa84a")
 sp("FeSO4", "Iron(II) sulfate", "sulfate", 3.65, 680, 9999, flags=["soluble"], color="#8ac8a0")
 sp("CoSO4", "Cobalt sulfate", "sulfate", 3.71, 735, 9999, flags=["soluble"], color="#c83a6a")
-sp("Na2SO4", "Sodium sulfate", "sulfate", 2.66, 884, 1429, flags=["soluble"], color="#f2f2f2")
+sp("Na2SO4", "Sodium sulfate", "sulfate", 2.66, 884, 1429, flags=["soluble"], color="#f2f2f2", solubility=0.28)
 sp("PbSO4", "Anglesite", "sulfate", 6.29, 1087, 9999, color="#e8e8e8")
 sp("TiCl4", "Titanium tetrachloride", "halide", 1.73, -24, 136, flags=["toxic"], toxicity=0.6, color="#e8e8a8")
-sp("MgCl2", "Magnesium chloride", "halide", 2.32, 714, 1412, flags=["soluble"], color="#f0f0f0")
+sp("MgCl2", "Magnesium chloride", "halide", 2.32, 714, 1412, flags=["soluble"], color="#f0f0f0", solubility=0.54)
 sp("FeCl2", "Iron(II) chloride", "halide", 3.16, 677, 1023, flags=["soluble"], color="#a8c87a")
 sp("V2O5", "Vanadium pentoxide", "oxide", 3.36, 690, 1750, flags=["toxic"], toxicity=0.3, color="#c88a2a")
+# --- Brines, salts and by-product chemistry (M8c-3a) ---
+sp("MgSO4", "Epsomite", "sulfate", 2.66, 1124, 9999, flags=["soluble"], color="#f2f2f2", solubility=0.35)
+sp("K2SO4", "Arcanite", "sulfate", 2.66, 1069, 1689, flags=["soluble"], color="#f0ece8", solubility=0.12)
+sp("NaBr", "Sodium bromide", "halide", 3.21, 747, 1390, flags=["soluble"], color="#f2f2f2", solubility=0.94)
+sp("NaI", "Sodium iodide", "halide", 3.67, 661, 1304, flags=["soluble"], color="#f2f2ea", solubility=1.84)
+sp("LiCl", "Lithium chloride", "halide", 2.07, 605, 1382, flags=["soluble"], color="#f2f2f2", solubility=0.84)
+sp("SrCl2", "Strontium chloride", "halide", 3.05, 874, 1250, flags=["soluble"], color="#f2f2f2", solubility=0.54)
+sp("CaCl2", "Calcium chloride", "halide", 2.15, 772, 1935, flags=["soluble"], color="#f2f2f2", solubility=0.81)
+sp("H3BO3", "Sassolite", "oxide", 1.44, 171, 300, flags=["soluble"], color="#f2f2f2", solubility=0.057)
+sp("B2O3", "Boron trioxide", "oxide", 2.46, 450, 1860, color="#efefef")
+sp("Na2CO3", "Soda ash", "carbonate", 2.54, 851, 1600, flags=["soluble"], color="#f2f2f2", solubility=0.30)
+sp("Li2CO3", "Lithium carbonate", "carbonate", 2.11, 723, 1310, flags=["soluble"], color="#f6f6f6", solubility=0.013)
+sp("Mg(OH)2", "Brucite", "oxide", 2.34, 350, 9999, color="#efefef")
+sp("NH3", "Ammonia", "gas", 0.00073, -78, -33, flags=["soluble", "toxic"], toxicity=0.5, color="#e8e8ff")
+sp("CdSO4", "Cadmium sulfate", "sulfate", 4.69, 1000, 9999, flags=["soluble", "toxic"], toxicity=0.6, color="#f2f2f2")
+sp("In2(SO4)3", "Indium sulfate", "sulfate", 3.44, 600, 9999, flags=["soluble"], color="#f2f2f2")
+sp("NaGa(OH)4", "Sodium gallate", "oxide", 1.6, 1000, 9999, flags=["soluble"], color="#efefef")
+sp("SeO2", "Selenium dioxide", "oxide", 3.95, 340, 315, flags=["toxic"], toxicity=0.6, color="#f2f2e0")
+sp("H2SeO3", "Selenous acid", "oxide", 3.0, 70, 9999, flags=["soluble", "toxic"], toxicity=0.6, color="#f2f2e8")
+sp("TeO2", "Tellurite", "oxide", 5.67, 732, 1245, color="#efefe0")
+sp("Na2TeO3", "Sodium tellurite", "oxide", 3.0, 700, 9999, flags=["soluble", "toxic"], toxicity=0.4, color="#f2f2f2")
+sp("GeCl4", "Germanium tetrachloride", "halide", 1.88, -49, 83, flags=["toxic"], toxicity=0.5, color="#f0f0e0")
+sp("GeO2", "Germanium dioxide", "oxide", 4.23, 1115, 9999, color="#f2f2f2")
+sp("Re2O7", "Rhenium heptoxide", "oxide", 6.1, 220, 360, color="#f0e8a0")
+sp("HReO4", "Perrhenic acid", "oxide", 3.0, 100, 9999, flags=["soluble"], color="#f2f2e8")
+sp("NH4ReO4", "Ammonium perrhenate", "oxide", 3.97, 365, 9999, flags=["soluble"], color="#f6f6f6", solubility=0.062)
+sp("Bi2O3", "Bismite", "oxide", 8.9, 817, 1890, color="#f0e060")
 
 KNOWN = {s["id"] for s in SPECIES}
 
@@ -169,6 +200,16 @@ BOILING = {"H": -253, "He": -269, "N": -196, "O": -183, "F": -188, "Ne": -246, "
            "Na": 883, "K": 759, "Rb": 688, "Cs": 671, "Li": 1342, "Mg": 1091, "Ca": 1484, "Sr": 1377, "Ba": 1845, "Tl": 1473,
            "Pb": 1749, "Bi": 1564, "Sb": 1587, "In": 2072, "Ga": 2400, "Sn": 2602, "Ag": 2162, "Cu": 2562, "Au": 2856,
            "Al": 2470, "Mn": 2061, "Cr": 2671, "Fe": 2861, "Co": 2927, "Ni": 2913, "Po": 962, "At": 337, "Fr": 677, "Ra": 1737}
+# Radioactivity (M8c-3a): specific activity of the element as it occurs (Bq per kg, natural isotopic
+# mix: K-40, Rb-87, U-238/234/235, Th-232...; longest-lived isotope for the others) and an external
+# dose-rate constant (Sv m^2 per Bq per hour) including short-lived daughters where they build up
+# within days (Ra-226 + Rn/Pb/Bi progeny, Th with its chain, Rn with progeny). Pure alpha emitters
+# (Po-210, Pu-239) are near zero outside the body; they matter when breathed in.
+ACTIVITY = {"K": (3.1e4, 2.1e-14), "Rb": (8.9e5, 1e-17), "Sm": (1.27e5, 1e-18), "Lu": (5.2e4, 6e-14), "Re": (1.0e3, 1e-18),
+            "Th": (4.07e6, 1.0e-13), "U": (2.54e7, 2.0e-15), "Ra": (3.66e13, 2.4e-13), "Rn": (5.7e18, 2.4e-13),
+            "Po": (1.66e17, 1e-18), "Ac": (2.68e15, 1.0e-13), "Pa": (1.75e12, 5.0e-14), "Tc": (6.3e11, 1e-17),
+            "Pm": (3.4e16, 1e-17), "Np": (2.6e10, 3.0e-14), "Pu": (2.3e12, 1e-17), "Fr": (1.4e21, 1.0e-13),
+            "At": (2.5e20, 1.0e-13)}
 TOXIC = {"Hg": 0.9, "As": 0.8, "Cd": 0.7, "Tl": 0.9, "Pb": 0.3, "Be": 0.6, "Po": 1.0, "Pu": 1.0, "Se": 0.4, "Cl": 0.7, "F": 0.9,
          "Br": 0.6, "Rn": 0.5, "U": 0.4, "Th": 0.3, "Ra": 0.9}
 for sym, e in ELEMENTS.items():
@@ -183,6 +224,9 @@ for sym, e in ELEMENTS.items():
     sp(sym, e["name"].capitalize(), kind, e["density"], mp, bp, flags=flags, toxicity=TOXIC.get(sym, 0.0), color=e["color"])
     if sym in POTENTIAL:
         SPECIES[-1]["potential"] = POTENTIAL[sym]
+    if sym in ACTIVITY:
+        SPECIES[-1]["activity"] = ACTIVITY[sym][0]
+        SPECIES[-1]["gamma"] = ACTIVITY[sym][1]
 
 # --- Formula check (mirrors the Java parser) -------------------------------------------------------
 TOKEN = re.compile(r"([A-Z][a-z]?|\(|\)|\d+(?:\.\d+)?)")
@@ -270,8 +314,8 @@ ORES = {
                                                        "Lu": 600, "Gd": 3000, "U": 2000, "Th": 1000, "Sc": 200}),
     "starwake:raw_bastnaesite": ore({"CeCO3F": 0.62, "LaCO3F": 0.38}, 0.75, {"Nd": 30000, "Pr": 9000, "Eu": 300, "Sm": 2000}),
     "starwake:raw_columbite": ore({"FeNb2O6": 0.6, "FeTa2O6": 0.25, "MnNb2O6": 0.15}, 0.7, {"Sn": 3000, "Sc": 400, "U": 1000}),
-    "starwake:raw_uraninite": ore({"UO2": 1.0}, 0.7, {"Ra": 0.3, "Po": 0.0001, "Pa": 0.3, "Th": 3000, "Pb": 20000, "Np": 0.01,
-                                                      "Pu": 0.01, "Tc": 0.01, "Ac": 0.15}),
+    "starwake:raw_uraninite": ore({"UO2": 1.0}, 0.7, {"Ra": 0.3, "Rn": 0.000002, "Po": 0.0001, "Pa": 0.3, "Th": 3000, "Pb": 20000, "Np": 0.000002,
+                                                      "Pu": 0.00001, "Tc": 0.0000005, "Ac": 0.00015}),
     "starwake:raw_barite": ore({"BaSO4": 1.0}, 0.85, {"Sr": 10000}),
     "starwake:raw_celestine": ore({"SrSO4": 1.0}, 0.85, {"Ba": 10000}),
     "starwake:raw_fluorite": ore({"CaF2": 1.0}, 0.8, {"Y": 300, "Ce": 200}),
@@ -283,6 +327,18 @@ ORES = {
     "minecraft:cinnabar": ore({"HgS": 1.0}, 0.7, {"Se": 200, "Sb": 500}),
     "minecraft:sulfur": ore({"S": 1.0}, 0.9, {"Se": 300, "Te": 50}, gangue={"CaSO4(H2O)2": 0.7, "CaCO3": 0.3}),
     "starwake:halite": ore({"NaCl": 0.95, "KCl": 0.03, "CaSO4(H2O)2": 0.02}, 0.95, {"Br": 300, "I": 20}, gangue={"SiO2": 1.0}, mass=1.0),
+    # Brines (M8c-3a), 1 kg of solution, what a Water Pump gives from the sea or a salt lake.
+    # Seawater: 35 g/kg salinity as the salts it crystallises to, plus Br, I, B, Li, Sr and trace U.
+    "starwake:seawater": {"mass": 1.0, "assay": {"H2O": 0.965, "NaCl": 0.0272, "MgCl2": 0.0038, "MgSO4": 0.0017, "CaSO4": 0.0013,
+                                                 "K2SO4": 0.00086, "CaCO3": 0.00012, "NaBr": 0.000084, "H3BO3": 0.000026,
+                                                 "SrCl2": 0.000015, "LiCl": 0.0000010, "NaI": 0.00000007, "U": 0.0000000033}},
+    # Salt-lake brine (Atacama-type): near-saturated NaCl with potash, magnesium, lithium and boron.
+    "starwake:salt_lake_brine": {"mass": 1.0, "assay": {"H2O": 0.715, "NaCl": 0.2, "KCl": 0.03, "MgCl2": 0.025, "Na2SO4": 0.012,
+                                                        "LiCl": 0.0095, "H3BO3": 0.004, "CaSO4": 0.002, "NaBr": 0.0005,
+                                                        "Rb": 0.00002, "Cs": 0.000002}},
+    # Acid crater-lake water (Kawah Ijen-type, pH ~0) on toxic worlds.
+    "starwake:acid_lake_water": {"mass": 1.0, "assay": {"H2O": 0.88, "H2SO4": 0.065, "HCl": 0.02, "FeSO4": 0.015, "NaCl": 0.012,
+                                                        "ZnSO4": 0.003, "CuSO4": 0.002, "MgSO4": 0.003}},
     "minecraft:ice": {"mass": 1.0, "assay": {"H2O": 1.0}},
     "minecraft:packed_ice": {"mass": 1.0, "assay": {"H2O": 1.0}},
     "minecraft:blue_ice": {"mass": 1.0, "assay": {"H2O": 1.0}},
@@ -305,12 +361,12 @@ ORES = {
 REACTIONS = []
 
 
-def rx(machine, name, equation, priority, note=None, draw=None, electrons=None, voltage=None, catalyst=None):
+def rx(machine, name, equation, priority, note=None, draw=None, electrons=None, voltage=None, catalyst=None, anhydrous=None):
     """draw: reactants the machine may feed from its reagent slots, inlet tank or the air (O2).
     electrons/voltage: electrolysis; energy per mole of reaction = electrons x Faraday x voltage.
     catalyst: an element or species that must be present in the catalyst slot (not consumed)."""
     REACTIONS.append({"name": name, "machine": machine, "equation": equation, "priority": priority, "draw": draw,
-                      "electrons": electrons, "voltage": voltage, "catalyst": catalyst, "note": note})
+                      "electrons": electrons, "voltage": voltage, "catalyst": catalyst, "anhydrous": anhydrous, "note": note})
 
 
 # Roaster (650 C, air): sulfides to oxides + SO2, carbonates calcine, cinnabar gives mercury vapour.
@@ -382,8 +438,9 @@ rx("leach", "bayer_boehmite", "AlO(OH) + NaOH + H2O -> NaAl(OH)4", 21, draw=["Na
 rx("crystallizer", "bayer_precipitation", "NaAl(OH)4 -> Al(OH)3 + NaOH", 10, "Seeded cooling precipitates gibbsite; the caustic liquor is recycled.")
 # Electrolysis cell. Energy = electrons x 96485 C/mol x voltage per mole of reaction.
 rx("electrolysis", "hall_heroult", "2 Al2O3 + 3 C -> 4 Al + 3 CO2", 10, "Alumina dissolved in molten cryolite (960 C); carbon anodes burn away.",
-   draw=["C"], electrons=12, voltage=4.2, catalyst="Na3AlF6")
-rx("electrolysis", "magnesium_chloride", "MgCl2 -> Mg + Cl2", 11, "Molten magnesium chloride (Dow / Kroll recycle).", electrons=2, voltage=3.2)
+   draw=["C"], electrons=12, voltage=4.2, catalyst="Na3AlF6", anhydrous=True)
+rx("electrolysis", "magnesium_chloride", "MgCl2 -> Mg + Cl2", 11, "Molten magnesium chloride (Dow / Kroll recycle).", electrons=2, voltage=3.2,
+   anhydrous=True)
 rx("electrolysis", "chlor_alkali", "2 NaCl + 2 H2O -> 2 NaOH + H2 + Cl2", 20, "Brine electrolysis: chlorine, hydrogen and caustic soda.",
    draw=["H2O"], electrons=2, voltage=3.5)
 rx("electrolysis", "chlor_potash", "2 KCl + 2 H2O -> 2 KOH + H2 + Cl2", 21, "Potash brine: chlorine, hydrogen and caustic potash.",
@@ -405,6 +462,62 @@ rx("chlorinator", "flare_chlorinator", "2 CO + O2 -> 2 CO2", 90, draw=["O2"])
 rx("kroll", "kroll_titanium", "TiCl4 + 2 Mg -> Ti + 2 MgCl2", 10, "Magnesium reduces TiCl4 to titanium sponge; MgCl2 goes back to the cell.",
    draw=["Mg"])
 
+# --- M8c-3a: brines, alkali and alkaline-earth metals, by-product recovery ---
+# Molten-salt cells ("anhydrous": skipped while the charge holds water, so brine goes to chlor-alkali).
+rx("electrolysis", "downs_sodium", "2 NaCl -> 2 Na + Cl2", 12, "Downs cell: molten salt gives sodium and chlorine.", electrons=2, voltage=7.0,
+   anhydrous=True)
+rx("electrolysis", "lithium_chloride", "2 LiCl -> 2 Li + Cl2", 13, "Molten LiCl-KCl cell (450 C).", electrons=2, voltage=7.0, anhydrous=True)
+rx("electrolysis", "calcium_chloride", "CaCl2 -> Ca + Cl2", 14, "Molten calcium chloride.", electrons=2, voltage=6.0, anhydrous=True)
+rx("electrolysis", "strontium_chloride", "SrCl2 -> Sr + Cl2", 15, electrons=2, voltage=6.5, anhydrous=True)
+rx("electrolysis", "electrowin_gallium", "4 NaGa(OH)4 -> 4 Ga + 4 NaOH + 3 O2 + 6 H2O", 34,
+   "Gallium plates out of concentrated Bayer liquor.", electrons=12, voltage=4.0)
+rx("electrolysis", "electrowin_tellurium", "Na2TeO3 + H2O -> Te + 2 NaOH + O2", 35, "Tellurium from caustic leach liquor.",
+   draw=["H2O"], electrons=4, voltage=2.5)
+# Reactor: ammonia, soda ash, lithium carbonate, magnesium removal, halogens, cementation, selenium.
+rx("reactor", "haber_ammonia", "N2 + 3 H2 -> 2 NH3", 40, "Haber-Bosch: needs an iron catalyst.", draw=["H2"], catalyst="Fe")
+rx("reactor", "soda_ash", "2 NaOH + CO2 -> Na2CO3 + H2O", 41, "Carbonating caustic soda.", draw=["NaOH"])
+rx("reactor", "brucite_precipitation", "MgCl2 + 2 NaOH -> Mg(OH)2 + 2 NaCl", 42, "Magnesium removed from brine as brucite.", draw=["NaOH"])
+rx("reactor", "lithium_carbonate", "2 LiCl + Na2CO3 -> Li2CO3 + 2 NaCl", 43, "Soda ash precipitates lithium carbonate.", draw=["Na2CO3"])
+rx("reactor", "bromine", "2 NaBr + Cl2 -> 2 NaCl + 2 Br", 44, "Chlorine displaces bromine from bittern.", draw=["Cl2"])
+rx("reactor", "iodine", "2 NaI + Cl2 -> 2 NaCl + 2 I", 45, "Chlorine displaces iodine.", draw=["Cl2"])
+rx("reactor", "cement_copper", "CuSO4 + Zn -> ZnSO4 + Cu", 50, "Zinc dust cements copper out of zinc liquor.", draw=["Zn"])
+rx("reactor", "cement_cadmium", "CdSO4 + Zn -> ZnSO4 + Cd", 51, "Zinc dust cements cadmium.", draw=["Zn"])
+rx("reactor", "cement_indium", "In2(SO4)3 + 3 Zn -> 3 ZnSO4 + 2 In", 52, "Zinc dust cements indium.", draw=["Zn"])
+rx("reactor", "reduce_selenous_acid", "H2SeO3 + 2 SO2 + H2O -> Se + 2 H2SO4", 53, "Sulfur dioxide precipitates red selenium.",
+   draw=["SO2", "H2O"])
+rx("reactor", "hydrolyse_germanium", "GeCl4 + 2 H2O -> GeO2 + 4 HCl", 54, "Germanium tetrachloride hydrolyses to the oxide.", draw=["H2O"])
+rx("reactor", "ammonium_perrhenate", "HReO4 + NH3 -> NH4ReO4", 55, "Ammonia crystallises ammonium perrhenate.", draw=["NH3"])
+# Leach: by-product dissolution.
+rx("leach", "leach_cadmium", "Cd + H2SO4 -> CdSO4 + H2", 30, draw=["H2SO4"])
+rx("leach", "leach_indium", "2 In + 3 H2SO4 -> In2(SO4)3 + 3 H2", 31, draw=["H2SO4"])
+rx("leach", "leach_gallium", "4 Ga + 4 NaOH + 3 O2 + 6 H2O -> 4 NaGa(OH)4", 32, "Gallium follows aluminium into Bayer liquor.",
+   draw=["NaOH", "O2", "H2O"])
+rx("leach", "leach_selenium_dioxide", "SeO2 + H2O -> H2SeO3", 33, draw=["H2O"])
+rx("leach", "leach_tellurite", "TeO2 + 2 NaOH -> Na2TeO3 + H2O", 34, "Caustic leach of roasted slimes.", draw=["NaOH"])
+rx("leach", "leach_rhenium", "Re2O7 + H2O -> 2 HReO4", 35, "Rhenium heptoxide from flue dust dissolves in water.", draw=["H2O"])
+rx("leach", "leach_lithium_carbonate", "Li2CO3 + 2 HCl -> 2 LiCl + H2O + CO2", 36, draw=["HCl"])
+rx("leach", "leach_magnesia_hcl", "MgO + 2 HCl -> MgCl2 + H2O", 37, "Hydrochloric acid washes magnesia out of crude boron.", draw=["HCl"])
+# Roaster: volatile oxides to the flue, hydrogen reductions (inlet H2).
+rx("roaster", "roast_selenium", "Se + O2 -> SeO2", 20, "Selenium dioxide sublimes into the flue dust.", draw=["O2"])
+rx("roaster", "roast_tellurium", "Te + O2 -> TeO2", 21, draw=["O2"])
+rx("roaster", "roast_rhenium", "4 Re + 7 O2 -> 2 Re2O7", 22, "Rhenium leaves molybdenite roasting as volatile heptoxide.", draw=["O2"])
+rx("roaster", "dehydrate_boric_acid", "2 H3BO3 -> B2O3 + 3 H2O", 34)
+rx("roaster", "reduce_molybdite_h2", "MoO3 + 3 H2 -> Mo + 3 H2O", 50, "Hydrogen reduction to molybdenum powder.", draw=["H2"])
+rx("roaster", "reduce_germania_h2", "GeO2 + 2 H2 -> Ge + 2 H2O", 51, draw=["H2"])
+rx("roaster", "reduce_perrhenate_h2", "2 NH4ReO4 + 7 H2 -> 2 Re + 2 NH3 + 8 H2O", 52, "Rhenium metal powder.", draw=["H2"])
+# Chlorinator: germanium.
+rx("chlorinator", "chlorinate_germanium", "Ge + 2 Cl2 -> GeCl4", 13, "Germanium tetrachloride distils off.", draw=["Cl2"])
+# Kroll reactor: magnesium and sodium reductions.
+rx("kroll", "reduce_boron_trioxide", "B2O3 + 3 Mg -> 2 B + 3 MgO", 11, "Moissan process: crude boron in magnesia.", draw=["Mg"])
+rx("kroll", "reduce_potassium", "KCl + Na -> NaCl + K", 12, "Sodium reduction; potassium distils off.", draw=["Na"])
+# Converter: antimony and arsenic oxidise out of metal (softening).
+rx("converter", "soften_antimony", "4 Sb + 3 O2 -> 2 Sb2O3", 30, "Softening: antimony oxidises into the slag.", draw=["O2"])
+rx("converter", "soften_arsenic", "4 As + 3 O2 -> 2 As2O3", 31, "Arsenic leaves as toxic As2O3 fume.", draw=["O2"])
+# Smelter: by-product oxides back to metal.
+rx("smelter", "reduce_senarmontite", "Sb2O3 + 3 C -> 2 Sb + 3 CO", 26, draw=["C"])
+rx("smelter", "reduce_arsenolite", "As2O3 + 3 C -> 2 As + 3 CO", 27, "Arsenic sublimes and condenses as grey arsenic.", draw=["C"])
+rx("smelter", "reduce_bismite", "Bi2O3 + 3 C -> 2 Bi + 3 CO", 28, draw=["C"])
+
 # Missing species used by reactions.
 sp("Sb2O3", "Senarmontite", "oxide", 5.2, 656, 1425, flags=["toxic"], toxicity=0.3, color="#efefef")
 
@@ -417,6 +530,26 @@ SEPARATIONS = {
                  "note": "Magnetite is strongly magnetic; ilmenite, chromite, wolframite, hematite and monazite weakly."},
     "gravity": {"min_density": 4.5, "recovery": 0.8, "entrainment": 0.08, "water": 1.0,
                 "note": "Shaking table: heavy minerals (cassiterite, wolframite, gold, zircon...) separate from light gangue."},
+}
+
+
+# --- Atmospheres (M8c-3a): mass fractions, by planet id or archetype ---------------------------------
+# Real compositions where there is one (Earth, Mars for Veyra, Titan for frozen worlds, Venus/Io for
+# toxic and volcanic ones). Java adds Earth's oxygen to planets that rolled breathable and removes free
+# oxygen from those that didn't; airless planets have none.
+EARTH = {"N2": 0.7552, "O2": 0.2314, "Ar": 0.0129, "CO2": 0.00062, "Ne": 0.0000127, "He": 0.00000072, "CH4": 0.00000097,
+         "Kr": 0.0000033, "Xe": 0.00000039, "H2": 0.000000035}
+ATMOSPHERES = {
+    "overworld": {**EARTH, "H2O": 0.010},
+    "veyra": {"CO2": 0.958, "N2": 0.0172, "Ar": 0.0145, "O2": 0.0005, "CO": 0.0005, "H2O": 0.0002},
+    "lush": {**EARTH, "H2O": 0.020},
+    "ocean": {**EARTH, "H2O": 0.025},
+    "desert": {**EARTH, "H2O": 0.002, "CO2": 0.002},
+    "frozen": {"N2": 0.94, "CH4": 0.05, "Ar": 0.009, "H2": 0.0001, "Ne": 0.0002},
+    "toxic": {"CO2": 0.85, "N2": 0.08, "SO2": 0.04, "Ar": 0.012, "HCl": 0.01, "H2O": 0.005, "CO": 0.003},
+    "volcanic": {"CO2": 0.55, "H2O": 0.2, "SO2": 0.12, "N2": 0.1, "Ar": 0.015, "HCl": 0.01, "CO": 0.005},
+    "crystal": {"N2": 0.75, "Ar": 0.18, "Ne": 0.04, "He": 0.02, "Kr": 0.002, "Xe": 0.0005},
+    "barren": {"Ar": 0.7, "He": 0.2, "Ne": 0.1},
 }
 
 
@@ -460,6 +593,12 @@ def main():
     for r in REACTIONS:
         data = {k: v for k, v in r.items() if v is not None and k != "name"}
         json.dump(data, open(os.path.join(DATA, "reaction", r["name"] + ".json"), "w"), indent=1)
+    d = os.path.join(DATA, "atmosphere")
+    os.makedirs(d, exist_ok=True)
+    for k, v in ATMOSPHERES.items():
+        for sid in v:
+            assert sid in {x["id"] for x in SPECIES}, (k, sid)
+        json.dump({"composition": v}, open(os.path.join(d, k + ".json"), "w"), indent=1)
     for k, v in SEPARATIONS.items():
         json.dump(v, open(os.path.join(DATA, "separation", k + ".json"), "w"), indent=1)
     print(f"{len(SPECIES)} species, {len(ORES)} ore/feed items, {len(REACTIONS)} reactions (all balanced)")

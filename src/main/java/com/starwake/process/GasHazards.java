@@ -29,6 +29,8 @@ public final class GasHazards {
 		int ttl;
 		final double toxicity;
 		final int color;
+		/** Radioactivity in the cloud (Bq; radon). */
+		double activity;
 
 		Cloud(ServerLevel level, Vec3 pos, double radius, int ttl, double toxicity, int color) {
 			this.level = level;
@@ -60,10 +62,25 @@ public final class GasHazards {
 			if (c.level == level && c.pos.distanceTo(at) < 3 && c.color == s.color()) {
 				c.ttl = Math.min(1200, c.ttl + (int) (kg * 60));
 				c.radius = Math.min(8, c.radius + Math.sqrt(kg) * 0.5);
+				c.activity += Radiation.perKg(species)[0] * kg;
 				return;
 			}
 		}
-		CLOUDS.add(new Cloud(level, at, Math.min(8, 1.5 + Math.sqrt(kg) * 1.5), Math.min(1200, 100 + (int) (kg * 60)), s.toxicity(), s.color()));
+		Cloud cloud = new Cloud(level, at, Math.min(8, 1.5 + Math.sqrt(kg) * 1.5), Math.min(1200, 100 + (int) (kg * 60)), s.toxicity(), s.color());
+		cloud.activity = Radiation.perKg(species)[0] * kg;
+		CLOUDS.add(cloud);
+	}
+
+	/** Activity concentration (Bq/m^3) a player is breathing (0 with a Survey Suit on oxygen). */
+	public static double inhaledActivity(Player player) {
+		var suit = PlanetHazards.suit(player);
+		if (!suit.isEmpty() && SurveySuitItem.oxygen(suit) > 0) return 0;
+		double c = 0;
+		for (Cloud cloud : CLOUDS) {
+			if (cloud.activity <= 0 || cloud.level != player.level() || player.position().distanceTo(cloud.pos) > cloud.radius) continue;
+			c += cloud.activity / (4.0 / 3 * Math.PI * Math.pow(cloud.radius, 3));
+		}
+		return c;
 	}
 
 	private static void tick() {

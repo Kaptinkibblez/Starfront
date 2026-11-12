@@ -1,0 +1,9 @@
+{
+ "machine": "roaster",
+ "equation": "MoO3 + 3 H2 -> Mo + 3 H2O",
+ "priority": 50,
+ "draw": [
+  "H2"
+ ],
+ "note": "Hydrogen reduction to molybdenum powder."
+}

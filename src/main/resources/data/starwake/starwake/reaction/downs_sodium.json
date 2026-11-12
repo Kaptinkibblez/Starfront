@@ -1,0 +1,9 @@
+{
+ "machine": "electrolysis",
+ "equation": "2 NaCl -> 2 Na + Cl2",
+ "priority": 12,
+ "electrons": 2,
+ "voltage": 7.0,
+ "anhydrous": true,
+ "note": "Downs cell: molten salt gives sodium and chlorine."
+}

@@ -64,6 +64,22 @@ public class MachineBlock extends BaseEntityBlock {
 				: (l, p, s, be) -> MachineBlockEntity.serverTick(l, p, s, (MachineBlockEntity) be);
 	}
 
+	/** Buckets and gas cylinders fill from / empty into the machine's tanks (M8c-3a). */
+	@Override
+	protected InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+			net.minecraft.world.InteractionHand hand, BlockHitResult hit) {
+		var storage = net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage.SIDED.find(level, pos, hit.getDirection());
+		if (storage != null && stack.getItem() instanceof com.starwake.process.GasCylinderItem) {
+			return com.starwake.process.GasCylinderItem.fillFrom(storage, player, hand) ? InteractionResult.SUCCESS : InteractionResult.TRY_WITH_EMPTY_HAND;
+		}
+		if (storage != null && net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext.forPlayerInteraction(player, hand)
+				.find(net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage.ITEM) != null
+				&& net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorageUtil.interactWithFluidStorage(storage, player, hand)) {
+			return InteractionResult.SUCCESS;
+		}
+		return InteractionResult.TRY_WITH_EMPTY_HAND;
+	}
+
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 		if (!level.isClientSide() && level.getBlockEntity(pos) instanceof MachineBlockEntity machine) {

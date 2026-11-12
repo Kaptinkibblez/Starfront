@@ -1,0 +1,9 @@
+{
+ "machine": "converter",
+ "equation": "4 As + 3 O2 -> 2 As2O3",
+ "priority": 31,
+ "draw": [
+  "O2"
+ ],
+ "note": "Arsenic leaves as toxic As2O3 fume."
+}

@@ -1,0 +1,9 @@
+{
+ "machine": "roaster",
+ "equation": "4 Re + 7 O2 -> 2 Re2O7",
+ "priority": 22,
+ "draw": [
+  "O2"
+ ],
+ "note": "Rhenium leaves molybdenite roasting as volatile heptoxide."
+}

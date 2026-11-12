@@ -1,0 +1,8 @@
+{
+ "machine": "electrolysis",
+ "equation": "4 NaGa(OH)4 -> 4 Ga + 4 NaOH + 3 O2 + 6 H2O",
+ "priority": 34,
+ "electrons": 12,
+ "voltage": 4.0,
+ "note": "Gallium plates out of concentrated Bayer liquor."
+}

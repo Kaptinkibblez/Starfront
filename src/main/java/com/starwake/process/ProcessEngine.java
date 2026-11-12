@@ -28,7 +28,7 @@ import java.util.Map;
  * </ul>
  */
 public final class ProcessEngine {
-	public enum Out { PRIMARY, SECONDARY, METAL, CONDENSATE, MATTE, SLAG, FLUE, GAS, LIQUID }
+	public enum Out { PRIMARY, SECONDARY, BITTERN, METAL, CONDENSATE, MATTE, SLAG, FLUE, GAS, LIQUID }
 
 	/** Where a machine gets drawable reactants. */
 	public interface Supply {
@@ -64,9 +64,13 @@ public final class ProcessEngine {
 	 * present. Returns the electrical energy the reactions need (J; electrolysis).
 	 */
 	/** Whether any of a machine's reactions can run on this pool (catalyst present, reactants available). */
+	/** Above this much water (kg) a charge counts as wet: molten-salt cells won't run. */
+	private static final double WET = 0.02;
+
 	public static boolean canReact(String machine, Map<String, Double> pool, Supply supply, java.util.function.Predicate<String> catalyst) {
 		for (Reactions.Reaction r : Reactions.forMachine(machine)) {
 			if (r.catalyst().isPresent() && !catalyst.test(r.catalyst().get())) continue;
+			if (r.anhydrous() && pool.getOrDefault("H2O", 0.0) > WET) continue;
 			if (extent(r, pool, supply) > EPS) return true;
 		}
 		return false;
@@ -76,6 +80,7 @@ public final class ProcessEngine {
 		double energy = 0;
 		for (Reactions.Reaction r : Reactions.forMachine(machine)) {
 			if (r.catalyst().isPresent() && !catalyst.test(r.catalyst().get())) continue;
+			if (r.anhydrous() && pool.getOrDefault("H2O", 0.0) > WET) continue;
 			double extent = extent(r, pool, supply);
 			if (extent <= EPS) continue;
 			for (Reactions.Term t : r.reactants()) {
@@ -109,22 +114,85 @@ public final class ProcessEngine {
 			else o = Out.PRIMARY;
 			out.computeIfAbsent(o, k -> new HashMap<>()).merge(s.id(), e.getValue(), Double::sum);
 		}
+		// Beyond its solubility a salt crystallises out of the solution (lithium carbonate, gypsum...).
+		Map<String, Double> liquid = out.get(Out.LIQUID);
+		if (liquid != null) {
+			double water = liquid.getOrDefault("H2O", 0.0);
+			for (var it = liquid.entrySet().iterator(); it.hasNext(); ) {
+				var e = it.next();
+				Species.Info s = Species.require(e.getKey());
+				double limit = s.solubilityLimit() * water;
+				if (e.getValue() > limit + EPS) {
+					out.computeIfAbsent(Out.PRIMARY, k -> new HashMap<>()).merge(e.getKey(), e.getValue() - limit, Double::sum);
+					if (limit <= EPS) it.remove();
+					else e.setValue(limit);
+				}
+			}
+		}
 		return out;
 	}
 
 	/** Energy to evaporate water, J/kg (a triple-effect evaporator: about a third of the latent heat). */
 	public static final double EVAPORATION_J_PER_KG = 0.8e6;
 
-	/** Evaporator: water -> condensate (LIQUID), gases -> GAS, everything dissolved crystallises -> PRIMARY. */
+	/**
+	 * Evaporator, fractional crystallisation: the water boils off (condensate -> LIQUID) and salts
+	 * crystallise in the order their solubility is exceeded, collected in three cuts: PRIMARY = what
+	 * comes out before the main salt starts (carbonates, gypsum, insolubles), SECONDARY = the main salt
+	 * (the most abundant one with a solubility limit: halite from seawater) until the next salt starts,
+	 * BITTERN = everything after (potash, magnesium salts, lithium, bromide, borate).
+	 */
 	public static Map<Out, Map<String, Double>> evaporate(Map<String, Double> pool) {
 		Map<Out, Map<String, Double>> out = new EnumMap<>(Out.class);
+		double water = pool.getOrDefault("H2O", 0.0);
+		String main = null;
+		double most = 0;
 		for (var e : pool.entrySet()) {
 			Species.Info s = Species.get(e.getKey()).orElse(null);
-			if (s == null || e.getValue() <= 0) continue;
-			Out o = s.kind() == Species.Kind.WATER ? Out.LIQUID : s.gasAtRoom() || s.kind() == Species.Kind.GAS ? Out.GAS : Out.PRIMARY;
-			out.computeIfAbsent(o, k -> new HashMap<>()).merge(s.id(), e.getValue(), Double::sum);
+			if (s == null || s.kind() == Species.Kind.WATER || !s.soluble() || Double.isInfinite(s.solubilityLimit())) continue;
+			if (e.getValue() > most) {
+				most = e.getValue();
+				main = s.id();
+			}
+		}
+		// Water left when the main salt starts (w1) and when the next one starts (w2).
+		double w1 = main == null ? 0 : Math.min(water, most / Species.require(main).solubilityLimit());
+		double w2 = 0;
+		for (var e : pool.entrySet()) {
+			Species.Info s = Species.get(e.getKey()).orElse(null);
+			if (s == null || s.id().equals(main) || !s.soluble() || s.kind() == Species.Kind.WATER || Double.isInfinite(s.solubilityLimit())) continue;
+			double w = e.getValue() / s.solubilityLimit();
+			if (w < w1) w2 = Math.max(w2, w);
+		}
+		for (var e : pool.entrySet()) {
+			Species.Info s = Species.get(e.getKey()).orElse(null);
+			double kg = e.getValue();
+			if (s == null || kg <= 0) continue;
+			if (s.kind() == Species.Kind.WATER) {
+				add(out, Out.LIQUID, s.id(), kg);
+			} else if (s.gasAtRoom() || s.kind() == Species.Kind.GAS) {
+				add(out, Out.GAS, s.id(), kg);
+			} else if (!s.soluble()) {
+				add(out, Out.PRIMARY, s.id(), kg);
+			} else {
+				double p1 = precipitated(s, kg, w1, water), p2 = precipitated(s, kg, w2, water);
+				add(out, Out.PRIMARY, s.id(), p1);
+				add(out, Out.SECONDARY, s.id(), p2 - p1);
+				add(out, Out.BITTERN, s.id(), kg - p2);
+			}
 		}
 		return out;
+	}
+
+	/** kg of a dissolved species crystallised once the water is down to {@code w} kg. */
+	private static double precipitated(Species.Info s, double kg, double w, double water) {
+		if (Double.isInfinite(s.solubilityLimit())) return w <= EPS ? kg : 0;
+		if (w >= water - EPS) return Math.max(0, kg - s.solubilityLimit() * water);
+		return Math.max(0, kg - s.solubilityLimit() * w);
+	}
+
+	private static void add(Map<Out, Map<String, Double>> out, Out o, String species, double kg) {
+		if (kg > EPS) out.computeIfAbsent(o, k -> new HashMap<>()).merge(species, kg, Double::sum);
 	}
 
 	/** Cell voltage for electrorefining (V). */

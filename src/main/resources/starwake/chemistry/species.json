@@ -842,7 +842,8 @@
    "soluble"
   ],
   "toxicity": 0.0,
-  "color": "#e8c8c8"
+  "color": "#e8c8c8",
+  "solubility": 0.34
  },
  {
   "id": "NaCl",
@@ -856,7 +857,8 @@
    "soluble"
   ],
   "toxicity": 0.0,
-  "color": "#efefef"
+  "color": "#efefef",
+  "solubility": 0.36
  },
  {
   "id": "Na2B4O7(H2O)10",
@@ -882,7 +884,8 @@
    "soluble"
   ],
   "toxicity": 0.0,
-  "color": "#efefef"
+  "color": "#efefef",
+  "solubility": 0.91
  },
  {
   "id": "CaSO4(H2O)2",
@@ -1187,9 +1190,12 @@
   "density": 2.97,
   "melting": 1460,
   "boiling": 9999,
-  "flags": [],
+  "flags": [
+   "soluble"
+  ],
   "toxicity": 0.0,
-  "color": "#efece4"
+  "color": "#efece4",
+  "solubility": 0.0024
  },
  {
   "id": "CuSO4",
@@ -1285,7 +1291,8 @@
    "soluble"
   ],
   "toxicity": 0.0,
-  "color": "#f2f2f2"
+  "color": "#f2f2f2",
+  "solubility": 0.28
  },
  {
   "id": "PbSO4",
@@ -1325,7 +1332,8 @@
    "soluble"
   ],
   "toxicity": 0.0,
-  "color": "#f0f0f0"
+  "color": "#f0f0f0",
+  "solubility": 0.54
  },
  {
   "id": "FeCl2",
@@ -1354,6 +1362,373 @@
   ],
   "toxicity": 0.3,
   "color": "#c88a2a"
+ },
+ {
+  "id": "MgSO4",
+  "name": "Epsomite",
+  "formula": "MgSO4",
+  "kind": "sulfate",
+  "density": 2.66,
+  "melting": 1124,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.35
+ },
+ {
+  "id": "K2SO4",
+  "name": "Arcanite",
+  "formula": "K2SO4",
+  "kind": "sulfate",
+  "density": 2.66,
+  "melting": 1069,
+  "boiling": 1689,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f0ece8",
+  "solubility": 0.12
+ },
+ {
+  "id": "NaBr",
+  "name": "Sodium bromide",
+  "formula": "NaBr",
+  "kind": "halide",
+  "density": 3.21,
+  "melting": 747,
+  "boiling": 1390,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.94
+ },
+ {
+  "id": "NaI",
+  "name": "Sodium iodide",
+  "formula": "NaI",
+  "kind": "halide",
+  "density": 3.67,
+  "melting": 661,
+  "boiling": 1304,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2ea",
+  "solubility": 1.84
+ },
+ {
+  "id": "LiCl",
+  "name": "Lithium chloride",
+  "formula": "LiCl",
+  "kind": "halide",
+  "density": 2.07,
+  "melting": 605,
+  "boiling": 1382,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.84
+ },
+ {
+  "id": "SrCl2",
+  "name": "Strontium chloride",
+  "formula": "SrCl2",
+  "kind": "halide",
+  "density": 3.05,
+  "melting": 874,
+  "boiling": 1250,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.54
+ },
+ {
+  "id": "CaCl2",
+  "name": "Calcium chloride",
+  "formula": "CaCl2",
+  "kind": "halide",
+  "density": 2.15,
+  "melting": 772,
+  "boiling": 1935,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.81
+ },
+ {
+  "id": "H3BO3",
+  "name": "Sassolite",
+  "formula": "H3BO3",
+  "kind": "oxide",
+  "density": 1.44,
+  "melting": 171,
+  "boiling": 300,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.057
+ },
+ {
+  "id": "B2O3",
+  "name": "Boron trioxide",
+  "formula": "B2O3",
+  "kind": "oxide",
+  "density": 2.46,
+  "melting": 450,
+  "boiling": 1860,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefef"
+ },
+ {
+  "id": "Na2CO3",
+  "name": "Soda ash",
+  "formula": "Na2CO3",
+  "kind": "carbonate",
+  "density": 2.54,
+  "melting": 851,
+  "boiling": 1600,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2",
+  "solubility": 0.3
+ },
+ {
+  "id": "Li2CO3",
+  "name": "Lithium carbonate",
+  "formula": "Li2CO3",
+  "kind": "carbonate",
+  "density": 2.11,
+  "melting": 723,
+  "boiling": 1310,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f6f6f6",
+  "solubility": 0.013
+ },
+ {
+  "id": "Mg(OH)2",
+  "name": "Brucite",
+  "formula": "Mg(OH)2",
+  "kind": "oxide",
+  "density": 2.34,
+  "melting": 350,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefef"
+ },
+ {
+  "id": "NH3",
+  "name": "Ammonia",
+  "formula": "NH3",
+  "kind": "gas",
+  "density": 0.00073,
+  "melting": -78,
+  "boiling": -33,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.5,
+  "color": "#e8e8ff"
+ },
+ {
+  "id": "CdSO4",
+  "name": "Cadmium sulfate",
+  "formula": "CdSO4",
+  "kind": "sulfate",
+  "density": 4.69,
+  "melting": 1000,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "In2(SO4)3",
+  "name": "Indium sulfate",
+  "formula": "In2(SO4)3",
+  "kind": "sulfate",
+  "density": 3.44,
+  "melting": 600,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "NaGa(OH)4",
+  "name": "Sodium gallate",
+  "formula": "NaGa(OH)4",
+  "kind": "oxide",
+  "density": 1.6,
+  "melting": 1000,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#efefef"
+ },
+ {
+  "id": "SeO2",
+  "name": "Selenium dioxide",
+  "formula": "SeO2",
+  "kind": "oxide",
+  "density": 3.95,
+  "melting": 340,
+  "boiling": 315,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#f2f2e0"
+ },
+ {
+  "id": "H2SeO3",
+  "name": "Selenous acid",
+  "formula": "H2SeO3",
+  "kind": "oxide",
+  "density": 3.0,
+  "melting": 70,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.6,
+  "color": "#f2f2e8"
+ },
+ {
+  "id": "TeO2",
+  "name": "Tellurite",
+  "formula": "TeO2",
+  "kind": "oxide",
+  "density": 5.67,
+  "melting": 732,
+  "boiling": 1245,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#efefe0"
+ },
+ {
+  "id": "Na2TeO3",
+  "name": "Sodium tellurite",
+  "formula": "Na2TeO3",
+  "kind": "oxide",
+  "density": 3.0,
+  "melting": 700,
+  "boiling": 9999,
+  "flags": [
+   "soluble",
+   "toxic"
+  ],
+  "toxicity": 0.4,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "GeCl4",
+  "name": "Germanium tetrachloride",
+  "formula": "GeCl4",
+  "kind": "halide",
+  "density": 1.88,
+  "melting": -49,
+  "boiling": 83,
+  "flags": [
+   "toxic"
+  ],
+  "toxicity": 0.5,
+  "color": "#f0f0e0"
+ },
+ {
+  "id": "GeO2",
+  "name": "Germanium dioxide",
+  "formula": "GeO2",
+  "kind": "oxide",
+  "density": 4.23,
+  "melting": 1115,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f2f2f2"
+ },
+ {
+  "id": "Re2O7",
+  "name": "Rhenium heptoxide",
+  "formula": "Re2O7",
+  "kind": "oxide",
+  "density": 6.1,
+  "melting": 220,
+  "boiling": 360,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0e8a0"
+ },
+ {
+  "id": "HReO4",
+  "name": "Perrhenic acid",
+  "formula": "HReO4",
+  "kind": "oxide",
+  "density": 3.0,
+  "melting": 100,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f2f2e8"
+ },
+ {
+  "id": "NH4ReO4",
+  "name": "Ammonium perrhenate",
+  "formula": "NH4ReO4",
+  "kind": "oxide",
+  "density": 3.97,
+  "melting": 365,
+  "boiling": 9999,
+  "flags": [
+   "soluble"
+  ],
+  "toxicity": 0.0,
+  "color": "#f6f6f6",
+  "solubility": 0.062
+ },
+ {
+  "id": "Bi2O3",
+  "name": "Bismite",
+  "formula": "Bi2O3",
+  "kind": "oxide",
+  "density": 8.9,
+  "melting": 817,
+  "boiling": 1890,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#f0e060"
  },
  {
   "id": "H",
@@ -1581,7 +1956,9 @@
   "flags": [],
   "toxicity": 0.0,
   "color": "#c8c8c0",
-  "potential": -2.93
+  "potential": -2.93,
+  "activity": 31000.0,
+  "gamma": 2.1e-14
  },
  {
   "id": "Ca",
@@ -1816,7 +2193,9 @@
   "boiling": 688,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8c4b8"
+  "color": "#c8c4b8",
+  "activity": 890000.0,
+  "gamma": 1e-17
  },
  {
   "id": "Sr",
@@ -1893,7 +2272,9 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a8a8b0"
+  "color": "#a8a8b0",
+  "activity": 630000000000.0,
+  "gamma": 1e-17
  },
  {
   "id": "Ru",
@@ -2124,7 +2505,9 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c0d0c0"
+  "color": "#c0d0c0",
+  "activity": 3.4e+16,
+  "gamma": 1e-17
  },
  {
   "id": "Sm",
@@ -2136,7 +2519,9 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8c8c0"
+  "color": "#c8c8c0",
+  "activity": 127000.0,
+  "gamma": 1e-18
  },
  {
   "id": "Eu",
@@ -2244,7 +2629,9 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c0c0c0"
+  "color": "#c0c0c0",
+  "activity": 52000.0,
+  "gamma": 6e-14
  },
  {
   "id": "Hf",
@@ -2295,7 +2682,9 @@
   "flags": [],
   "toxicity": 0.0,
   "color": "#a8a8b0",
-  "potential": 0.3
+  "potential": 0.3,
+  "activity": 1000.0,
+  "gamma": 1e-18
  },
  {
   "id": "Os",
@@ -2419,7 +2808,9 @@
    "toxic"
   ],
   "toxicity": 1.0,
-  "color": "#b0b0b8"
+  "color": "#b0b0b8",
+  "activity": 1.66e+17,
+  "gamma": 1e-18
  },
  {
   "id": "At",
@@ -2431,7 +2822,9 @@
   "boiling": 337,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#3a3a3a"
+  "color": "#3a3a3a",
+  "activity": 2.5e+20,
+  "gamma": 1e-13
  },
  {
   "id": "Rn",
@@ -2445,7 +2838,9 @@
    "toxic"
   ],
   "toxicity": 0.5,
-  "color": "#d0f0d0"
+  "color": "#d0f0d0",
+  "activity": 5.7e+18,
+  "gamma": 2.4e-13
  },
  {
   "id": "Fr",
@@ -2457,7 +2852,9 @@
   "boiling": 677,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8c0a0"
+  "color": "#c8c0a0",
+  "activity": 1.4e+21,
+  "gamma": 1e-13
  },
  {
   "id": "Ra",
@@ -2471,7 +2868,9 @@
    "toxic"
   ],
   "toxicity": 0.9,
-  "color": "#e8f0e0"
+  "color": "#e8f0e0",
+  "activity": 36600000000000.0,
+  "gamma": 2.4e-13
  },
  {
   "id": "Ac",
@@ -2483,7 +2882,9 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#c8d0e0"
+  "color": "#c8d0e0",
+  "activity": 2680000000000000.0,
+  "gamma": 1e-13
  },
  {
   "id": "Th",
@@ -2498,7 +2899,9 @@
   ],
   "toxicity": 0.3,
   "color": "#909098",
-  "potential": -1.9
+  "potential": -1.9,
+  "activity": 4070000.0,
+  "gamma": 1e-13
  },
  {
   "id": "Pa",
@@ -2510,7 +2913,9 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a8a8b0"
+  "color": "#a8a8b0",
+  "activity": 1750000000000.0,
+  "gamma": 5e-14
  },
  {
   "id": "U",
@@ -2525,7 +2930,9 @@
   ],
   "toxicity": 0.4,
   "color": "#8a9080",
-  "potential": -1.8
+  "potential": -1.8,
+  "activity": 25400000.0,
+  "gamma": 2e-15
  },
  {
   "id": "Np",
@@ -2537,7 +2944,9 @@
   "boiling": 3000,
   "flags": [],
   "toxicity": 0.0,
-  "color": "#a0a0a8"
+  "color": "#a0a0a8",
+  "activity": 26000000000.0,
+  "gamma": 3e-14
  },
  {
   "id": "Pu",
@@ -2551,7 +2960,9 @@
    "toxic"
   ],
   "toxicity": 1.0,
-  "color": "#909098"
+  "color": "#909098",
+  "activity": 2300000000000.0,
+  "gamma": 1e-17
  },
  {
   "id": "Am",

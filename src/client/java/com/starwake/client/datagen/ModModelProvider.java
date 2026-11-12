@@ -220,6 +220,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		ModPlanetBlocks.ores().forEach(ore -> generators.generateFlatItem(ore.raw(), ModelTemplates.FLAT_ITEM));
 		generators.generateFlatItem(ModItems.SURVEY_SUIT, ModelTemplates.FLAT_ITEM);
 		generators.generateFlatItem(com.starwake.registry.ModHubBlocks.SEALED_CARGO, ModelTemplates.FLAT_ITEM);
+		generators.generateFlatItem(com.starwake.registry.ModProcess.GAS_CYLINDER, ModelTemplates.FLAT_ITEM);
 		// Bulk process materials (M8c): grey textures tinted by their main species.
 		for (var item : com.starwake.registry.ModProcess.bulkItems()) {
 			var texture = net.minecraft.resources.Identifier.fromNamespaceAndPath("starwake", "item/bulk_" + item.kind().id);

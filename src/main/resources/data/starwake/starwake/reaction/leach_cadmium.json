@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "Cd + H2SO4 -> CdSO4 + H2",
+ "priority": 30,
+ "draw": [
+  "H2SO4"
+ ]
+}

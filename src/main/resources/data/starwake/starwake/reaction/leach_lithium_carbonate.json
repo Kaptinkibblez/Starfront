@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "Li2CO3 + 2 HCl -> 2 LiCl + H2O + CO2",
+ "priority": 36,
+ "draw": [
+  "HCl"
+ ]
+}

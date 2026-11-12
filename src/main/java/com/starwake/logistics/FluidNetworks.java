@@ -110,7 +110,8 @@ public final class FluidNetworks {
 			}
 			if (targets.isEmpty()) continue;
 			try (Transaction tx = Transaction.openOuter()) {
-				long moved = StorageUtil.move(from, new CombinedStorage<>(targets), v -> true, amount, tx);
+				var filter = level.getBlockEntity(pos) instanceof FluidPipeBlockEntity pipe ? pipe : null;
+				long moved = StorageUtil.move(from, new CombinedStorage<>(targets), v -> filter == null || filter.allows(v), amount, tx);
 				if (moved > 0) tx.commit();
 			}
 		}

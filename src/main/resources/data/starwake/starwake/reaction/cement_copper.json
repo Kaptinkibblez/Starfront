@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "CuSO4 + Zn -> ZnSO4 + Cu",
+ "priority": 50,
+ "draw": [
+  "Zn"
+ ],
+ "note": "Zinc dust cements copper out of zinc liquor."
+}

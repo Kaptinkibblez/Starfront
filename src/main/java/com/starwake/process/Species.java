@@ -32,14 +32,20 @@ public final class Species {
 	public enum Kind { METAL, ELEMENT, SULFIDE, OXIDE, SILICATE, CARBONATE, SULFATE, PHOSPHATE, HALIDE, GAS, ORGANIC, CARBON, WATER }
 
 	public record Info(String id, String name, String formula, Kind kind, double density, double melting, double boiling, Set<String> flags,
-			double toxicity, int color, Map<String, Double> elements, double molarMass, int index, double potential) {
+			double toxicity, int color, Map<String, Double> elements, double molarMass, int index, double potential, double solubility,
+			double activity, double gamma) {
+		/** kg that dissolve per kg of water (infinite when unlimited). */
+		public double solubilityLimit() {
+			return Double.isNaN(solubility) ? Double.POSITIVE_INFINITY : solubility;
+		}
+
 		/** Dissolves into aqueous solutions. */
 		public boolean soluble() {
 			return flags.contains("soluble") || kind == Kind.WATER;
 		}
 
 		public Component displayName() {
-			return Component.translatable("species.starwake." + id.toLowerCase().replaceAll("[^a-z0-9]", "_"), name);
+			return Component.translatableWithFallback("species.starwake." + id.toLowerCase().replaceAll("[^a-z0-9]", "_"), name);
 		}
 
 		public boolean has(String flag) {
@@ -101,7 +107,9 @@ public final class Species {
 			Info info = new Info(o.get("id").getAsString(), o.get("name").getAsString(), formula, Kind.valueOf(o.get("kind").getAsString().toUpperCase()),
 					o.get("density").getAsDouble(), o.get("melting").getAsDouble(), o.get("boiling").getAsDouble(), Set.copyOf(flags),
 					o.get("toxicity").getAsDouble(), Integer.parseInt(o.get("color").getAsString().substring(1), 16), Map.copyOf(fractions), molar,
-					out.size(), o.has("potential") ? o.get("potential").getAsDouble() : Double.NaN);
+					out.size(), o.has("potential") ? o.get("potential").getAsDouble() : Double.NaN,
+					o.has("solubility") ? o.get("solubility").getAsDouble() : Double.NaN,
+					o.has("activity") ? o.get("activity").getAsDouble() : 0, o.has("gamma") ? o.get("gamma").getAsDouble() : 0);
 			out.add(info);
 			map.put(info.id(), info);
 		}

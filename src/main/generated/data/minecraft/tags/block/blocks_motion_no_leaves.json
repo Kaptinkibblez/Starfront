@@ -85,6 +85,7 @@
     "starwake:crystallizer",
     "starwake:electrolysis",
     "starwake:chlorinator",
-    "starwake:kroll"
+    "starwake:kroll",
+    "starwake:air_separator"
   ]
 }

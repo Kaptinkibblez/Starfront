@@ -99,6 +99,27 @@ public class FluidPipeBlock extends Block implements EntityBlock {
 		Direction side = Direction.getApproximateNearest(local.x, local.y, local.z);
 		PipeSide current = state.getValue(SIDES.get(side));
 		if (current == PipeSide.NONE || level.getBlockState(pos.relative(side)).getBlock() instanceof FluidPipeBlock) return InteractionResult.PASS;
+		if (current == PipeSide.EXTRACT && player.isSecondaryUseActive()) {
+			// Sneak-use an extract arm: cycle the species filter through what the source holds.
+			if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FluidPipeBlockEntity pipe) {
+				java.util.List<String> options = new java.util.ArrayList<>();
+				options.add("");
+				var from = FluidStorage.SIDED.find(level, pos.relative(side), side.getOpposite());
+				if (from != null) {
+					for (var view : from) {
+						if (view.isResourceBlank() || view.getAmount() <= 0) continue;
+						com.starwake.process.Chemicals.speciesOf(view.getResource()).filter(sp -> !options.contains(sp)).ifPresent(options::add);
+					}
+				}
+				if (!pipe.filter().isEmpty() && !options.contains(pipe.filter())) options.add(pipe.filter());
+				String next = options.get((options.indexOf(pipe.filter()) + 1) % options.size());
+				pipe.setFilter(next);
+				Component what = next.isEmpty() ? Component.translatable("message.starwake.pipe.filter_any")
+						: com.starwake.process.Species.get(next).map(com.starwake.process.Species.Info::displayName).orElse(Component.literal(next));
+				player.sendOverlayMessage(Component.translatable("message.starwake.pipe.filter", what));
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (!level.isClientSide()) {
 			PipeSide next = current == PipeSide.EXTRACT ? PipeSide.CONNECTED : PipeSide.EXTRACT;
 			level.setBlockAndUpdate(pos, state.setValue(SIDES.get(side), next));

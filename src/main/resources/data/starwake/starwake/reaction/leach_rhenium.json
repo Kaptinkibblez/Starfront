@@ -1,0 +1,9 @@
+{
+ "machine": "leach",
+ "equation": "Re2O7 + H2O -> 2 HReO4",
+ "priority": 35,
+ "draw": [
+  "H2O"
+ ],
+ "note": "Rhenium heptoxide from flue dust dissolves in water."
+}

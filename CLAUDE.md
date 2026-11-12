@@ -303,6 +303,30 @@ commit. **Don't start the next milestone until the user confirms the current one
         kWh/kg Zn, acid regenerated); impure copper anodes -> 100% Cu cathode, Ag/Au/Pb slimes, Ni
         in the bleed; brine evaporated to salt; pump and condenser fill tanks; charges wait for
         their reagents instead of passing through unreacted.)*
+  - **8c-3 decisions (user, 2026-11-12):** **real routes** for every rare element (REE by solvent
+    extraction, PGMs from slimes, Ga from Bayer liquor, Ge/In/Cd from zinc residues, Re from
+    molybdenite flue dust, Se/Te from slimes, U/Th from monazite); **per-planet atmospheres** (an Air
+    Separation Unit separates whatever that planet's air holds); **pumps read the biome** (ocean =
+    seawater, evaporite worlds = Li/K/B salt-lake brine; fractional crystallisation in real order);
+    **radiation now** (activity from the assay, dose from carried/nearby material, radon leaks;
+    suit shielding in 8h); **tanks + a Gas Cylinder item** (refills the suit's O2); refined elements
+    are **purity-tracked** (metals as composition ingots, non-metals as element items with a
+    composition); split into **8c-3a** (atmospheres + ASU, brines + salts, radiation, by-product
+    recovery: Se Te Ag Au Ga Ge Cd Re Mo Bi Sb As...) and **8c-3b** (rare earths, PGMs, actinides,
+    audit that every natural element has a route), each with a jar + pause.
+  - [x] 8c-3a. Atmospheres + Air Separation Unit, biome-aware pumps (seawater, salt-lake brine, acid
+        lake water), fractional crystallisation, solubility limits, molten-salt cells (Na, Li, Ca, Sr,
+        Mg), by-product recovery (Se, Te, Ga, Ge, Cd, In, Re, Mo, Br, I, B, K, Sb, As, Bi), Haber
+        ammonia, pipe species filters, Gas Cylinder, purity-tracked element products, radiation.
+        *(Verified 2026-11-12, dedicated server + client: Overworld air -> ASU -> O2-filtered pipe
+        fills a tank with O2 only; salt-lake brine evaporated into gypsum / 99.3% halite / bittern (KCl
+        27%, MgCl2 22%, LiCl 8.4%, borate 3.5%); LiCl + soda ash -> Li2CO3 (solubility loss real);
+        Downs cell 0.393 kg Na per kg NaCl; molten LiCl -> Li; H2SeO3 + SO2 -> selenium powder
+        (Se 100%); MoO3 + H2 -> Mo dust 99.996%; Re flue dust, NH4ReO4 crystals; GeCl4 -> GeO2;
+        CdSO4 + Zn -> Cd; KCl + Na -> K; NaBr + Cl2 -> Br; Ga leached into Bayer liquor and
+        electrowon; pumps give seawater / brine by biome; uraninite shows 4 uSv/h at 1 m per chunk,
+        64 chunks + 4 g radium nearby read 1.9-4.8 mSv/h on the HUD; an O2 cylinder refills the
+        suit; cylinders fill from tanks and sneak-empty into them.)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
 
 ---
@@ -836,8 +860,8 @@ normal gravity.
   needed; a weak grid just makes it slower.
 - **Electrolysis energy** = moles of reaction x electrons x 96485 x cell voltage (`electrons`,
   `voltage` in reaction JSON): Hall-Heroult 12 e at 4.2 V (~12.5 kWh/kg Al), chlor-alkali 2 e at
-  3.5 V, zinc 4 e per 2 Zn at 3.3 V. **Electrorefining** (a metal item as the charge, needs an acid
-  sulfate electrolyte in the inlet): the base metal plates out pure, nobler elements (higher
+  3.5 V, zinc 4 e per 2 Zn at 3.3 V. **Electrorefining** (a metal item as the charge, needs an
+  electrolyte, any dissolved salt or acid, in the inlet): the base metal plates out pure, nobler elements (higher
   `potential` in species.json) plus Pb/Sn/Se/Te go to anode slimes, less noble ones dissolve into
   the liquid outlet; 0.3 V x 2 F per mole. An idle cell with metal sulfate in the inlet electrowins it.
 - **Catalysts** (`catalyst` in reaction JSON) must be in the catalyst slot and are never used up:
@@ -861,7 +885,65 @@ normal gravity.
   machines with `/item replace ... with <item>[starwake:assay={...}]` (ppb) and `/data merge block
   ... {inlet:{SO2:162000L}}` (droplets, 81000 per kg), `/tick sprint`, then `/data get block`.
 
+## How residues, brines, air and radiation work (Milestone 8c-3a)
+
+- **Air** (`planet/Atmospheres`, datapack `starwake/atmosphere/<id>.json`, from
+  `tools/chemistry_process.py` `ATMOSPHERES`): mass fractions per planet id (overworld = real Earth
+  air incl. Ne/He/Kr/Xe, veyra = Mars-like) or archetype (frozen = Titan-like N2/CH4, toxic and
+  volcanic = Venus/Io-like CO2/SO2/HCl, crystal = noble-gas rich). A breathable planet gets Earth's
+  23% O2, a non-breathable one loses free O2, airless ones and space have none. Cached per dimension.
+- **Air Separation Unit** (`Process.AIR_SEPARATOR`, Mode AIR): `rate` kg of air per cycle (scaled by
+  air density), 0.4 MJ/kg; gases to the off-gas tank (one fluid per species), water to the liquid
+  tank; stops when the gas tank is nearly full. **Pipe filters** (`FluidPipeBlockEntity.filter`):
+  sneak-use an extract arm to cycle through the species the source holds; filtered pipes only pull
+  that pure species (`/data merge block ... {filter:"O2"}` in tests).
+- **Brines:** the Water Pump reads the biome of its water (`#starwake:seawater` = oceans, beaches and
+  our ocean biomes; `#starwake:salt_lake` = desert biomes; `#starwake:acid_water` = toxic acid seas)
+  and pumps the feeds `starwake:seawater` (real 35 g/kg salts + Br, B, Sr, Li, I, U),
+  `salt_lake_brine` (Atacama-type, Li 0.16%) or `acid_lake_water` (pH ~0 Kawah Ijen-type); fresh
+  water elsewhere. Its tank is a mixture tank.
+- **Solubility** (`solubility` kg/kg water in species.json; unlimited when absent): `routeWet`
+  crystallises whatever exceeds it (Li2CO3, NH4ReO4, gypsum precipitate in reactors). The
+  **Evaporator** dries a 2 kg slice and cuts the crystals in real order: early salts (insolubles,
+  carbonates, gypsum) before the main salt starts, the main salt (largest limited one, halite)
+  until the next one starts, then the bittern (K, Mg, Li, Br, B salts). Water to the liquid tank.
+- **Anhydrous reactions** (`anhydrous: true`): molten-salt cells (Downs Na, Li, Ca, Sr, Mg,
+  Hall-Heroult) skip a wet charge (> 0.02 kg water), so brine goes to chlor-alkali instead.
+- **By-product routes** (reaction JSON): Se: roast -> SeO2 flue -> water leach -> H2SeO3 + SO2 ->
+  Se. Te: roast -> TeO2 -> caustic leach -> electrowin. Re: molybdenite roast -> Re2O7 flue -> leach
+  -> HReO4 + NH3 -> NH4ReO4 -> H2 reduction. Mo: MoO3 + H2 (roaster with an H2 inlet). Ge:
+  chlorinate -> GeCl4 -> hydrolyse -> GeO2 -> H2. Cd/In/Cu: acid leach then zinc cementation
+  (reactor reagent slot). Ga: Bayer leach -> NaGa(OH)4 in the liquor -> electrowin. Li: bittern +
+  NaOH (Mg out as brucite) + soda ash -> Li2CO3 -> HCl -> LiCl -> molten cell. K: KCl + Na (Kroll
+  reactor). B: H3BO3 -> B2O3 -> Mg (Kroll) -> HCl wash. Br/I: Cl2 displacement. Sb/As: converter
+  softening -> oxides -> smelter + C (As sublimes). NH3: Haber (iron catalyst). Pb bullion
+  electrorefines generically (Bi, Sb, Ag to slimes).
+- **Element products** (`ProcessMachineBlockEntity.elementProduct`): a solid output that is >= 50%
+  one element comes out as that element's powder item (non-metals: Se, Te, Ge, B, I) or as
+  `metal_dust` (metals: Mo, Re, Cd), carrying its full composition (purity-tracked).
+- **Gas Cylinder** (`process/GasCylinderItem`, component `starwake:gas` = species + droplets, 5 kg,
+  gases only; Fabric `FluidStorage.ITEM` via `SingleVariantItemStorage`): use on a tank or machine =
+  fill only (a held right-click would otherwise toggle the gas back), sneak-use = empty into it;
+  use in the air with O2 while wearing the Survey Suit refills it at 0.84 kg O2/day.
+- **Radiation** (`process/Radiation`): species.json carries `activity` (Bq/kg, natural isotopes) and
+  `gamma` (Sv m^2/(Bq h), with short-lived progeny) on element species; compounds derive them from
+  their element fractions; item values are cached per item + components (element samples = 1 g,
+  other element items 1 kg). Once a second per player: inventory at 0.4 m + containers, machines,
+  tanks and dropped items within 8 blocks (inverse square, no shielding until 8h) + inhaled radon
+  in gas clouds (9e-9 Sv/h per Bq/m^3; the suit on oxygen blocks it). Acute dose heals with a 1200 s
+  half-life; 0.5 Sv hunger, 1 Sv weakness, 2 Sv sickness damage, 4 Sv severe + nausea, 8 Sv
+  ~2 HP/s (`starwake:radiation`, bypasses armour). Synced player attachment `starwake:radiation`
+  (dose, rate) -> HUD card under the environment card; item tooltips show activity and dose rate.
+
 ## 26.3 gotchas (learned the hard way)
+
+- **`Component.translatable(key, fallback)` treats the second argument as a format arg**, not a
+  fallback: use `Component.translatableWithFallback`.
+- Fabric `FluidStorageUtil.interactWithFluidStorage` tries "fill the hand" then "empty the hand", and
+  a held right-click repeats every 4 ticks, so a container item toggles back and forth. For
+  multi-use items pick one direction per gesture (we fill on use, empty on sneak-use).
+- Fabric attachments: `AttachmentRegistry.create(id, b -> b.persistent(codec).syncWith(streamCodec,
+  AttachmentSyncPredicate.targetOnly()))`; setting null removes it.
 
 - **Fabric's `FluidVariant.of` rejects non-source fluids** ("Cannot convert flowing fluid"): a
   custom non-placeable fluid must return `isSource = true`.

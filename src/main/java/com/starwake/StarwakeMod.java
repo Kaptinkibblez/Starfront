@@ -63,6 +63,8 @@ public final class StarwakeMod implements ModInitializer {
 		com.starwake.logistics.FluidNetworks.init();
 		com.starwake.process.Reactions.init();
 		com.starwake.process.GasHazards.init();
+		com.starwake.planet.Atmospheres.init();
+		com.starwake.process.Radiation.init();
 		com.starwake.metal.MetalCommands.init();
 		com.starwake.trade.TradeData.init();
 		com.starwake.trade.Economy.init();

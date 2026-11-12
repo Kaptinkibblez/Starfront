@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "2 NaOH + CO2 -> Na2CO3 + H2O",
+ "priority": 41,
+ "draw": [
+  "NaOH"
+ ],
+ "note": "Carbonating caustic soda."
+}

@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "GeCl4 + 2 H2O -> GeO2 + 4 HCl",
+ "priority": 54,
+ "draw": [
+  "H2O"
+ ],
+ "note": "Germanium tetrachloride hydrolyses to the oxide."
+}

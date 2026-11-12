@@ -29,6 +29,32 @@ public final class EnvironmentHud {
 		HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, StarwakeMod.id("environment_hud"), EnvironmentHud::render);
 	}
 
+	/** Dose-rate and acute-dose card (M8c-3a), below the environment card. */
+	private static void radiation(GuiGraphicsExtractor g, Font font, int x, int y, int width, com.starwake.process.Radiation.State state) {
+		double rate = state.rate(), dose = state.dose();
+		int color = dose >= 2 || rate >= 0.1 ? BAD : dose >= 0.5 || rate >= 1e-3 ? WARN : CYAN;
+		g.fill(x - 4, y - 4, x + width + 4, y + 22, FlightHud.PANEL);
+		FlightHud.corners(g, x - 4, y - 4, width + 8, 26, color);
+		g.text(font, Component.translatable("hud.starwake.rad.rate"), x, y, DIM);
+		String r = sievertsPerHour(rate);
+		g.text(font, r, x + width - font.width(r), y, color);
+		g.text(font, Component.translatable("hud.starwake.rad.dose"), x, y + 11, DIM);
+		String d = sieverts(dose);
+		g.text(font, d, x + width - font.width(d), y + 11, dose >= 2 ? BAD : dose >= 0.5 ? WARN : TEXT);
+	}
+
+	public static String sievertsPerHour(double svh) {
+		if (svh >= 1) return String.format("%.2f Sv/h", svh);
+		if (svh >= 1e-3) return String.format("%.1f mSv/h", svh * 1e3);
+		return String.format("%.1f µSv/h", svh * 1e6);
+	}
+
+	public static String sieverts(double sv) {
+		if (sv >= 1) return String.format("%.2f Sv", sv);
+		if (sv >= 1e-3) return String.format("%.0f mSv", sv * 1e3);
+		return String.format("%.2f mSv", sv * 1e3);
+	}
+
 	private static void render(GuiGraphicsExtractor g, DeltaTracker delta) {
 		Minecraft minecraft = Minecraft.getInstance();
 		var player = minecraft.player;
@@ -36,11 +62,15 @@ public final class EnvironmentHud {
 		Hazards hazards = Planets.forDimension(minecraft.level.registryAccess(), minecraft.level.dimension())
 				.map(p -> p.planet().hazards()).orElse(Hazards.EARTHLIKE);
 		ItemStack suit = PlanetHazards.suit(player);
-		if (!hazards.any() && suit.isEmpty()) return;
-
 		Font font = minecraft.font;
 		int width = 120, x = g.guiWidth() - width - 6;
 		int y = player.getActiveEffects().isEmpty() ? 6 : 56;
+		var radiation = player.getAttached(com.starwake.process.Radiation.STATE);
+		boolean showRadiation = radiation != null && (radiation.rate() > 1e-6 || radiation.dose() > 1e-3);
+		boolean showEnvironment = hazards.any() || !suit.isEmpty();
+		if (showRadiation) radiation(g, font, x, showEnvironment ? y + 44 : y, width, radiation);
+		if (!showEnvironment) return;
+
 		g.fill(x - 4, y - 4, x + width + 4, y + 34, FlightHud.PANEL);
 		FlightHud.corners(g, x - 4, y - 4, width + 8, 38, hazards.any() ? WARN : CYAN);
 

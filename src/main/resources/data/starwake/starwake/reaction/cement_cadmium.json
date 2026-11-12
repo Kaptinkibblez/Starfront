@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "CdSO4 + Zn -> ZnSO4 + Cd",
+ "priority": 51,
+ "draw": [
+  "Zn"
+ ],
+ "note": "Zinc dust cements cadmium."
+}

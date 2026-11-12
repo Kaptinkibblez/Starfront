@@ -1,0 +1,8 @@
+{
+ "machine": "roaster",
+ "equation": "GeO2 + 2 H2 -> Ge + 2 H2O",
+ "priority": 51,
+ "draw": [
+  "H2"
+ ]
+}

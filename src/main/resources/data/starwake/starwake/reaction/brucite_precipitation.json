@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "MgCl2 + 2 NaOH -> Mg(OH)2 + 2 NaCl",
+ "priority": 42,
+ "draw": [
+  "NaOH"
+ ],
+ "note": "Magnesium removed from brine as brucite."
+}

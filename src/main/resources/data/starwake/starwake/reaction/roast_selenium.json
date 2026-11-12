@@ -1,0 +1,9 @@
+{
+ "machine": "roaster",
+ "equation": "Se + O2 -> SeO2",
+ "priority": 20,
+ "draw": [
+  "O2"
+ ],
+ "note": "Selenium dioxide sublimes into the flue dust."
+}

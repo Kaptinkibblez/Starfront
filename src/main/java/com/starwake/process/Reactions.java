@@ -40,7 +40,7 @@ public final class Reactions {
 	 * reaction = electrons x Faraday x voltage. A catalyst must be present but isn't consumed.
 	 */
 	public record Reaction(Identifier id, String machine, int priority, List<Term> reactants, List<Term> products, List<String> draw,
-			Optional<String> note, String equation, int electrons, double voltage, Optional<String> catalyst) {
+			Optional<String> note, String equation, int electrons, double voltage, Optional<String> catalyst, boolean anhydrous) {
 		public static final double FARADAY = 96485.33;
 
 		public double joulesPerMole() {
@@ -49,7 +49,7 @@ public final class Reactions {
 	}
 
 	record Raw(String machine, String equation, int priority, List<String> draw, Optional<String> note, int electrons, double voltage,
-			Optional<String> catalyst) {
+			Optional<String> catalyst, boolean anhydrous) {
 		static final Codec<Raw> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("machine").forGetter(Raw::machine),
 				Codec.STRING.fieldOf("equation").forGetter(Raw::equation),
@@ -58,7 +58,8 @@ public final class Reactions {
 				Codec.STRING.optionalFieldOf("note").forGetter(Raw::note),
 				Codec.INT.optionalFieldOf("electrons", 0).forGetter(Raw::electrons),
 				Codec.DOUBLE.optionalFieldOf("voltage", 0.0).forGetter(Raw::voltage),
-				Codec.STRING.optionalFieldOf("catalyst").forGetter(Raw::catalyst)
+				Codec.STRING.optionalFieldOf("catalyst").forGetter(Raw::catalyst),
+				Codec.BOOL.optionalFieldOf("anhydrous", false).forGetter(Raw::anhydrous)
 		).apply(i, Raw::new));
 	}
 
@@ -143,7 +144,7 @@ public final class Reactions {
 				if (Math.abs(e.getValue()) > 1e-6) throw new IllegalArgumentException("unbalanced " + e.getKey() + " by " + e.getValue());
 			}
 			return Optional.of(new Reaction(id, raw.machine(), raw.priority(), left, right, raw.draw(), raw.note(), raw.equation(), raw.electrons(),
-					raw.voltage(), raw.catalyst()));
+					raw.voltage(), raw.catalyst(), raw.anhydrous()));
 		} catch (RuntimeException e) {
 			StarwakeMod.LOGGER.error("Bad reaction {}: {}", id, e.getMessage());
 			return Optional.empty();

@@ -1,0 +1,8 @@
+{
+ "machine": "electrolysis",
+ "equation": "SrCl2 -> Sr + Cl2",
+ "priority": 15,
+ "electrons": 2,
+ "voltage": 6.5,
+ "anhydrous": true
+}

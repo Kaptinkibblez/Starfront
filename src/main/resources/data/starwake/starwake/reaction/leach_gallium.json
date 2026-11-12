@@ -1,0 +1,11 @@
+{
+ "machine": "leach",
+ "equation": "4 Ga + 4 NaOH + 3 O2 + 6 H2O -> 4 NaGa(OH)4",
+ "priority": 32,
+ "draw": [
+  "NaOH",
+  "O2",
+  "H2O"
+ ],
+ "note": "Gallium follows aluminium into Bayer liquor."
+}

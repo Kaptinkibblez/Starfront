@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "HReO4 + NH3 -> NH4ReO4",
+ "priority": 55,
+ "draw": [
+  "NH3"
+ ],
+ "note": "Ammonia crystallises ammonium perrhenate."
+}

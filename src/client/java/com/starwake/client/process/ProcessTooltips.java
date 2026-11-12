@@ -27,6 +27,35 @@ public final class ProcessTooltips {
 
 	public static void init() {
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> append(stack, lines));
+		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> extras(stack, lines));
+	}
+
+	/** Gas cylinder contents and radioactivity (M8c-3a), for any item. */
+	private static void extras(ItemStack stack, List<Component> lines) {
+		var fill = stack.get(com.starwake.registry.ModComponents.GAS);
+		if (stack.getItem() instanceof com.starwake.process.GasCylinderItem) {
+			double kg = fill == null ? 0 : fill.kg();
+			lines.add(Component.translatable("item.starwake.gas_cylinder.contents", String.format("%.3f", kg),
+					String.format("%.0f", com.starwake.process.GasCylinderItem.CAPACITY_KG)).withColor(DIM));
+			if (fill != null && fill.species().equals("O2")) lines.add(Component.translatable("item.starwake.gas_cylinder.suit").withColor(DIM));
+			lines.add(Component.translatable("item.starwake.gas_cylinder.help").withColor(DIM));
+		}
+		double[] r = com.starwake.process.Radiation.perItem(stack);
+		if (r[0] * stack.getCount() >= 1000) {
+			double a = r[0] * stack.getCount(), g = r[1] * stack.getCount();
+			lines.add(Component.translatable("process.starwake.tooltip.radioactive", becquerels(a),
+					com.starwake.client.hud.EnvironmentHud.sievertsPerHour(g)).withColor(0xFFE0C040));
+		}
+	}
+
+	private static String becquerels(double bq) {
+		String[] units = {"Bq", "kBq", "MBq", "GBq", "TBq", "PBq", "EBq"};
+		int u = 0;
+		while (bq >= 1000 && u < units.length - 1) {
+			bq /= 1000;
+			u++;
+		}
+		return String.format(bq >= 100 ? "%.0f %s" : "%.1f %s", bq, units[u]);
 	}
 
 	private static void append(ItemStack stack, List<Component> lines) {

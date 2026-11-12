@@ -1,0 +1,8 @@
+{
+ "machine": "leach",
+ "equation": "SeO2 + H2O -> H2SeO3",
+ "priority": 33,
+ "draw": [
+  "H2O"
+ ]
+}

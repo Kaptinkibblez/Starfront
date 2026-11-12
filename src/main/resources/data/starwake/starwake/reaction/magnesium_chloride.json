@@ -4,5 +4,6 @@
  "priority": 11,
  "electrons": 2,
  "voltage": 3.2,
+ "anhydrous": true,
  "note": "Molten magnesium chloride (Dow / Kroll recycle)."
 }

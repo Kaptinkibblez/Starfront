@@ -26,6 +26,12 @@ public final class ModComponents {
 					.persistent(com.starwake.process.Assay.CODEC)
 					.networkSynchronized(com.starwake.process.Assay.STREAM_CODEC).build());
 
+	/** What a Gas Cylinder holds (M8c-3a). */
+	public static final DataComponentType<com.starwake.process.GasCylinderItem.Fill> GAS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			StarwakeMod.id("gas"), DataComponentType.<com.starwake.process.GasCylinderItem.Fill>builder()
+					.persistent(com.starwake.process.GasCylinderItem.Fill.CODEC)
+					.networkSynchronized(com.starwake.process.GasCylinderItem.Fill.STREAM_CODEC).build());
+
 	private ModComponents() {}
 
 	public static void init() {}

@@ -1,0 +1,9 @@
+{
+ "machine": "kroll",
+ "equation": "B2O3 + 3 Mg -> 2 B + 3 MgO",
+ "priority": 11,
+ "draw": [
+  "Mg"
+ ],
+ "note": "Moissan process: crude boron in magnesia."
+}

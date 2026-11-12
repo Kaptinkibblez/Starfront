@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "2 NaBr + Cl2 -> 2 NaCl + 2 Br",
+ "priority": 44,
+ "draw": [
+  "Cl2"
+ ],
+ "note": "Chlorine displaces bromine from bittern."
+}

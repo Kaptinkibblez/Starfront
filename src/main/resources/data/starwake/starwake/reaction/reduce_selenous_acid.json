@@ -1,0 +1,10 @@
+{
+ "machine": "reactor",
+ "equation": "H2SeO3 + 2 SO2 + H2O -> Se + 2 H2SO4",
+ "priority": 53,
+ "draw": [
+  "SO2",
+  "H2O"
+ ],
+ "note": "Sulfur dioxide precipitates red selenium."
+}

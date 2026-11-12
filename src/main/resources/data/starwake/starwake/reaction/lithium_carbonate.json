@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "2 LiCl + Na2CO3 -> Li2CO3 + 2 NaCl",
+ "priority": 43,
+ "draw": [
+  "Na2CO3"
+ ],
+ "note": "Soda ash precipitates lithium carbonate."
+}

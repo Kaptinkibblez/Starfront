@@ -1,0 +1,9 @@
+{
+ "machine": "reactor",
+ "equation": "2 NaI + Cl2 -> 2 NaCl + 2 I",
+ "priority": 45,
+ "draw": [
+  "Cl2"
+ ],
+ "note": "Chlorine displaces iodine."
+}

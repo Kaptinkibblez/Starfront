@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:is_ocean",
+    "#minecraft:is_beach",
+    {"id": "starwake:planet/ocean_deep_ocean", "required": false},
+    {"id": "starwake:planet/ocean_reef", "required": false},
+    {"id": "starwake:planet/ocean_islands", "required": false},
+    {"id": "starwake:planet/ocean_shoals", "required": false},
+    {"id": "starwake:planet/lush_ocean", "required": false},
+    {"id": "starwake:planet/frozen_frozen_sea", "required": false}
+  ]
+}

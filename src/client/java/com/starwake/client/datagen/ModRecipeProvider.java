@@ -67,6 +67,9 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				machine(com.starwake.process.ProcessMachineBlockEntity.Process.ELECTROLYSIS, "CRC", "IBI", "III", Items.CAULDRON);
 				machine(com.starwake.process.ProcessMachineBlockEntity.Process.CHLORINATOR, "BBB", "ICI", "IRI", Items.BRICKS);
 				machine(com.starwake.process.ProcessMachineBlockEntity.Process.KROLL, "III", "BCB", "BRB", Items.BRICKS);
+				machine(com.starwake.process.ProcessMachineBlockEntity.Process.AIR_SEPARATOR, "GBG", "ICI", "IRI", Items.BLUE_ICE);
+				shaped(RecipeCategory.TOOLS, com.starwake.registry.ModProcess.GAS_CYLINDER).pattern(" I ").pattern("I I").pattern("III")
+						.define('I', Items.IRON_INGOT).unlockedBy("has_iron", has(Items.IRON_INGOT)).save(output);
 				shaped(RecipeCategory.REDSTONE, ModMachines.WATER_PUMP).pattern("IPI").pattern("CBC").pattern("IRI")
 						.define('I', Items.IRON_INGOT).define('P', Items.PISTON).define('C', ModMachines.COPPER_CABLE).define('B', Items.BUCKET)
 						.define('R', Items.REDSTONE).unlockedBy("has_cable", has(ModMachines.COPPER_CABLE)).save(output);

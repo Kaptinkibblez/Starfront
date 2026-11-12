@@ -1,0 +1,9 @@
+{
+ "machine": "leach",
+ "equation": "MgO + 2 HCl -> MgCl2 + H2O",
+ "priority": 37,
+ "draw": [
+  "HCl"
+ ],
+ "note": "Hydrochloric acid washes magnesia out of crude boron."
+}

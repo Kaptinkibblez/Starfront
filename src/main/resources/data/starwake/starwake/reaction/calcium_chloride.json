@@ -1,0 +1,9 @@
+{
+ "machine": "electrolysis",
+ "equation": "CaCl2 -> Ca + Cl2",
+ "priority": 14,
+ "electrons": 2,
+ "voltage": 6.0,
+ "anhydrous": true,
+ "note": "Molten calcium chloride."
+}

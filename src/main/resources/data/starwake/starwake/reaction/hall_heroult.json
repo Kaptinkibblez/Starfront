@@ -8,5 +8,6 @@
  "electrons": 12,
  "voltage": 4.2,
  "catalyst": "Na3AlF6",
+ "anhydrous": true,
  "note": "Alumina dissolved in molten cryolite (960 C); carbon anodes burn away."
 }

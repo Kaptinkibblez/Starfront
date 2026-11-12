@@ -36,6 +36,9 @@ public class FluidTankBlock extends Block implements EntityBlock {
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 			BlockHitResult hit) {
+		if (stack.getItem() instanceof com.starwake.process.GasCylinderItem && level.getBlockEntity(pos) instanceof FluidTankBlockEntity tank) {
+			return com.starwake.process.GasCylinderItem.fillFrom(tank.storage(), player, hand) ? InteractionResult.SUCCESS : InteractionResult.TRY_WITH_EMPTY_HAND;
+		}
 		if (level.getBlockEntity(pos) instanceof FluidTankBlockEntity tank && FluidStorageUtil.interactWithFluidStorage(tank.storage(), player, hand)) {
 			return InteractionResult.SUCCESS;
 		}

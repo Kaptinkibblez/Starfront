@@ -1,0 +1,9 @@
+{
+ "machine": "chlorinator",
+ "equation": "Ge + 2 Cl2 -> GeCl4",
+ "priority": 13,
+ "draw": [
+  "Cl2"
+ ],
+ "note": "Germanium tetrachloride distils off."
+}

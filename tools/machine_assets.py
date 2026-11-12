@@ -303,6 +303,19 @@ def process_textures():
     front("water_pump", "#566270", water_pump)
     front("atmospheric_condenser", "#646e78", atmospheric_condenser)
 
+    # M8c-3a: cryogenic air separation (cold box with a distillation column and frost).
+    def air_separator(im, on):
+        rect(im, 6, 1, 9, 14, "#c8d0d8")
+        for y in (3, 6, 9, 12):
+            rect(im, 6, y, 9, y, "#8a949e")
+        rect(im, 2, 8, 5, 13, "#3a4450")
+        rect(im, 10, 8, 13, 13, "#3a4450")
+        if on:
+            for x, y in ((3, 9), (11, 10), (4, 12), (12, 12), (7, 2)):
+                rect(im, x, y, x, y, "#d8f4ff")
+
+    front("air_separator", "#5e6a76", air_separator)
+
 
 def bulk_textures():
     """Bulk materials (tinted by their main species): crushed ore, concentrate, tailings, calcine,
@@ -352,6 +365,21 @@ def bulk_textures():
               "residue": pile(9, True, 18, 180), "crystals": crystals(10), "slimes": pile(11, False, 20, 160)}
     for name, im in images.items():
         im.save(os.path.join(out, f"bulk_{name}.png"))
+
+
+def gas_cylinder():
+    """M8c-3a: a steel pressure cylinder with a valve; the bar shows the gas."""
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(4, 15):
+        for x in range(5, 11):
+            shade_v = 150 + (10 - abs(x - 7) * 18)
+            if y in (4, 14) and x in (5, 10):
+                continue
+            im.putpixel((x, y), (shade_v, shade_v + 6, shade_v + 12, 255))
+    rect(im, 7, 2, 8, 3, "#5a5e66")
+    rect(im, 6, 1, 9, 1, "#3a3e46")
+    rect(im, 5, 6, 10, 6, "#2a6aa8")
+    im.save(os.path.join(ROOT, "textures", "item", "gas_cylinder.png"))
 
 
 def element(fr, to, tex, faces=("north", "south", "east", "west", "up", "down"), uv=None):
@@ -406,6 +434,7 @@ def main():
     textures()
     process_textures()
     bulk_textures()
+    gas_cylinder()
     models()
     print("machine assets written")
 

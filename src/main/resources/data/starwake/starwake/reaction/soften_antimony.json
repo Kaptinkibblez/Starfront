@@ -1,0 +1,9 @@
+{
+ "machine": "converter",
+ "equation": "4 Sb + 3 O2 -> 2 Sb2O3",
+ "priority": 30,
+ "draw": [
+  "O2"
+ ],
+ "note": "Softening: antimony oxidises into the slag."
+}

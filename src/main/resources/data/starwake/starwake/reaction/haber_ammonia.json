@@ -1,0 +1,10 @@
+{
+ "machine": "reactor",
+ "equation": "N2 + 3 H2 -> 2 NH3",
+ "priority": 40,
+ "draw": [
+  "H2"
+ ],
+ "catalyst": "Fe",
+ "note": "Haber-Bosch: needs an iron catalyst."
+}

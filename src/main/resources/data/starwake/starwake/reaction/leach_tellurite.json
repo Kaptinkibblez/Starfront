@@ -1,0 +1,9 @@
+{
+ "machine": "leach",
+ "equation": "TeO2 + 2 NaOH -> Na2TeO3 + H2O",
+ "priority": 34,
+ "draw": [
+  "NaOH"
+ ],
+ "note": "Caustic leach of roasted slimes."
+}
