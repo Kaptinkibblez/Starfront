@@ -348,6 +348,8 @@ commit. **Don't start the next milestone until the user confirms the current one
         5%; RaSO4 stays in the tailings; gas well + ASU -> helium; chromate dissolves in water; SX screen
         shows the cut.)*
 - [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
+  - **User notes for M9 (2026-11-12):** conveyors move items the wrong way; ship flight is buggy
+    all around (overhaul it); hub NPCs (guards/crew) add little value: **remove them**.
 
 ---
 
