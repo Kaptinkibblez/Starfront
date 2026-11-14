@@ -1,75 +1,129 @@
-# Generates the Kestrel blueprint (an original light fighter in the Star Citizen style).
+# Generates the Kestrel blueprint: an original light fighter (M9 pass 2 redesign).
+#
+# No wings (starships don't fly on wings): a sloped wedge fuselage shaped with Hull Plating Stairs and Slabs,
+# a frameless Canopy Glass bubble, side sponsons carrying the strafe/retro thrusters far from the centre of mass
+# (yaw authority), four belly main engines for VTOL lift around the centre of mass, two rear mains, RCS for roll
+# and pitch, and enough power plants that the engines get full power at the default 60/20/20 split.
+#
+# Axes: x west->east (13 wide), y bottom->top, z nose(north)->tail. Run: python3 tools/kestrel_blueprint.py <out.json>
 import json, sys
-W, L, Hgt = 15, 18, 8          # x (west->east), z (nose->tail), y (bottom->top)
+
+W, L, H = 13, 18, 7
 g = {}
-def put(x, y, z, c): g[(x, y, z)] = c
+
+
+def put(x, y, z, c):
+    g[(x, y, z)] = c
+
+
 def box(x0, x1, y0, y1, z0, z1, c):
     for x in range(x0, x1 + 1):
         for y in range(y0, y1 + 1):
-            for z in range(z0, z1 + 1): put(x, y, z, c)
-# Nose
-box(7, 7, 1, 2, 1, 1, 'H')
-box(6, 8, 1, 3, 2, 2, 'H')
-# Cockpit section z3..7: floor, walls, canopy
-box(6, 8, 1, 1, 3, 3, 'H'); box(6, 8, 2, 2, 3, 3, 'H'); box(6, 8, 3, 4, 3, 3, 'G')   # windscreen
-box(5, 9, 1, 1, 4, 7, 'H')                     # floor
-for z in range(4, 8):
-    for x in (5, 9):
-        put(x, 2, z, 'H'); put(x, 3, z, 'G'); put(x, 4, z, 'G' if z < 7 else 'H')
-box(6, 8, 5, 5, 3, 7, 'G')                     # bubble canopy roof
-put(5, 5, 7, 'H'); put(9, 5, 7, 'H')
-box(6, 8, 2, 4, 4, 7, '.')                     # cabin air
-put(7, 2, 5, 'K')                              # helm, facing north
-put(7, 2, 7, 'J')                              # crew seat
-# Bulkhead and engineering z8..15
-box(5, 9, 1, 5, 8, 8, 'H')
-box(5, 9, 1, 5, 9, 10, 'H'); box(6, 8, 2, 4, 9, 10, '.')
-box(5, 9, 1, 4, 11, 15, 'H'); box(6, 8, 2, 3, 11, 14, '.')
-put(6, 2, 9, 'P'); put(7, 2, 9, 'P'); put(8, 2, 9, 'P')
-put(6, 3, 9, 'C'); put(7, 3, 9, 'C'); put(8, 3, 9, 'C')
-put(6, 2, 10, 'T'); put(7, 2, 10, 'Q'); put(8, 2, 10, 'T')
-put(6, 3, 10, 'C'); put(7, 3, 10, 'S'); put(8, 3, 10, 'P')
-# Main engines out the back
-put(6, 3, 16, 'E'); put(8, 3, 16, 'E')
-# Swept wings at y2
-sweep = {8: (4, 4), 9: (3, 4), 10: (2, 4), 11: (1, 4), 12: (0, 4), 13: (0, 4)}
-for z, (a, b) in sweep.items():
-    for x in range(a, b + 1):
-        put(x, 2, z, 'W'); put(14 - x, 2, z, 'W')
-# Twin tail fins
-for x in (5, 9):
-    for z in range(12, 16):
-        put(x, 5, z, 'F')
-    for z in range(13, 16):
-        put(x, 6, z, 'F')
-# VTOL: main engines in the belly + thrusters under the wings
-for x, z in ((6, 5), (8, 5), (6, 13), (8, 13)): put(x, 0, z, 'M')
-for x in (2, 12): put(x, 1, 11, 'D')
-# Tricycle landing gear: nose and two mains, around the centre of mass
-for x, z in ((7, 4), (5, 11), (9, 11)): put(x, 0, z, 'L')
-# Maneuvering thrusters (RCS)
-put(6, 2, 1, 'n'); put(8, 2, 1, 'n')                      # retros
-put(5, 3, 2, 'w'); put(9, 3, 2, 'e')                      # nose yaw/strafe
-put(4, 3, 14, 'w'); put(10, 3, 14, 'e')                   # tail yaw/strafe
-put(7, 0, 2, 'd')                                        # nose pitch (none on top: it would block the view)
-put(7, 5, 15, 'u'); put(7, 0, 15, 'd')                    # tail pitch
-for x in (0, 14): put(x, 3, 12, 'u'); put(x, 1, 12, 'd')  # wingtip roll
+            for z in range(z0, z1 + 1):
+                put(x, y, z, c)
+
+
+C = 6  # centre line
+
+# --- Nose (z 0..2): a wedge sloping down and in toward the tip ---------------------------------------------------
+put(C, 1, 0, 'H'); put(C, 2, 0, 'n')                       # tip, with a slope on top
+box(C - 1, C + 1, 1, 2, 1, 1, 'H'); put(C - 1, 3, 1, 'n'); put(C, 3, 1, 'n'); put(C + 1, 3, 1, 'n')
+put(C - 2, 1, 1, 'w'); put(C + 2, 1, 1, 'e')               # cheeks
+box(C - 2, C + 2, 1, 2, 2, 2, 'H'); put(C - 2, 2, 2, 'w'); put(C + 2, 2, 2, 'e')
+put(C - 1, 3, 2, 'n'); put(C, 3, 2, 'n'); put(C + 1, 3, 2, 'n')   # low sloped dash: clear forward view
+put(C, 0, 1, 'v'); put(C - 1, 0, 2, 'v'); put(C, 0, 2, 'v'); put(C + 1, 0, 2, 'v')  # chin
+
+# --- Cockpit (z 3..7): floor, sloped sills, bubble canopy -----------------------------------------------------------
+box(C - 2, C + 2, 1, 1, 3, 7, 'H')                         # floor
+for z in range(3, 8):
+    put(C - 2, 2, z, 'H'); put(C + 2, 2, z, 'H')           # sills
+    put(C - 2, 3, z, 'G'); put(C + 2, 3, z, 'G')           # side glass
+    put(C - 2, 4, z, 'G'); put(C + 2, 4, z, 'G')
+box(C - 1, C + 1, 2, 4, 3, 3, 'G')                         # windscreen
+box(C - 1, C + 1, 5, 5, 3, 7, 'G')                         # canopy roof (2 clear blocks above the Helm)
+box(C - 1, C + 1, 2, 4, 4, 7, '.')                         # cabin air
+put(C, 2, 5, 'K')                                          # helm, facing north
+put(C, 2, 7, 'J')                                          # crew seat
+for z in range(3, 8):
+    put(C - 3, 1, z, 'w'); put(C + 3, 1, z, 'e')           # lower flanks
+
+# --- Engineering spine (z 8..15) ---------------------------------------------------------------------------------
+box(C - 2, C + 2, 1, 4, 8, 15, 'H')
+box(C - 1, C + 1, 2, 3, 8, 14, '.')                        # corridor + bay air (joins the cabin)
+for z in range(8, 16):
+    put(C - 2, 4, z, 'w'); put(C + 2, 4, z, 'e')           # sloped shoulders (the walls end a block lower)
+    put(C, 5, z, 't')                                      # roof ridge (carries the dorsal fin)
+put(C, 6, 12, 'f'); put(C, 6, 13, 'f'); put(C, 6, 14, 'H'); put(C, 6, 15, 'H')   # dorsal fin
+put(C, 6, 11, 'n')
+# Systems along the corridor walls (inside the hull, x = C-1 / C+1 at y 2..3)
+for (x, y, z, c) in ((C - 1, 2, 9, 'P'), (C + 1, 2, 9, 'P'), (C - 1, 3, 9, 'C'), (C + 1, 3, 9, 'C'),
+                     (C - 1, 2, 10, 'P'), (C + 1, 2, 10, 'P'), (C - 1, 3, 10, 'C'), (C + 1, 3, 10, 'C'),
+                     (C - 1, 2, 12, 'P'), (C - 1, 3, 12, 'C'),
+                     (C + 1, 2, 12, 'S'), (C + 1, 3, 12, 'Q'),
+                     (C + 1, 2, 11, 'P'), (C + 1, 3, 11, 'C'),
+                     (C - 1, 2, 13, 'T'), (C + 1, 2, 13, 'T')):
+    put(x, y, z, c)
+put(C, 2, 14, 'H'); put(C, 3, 14, 'H')                     # aft bulkhead
+for y in (1, 2, 3):
+    put(C - 2, y, 15, 'w'); put(C + 2, y, 15, 'e')         # tapered tail corners
+
+# --- Sponsons (x 2..3 and 9..10, z 8..14): carry the strafe/retro thrusters out at the sides ---------------------
+for x in (C - 4, C - 3, C + 3, C + 4):
+    for z in range(8, 15):
+        put(x, 1, z, 'b' if x in (C - 4, C + 4) else 'H')   # slab outer edge, hull inner
+for x in (C - 3, C + 3):
+    for z in range(8, 15):
+        put(x, 2, z, 'w' if x < C else 'e')                # slopes up into the spine
+# Strafe/yaw: medium thrusters at the sponson ends, pushing sideways (nozzles out)
+put(C - 5, 1, 8, 'X'); put(C - 5, 1, 14, 'X')
+put(C + 5, 1, 8, 'Y'); put(C + 5, 1, 14, 'Y')
+# Retros: medium thrusters at the sponson fronts, nozzles forward
+put(C - 4, 1, 7, 'R'); put(C + 4, 1, 7, 'R')
+# Roll: RCS up/down at the sponson tips
+put(C - 4, 2, 9, 'u'); put(C + 4, 2, 9, 'u')
+put(C - 4, 0, 11, 'd'); put(C + 4, 0, 11, 'd')
+
+# --- Engines --------------------------------------------------------------------------------------------------------
+put(C - 1, 2, 16, 'E'); put(C + 1, 2, 16, 'E')             # rear mains (nozzles south)
+box(C - 1, C + 1, 1, 1, 16, 16, 'H'); put(C, 2, 16, 'H'); box(C - 1, C + 1, 3, 3, 16, 16, 't')
+for x, z in ((C - 1, 6), (C + 1, 6), (C - 1, 14), (C + 1, 14)):
+    put(x, 0, z, 'M')                                      # belly VTOL mains (nozzles down)
+# Pitch RCS: nose down + tail up/down (none on top of the nose: it would block the view)
+put(C, 0, 0, 'm')
+put(C, 0, 15, 'm'); put(C - 1, 5, 15, 'u'); put(C + 1, 5, 15, 'u')
+
+# --- Landing gear: nose + two mains around the centre of mass -----------------------------------------------------
+put(C, 0, 4, 'L'); put(C - 3, 0, 12, 'L'); put(C + 3, 0, 12, 'L')
+
 palette = {
-  "H": "starwake:hull_plating", "G": "minecraft:glass", "K": "starwake:helm[facing=north]", "J": "starwake:seat",
-  "P": "starwake:power_plant", "C": "starwake:cooler", "S": "starwake:shield_generator", "Q": "starwake:quantum_drive",
-  "T": "starwake:fuel_tank", "E": "starwake:main_engine[facing=south]", "M": "starwake:main_engine[facing=down]",
-  "D": "starwake:thruster[facing=down]", "W": "starwake:wing[axis=y]", "F": "starwake:wing[axis=x]",
-  "n": "starwake:maneuvering_thruster[facing=north]", "w": "starwake:maneuvering_thruster[facing=west]",
-  "e": "starwake:maneuvering_thruster[facing=east]", "u": "starwake:maneuvering_thruster[facing=up]",
-  "d": "starwake:maneuvering_thruster[facing=down]",
-  "L": "starwake:landing_gear[deployed=true]"}
+    "H": "starwake:hull_plating",
+    "G": "starwake:canopy_glass",
+    "b": "starwake:hull_plating_slab[type=bottom]",
+    "t": "starwake:hull_plating_slab[type=bottom]",
+    "s": "starwake:hull_plating_slab[type=top]",
+    # Stairs: "facing" is the tall side. n = slope descending toward the nose; w/e = slopes down to the west/east.
+    "n": "starwake:hull_plating_stairs[facing=south,half=bottom]",
+    "w": "starwake:hull_plating_stairs[facing=east,half=bottom]",
+    "e": "starwake:hull_plating_stairs[facing=west,half=bottom]",
+    "v": "starwake:hull_plating_stairs[facing=south,half=top]",
+    "f": "starwake:hull_plating_slab[type=bottom]",
+    "K": "starwake:helm[facing=north]", "J": "starwake:seat",
+    "P": "starwake:power_plant", "C": "starwake:cooler", "S": "starwake:shield_generator",
+    "Q": "starwake:quantum_drive", "T": "starwake:fuel_tank",
+    "E": "starwake:main_engine[facing=south]", "M": "starwake:main_engine[facing=down]",
+    "X": "starwake:thruster[facing=west]", "Y": "starwake:thruster[facing=east]",
+    "R": "starwake:thruster[facing=north]",
+    "u": "starwake:maneuvering_thruster[facing=up]", "d": "starwake:maneuvering_thruster[facing=down]",
+    "m": "starwake:maneuvering_thruster[facing=down]",
+    "L": "starwake:landing_gear[deployed=true]",
+}
+
+xs = [p[0] for p in g]; assert min(xs) >= 0 and max(xs) < W, (min(xs), max(xs))
 layers = []
-for y in range(Hgt):
-    rows = []
-    for z in range(L):
-        rows.append(''.join(g.get((x, y, z), '.') for x in range(W)))
-    layers.append(rows)
-out = {"name": {"text": "Kestrel"}, "_comment": "Original light fighter, Star Citizen style. Nose north.",
+for y in range(H):
+    layers.append([''.join(g.get((x, y, z), '.') for x in range(W)) for z in range(L)])
+out = {"name": {"text": "Kestrel"},
+       "_comment": "Original light fighter (M9 redesign: no wings, sloped hull, canopy glass). Nose north. Generated by tools/kestrel_blueprint.py.",
        "palette": palette, "layers": layers}
 json.dump(out, open(sys.argv[1], 'w'), indent=2)
 print(sum(1 for v in g.values() if v != '.'), "blocks")

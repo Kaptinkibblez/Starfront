@@ -504,8 +504,14 @@ commit. **Don't start the next milestone until the user confirms the current one
       block; **every block-entity renderer aboard, with animations** (chest lids, sign edits); HUD **scale/opacity
       settings** and **contact markers** for nearby ships; **Kestrel redesign + rebalance** (sloped hull, no wings,
       stronger RCS, enough power).
-    - **Next (user, 2026-11-13):** the rest of ships (building/editing aboard, cockpit HUD, Kestrel, block-entity
-      rendering aboard, rain through hulls, observer smoothing), audit -> ask -> fix; still one jar at the end.
+    - [x] **Ships pass 2 (2026-11-14).** *(Verified: singleplayer + a dedicated server with two clients: a parked ship
+      keeps its exact position and fuel for minutes; chest, sign and banner render aboard; the chest opens aboard and its
+      lid closes again; a sign placed aboard opens the editor and takes text; a spectator watching the pilot sees the
+      Kestrel move smoothly with the pilot in the canopy; contact bracket "SHIP 44 m 0 m/s" on a ship ahead; new Kestrel
+      passes pre-flight (342 blocks, 473 t, lift 1.78x, accel fwd 19 / back 3.8 / side 3.8 / up 36 / down 1.9 m/s²,
+      pitch 211 / yaw 73 / roll 291 °/s², drag-limited top speed 100 m/s, cabin sealed) and flies at 46 m/s.)* Details in
+      "How ships work after M9" below. Rain under ship roofs was only checked in stills (inconclusive in the headless
+      client).
 
 ---
 
@@ -663,7 +669,7 @@ normal gravity.
 - **3i additions:**
   - *Decoupled* (V, `ShipQuantumPayload.ACTION_DECOUPLE`, saved per ship): the flight computer
     stops braking uncommanded axes and stops nulling vertical drift (gravity is still cancelled).
-  - *Wings* (`WingBlock`, a thin plate; AXIS = plate normal: Y = wing, X/Z = fin). Each panel in
+  - *Wings* (removed in M9 pass 2; kept here for history) (`WingBlock`, a thin plate; AXIS = plate normal: Y = wing, X/Z = fin). Each panel in
     `ShipDynamics.aero` is a flat plate (force `-wing_drag * density * |v| * (v·n)` along n, at
     the panel's own velocity incl. spin, so fins weathervane and damp yaw) and horizontal
     panels are cambered (`wing_lift * density * forwardAirspeed²` along local up). Air density
@@ -767,9 +773,41 @@ normal gravity.
 - **Walking aboard** (S6): the walker's client (ShipLocalMotion) sends `ShipFootingPayload(ship, local pos, onGround)`
   every tick (-1 when stepping off); `ShipFooting.carry(ship)` places those players from the server's ship transform
   after each ship tick, so other players see walkers glued to the deck.
-- Known limits: block-entity renderers (chest lids, signs) don't render aboard yet; rain renders through hulls; structure
-  changes resync the whole snapshot (fine for small changes, heavy for 65k-block ships with redstone clocks);
-  radiation from machines aboard isn't counted for nearby players; observers don't interpolate.
+- **Pass 2 (2026-11-14):**
+  - *No wings:* the Wing block is gone (a Fabric registry alias loads saved `starwake:wing` as hull plating). Air drag is
+    `ShipDynamics.drag`: per local axis `air_drag x density x cross-section x |v| x v / mass` (cross-sections = the
+    hull's projected silhouette, counted in `finish()`, sent in `ShipDynamicsPayload`), never more than stops the ship in
+    a tick; `drag_atmosphere` is now a light 0.998. Pre-flight reports the frontal area and the drag-limited top speed.
+  - *Parked ships sleep:* an unpiloted ship resting on the ground (`grounded` or clearance < 0.05) stops simulating and
+    burning until moved, edited (`applyEdit`) or piloted (fixes slow creep and idle burn while parked).
+  - *Observers:* the custom `InterpolationHandler` queues server positions and the ORIENTATION data (separately,
+    `onSyncedDataUpdated`) and plays one of each per tick (max 3 queued; > 16 blocks snaps). The pilot predicts as before.
+  - *Block entities aboard* (`client/ship/ShipBlockEntities`): `ShipStructure.STREAM_CODEC` now sends each block
+    entity's `getUpdateTag` (sign text, banner patterns; never inventories). The client keeps "ghost" block entities per
+    ship (kept across snapshots so animation survives) and `ShipRenderer` extracts/submits them with vanilla's renderers
+    in the ship frame (camera moved into ship space; light from the world cell). Chest lids: the server relays block
+    events from the plot (`ServerLevelShipyardMixin.doBlockEvent` -> `ShipBlockEventPayload`) and ghosts tick
+    `lidAnimateTick`. `ContainerOpenersMixin` counts a plot chest's viewers around the ship's real position (vanilla
+    looked in the empty shipyard and the lid stuck). Sign text edits: `sendBlockUpdated` without a state change ->
+    `onPlotDataChange` resyncs; `SignEditorMixin` opens the editor on a ghost copy at the plot position once the new
+    snapshot arrives; `SignBlockEntityMixin` finds the editor server-wide; the sign update packet is applied in the yard.
+    Synced `PLOT` index lets clients map plot positions to ships.
+  - *Plots reused cleanly:* `Shipyard.writeFresh` wipes the new ship's bounds + 2 before writing (a previous ship's
+    leftover block above a chest kept it from opening, vanilla's solid-block-above rule).
+  - *Rain:* `client/ship/ShipRain` records per tick the top of each ship over every nearby column; `WeatherMixin`
+    (rain columns) and `ClientLevelWeatherMixin` (splashes, rain-above sound) stop there.
+  - *Blocks:* **Canopy Glass** (frameless tinted glass, 1200 C, armour 4, seals; 8 from 8 glass + 1 iron) and **Hull
+    Plating Stairs / Slab** (stonecutter-style recipes; plain steel, 1.1 t / 0.75 t).
+  - *HUD:* Wristcom **Settings** app (steering mode, cockpit HUD size 60-160%, opacity 30-100%, saved in
+    `config/starwake-client.properties`); **contact markers** (bracket, owner name or SHIP, range, closing speed; red when
+    closing > 20 m/s) for up to 8 ships in view, limited to ships the client tracks (~160 blocks); the skin-temperature
+    alert shows from half the hull's limit. `/starwake ship assemble` lists the failed checks when it refuses.
+  - *Kestrel* (`tools/kestrel_blueprint.py`): wedge nose and sloped shoulders from hull stairs/slabs, a Canopy Glass
+    bubble (2 clear blocks over the Helm), a spine with 6 plants/coolers, shield, quantum drive and two tanks, side
+    sponsons with medium strafe/retro thrusters, four belly VTOL mains around the centre of mass, two rear mains, RCS.
+- Known limits: structure changes resync the whole snapshot (fine for small changes, heavy for 65k-block ships with
+  redstone clocks); radiation from machines aboard isn't counted for nearby players; block entities aboard only tick
+  chest lids on the client (no bell swing or campfire smoke yet); contacts beyond entity tracking range aren't shown.
 
 ## How ship editing works (Milestone 4)
 
