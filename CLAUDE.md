@@ -512,6 +512,20 @@ commit. **Don't start the next milestone until the user confirms the current one
       pitch 211 / yaw 73 / roll 291 °/s², drag-limited top speed 100 m/s, cabin sealed) and flies at 46 m/s.)* Details in
       "How ships work after M9" below. Rain under ship roofs was only checked in stills (inconclusive in the headless
       client).
+    - **Ships pass 3 decisions (user, 2026-11-14): custom hulls and Reclaimer-class ships, now.** Goal: build something like
+      Star Citizen's Reclaimer with complex detail. Choices: **shape-cycling Hull Panels** (one panel item per material that
+      keeps its alloy; a Hull Tool cycles the placed panel's shape) with **all four shape families**: slopes and wedges (1:1,
+      1:2, 1:4 + corner, inner-corner, peak), curves and rounds (quarter-rounds, rounded corners, convex/concave, cylinders),
+      thin panels and plates (half/quarter plates, angled armour, fins), frames and trusses (open frames, lattice beams,
+      ribs); **greebles/decorative parts** (vents, pipes, conduits, seams, antennas, railings, ladders, catwalks, ribbed
+      panels, hazard trims, cargo racks); **lighting** (running, interior strip, flood, landing lights, nav strobes); **big
+      functional parts** via a **general Hinge (two set angles) and Rotor (free turn) block**: everything built beyond it is
+      a sub-assembly that rotates as a unit, and thrusters on it push along their real direction (Reclaimer-style side pods
+      swinging from down to back); hinges are **linked to the landing gear** (gear down = VTOL pose, gear up = cruise pose);
+      **true scale** (1 block = 1 m, ~155 m Reclaimer) with the ship cap raised to **262,144 blocks** plus the big-ship
+      performance work (delta block updates instead of full resyncs, per-section meshes, a simplified collision hull).
+      Paint/liveries not chosen. Build order: 3a big-ship performance + cap, 3b hull panels + Hull Tool, 3c greebles +
+      lighting, 3d hinges/rotors + gear-linked articulation, 3e a large demo blueprint; one jar at the end of M9 still.
 
 ---
 
