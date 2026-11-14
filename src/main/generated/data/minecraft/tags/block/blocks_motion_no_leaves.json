@@ -1,6 +1,8 @@
 {
   "values": [
     "starwake:hull_plating",
+    "starwake:hull_plating_stairs",
+    "starwake:hull_plating_slab",
     "starwake:regolith",
     "starwake:rust_sand",
     "starwake:ferrite_ore",
@@ -8,6 +10,7 @@
     "starwake:thruster",
     "starwake:main_engine",
     "starwake:maneuvering_thruster",
+    "starwake:canopy_glass",
     "starwake:fuel_tank",
     "starwake:seat",
     "starwake:power_plant",

@@ -19,6 +19,9 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 	public void generateTranslations(HolderLookup.Provider registries, TranslationBuilder builder) {
 		builder.add(ModCreativeTabs.MAIN_TITLE_KEY, "Starwake");
 		builder.add(ModBlocks.HULL_PLATING, "Hull Plating");
+		builder.add(ModBlocks.CANOPY_GLASS, "Canopy Glass");
+		builder.add(ModBlocks.HULL_PLATING_STAIRS, "Hull Plating Stairs");
+		builder.add(ModBlocks.HULL_PLATING_SLAB, "Hull Plating Slab");
 		builder.add(ModBlocks.REGOLITH, "Regolith");
 		builder.add(ModBlocks.RUST_SAND, "Rust Sand");
 		builder.add(ModBlocks.FERRITE_ORE, "Ferrite Ore");
@@ -526,7 +529,6 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModBlocks.HELM, "Helm");
 		builder.add(ModBlocks.THRUSTER, "Thruster");
 		builder.add(ModBlocks.MAIN_ENGINE, "Main Engine");
-		builder.add(ModBlocks.WING, "Wing");
 		builder.add(ModBlocks.LANDING_GEAR, "Landing Gear");
 		builder.add(ModBlocks.MANEUVERING_THRUSTER, "Maneuvering Thruster");
 		builder.add(ModBlocks.FUEL_TANK, "Fuel Tank");
@@ -607,6 +609,13 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("wristcom.app.starmap", "Starmap");
 		builder.add("wristcom.app.contracts", "Contracts");
 		builder.add("wristcom.app.codex", "Codex");
+		builder.add("wristcom.app.settings", "Settings");
+		builder.add("wristcom.settings.steering", "Steering");
+		builder.add("wristcom.settings.steering.mouse_aim", "Mouse-aim");
+		builder.add("wristcom.settings.steering.joystick", "Joystick");
+		builder.add("wristcom.settings.hud_scale", "Cockpit HUD size");
+		builder.add("wristcom.settings.hud_opacity", "Cockpit HUD opacity");
+		builder.add("wristcom.settings.note", "Saved on this computer. K also toggles steering in flight.");
 		builder.add("wristcom.app.contracts.desc", "Jobs from faction contacts: deliveries, bounties, salvage. Accept, track and turn in contracts here.");
 		builder.add("wristcom.app.trade", "Trade");
 		builder.add("wristcom.app.trade.desc", "Commodity prices at known terminals, your best routes, and market history.");
@@ -733,7 +742,7 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("preflight.starwake.centre_of_mass", "Centre of mass: %s, %s, %s");
 		builder.add("preflight.starwake.lift_unbalanced", "Lift is off-centre: only %s of %s lift is usable without tipping (weight %s). Spread lift thrusters around the centre of mass");
 		builder.add("preflight.starwake.lift_wasted", "%s of lift is spent keeping level: lift thrusters are off-centre");
-		builder.add("preflight.starwake.wings", "Wings: %s panels (%s lifting) carry %s of the weight at %s m/s here");
+		builder.add("preflight.starwake.drag", "Air drag: %s m² frontal area; full forward thrust tops out at %s m/s here (cap %s)");
 		builder.add("key.starwake.decouple", "Coupled / Decoupled");
 		builder.add("message.starwake.decoupled", "DECOUPLED: no automatic braking");
 		builder.add("message.starwake.coupled", "COUPLED: flight computer brakes drift");

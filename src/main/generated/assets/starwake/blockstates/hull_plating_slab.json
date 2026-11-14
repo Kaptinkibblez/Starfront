@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "starwake:block/hull_plating_slab"
+    },
+    "type=double": {
+      "model": "starwake:block/hull_plating"
+    },
+    "type=top": {
+      "model": "starwake:block/hull_plating_slab_top"
+    }
+  }
+}

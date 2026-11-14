@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
- * Server -> clients tracking a ship (M9): its rigid-body model (mass, centre of mass, inertia, thrusters, wings) as the
+ * Server -> clients tracking a ship (M9): its rigid-body model (mass, centre of mass, inertia, thrusters, cross-section) as the
  * server computed it from ship stats and part materials, so a pilot's client can predict the flight exactly.
  */
 public record ShipDynamicsPayload(int shipId, byte[] model) implements CustomPacketPayload {

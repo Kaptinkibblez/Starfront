@@ -496,6 +496,14 @@ commit. **Don't start the next milestone until the user confirms the current one
       hull flush with a small bounce, diagonal push slides along the wall; forced drop lands and settles without
       jitter; parked ships sleep; prediction matches the server exactly in singleplayer.)* Details in "How ships
       work after M9" below.
+    - **Ships pass 2 decisions (user, 2026-11-13):** audit found rain falling through hulls, chests/signs invisible
+      aboard, parked unpiloted ships still burning idle fuel, observers snapping instead of interpolating, a caged
+      canopy view, and a weak, over-winged, boxy Kestrel. Choices: **remove wings entirely** ("a starship doesn't have
+      traditional wings": the Wing block, lift and wing HUD/pre-flight go; saved wings become hull plating) with
+      **drag only** in atmospheres (scaled by air density and the hull's cross-section); a frameless **Canopy Glass**
+      block; **every block-entity renderer aboard, with animations** (chest lids, sign edits); HUD **scale/opacity
+      settings** and **contact markers** for nearby ships; **Kestrel redesign + rebalance** (sloped hull, no wings,
+      stronger RCS, enough power).
     - **Next (user, 2026-11-13):** the rest of ships (building/editing aboard, cockpit HUD, Kestrel, block-entity
       rendering aboard, rain through hulls, observer smoothing), audit -> ask -> fix; still one jar at the end.
 

@@ -47,6 +47,18 @@ abstract class ServerLevelShipyardMixin {
 		if (at != null) at.ship().level().levelEvent(null, type, BlockPos.containing(at.pos()), data);
 	}
 
+	/** Sign edits and other block-entity updates without a state change reach the ship's snapshot too. */
+	@Inject(method = "sendBlockUpdated", at = @At("HEAD"))
+	private void starwake$shipyardData(BlockPos pos, BlockState old, BlockState current, int flags, CallbackInfo ci) {
+		if (old == current) Shipyard.onBlockDataChanged((ServerLevel) (Object) this, pos);
+	}
+
+	/** Block events aboard (chest lids) are replayed by clients tracking the ship. */
+	@Inject(method = "doBlockEvent", at = @At("RETURN"))
+	private void starwake$shipyardBlockEvent(net.minecraft.world.level.BlockEventData data, CallbackInfoReturnable<Boolean> cir) {
+		if (cir.getReturnValueZ()) Shipyard.onBlockEvent((ServerLevel) (Object) this, data.pos(), data.paramA(), data.paramB());
+	}
+
 	@Inject(method = "addFreshEntity", at = @At("HEAD"), cancellable = true)
 	private void starwake$relocateFromShipyard(Entity entity, CallbackInfoReturnable<Boolean> cir) {
 		if (Shipyard.relocate((ServerLevel) (Object) this, entity)) cir.setReturnValue(true);

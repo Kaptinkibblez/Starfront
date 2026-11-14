@@ -1,7 +1,7 @@
 {
   "thrust_to_accel": 0.05,
   "gravity_to_accel": 0.05,
-  "drag_atmosphere": 0.992,
+  "drag_atmosphere": 0.998,
   "drag_space": 0.998,
   "max_speed": 5.0,
   "max_speed_space": 12.5,
@@ -13,6 +13,5 @@
   "quantum_min_distance": 20000,
   "quantum_standoff": 600,
   "quantum_align": 3.0,
-  "wing_lift": 2.6,
-  "wing_drag": 10.0
+  "air_drag": 0.015
 }

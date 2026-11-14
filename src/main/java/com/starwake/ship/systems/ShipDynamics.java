@@ -35,9 +35,13 @@ public final class ShipDynamics {
 	private final Vector3d weightedPos = new Vector3d();
 	private final List<double[]> blocks = new ArrayList<>(); // x, y, z, mass
 	private final List<Thruster> thrusters = new ArrayList<>();
-	/** Wing panels: position and plate normal (local); horizontal ones make lift (3i). */
-	public record Wing(Vector3d position, Vector3d normal, boolean horizontal) {}
-	private final List<Wing> wings = new ArrayList<>();
+	/**
+	 * Hull silhouette for air drag (M9 pass 2): the occupied cells projected onto each local plane, so {@code area}
+	 * x/y/z is the cross-section facing air along that axis (blocks²). Collected in add(), counted in finish().
+	 */
+	private final it.unimi.dsi.fastutil.longs.LongOpenHashSet shadowX = new it.unimi.dsi.fastutil.longs.LongOpenHashSet(),
+			shadowY = new it.unimi.dsi.fastutil.longs.LongOpenHashSet(), shadowZ = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
+	private final Vector3d area = new Vector3d();
 
 	// Derived by finish().
 	private final Vector3d centre = new Vector3d();
@@ -68,11 +72,9 @@ public final class ShipDynamics {
 		mass += m;
 		weightedPos.add(x * m, y * m, z * m);
 		blocks.add(new double[] {x, y, z, m});
-		if (state.getBlock() instanceof com.starwake.ship.block.WingBlock) {
-			Direction.Axis axis = com.starwake.ship.block.WingBlock.normal(state);
-			Vector3d normal = new Vector3d(axis == Direction.Axis.X ? 1 : 0, axis == Direction.Axis.Y ? 1 : 0, axis == Direction.Axis.Z ? 1 : 0);
-			wings.add(new Wing(new Vector3d(x, y, z), normal, axis == Direction.Axis.Y));
-		}
+		shadowX.add(BlockPos.asLong(0, pos.getY(), pos.getZ()));
+		shadowY.add(BlockPos.asLong(pos.getX(), 0, pos.getZ()));
+		shadowZ.add(BlockPos.asLong(pos.getX(), pos.getY(), 0));
 		if (state.getBlock() instanceof ThrusterBlock && clearExhaust && stats.thrust() > 0) {
 			Direction nozzle = state.getValue(ThrusterBlock.FACING);
 			Direction push = nozzle.getOpposite();
@@ -101,6 +103,10 @@ public final class ShipDynamics {
 		inertia.invert(inverseInertia);
 		gyration = Math.max(1.0, Math.sqrt((xx + yy + zz) / (2 * mass)));
 		blocks.clear(); // only needed for the tensor
+		area.set(Math.max(1, shadowX.size()), Math.max(1, shadowY.size()), Math.max(1, shadowZ.size()));
+		shadowX.clear();
+		shadowY.clear();
+		shadowZ.clear();
 
 		columns = new double[thrusters.size()][];
 		for (int k = 0; k < thrusters.size(); k++) {
@@ -132,12 +138,7 @@ public final class ShipDynamics {
 			buf.writeByte(t.nozzle().get3DDataValue());
 			buf.writeBlockPos(t.pos());
 		}
-		buf.writeVarInt(wings.size());
-		for (Wing w : wings) {
-			buf.writeDouble(w.position().x).writeDouble(w.position().y).writeDouble(w.position().z);
-			buf.writeDouble(w.normal().x).writeDouble(w.normal().y).writeDouble(w.normal().z);
-			buf.writeBoolean(w.horizontal());
-		}
+		buf.writeDouble(area.x).writeDouble(area.y).writeDouble(area.z);
 	}
 
 	/** Reads a model written by {@link #write} (derived values are rebuilt). */
@@ -158,12 +159,7 @@ public final class ShipDynamics {
 			Direction nozzle = Direction.from3DDataValue(buf.readByte());
 			d.thrusters.add(new Thruster(pos, push, thrust, burn, nozzle, buf.readBlockPos()));
 		}
-		int w = buf.readVarInt();
-		for (int i = 0; i < w; i++) {
-			Vector3d pos = new Vector3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
-			Vector3d normal = new Vector3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
-			d.wings.add(new Wing(pos, normal, buf.readBoolean()));
-		}
+		d.area.set(buf.readDouble(), buf.readDouble(), buf.readDouble());
 		d.columns = new double[d.thrusters.size()][];
 		for (int k = 0; k < d.thrusters.size(); k++) {
 			Thruster t = d.thrusters.get(k);
@@ -182,41 +178,28 @@ public final class ShipDynamics {
 	public List<Thruster> thrusters() { return thrusters; }
 	public int thrusterCount() { return thrusters.size(); }
 
-	public List<Wing> wings() { return wings; }
-
-	/** Number of horizontal (lifting) wing panels. */
-	public int liftingWings() {
-		int n = 0;
-		for (Wing w : wings) if (w.horizontal()) n++;
-		return n;
-	}
+	/** Cross-section facing the air along each local axis (blocks²). */
+	public Vector3d area() { return area; }
 
 	/**
-	 * Aerodynamic force and torque (local, thrust units) on the wings (3i). Each panel is a flat
-	 * plate: air pushing through it is resisted ({@code drag x |v| x v·n}, along -n), which also
-	 * damps spin and weathervanes a ship with fins at the back. Horizontal panels are cambered:
-	 * forward airspeed squared times {@code lift}, along the panel's up. Every panel acts at
-	 * its own position, so wings ahead of or behind the centre of mass pitch the ship.
+	 * Air drag (M9 pass 2; replaces 3i's wings: starships don't fly on wings). Quadratic drag on each local axis,
+	 * {@code coefficient x density x area x |v| x v}, divided by mass: a long thin ship slips through the air nose
+	 * first and slows hard broadside; thin air is slippery, thick air sluggish. Acts at the centre of mass (no
+	 * torque), so it never fights the pilot's attitude.
 	 *
-	 * @param velocity local velocity (blocks/tick); {@code omega} local angular velocity (rad/tick)
-	 * @param forward  the ship's local forward (unit)
+	 * @param velocity local velocity (blocks/tick)
+	 * @return local acceleration (blocks/tick²)
 	 */
-	public double[] aero(Vector3d velocity, Vector3d omega, Vector3d forward, double density, double lift, double drag) {
-		double[] out = new double[6];
-		if (density <= 0 || wings.isEmpty()) return out;
-		for (Wing w : wings) {
-			Vector3d r = new Vector3d(w.position()).sub(centre);
-			Vector3d v = omega.cross(r, new Vector3d()).add(velocity); // the panel's own velocity
-			double speed = v.length();
-			double through = v.dot(w.normal());
-			Vector3d force = new Vector3d(w.normal()).mul(-drag * density * speed * through);
-			if (w.horizontal()) {
-				double airspeed = Math.max(0, v.dot(forward));
-				force.add(0, lift * density * airspeed * airspeed, 0);
-			}
-			Vector3d torque = r.cross(force, new Vector3d());
-			out[0] += force.x; out[1] += force.y; out[2] += force.z;
-			out[3] += torque.x; out[4] += torque.y; out[5] += torque.z;
+	public Vector3d drag(Vector3d velocity, double density, double coefficient) {
+		Vector3d out = new Vector3d();
+		if (density <= 0 || coefficient <= 0) return out;
+		double speed = velocity.length();
+		double k = coefficient * density * speed / mass;
+		out.set(-k * area.x * velocity.x, -k * area.y * velocity.y, -k * area.z * velocity.z);
+		// Never more than stops the ship this tick (stiff at low mass / huge areas).
+		for (int axis = 0; axis < 3; axis++) {
+			double v = velocity.get(axis), a = out.get(axis);
+			if (Math.abs(a) > Math.abs(v)) out.setComponent(axis, -v);
 		}
 		return out;
 	}
@@ -252,7 +235,7 @@ public final class ShipDynamics {
 	 *
 	 * @param up        world-up in the ship's frame (ignored when {@code weight} is 0, e.g. space)
 	 * @param hover     whether to hold altitude at all (false in space, or climbing/diving on purpose)
-	 * @param weight    vertical force needed to hover (thrust units); negative if wings over-lift
+	 * @param weight    vertical force needed to hover (thrust units); 
 	 * @param torque    wanted torque (local)
 	 * @param push      wanted translation force (local); over-ask for "full thrust"
 	 * @param scale     thrust multiplier for every thruster (power routing, boost)

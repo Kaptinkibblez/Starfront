@@ -106,6 +106,8 @@ public class ShipEntity extends Entity {
 	 * During a jump: how far the ship has "really" travelled from where it sits. The hull
 	 * stays put in the world until the jump ends; the crew see space as if from start + offset.
 	 */
+	/** The shipyard plot index, for clients (sign editing aboard maps plot positions back to the ship). */
+	private static final EntityDataAccessor<Integer> PLOT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<org.joml.Vector3fc> QT_OFFSET = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.VECTOR3);
 
 	/** Firing thrusters for exhaust effects (see {@link #publishThrottles}). */
@@ -113,7 +115,6 @@ public class ShipEntity extends Entity {
 
 	private static final EntityDataAccessor<String> ACCESS = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
 	private static final EntityDataAccessor<Boolean> DECOUPLED = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.BOOLEAN);
-	private static final EntityDataAccessor<Float> WING_LIFT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	/** Jump drive (M6): state bits ({@code JD_*}), target system id, info (fuel or ticks left), spool. */
 	private static final EntityDataAccessor<Integer> JD_STATE = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<String> JD_TARGET = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
@@ -417,6 +418,21 @@ public class ShipEntity extends Entity {
 	}
 
 	/** A block in our plot changed (Shipyard listener). Changes that match the snapshot are ignored. */
+	/**
+	 * A plot block entity changed what clients see without a state change (sign text edited, ...): resync that cell
+	 * so the new client tag reaches everyone (M9 pass 2).
+	 */
+	public void onPlotDataChange(BlockPos local) {
+		if (structure == null) return;
+		BlockState known = structure.get(local);
+		if (known != null) plotChanges.put(local.immutable(), known);
+	}
+
+	/** Client: the synced plot index (-1 until known). */
+	public int syncedPlot() {
+		return entityData.get(PLOT);
+	}
+
 	public void onPlotChange(BlockPos local, BlockState state) {
 		if (structure == null) return;
 		BlockState known = structure.get(local);
@@ -442,10 +458,11 @@ public class ShipEntity extends Entity {
 		}
 		if (plot < 0) {
 			plot = com.starwake.ship.yard.Shipyard.allocate(world.getServer(), getUUID());
-			com.starwake.ship.yard.Shipyard.write(yard, plot, structure.entries());
+			com.starwake.ship.yard.Shipyard.writeFresh(yard, plot, structure.entries());
 			com.starwake.StarwakeMod.LOGGER.info("Ship {} moved into shipyard plot {} ({} blocks)", getId(), plot, structure.entries().size());
 		}
 		com.starwake.ship.yard.Shipyard.track(this, plot);
+		if (entityData.get(PLOT) != plot) entityData.set(PLOT, plot);
 		if (tickCount % 40 == 1) com.starwake.ship.yard.Shipyard.ticket(yard, plot, structure);
 		if (!plotSynced && yard.isLoaded(com.starwake.ship.yard.Shipyard.toPlot(plot, helmLocal))) {
 			// First tick with the plot loaded: pick up anything that changed while nobody was listening.
@@ -517,6 +534,7 @@ public class ShipEntity extends Entity {
 	 * recomputed and every tracking client gets the new structure.
 	 */
 	public void applyEdit(ShipStructure next) {
+		asleep = false; // its shape (and maybe its support) changed
 		for (Entity passenger : List.copyOf(getPassengers())) {
 			BlockPos seat = seatOf(passenger);
 			if (seat != null && next.get(seat) == null) passenger.stopRiding();
@@ -571,10 +589,10 @@ public class ShipEntity extends Entity {
 		builder.define(THROTTLES, "");
 		builder.define(DECOUPLED, false);
 		builder.define(ACCESS, "\n0\n");
-		builder.define(WING_LIFT, 0f);
 		builder.define(QT_TARGET, "");
 		builder.define(QT_INFO, 0);
 		builder.define(QT_OFFSET, new Vector3f());
+		builder.define(PLOT, -1);
 		builder.define(JD_STATE, 0);
 		builder.define(JD_TARGET, "");
 		builder.define(JD_INFO, 0);
@@ -748,7 +766,8 @@ public class ShipEntity extends Entity {
 	// =========================================================================================
 
 	public Quaternionfc orientation() {
-		return predicting ? predictedOrientation : entityData.get(ORIENTATION);
+		if (predicting) return predictedOrientation;
+		return shownReady ? shownOrientation : entityData.get(ORIENTATION);
 	}
 
 	public void setOrientation(Quaternionfc orientation) {
@@ -1007,7 +1026,19 @@ public class ShipEntity extends Entity {
 					.rotateZ((float) Math.toRadians(spin.z / 20));
 			setOrientation(next.normalize());
 		}
+		if (pilot != null) asleep = false;
 		if (pilot == null) {
+			// Parked (M9 pass 2): a ship at rest on the ground stops simulating until something disturbs it. Stepping
+			// a resting body still pushes its contacts apart a hair every tick, which made parked ships creep.
+			if (getDeltaMovement().lengthSqr() > 1.0e-4 || drift.lengthSqr() > 0 || spin.lengthSqr() > 0) asleep = false;
+			else if (!asleep && (grounded || clearance < 0.05) && angularVelocity.lengthSquared() < 1.0e-5) asleep = true;
+			if (asleep) {
+				setDeltaMovement(Vec3.ZERO);
+				angularVelocity.zero();
+				java.util.Arrays.fill(throttles, 0);
+				publishThrottles();
+				return false;
+			}
 			if (drift.lengthSqr() > 0) {
 				velocity = drift;
 			} else {
@@ -1598,23 +1629,18 @@ public class ShipEntity extends Entity {
 		Vector3d alpha = wanted.sub(angularVelocity).mul(0.35);
 		Vector3d torque = dynamics.inertia().transform(alpha, new Vector3d()).div(physics.thrustToAccel());
 
-		// Wings (3i): their lift carries part of the weight, so thrusters only make up the rest,
-		// and the flight computer counters their pitching/yawing moments where it can.
+		// Air drag (M9 pass 2): by the hull's cross-section and the planet's air density, at the centre of mass.
 		double density = space ? 0 : Planets.airDensityOf(level());
-		double[] air = dynamics.aero(local, angularVelocity, new Vector3d(fwdAxis), density, physics.wingLift(), physics.wingDrag());
-		double airLift = air[0] * upLocal.x + air[1] * upLocal.y + air[2] * upLocal.z;
-		double fullWeight = mass * gravity * physics.gravityToAccel() / physics.thrustToAccel();
-		if (!level().isClientSide()) entityData.set(WING_LIFT, fullWeight > 0 ? (float) Mth.clamp(airLift / fullWeight, 0, 9) : 0f);
-		if (hovering) weight -= airLift; // may go negative: then hold the ship down
-		torque.sub(air[3], air[4], air[5]);
+		Vector3d drag = dynamics.drag(local, density, physics.airDrag());
 
 		double[] th = level().isClientSide() || throttles.length != dynamics.thrusterCount() ? new double[dynamics.thrusterCount()] : throttles;
 		double[] achieved = dynamics.allocate(new Vector3d(upLocal.x, upLocal.y, upLocal.z), hovering, weight, torque, force, scale, th);
 		if (scale > 0 && !level().isClientSide()) burnFuel(dynamics.burn(th) * scale);
 
-		for (int j = 0; j < 6; j++) achieved[j] += air[j]; // thrust + aerodynamics
 		Vector3f f = q.transform(new Vector3f((float) achieved[0], (float) achieved[1], (float) achieved[2]));
-		Vec3 accel = new Vec3(f.x, f.y, f.z).scale(physics.thrustToAccel() / mass).add(0, -gravity * physics.gravityToAccel(), 0);
+		Vector3f d = q.transform(new Vector3f((float) drag.x, (float) drag.y, (float) drag.z));
+		Vec3 accel = new Vec3(f.x, f.y, f.z).scale(physics.thrustToAccel() / mass).add(d.x, d.y, d.z)
+				.add(0, -gravity * physics.gravityToAccel(), 0);
 		Vector3d spin = dynamics.inverseInertia().transform(new Vector3d(achieved[3], achieved[4], achieved[5]))
 				.mul(physics.thrustToAccel());
 		angularVelocity.add(spin).mul(space ? 0.998 : 0.985); // slight passive damping; the flight computer does the braking
@@ -1722,6 +1748,11 @@ public class ShipEntity extends Entity {
 			if (predicting) {
 				predicting = false;
 				history.clear();
+				// Observers resume from where the prediction left the ship.
+				shownOrientation.set(predictedOrientation);
+				shownReady = true;
+				shownPositions.clear();
+				shownOrientations.clear();
 			}
 			return;
 		}
@@ -1795,28 +1826,81 @@ public class ShipEntity extends Entity {
 		}
 	}
 
+	// Observers (M9 pass 2): server updates are played out one per tick from a small queue instead of snapping as they
+	// arrive. Packets come in bursts (two in one tick, none the next); a queue evens that out at about a tick of
+	// latency. Position and orientation travel separately (move packets vs entity data), so each has its own queue,
+	// popped in step. The pilot's own client predicts instead and ignores both.
+	/** Queued server positions / orientations, oldest first (client, observers only). */
+	private final java.util.ArrayDeque<Vec3> shownPositions = new java.util.ArrayDeque<>();
+	private final java.util.ArrayDeque<Quaternionf> shownOrientations = new java.util.ArrayDeque<>();
+	/** The orientation observers see (what {@link #orientation()} returns on their client once ready). */
+	private final Quaternionf shownOrientation = new Quaternionf();
+	private boolean shownReady;
+	/** Queue lengths past which the playout catches up (drops the oldest), and the jump that snaps instead. */
+	private static final int SHOWN_MAX = 3;
+	private static final double SHOWN_SNAP = 16;
+
+	@Override
+	public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+		super.onSyncedDataUpdated(accessor);
+		if (shownOrientations == null) return; // called from the superclass constructor
+		if (accessor.equals(ORIENTATION) && level().isClientSide() && !predicting) {
+			Quaternionf q = new Quaternionf(entityData.get(ORIENTATION));
+			if (!shownReady) {
+				shownOrientation.set(q);
+				shownReady = true;
+				setBoundingBox(makeBoundingBox(position()));
+			} else {
+				shownOrientations.addLast(q);
+			}
+		}
+	}
+
 	/** The server's velocity packets don't overwrite a predicted ship's velocity either. */
 	@Override
 	public void lerpMotion(Vec3 movement) {
 		if (!predicting) super.lerpMotion(movement);
 	}
 
-	/** Server packets don't move a ship the client is predicting (it reconciles instead). */
+	/** Server packets don't move a ship the client is predicting (it reconciles instead); observers queue them. */
 	@Override
 	protected net.minecraft.world.entity.InterpolationHandler createInterpolationHandler() {
 		return new net.minecraft.world.entity.InterpolationHandler() {
 			@Override
 			public net.minecraft.core.@Nullable PositionAndRotation target() {
-				return null;
+				Vec3 last = shownPositions.peekLast();
+				return last == null ? null : net.minecraft.core.PositionAndRotation.of(last, getYRot(), getXRot());
 			}
 
 			@Override
 			public boolean interpolateTo(net.minecraft.world.entity.@Nullable PositionPath position, float yRot, float xRot, boolean hasRotation) {
-				return predicting;
+				if (predicting) return true;
+				if (position == null) return true;
+				Vec3 end = position.endPosition();
+				Vec3 from = shownPositions.isEmpty() ? position() : shownPositions.peekLast();
+				if (end.distanceToSqr(from) > SHOWN_SNAP * SHOWN_SNAP) {
+					// A teleport or a long lag: snap there and drop the backlog.
+					shownPositions.clear();
+					flushOrientations();
+					setPos(end);
+					return true;
+				}
+				shownPositions.addLast(end);
+				return true;
 			}
 
 			@Override
 			public void interpolate() {
+				if (predicting) return;
+				// Orientation first, so the bounding box built by setPos uses it.
+				Quaternionf q = null;
+				while (shownOrientations.size() > SHOWN_MAX) shownOrientations.pollFirst();
+				if (!shownOrientations.isEmpty()) q = shownOrientations.pollFirst();
+				if (q != null) shownOrientation.set(q);
+				while (shownPositions.size() > SHOWN_MAX) shownPositions.pollFirst();
+				Vec3 next = shownPositions.pollFirst();
+				if (next != null) setPos(next);
+				else if (q != null) setBoundingBox(makeBoundingBox(position()));
 			}
 
 			@Override
@@ -1825,13 +1909,22 @@ public class ShipEntity extends Entity {
 
 			@Override
 			public boolean hasActiveInterpolation() {
-				return false;
+				return !shownPositions.isEmpty();
 			}
 
 			@Override
 			public void cancel() {
+				shownPositions.clear();
+				flushOrientations();
 			}
 		};
+	}
+
+	/** Jumps the shown orientation to the newest one received. */
+	private void flushOrientations() {
+		Quaternionf last = shownOrientations.peekLast();
+		if (last != null) shownOrientation.set(last);
+		shownOrientations.clear();
 	}
 
 	// =========================================================================================
@@ -1990,11 +2083,6 @@ public class ShipEntity extends Entity {
 		return level().isClientSide() ? entityData.get(DECOUPLED) : decoupled;
 	}
 
-	/** Fraction of the ship's weight its wings are carrying right now (synced, for the HUD). */
-	public float wingLift() {
-		return entityData.get(WING_LIFT);
-	}
-
 	/** Pilot pressed V: coupled <-> decoupled. */
 	public void toggleDecoupled() {
 		decoupled = !decoupled;
@@ -2009,6 +2097,9 @@ public class ShipEntity extends Entity {
 
 	/** Whether the pilot is holding boost this tick (raises the speed cap). */
 	private boolean boosting;
+
+	/** Parked and not simulating (server, unpiloted only; see the unpiloted branch of the server tick). */
+	private boolean asleep;
 
 	/** Height of the hull's bottom above the ground below the ship's centre (blocks; 64 = nothing in range). */
 	private double clearance = 64;
@@ -2056,8 +2147,9 @@ public class ShipEntity extends Entity {
 			velocity = velocity.scale(0.8);
 			return velocity.lengthSqr() < 1.0e-6 ? Vec3.ZERO : velocity;
 		}
-		if (grounded) {
-			// Parked on something: gravity and the contacts keep it there (it settles and tips like a real object).
+		if (grounded || clearance < 0.05) {
+			// Parked on something (or just assembled standing on it: the hover would hold it a hair off the ground
+			// forever and keep burning): gravity and the contacts keep it there: gravity and the contacts keep it there (it settles and tips like a real object).
 			return velocity.add(0, -gravity * physics.gravityToAccel(), 0).scale(0.9);
 		}
 		double weight = mass * gravity * physics.gravityToAccel() / physics.thrustToAccel();
@@ -2083,7 +2175,7 @@ public class ShipEntity extends Entity {
 	/**
 	 * Mouse-aim: the angular velocity (ship frame, rad/tick) that turns the nose toward where the
 	 * pilot looks, eased near the target and capped at {@code turn_rate}; Z/C roll; in an
-	 * atmosphere the wings ease level when not rolling. Free-look holds attitude.
+	 * atmosphere the ship eases level when not rolling. Free-look holds attitude.
 	 */
 	private Vector3d wantedRotation(Player pilot, ShipPhysics physics, boolean space) {
 		double max = Math.toRadians(physics.turnRateDegrees()) / 20.0;
@@ -2112,7 +2204,7 @@ public class ShipEntity extends Entity {
 		if (rolling) {
 			want.add(new Vector3d(nose).mul((controls & CONTROL_ROLL_RIGHT) != 0 ? max : -max));
 		} else if (!space) {
-			// Atmospheric auto-level: ease the wings level unless the pilot is rolling on purpose.
+			// Atmospheric auto-level: ease the ship level unless the pilot is rolling on purpose.
 			Vector3f up = q.transform(new Vector3f(0, 1, 0));
 			Direction right = forward.getClockWise();
 			Vector3f r = q.transform(new Vector3f(right.getStepX(), 0, right.getStepZ()));

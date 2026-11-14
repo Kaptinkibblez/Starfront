@@ -33,7 +33,7 @@ import org.jspecify.annotations.Nullable;
  *   <li>left tape: speed (m/s) with the top-speed mark, flight mode (CPLD/DCPL) and boost;</li>
  *   <li>right tape: altitude (or range to the nearest planet in space) and vertical speed;</li>
  *   <li>top: heading tape;</li>
- *   <li>bottom: systems strip (fuel, shields, power triangle, engines, heat, wing lift);</li>
+ *   <li>bottom: systems strip (fuel, shields, power triangle, engines, heat, gear);</li>
  *   <li>alerts under the reticle: DECOUPLED, LOW FUEL, OVERHEAT, SHIELDS DOWN.</li>
  * </ul>
  * Crew and people walking aboard get a compact status card instead. While piloting, vanilla's
@@ -41,8 +41,29 @@ import org.jspecify.annotations.Nullable;
  * ship data.
  */
 public final class FlightHud {
-	public static final int HOLO = 0xFF6FE3FF, HOLO_DIM = 0x996FE3FF, HOLO_FAINT = 0x406FE3FF, WHITE = 0xFFE9F6FF,
-			WARN = 0xFFFFB347, ALERT = 0xFFFF5A4A, GOOD = 0xFF7CFFB2, PANEL = 0x58061018;
+	/** Palette at full opacity; the live colours below are these scaled by the HUD opacity setting each frame. */
+	private static final int BASE_HOLO = 0xFF6FE3FF, BASE_HOLO_DIM = 0x996FE3FF, BASE_HOLO_FAINT = 0x406FE3FF, BASE_WHITE = 0xFFE9F6FF,
+			BASE_WARN = 0xFFFFB347, BASE_ALERT = 0xFFFF5A4A, BASE_GOOD = 0xFF7CFFB2, BASE_PANEL = 0x58061018;
+	public static int HOLO = BASE_HOLO, HOLO_DIM = BASE_HOLO_DIM, HOLO_FAINT = BASE_HOLO_FAINT, WHITE = BASE_WHITE,
+			WARN = BASE_WARN, ALERT = BASE_ALERT, GOOD = BASE_GOOD, PANEL = BASE_PANEL;
+
+	/** Applies the HUD opacity setting to the palette (M9 pass 2). */
+	private static void applyOpacity() {
+		float o = com.starwake.client.ship.FlightControls.hudOpacity();
+		HOLO = fade(BASE_HOLO, o);
+		HOLO_DIM = fade(BASE_HOLO_DIM, o);
+		HOLO_FAINT = fade(BASE_HOLO_FAINT, o);
+		WHITE = fade(BASE_WHITE, o);
+		WARN = fade(BASE_WARN, o);
+		ALERT = fade(BASE_ALERT, o);
+		GOOD = fade(BASE_GOOD, o);
+		PANEL = fade(BASE_PANEL, o);
+	}
+
+	private static int fade(int argb, float opacity) {
+		int alpha = Math.round((argb >>> 24) * opacity);
+		return (Math.max(alpha, 8) << 24) | (argb & 0xFFFFFF);
+	}
 
 	private FlightHud() {}
 
@@ -75,14 +96,27 @@ public final class FlightHud {
 	private static void render(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.player == null) return; // (F1 already hides HUD elements)
+		applyOpacity();
 		ShipEntity piloted = pilotedShip();
 		if (piloted == null) {
 			ShipEntity aboard = minecraft.player.getVehicle() instanceof ShipEntity seated ? seated : ShipLocalMotion.activeShip();
 			if (aboard != null) crewCard(graphics, minecraft.font, aboard, minecraft.player.isPassenger());
 			return;
 		}
+		// HUD scale (M9 pass 2): draw everything in a scaled space whose logical size is the screen over the scale.
+		float scale = com.starwake.client.ship.FlightControls.hudScale();
+		graphics.pose().pushMatrix();
+		graphics.pose().scale(scale, scale);
+		try {
+			cockpit(graphics, deltaTracker, minecraft, piloted, Math.round(graphics.guiWidth() / scale), Math.round(graphics.guiHeight() / scale));
+		} finally {
+			graphics.pose().popMatrix();
+		}
+	}
+
+	private static void cockpit(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, Minecraft minecraft, ShipEntity piloted, int w, int h) {
 		Font font = minecraft.font;
-		int w = graphics.guiWidth(), h = graphics.guiHeight(), cx = w / 2, cy = h / 2;
+		int cx = w / 2, cy = h / 2;
 		heatHaze(graphics, w, h, com.starwake.client.ship.ReentryEffects.intensity(deltaTracker.getGameTimeDeltaPartialTick(true)));
 		Camera camera = minecraft.gameRenderer.mainCamera();
 		Matrix4f mvp = camera.getViewRotationProjectionMatrix(new Matrix4f());
@@ -112,6 +146,7 @@ public final class FlightHud {
 			int[] v = HudProjection.project(mvp, look, velocity, w, h);
 			if (v != null) velocityMarker(graphics, v[0], v[1]);
 		}
+		contacts(graphics, font, mvp, look, camera.position(), piloted, w, h);
 		headingTape(graphics, font, cx, 4, heading, Math.min(80, Math.round(w * 0.18f)));
 		speedTape(graphics, font, cx - tapeOffset, cy, tapeHalf, speed, piloted, space);
 		altitudeTape(graphics, font, cx + tapeOffset, cy, tapeHalf, piloted, velocity.y, space);
@@ -162,6 +197,42 @@ public final class FlightHud {
 		g.fill(cx, cy - 7, cx + 1, cy - 3, HOLO);
 		g.fill(cx, cy + 4, cx + 1, cy + 8, HOLO);
 		g.fill(cx, cy, cx + 1, cy + 1, WHITE);
+	}
+
+	/** Contacts (M9 pass 2): the nearest other ships in view, bracketed, with range and closing speed. */
+	private static void contacts(GuiGraphicsExtractor g, Font font, Matrix4f mvp, Vector3f look, Vec3 eye, ShipEntity own, int w, int h) {
+		java.util.List<ShipEntity> ships = new java.util.ArrayList<>();
+		for (var e : own.level().getEntities(own, own.getBoundingBox().inflate(2000), e -> e instanceof ShipEntity)) ships.add((ShipEntity) e);
+		ships.sort(java.util.Comparator.comparingDouble(s -> s.position().distanceToSqr(eye)));
+		Vec3 ownVelocity = own.recentVelocity();
+		int shown = 0;
+		for (ShipEntity ship : ships) {
+			if (shown >= 8) break;
+			Vec3 rel = ship.position().subtract(eye);
+			double range = rel.length();
+			if (range < 1) continue;
+			int[] p = HudProjection.project(mvp, look, rel, w, h);
+			if (p == null) continue;
+			shown++;
+			// Bracket size shrinks with range (but stays readable).
+			int r = (int) Mth.clamp(Math.round(ship.getBoundingBox().getSize() * 120 / Math.max(range, 1)), 5, 40);
+			double closing = -ship.recentVelocity().subtract(ownVelocity).dot(rel.scale(1 / range)) * 20; // m/s, + = closing
+			int color = closing > 20 ? ALERT : closing > 5 ? WARN : HOLO;
+			int x = p[0], y = p[1], arm = Math.max(2, r / 3);
+			for (int sx : new int[] {-1, 1}) {
+				for (int sy : new int[] {-1, 1}) {
+					int bx = x + sx * r, by = y + sy * r;
+					g.fill(Math.min(bx, bx - sx * arm), by, Math.max(bx, bx - sx * arm) + 1, by + 1, color);
+					g.fill(bx, Math.min(by, by - sy * arm), bx + 1, Math.max(by, by - sy * arm) + 1, color);
+				}
+			}
+			String label = range >= 1000 ? String.format("%.1f km", range / 1000) : Math.round(range) + " m";
+			String rate = (closing >= 0 ? "+" : "") + Math.round(closing) + " m/s";
+			String name = ship.ownerName().isEmpty() ? "SHIP" : ship.ownerName().toUpperCase(java.util.Locale.ROOT);
+			g.text(font, name, x + r + 3, y - r, color, false);
+			g.text(font, label, x + r + 3, y - r + 9, HOLO_DIM, false);
+			g.text(font, rate, x + r + 3, y - r + 18, color, false);
+		}
 	}
 
 	/** Where the nose points: a "W" gun-cross. */
@@ -358,11 +429,7 @@ public final class FlightHud {
 			items.add(ship.isGearDown() ? "GEAR DN" : "GEAR UP");
 			colors.add(ship.isGearDown() ? GOOD : HOLO_DIM);
 		}
-		if (!space) {
-			int lift = Math.round(ship.wingLift() * 100);
-			items.add("WING " + lift + "%");
-			colors.add(lift > 0 ? HOLO : HOLO_DIM);
-		} else if (ship.isQuantumTravelling()) {
+		if (space && ship.isQuantumTravelling()) {
 			items.add("QUANTUM");
 			colors.add(0xFFC27BFF);
 		}

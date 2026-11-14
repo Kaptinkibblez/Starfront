@@ -57,4 +57,20 @@ abstract class ServerGamePacketListenerImplMixin {
 			player.setPos(target);
 		}
 	}
+
+	/**
+	 * Sign text edited aboard a ship (M9 pass 2): the sign lives in the shipyard, not the player's level, so vanilla
+	 * would look in the wrong world and drop the edit.
+	 */
+	@org.spongepowered.asm.mixin.injection.Inject(method = "updateSignText", at = @At("HEAD"), cancellable = true)
+	private void starwake$signAboard(net.minecraft.network.protocol.game.ServerboundSignUpdatePacket packet,
+			java.util.List<net.minecraft.server.network.FilteredText> lines, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+		if (!com.starwake.ship.yard.Shipyard.inYard(packet.pos()) || com.starwake.ship.yard.Shipyard.isShipyard(player.level())) return;
+		ci.cancel();
+		var yard = com.starwake.ship.yard.Shipyard.level(player.level().getServer());
+		if (yard != null && yard.isLoaded(packet.pos()) && yard.getBlockEntity(packet.pos()) instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign) {
+			player.resetLastActionTime();
+			sign.updateSignText(player, packet.slot(), lines);
+		}
+	}
 }

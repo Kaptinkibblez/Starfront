@@ -1,0 +1,8 @@
+{
+  "blocks": [
+    "starwake:hull_plating_stairs"
+  ],
+  "mass": 1.1,
+  "heat_limit": 800,
+  "armor": 8
+}

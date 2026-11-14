@@ -147,6 +147,11 @@ public final class ShipCommands {
 		}
 		ShipEntity ship = ShipAssembler.assemble(source.getLevel(), helm, null);
 		if (ship == null) {
+			// Show what failed, so "fix the failed checks above" has something above it.
+			PreflightReport report = PreflightReport.analyze(source.getLevel(), ShipScanner.scan(source.getLevel(), helm));
+			for (PreflightReport.Line line : report.lines()) {
+				if (line.status() == PreflightReport.Status.FAIL) source.sendFailure(Component.literal(line.status().icon + " ").append(line.text()));
+			}
 			source.sendFailure(Component.translatable("preflight.starwake.verdict_grounded"));
 			return 0;
 		}

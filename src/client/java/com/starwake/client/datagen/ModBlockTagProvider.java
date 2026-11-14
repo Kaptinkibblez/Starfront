@@ -24,8 +24,14 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(
 				key(ModBlocks.HULL_PLATING), key(ModBlocks.REGOLITH), key(ModBlocks.FERRITE_ORE));
 		builder(BlockTags.NEEDS_STONE_TOOL).add(key(ModBlocks.HULL_PLATING), key(ModBlocks.FERRITE_ORE));
+		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(key(ModBlocks.HULL_PLATING_STAIRS), key(ModBlocks.HULL_PLATING_SLAB));
+		builder(BlockTags.NEEDS_STONE_TOOL).add(key(ModBlocks.HULL_PLATING_STAIRS), key(ModBlocks.HULL_PLATING_SLAB));
+		builder(BlockTags.STAIRS).add(key(ModBlocks.HULL_PLATING_STAIRS));
+		builder(BlockTags.SLABS).add(key(ModBlocks.HULL_PLATING_SLAB));
+		// Canopy Glass counts as glass for ship stats and weather (#minecraft:impermeable), but has its own stats JSON.
+		builder(BlockTags.IMPERMEABLE).add(key(ModBlocks.CANOPY_GLASS));
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(
-				key(ModBlocks.HELM), key(ModBlocks.THRUSTER), key(ModBlocks.MAIN_ENGINE), key(ModBlocks.MANEUVERING_THRUSTER), key(ModBlocks.WING), key(ModBlocks.LANDING_GEAR), key(ModBlocks.FUEL_TANK), key(ModBlocks.SEAT),
+				key(ModBlocks.HELM), key(ModBlocks.THRUSTER), key(ModBlocks.MAIN_ENGINE), key(ModBlocks.MANEUVERING_THRUSTER), key(ModBlocks.LANDING_GEAR), key(ModBlocks.FUEL_TANK), key(ModBlocks.SEAT),
 				key(ModBlocks.POWER_PLANT), key(ModBlocks.COOLER), key(ModBlocks.SHIELD_GENERATOR), key(ModBlocks.QUANTUM_DRIVE), key(ModBlocks.JUMP_DRIVE));
 		var upgrades = builder(BlockTags.MINEABLE_WITH_PICKAXE);
 		com.starwake.registry.ModShipParts.upgrades().forEach(block -> upgrades.add(key(block)));
@@ -74,10 +80,10 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		// treats our terrain as hollow and ores never generate. Every Starwake block is currently
 		// a full solid cube; non-solid blocks added later must opt out here.
 		var motion = builder(BlockTags.BLOCKS_MOTION_NO_LEAVES);
-		// Wings and landing gear aren't solid cubes, so they stay out.
+		// Landing gear isn't a solid cube, so it stays out.
 		var thin = java.util.Set.of(com.starwake.registry.ModMachines.COPPER_CABLE, com.starwake.registry.ModMachines.ALUMINIUM_CABLE,
 				com.starwake.registry.ModMachines.FLUID_PIPE, com.starwake.registry.ModMachines.CONVEYOR, com.starwake.registry.ModMachines.SOLAR_PANEL);
-		ModBlocks.all().stream().filter(block -> block != ModBlocks.WING && !(block instanceof com.starwake.ship.block.LandingGearBlock) && !thin.contains(block)
+		ModBlocks.all().stream().filter(block -> !(block instanceof com.starwake.ship.block.LandingGearBlock) && !thin.contains(block)
 				&& !ModPlanetBlocks.nonSolid().contains(block)).forEach(block -> motion.add(key(block)));
 		builder(BlockTags.SAND).add(key(ModPlanetBlocks.FINE_REGOLITH), key(ModPlanetBlocks.VOLCANIC_ASH));
 

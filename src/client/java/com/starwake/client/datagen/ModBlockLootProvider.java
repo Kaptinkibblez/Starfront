@@ -18,6 +18,9 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 	public void generate() {
 		// Hull plating keeps its alloy (M8e-1); every Mk tier of every ship part keeps its material and quality (M8e-2).
 		materialDrop(ModBlocks.HULL_PLATING);
+		dropSelf(ModBlocks.CANOPY_GLASS);
+		dropSelf(ModBlocks.HULL_PLATING_STAIRS);
+		add(ModBlocks.HULL_PLATING_SLAB, createSlabItemTable(ModBlocks.HULL_PLATING_SLAB));
 		for (var part : com.starwake.registry.ModShipParts.Part.values()) {
 			for (int mk = 1; mk <= 3; mk++) materialDrop(com.starwake.registry.ModShipParts.get(part, mk));
 		}
@@ -29,7 +32,6 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		dropSelf(ModBlocks.REGOLITH);
 		dropSelf(ModBlocks.RUST_SAND);
 		dropSelf(ModBlocks.HELM);
-		dropSelf(ModBlocks.WING);
 		dropSelf(ModBlocks.SEAT);
 		for (var block : new net.minecraft.world.level.block.Block[] {com.starwake.registry.ModHubBlocks.STATION_PANEL,
 				com.starwake.registry.ModHubBlocks.STATION_FLOOR, com.starwake.registry.ModHubBlocks.LIGHT_PANEL,

@@ -11,4 +11,7 @@ public final class ShipRenderState extends EntityRenderState {
 	int[] light = new int[0];
 	final Quaternionf orientation = new Quaternionf();
 	Vec3 pivot = Vec3.ZERO;
+	/** Block entities aboard (M9 pass 2): local position and the renderer's own state, per frame. */
+	final java.util.List<net.minecraft.core.BlockPos> blockEntityPos = new java.util.ArrayList<>();
+	final java.util.List<net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState> blockEntities = new java.util.ArrayList<>();
 }

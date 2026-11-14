@@ -7,7 +7,10 @@
 		"EntityTurnMixin",
 		"LocalPlayerMixin",
 		"PlayerTravelMixin",
-		"MinecraftMixin"
+		"MinecraftMixin",
+		"WeatherMixin",
+		"ClientLevelWeatherMixin",
+		"SignEditorMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

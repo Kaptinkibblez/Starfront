@@ -1,0 +1,8 @@
+{
+  "blocks": [
+    "starwake:hull_plating_slab"
+  ],
+  "mass": 0.75,
+  "heat_limit": 800,
+  "armor": 8
+}

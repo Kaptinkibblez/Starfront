@@ -8,7 +8,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "starwake:wing"
+          "name": "starwake:hull_plating_stairs"
         }
       ],
       "rolls": 1

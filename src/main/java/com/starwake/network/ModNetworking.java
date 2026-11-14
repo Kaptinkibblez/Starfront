@@ -16,6 +16,7 @@ public final class ModNetworking {
 		PayloadTypeRegistry.clientboundPlay().register(ShipConsolePayload.TYPE, ShipConsolePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ShipStructurePayload.TYPE, ShipStructurePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ShipStatePayload.TYPE, ShipStatePayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ShipBlockEventPayload.TYPE, ShipBlockEventPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ShipDynamicsPayload.TYPE, ShipDynamicsPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ShipPhysicsPayload.TYPE, ShipPhysicsPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(PlanetListPayload.TYPE, PlanetListPayload.CODEC);

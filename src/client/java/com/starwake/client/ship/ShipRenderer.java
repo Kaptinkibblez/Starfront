@@ -67,6 +67,43 @@ public class ShipRenderer extends EntityRenderer<ShipEntity, ShipRenderState> {
 			cell.set(origin.x + c.x, origin.y + c.y, origin.z + c.z);
 			state.light[i] = LightCoordsUtil.pack(level.getBrightness(LightLayer.BLOCK, cell), level.getBrightness(LightLayer.SKY, cell));
 		}
+		extractBlockEntities(ship, level, state, partialTicks, origin, c, cell);
+	}
+
+	/**
+	 * Block entities aboard (M9 pass 2): each ghost's renderer extracts its state with the camera moved into the
+	 * ship's frame (renderers judge distance and facing against it), then gets the light of its world cell.
+	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private static void extractBlockEntities(ShipEntity ship, ClientLevel level, ShipRenderState state, float partialTicks, Vec3 origin,
+			Vector3f c, BlockPos.MutableBlockPos cell) {
+		state.blockEntityPos.clear();
+		state.blockEntities.clear();
+		var ghosts = ShipBlockEntities.of(ship, level);
+		if (ghosts.isEmpty()) return;
+		var dispatcher = net.minecraft.client.Minecraft.getInstance().getBlockEntityRenderDispatcher();
+		Vec3 camera = net.minecraft.client.Minecraft.getInstance().gameRenderer.mainCamera().position();
+		Vector3f rel = new Vector3f((float) (camera.x - origin.x), (float) (camera.y - origin.y), (float) (camera.z - origin.z));
+		new org.joml.Quaternionf(state.orientation).conjugate().transform(rel);
+		Vec3 localCamera = new Vec3(rel.x + state.pivot.x, rel.y + state.pivot.y, rel.z + state.pivot.z);
+		for (var ghost : ghosts.entrySet()) {
+			BlockPos local = ghost.getKey();
+			if (Vec3.atCenterOf(local).distanceToSqr(localCamera) > 64 * 64) continue;
+			net.minecraft.client.renderer.blockentity.BlockEntityRenderer renderer = dispatcher.getRenderer(ghost.getValue());
+			if (renderer == null) continue;
+			var beState = (net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState) renderer.createRenderState();
+			try {
+				renderer.extractRenderState(ghost.getValue(), beState, partialTicks, localCamera, null);
+			} catch (RuntimeException e) {
+				continue; // a renderer that needs real world neighbours: skip it rather than crash the frame
+			}
+			c.set((float) (local.getX() + 0.5 - state.pivot.x), (float) (local.getY() + 0.5 - state.pivot.y), (float) (local.getZ() + 0.5 - state.pivot.z));
+			state.orientation.transform(c);
+			cell.set(origin.x + c.x, origin.y + c.y, origin.z + c.z);
+			beState.lightCoords = LightCoordsUtil.pack(level.getBrightness(LightLayer.BLOCK, cell), level.getBrightness(LightLayer.SKY, cell));
+			state.blockEntityPos.add(local);
+			state.blockEntities.add(beState);
+		}
 	}
 
 	@Override
@@ -81,6 +118,14 @@ public class ShipRenderer extends EntityRenderer<ShipEntity, ShipRenderState> {
 			for (ChunkSectionLayer layer : ChunkSectionLayer.values()) {
 				if (!mesh.has(layer)) continue;
 				collector.submitCustomGeometry(poseStack, renderType(layer), (pose, buffer) -> mesh.emit(layer, pose, buffer, light));
+			}
+			var dispatcher = net.minecraft.client.Minecraft.getInstance().getBlockEntityRenderDispatcher();
+			for (int i = 0; i < state.blockEntities.size(); i++) {
+				BlockPos local = state.blockEntityPos.get(i);
+				poseStack.pushPose();
+				poseStack.translate(local.getX(), local.getY(), local.getZ());
+				dispatcher.submit(state.blockEntities.get(i), poseStack, collector, camera);
+				poseStack.popPose();
 			}
 			poseStack.popPose();
 		}

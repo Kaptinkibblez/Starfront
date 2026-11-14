@@ -89,7 +89,7 @@ public final class ShipAssembler {
 		ServerLevel yard = com.starwake.ship.yard.Shipyard.level(level.getServer());
 		if (yard != null) {
 			int plot = com.starwake.ship.yard.Shipyard.allocate(level.getServer(), ship.getUUID());
-			com.starwake.ship.yard.Shipyard.write(yard, plot, entries);
+			com.starwake.ship.yard.Shipyard.writeFresh(yard, plot, entries);
 			ship.setPlot(plot);
 		}
 		ship.initialize(new ShipStructure(entries), helm.subtract(min), forward, fuel, capacity);

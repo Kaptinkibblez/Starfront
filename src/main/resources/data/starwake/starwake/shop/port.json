@@ -43,12 +43,6 @@
    "rep": -100
   },
   {
-   "item": "starwake:wing",
-   "price": 200,
-   "count": 1,
-   "rep": -100
-  },
-  {
    "item": "starwake:power_plant",
    "price": 2000,
    "count": 1,
@@ -85,8 +79,8 @@
    "rep": -100
   },
   {
-   "item": "minecraft:glass",
-   "price": 30,
+   "item": "starwake:canopy_glass",
+   "price": 60,
    "count": 16,
    "rep": -100
   },

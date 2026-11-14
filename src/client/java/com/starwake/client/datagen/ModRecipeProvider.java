@@ -44,6 +44,11 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 						.define('K', Items.DRIED_KELP).define('C', Items.COPPER_INGOT).unlockedBy("has_copper", has(Items.COPPER_INGOT)).save(output);
 				shaped(RecipeCategory.REDSTONE, ModMachines.FLUID_PIPE, 8).pattern("CCC").pattern("   ").pattern("CCC")
 						.define('C', Items.COPPER_INGOT).unlockedBy("has_copper", has(Items.COPPER_INGOT)).save(output);
+				shaped(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.CANOPY_GLASS, 8).pattern("GGG").pattern("GIG").pattern("GGG")
+						.define('G', Items.GLASS).define('I', Items.IRON_INGOT).unlockedBy("has_glass", has(Items.GLASS)).save(output);
+				stairBuilder(com.starwake.registry.ModBlocks.HULL_PLATING_STAIRS, net.minecraft.world.item.crafting.Ingredient.of(com.starwake.registry.ModBlocks.HULL_PLATING))
+						.unlockedBy("has_hull", has(com.starwake.registry.ModBlocks.HULL_PLATING)).save(output);
+				slab(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.HULL_PLATING_SLAB, com.starwake.registry.ModBlocks.HULL_PLATING);
 				shaped(RecipeCategory.REDSTONE, ModMachines.FLUID_TANK).pattern("IGI").pattern("G G").pattern("IGI")
 						.define('I', Items.IRON_INGOT).define('G', Items.GLASS).unlockedBy("has_glass", has(Items.GLASS)).save(output);
 				shaped(RecipeCategory.REDSTONE, ModMachines.CONVEYOR, 6).pattern("KKK").pattern("IRI")

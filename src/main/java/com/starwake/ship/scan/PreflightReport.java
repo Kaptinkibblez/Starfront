@@ -211,13 +211,16 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 			lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.cant_turn", String.join(", ", cantTurn))));
 		}
 
-		// Wings (3i): how much of the weight they carry at two-thirds of top speed, here.
-		if (!dynamics.wings().isEmpty()) {
-			double density = Planets.airDensityOf(level.dimension());
-			double cruise = physics.maxSpeed() * 2.0 / 3.0; // blocks per tick
-			double wingLift = dynamics.liftingWings() * physics.wingLift() * density * cruise * cruise;
-			lines.add(new Line(Status.INFO, Component.translatable("preflight.starwake.wings",
-					dynamics.wings().size(), dynamics.liftingWings(), pct(weight > 0 ? wingLift / weight : 0), fmt(cruise * 20))));
+		// Air drag (M9 pass 2): the top speed full forward thrust reaches in this planet's air (where drag = thrust).
+		double density = Planets.airDensityOf(level.dimension());
+		if (density > 0 && physics.airDrag() > 0) {
+			double thrustAccel = accel[0] / 400; // balanced forward thrust, blocks/tick²
+			double area = forward.getAxis() == net.minecraft.core.Direction.Axis.X ? dynamics.area().x : dynamics.area().z;
+			// Solve thrust = c ρ A v² / m + (1 - linear) v for v (blocks/tick).
+			double a = physics.airDrag() * density * area / dynamics.mass(), b = 1 - physics.dragAtmosphere();
+			double v = a > 0 ? (-b + Math.sqrt(b * b + 4 * a * thrustAccel)) / (2 * a) : physics.maxSpeed();
+			lines.add(new Line(Status.INFO, Component.translatable("preflight.starwake.drag",
+					fmt(area), fmt(Math.min(v, physics.maxSpeed()) * 20), fmt(physics.maxSpeed() * 20))));
 		}
 
 		// Landing gear (3j).

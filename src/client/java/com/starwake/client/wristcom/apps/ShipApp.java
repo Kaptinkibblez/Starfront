@@ -165,7 +165,6 @@ public class ShipApp implements WristcomApp {
 				{"Engines", Math.round(ship.engineFactor() * 100) + "% power"},
 				{"Plants", ship.thermalFactor() < 0.999f ? "OVERHEATING " + Math.round(ship.thermalFactor() * 100) + "%" : "nominal"},
 				{"Flight", ship.isDecoupled() ? "DECOUPLED" : "Coupled"},
-				{"Wing lift", Math.round(ship.wingLift() * 100) + "% of weight"},
 				{"Speed", String.format("%.0f m/s", ship.recentVelocity().length() * 20)},
 				{"Quantum", ship.isQuantumTravelling() ? "in transit" : ship.quantumProgress() >= 0 ? "armed" : "idle"}};
 		for (String[] row : rows) {

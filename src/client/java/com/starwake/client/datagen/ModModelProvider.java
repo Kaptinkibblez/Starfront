@@ -29,7 +29,8 @@ public final class ModModelProvider extends FabricModelProvider {
 	@Override
 	public void generateBlockStateModels(BlockModelGenerators generators) {
 		// Plain full cube: textures/block/<name>.png on all six faces.
-		generators.createTrivialCube(ModBlocks.HULL_PLATING);
+		generators.family(ModBlocks.HULL_PLATING).stairs(ModBlocks.HULL_PLATING_STAIRS).slab(ModBlocks.HULL_PLATING_SLAB);
+		generators.createTrivialCube(ModBlocks.CANOPY_GLASS);
 		generators.createTrivialCube(ModBlocks.REGOLITH);
 		generators.createTrivialCube(ModBlocks.RUST_SAND);
 		generators.createTrivialCube(ModBlocks.FERRITE_ORE);
@@ -111,7 +112,6 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.createTrivialBlock(ModBlocks.FUEL_TANK, TexturedModel.COLUMN);
 		createNozzleBlock(generators, ModBlocks.THRUSTER);
 		createNozzleBlock(generators, ModBlocks.MAIN_ENGINE);
-		createWing(generators, ModBlocks.WING);
 		createLandingGear(generators, ModBlocks.LANDING_GEAR);
 		createNozzleBlock(generators, ModBlocks.MANEUVERING_THRUSTER);
 		createSeat(generators, ModBlocks.SEAT);
@@ -148,26 +148,6 @@ public final class ModModelProvider extends FabricModelProvider {
 						.select(Direction.SOUTH, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_180))
 						.select(Direction.WEST, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_270))
 						.select(Direction.EAST, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_90))));
-	}
-
-	/**
-	 * A thin plate (hand-written parent {@code block/template_wing}), turned so its normal follows
-	 * AXIS: Y = horizontal wing, X/Z = vertical fin. Textures {@code <name>_top} (faces), {@code _side} (edges).
-	 */
-	private static void createWing(BlockModelGenerators generators, Block block) {
-		TextureMapping textures = new TextureMapping()
-				.put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top"))
-				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side"));
-		ModelTemplate template = new ModelTemplate(java.util.Optional.of(com.starwake.StarwakeMod.id("block/template_wing")),
-				java.util.Optional.empty(), TextureSlot.TOP, TextureSlot.SIDE);
-		Identifier modelId = template.create(block, textures, generators.modelOutput);
-		MultiVariant model = BlockModelGenerators.plainVariant(modelId);
-		generators.registerSimpleItemModel(block, modelId);
-		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(block).with(
-				PropertyDispatch.initial(BlockStateProperties.AXIS)
-						.select(Direction.Axis.Y, model)
-						.select(Direction.Axis.Z, model.with(BlockModelGenerators.X_ROT_90))
-						.select(Direction.Axis.X, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_90))));
 	}
 
 	/**

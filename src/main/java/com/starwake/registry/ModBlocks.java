@@ -40,6 +40,21 @@ public final class ModBlocks {
 					.sound(SoundType.METAL)
 					.requiresCorrectToolForDrops());
 
+	/** Hull Plating Stairs and Slab (M9 pass 2): sloped and half-height hull pieces for shaping ships. Plain steel. */
+	public static final Block HULL_PLATING_STAIRS = register("hull_plating_stairs",
+			p -> new net.minecraft.world.level.block.StairBlock(HULL_PLATING.defaultBlockState(), p),
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.METAL)
+					.strength(5.0f, 6.0f)
+					.sound(SoundType.METAL)
+					.requiresCorrectToolForDrops());
+	public static final Block HULL_PLATING_SLAB = register("hull_plating_slab", net.minecraft.world.level.block.SlabBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.METAL)
+					.strength(5.0f, 6.0f)
+					.sound(SoundType.METAL)
+					.requiresCorrectToolForDrops());
+
 	/** Regolith: the bedrock-to-surface stone of rocky planets (Veyra's "stone"). */
 	public static final Block REGOLITH = register("regolith", Block::new,
 			BlockBehaviour.Properties.of()
@@ -98,14 +113,18 @@ public final class ModBlocks {
 					.sound(SoundType.METAL)
 					.requiresCorrectToolForDrops());
 
-	/** Wing: thin lifting plate (horizontal) or fin (vertical); aerodynamics in ShipDynamics (3i). */
-	public static final Block WING = register("wing", com.starwake.ship.block.WingBlock::new,
+	/**
+	 * Canopy Glass (M9 pass 2): frameless, faintly tinted ship glass for canopies and windows. Neighbouring panes merge
+	 * seamlessly (no frame lines), it's tougher than window glass, seals a cabin, and rates 1200 C for re-entry.
+	 */
+	public static final Block CANOPY_GLASS = register("canopy_glass", net.minecraft.world.level.block.TransparentBlock::new,
 			BlockBehaviour.Properties.of()
-					.mapColor(MapColor.METAL)
-					.strength(3.0f, 6.0f)
-					.sound(SoundType.METAL)
+					.strength(1.5f, 6.0f)
+					.sound(SoundType.GLASS)
 					.noOcclusion()
-					.requiresCorrectToolForDrops());
+					.isValidSpawn(net.minecraft.world.level.block.Blocks::never)
+					.isRedstoneConductor(net.minecraft.world.level.block.Blocks::never)
+					.isSuffocating(net.minecraft.world.level.block.Blocks::never));
 
 	/** Landing Gear: deploy/retract with N; soft landings need it down (3j). */
 	public static final Block LANDING_GEAR = register("landing_gear", com.starwake.ship.block.LandingGearBlock::new,
@@ -180,5 +199,9 @@ public final class ModBlocks {
 	}
 
 	/** Forces static initialization so every field above is registered. */
-	public static void init() {}
+	public static void init() {
+		// M9 pass 2: the Wing block is gone (starships don't fly on wings). Saved wings load as hull plating.
+		((net.fabricmc.fabric.api.event.registry.FabricRegistry) BuiltInRegistries.BLOCK).addAlias(StarwakeMod.id("wing"), StarwakeMod.id("hull_plating"));
+		((net.fabricmc.fabric.api.event.registry.FabricRegistry) BuiltInRegistries.ITEM).addAlias(StarwakeMod.id("wing"), StarwakeMod.id("hull_plating"));
+	}
 }

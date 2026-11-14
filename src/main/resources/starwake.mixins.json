@@ -6,7 +6,9 @@
 		"EntityCollideMixin",
 		"PlayerMixin",
 		"ServerGamePacketListenerImplMixin",
-		"ServerLevelShipyardMixin"
+		"ServerLevelShipyardMixin",
+		"SignBlockEntityMixin",
+		"ContainerOpenersMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

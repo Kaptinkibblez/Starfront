@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
  * restore it, plus a precomputed "outer face" list per direction for cheap terrain collision.
  */
 public final class ShipStructure {
-	/** One stored block. {@code blockEntity} is only kept server-side (never sent to clients). */
+	/** One stored block. {@code blockEntity}: full NBT on the server; the client update tag on clients (see STREAM_CODEC). */
 	public record Entry(BlockPos pos, BlockState state, Optional<CompoundTag> blockEntity) {
 		public static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
 				BlockPos.CODEC.fieldOf("pos").forGetter(Entry::pos),
@@ -50,17 +50,56 @@ public final class ShipStructure {
 			Entry.CODEC.listOf().xmap(ShipStructure::new, ShipStructure::entries));
 
 	/** Network form: positions, block states and the pivot. */
-	public static final StreamCodec<RegistryFriendlyByteBuf, ShipStructure> STREAM_CODEC = StreamCodec.composite(
-			BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), s -> s.entries.stream().map(Entry::pos).toList(),
-			ByteBufCodecs.idMapper(Block.BLOCK_STATE_REGISTRY).apply(ByteBufCodecs.list()), s -> s.entries.stream().map(Entry::state).toList(),
-			net.minecraft.world.phys.Vec3.STREAM_CODEC, ShipStructure::pivot,
-			(positions, states, pivot) -> {
-				List<Entry> entries = new ArrayList<>(positions.size());
-				for (int i = 0; i < positions.size(); i++) {
-					entries.add(new Entry(positions.get(i), states.get(i), Optional.empty()));
-				}
-				return new ShipStructure(entries, pivot);
-			});
+	/**
+	 * Network form. Clients get every block plus, for blocks with a block entity, what vanilla would send them with a
+	 * chunk: the entity's {@code getUpdateTag} (sign text, banner patterns, ... never inventories), so block-entity
+	 * renderers can draw them aboard (M9 pass 2). On the client an entry's {@code blockEntity} holds that tag (empty
+	 * when the entity shares nothing, e.g. a chest).
+	 */
+	public static final StreamCodec<RegistryFriendlyByteBuf, ShipStructure> STREAM_CODEC = StreamCodec.of((buf, s) -> {
+		List<Entry> list = s.entries;
+		BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buf, list.stream().map(Entry::pos).toList());
+		ByteBufCodecs.idMapper(Block.BLOCK_STATE_REGISTRY).apply(ByteBufCodecs.list()).encode(buf, list.stream().map(Entry::state).toList());
+		net.minecraft.world.phys.Vec3.STREAM_CODEC.encode(buf, s.pivot);
+		var tags = s.clientTags(buf.registryAccess());
+		buf.writeVarInt(tags.size());
+		for (var tag : tags.int2ObjectEntrySet()) {
+			buf.writeVarInt(tag.getIntKey());
+			ByteBufCodecs.TRUSTED_COMPOUND_TAG.encode(buf, tag.getValue());
+		}
+	}, buf -> {
+		List<BlockPos> positions = BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buf);
+		List<BlockState> states = ByteBufCodecs.idMapper(Block.BLOCK_STATE_REGISTRY).apply(ByteBufCodecs.list()).decode(buf);
+		net.minecraft.world.phys.Vec3 pivot = net.minecraft.world.phys.Vec3.STREAM_CODEC.decode(buf);
+		it.unimi.dsi.fastutil.ints.Int2ObjectMap<CompoundTag> tags = new it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<>();
+		int n = buf.readVarInt();
+		for (int i = 0; i < n; i++) tags.put(buf.readVarInt(), ByteBufCodecs.TRUSTED_COMPOUND_TAG.decode(buf));
+		List<Entry> entries = new ArrayList<>(positions.size());
+		for (int i = 0; i < positions.size(); i++) {
+			entries.add(new Entry(positions.get(i), states.get(i), Optional.ofNullable(tags.get(i))));
+		}
+		return new ShipStructure(entries, pivot);
+	});
+
+	/** Client tags by entry index, computed once per structure (it's immutable) on first send. */
+	private it.unimi.dsi.fastutil.ints.@Nullable Int2ObjectMap<CompoundTag> clientTags;
+
+	private it.unimi.dsi.fastutil.ints.Int2ObjectMap<CompoundTag> clientTags(net.minecraft.core.HolderLookup.Provider registries) {
+		if (clientTags != null) return clientTags;
+		var tags = new it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<CompoundTag>();
+		for (int i = 0; i < entries.size(); i++) {
+			Entry entry = entries.get(i);
+			if (!(entry.state().getBlock() instanceof net.minecraft.world.level.block.EntityBlock)) continue;
+			CompoundTag tag = new CompoundTag();
+			if (entry.blockEntity().isPresent()) {
+				var be = net.minecraft.world.level.block.entity.BlockEntity.loadStatic(entry.pos(), entry.state(), entry.blockEntity().get(), registries);
+				if (be != null) tag = be.getUpdateTag(registries);
+			}
+			tags.put(i, tag);
+		}
+		clientTags = tags;
+		return tags;
+	}
 
 	private final List<Entry> entries;
 	private final Long2ObjectMap<BlockState> states = new Long2ObjectOpenHashMap<>();

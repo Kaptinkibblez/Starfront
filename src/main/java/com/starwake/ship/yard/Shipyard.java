@@ -253,6 +253,45 @@ public final class Shipyard {
 		}
 	}
 
+	/**
+	 * Writes a ship into a freshly allocated plot, first wiping whatever a previous owner left there (M9 pass 2:
+	 * reused plots kept the old ship's blocks, which blocked chests and leaked into the new ship on its next load
+	 * sync). The wipe covers the new ship's bounds plus a 2-block margin, which is everything the ship can touch.
+	 */
+	public static void writeFresh(ServerLevel yard, int index, Collection<ShipStructure.Entry> entries) {
+		if (!entries.isEmpty()) {
+			int x0 = Integer.MAX_VALUE, y0 = Integer.MAX_VALUE, z0 = Integer.MAX_VALUE;
+			int x1 = Integer.MIN_VALUE, y1 = Integer.MIN_VALUE, z1 = Integer.MIN_VALUE;
+			for (ShipStructure.Entry entry : entries) {
+				BlockPos p = entry.pos();
+				x0 = Math.min(x0, p.getX()); y0 = Math.min(y0, p.getY()); z0 = Math.min(z0, p.getZ());
+				x1 = Math.max(x1, p.getX()); y1 = Math.max(y1, p.getY()); z1 = Math.max(z1, p.getZ());
+			}
+			wipe(yard, index, new BlockPos(x0 - 2, y0 - 2, z0 - 2), new BlockPos(x1 + 2, y1 + 2, z1 + 2));
+		}
+		write(yard, index, entries);
+	}
+
+	/** Clears every non-air block in a local box of a plot, quietly (no updates, no drops). */
+	private static void wipe(ServerLevel yard, int index, BlockPos lo, BlockPos hi) {
+		quiet++;
+		try {
+			int removed = 0;
+			for (BlockPos local : BlockPos.betweenClosed(lo, hi)) {
+				BlockPos pos = toPlot(index, local);
+				if (pos.getY() < yard.getMinY() || pos.getY() > yard.getMaxY()) continue;
+				yard.getChunk(pos);
+				if (yard.getBlockState(pos).isAir()) continue;
+				yard.removeBlockEntity(pos);
+				yard.setBlock(pos, Blocks.AIR.defaultBlockState(), QUIET);
+				removed++;
+			}
+			if (removed > 0) com.starwake.StarwakeMod.LOGGER.info("Shipyard plot {}: cleared {} blocks left by a previous ship", index, removed);
+		} finally {
+			quiet--;
+		}
+	}
+
 	/** Reads the current blocks (and fresh block-entity data) at these local positions. */
 	public static List<ShipStructure.Entry> read(ServerLevel yard, int index, Collection<BlockPos> locals) {
 		List<ShipStructure.Entry> entries = new ArrayList<>(locals.size());
@@ -295,6 +334,24 @@ public final class Shipyard {
 		if (quiet > 0 || level.dimension() != KEY) return;
 		ShipEntity ship = shipAt(pos);
 		if (ship != null) ship.onPlotChange(toLocal(ship.plot(), pos), now);
+	}
+
+	/** A block entity in the shipyard pushed a client update without changing its block (sign text, ...). */
+	public static void onBlockDataChanged(ServerLevel level, BlockPos pos) {
+		if (quiet > 0 || level.dimension() != KEY) return;
+		ShipEntity ship = shipAt(pos);
+		if (ship != null) ship.onPlotDataChange(toLocal(ship.plot(), pos));
+	}
+
+	/** A block event ran in the shipyard (chest lid, bell, note block): clients tracking the ship replay it. */
+	public static void onBlockEvent(ServerLevel level, BlockPos pos, int a, int b) {
+		if (level.dimension() != KEY) return;
+		ShipEntity ship = shipAt(pos);
+		if (ship == null) return;
+		var payload = new com.starwake.network.ShipBlockEventPayload(ship.getId(), toLocal(ship.plot(), pos), a, b);
+		for (var player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(ship)) {
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
+		}
 	}
 
 	/**

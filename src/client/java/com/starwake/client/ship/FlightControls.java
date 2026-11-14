@@ -25,6 +25,9 @@ public final class FlightControls {
 
 	private static boolean joystick;
 	private static boolean loaded;
+	/** Cockpit HUD size and brightness (M9 pass 2; Wristcom Settings app). */
+	private static float hudScale = 1.0f, hudOpacity = 1.0f;
+	public static final float HUD_SCALE_MIN = 0.6f, HUD_SCALE_MAX = 1.6f, HUD_OPACITY_MIN = 0.3f;
 	private static float stickX, stickY;
 
 	private FlightControls() {}
@@ -53,6 +56,37 @@ public final class FlightControls {
 			stickX /= r;
 			stickY /= r;
 		}
+	}
+
+	public static float hudScale() {
+		load();
+		return hudScale;
+	}
+
+	public static float hudOpacity() {
+		load();
+		return hudOpacity;
+	}
+
+	/** Steps the HUD scale by {@code delta} (clamped, rounded to 0.1) and remembers it. */
+	public static void stepHudScale(float delta) {
+		load();
+		hudScale = Math.round(Math.clamp(hudScale + delta, HUD_SCALE_MIN, HUD_SCALE_MAX) * 10) / 10f;
+		save();
+	}
+
+	public static void stepHudOpacity(float delta) {
+		load();
+		hudOpacity = Math.round(Math.clamp(hudOpacity + delta, HUD_OPACITY_MIN, 1f) * 10) / 10f;
+		save();
+	}
+
+	/** Sets the steering mode directly (Settings app). */
+	public static void setJoystick(boolean on) {
+		load();
+		joystick = on;
+		stickX = stickY = 0;
+		save();
 	}
 
 	public static void centre() {
@@ -104,7 +138,9 @@ public final class FlightControls {
 		try (Reader in = Files.newBufferedReader(FILE)) {
 			props.load(in);
 			joystick = "joystick".equals(props.getProperty("steering", "mouse_aim"));
-		} catch (IOException ignored) {
+			hudScale = Math.clamp(Float.parseFloat(props.getProperty("hud_scale", "1.0")), HUD_SCALE_MIN, HUD_SCALE_MAX);
+			hudOpacity = Math.clamp(Float.parseFloat(props.getProperty("hud_opacity", "1.0")), HUD_OPACITY_MIN, 1f);
+		} catch (IOException | NumberFormatException ignored) {
 			// Defaults stand.
 		}
 	}
@@ -119,6 +155,8 @@ public final class FlightControls {
 			}
 		}
 		props.setProperty("steering", joystick ? "joystick" : "mouse_aim");
+		props.setProperty("hud_scale", Float.toString(hudScale));
+		props.setProperty("hud_opacity", Float.toString(hudOpacity));
 		try (Writer out = Files.newBufferedWriter(FILE)) {
 			props.store(out, "Starwake client settings");
 		} catch (IOException ignored) {

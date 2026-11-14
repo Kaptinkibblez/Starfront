@@ -154,6 +154,12 @@ public final class ShipClient {
 			}
 		};
 
+		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.ShipBlockEventPayload.TYPE, (payload, context) -> {
+			if (context.client().level != null && context.client().level.getEntity(payload.shipId()) instanceof ShipEntity ship) {
+				ShipBlockEntities.blockEvent(ship, payload.local(), payload.a(), payload.b());
+			}
+		});
+		ClientTickEvents.END_LEVEL_TICK.register(ShipBlockEntities::tick);
 		ClientPlayNetworking.registerGlobalReceiver(ShipStructurePayload.TYPE, (payload, context) -> {
 			if (context.client().level != null && context.client().level.getEntity(payload.entityId()) instanceof ShipEntity ship) {
 				ship.setStructure(payload.structure());
