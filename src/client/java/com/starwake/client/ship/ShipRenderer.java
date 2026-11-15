@@ -21,15 +21,38 @@ import org.joml.Vector3f;
 
 /**
  * Draws an assembled ship: rotates by the ship's (interpolated) orientation about its pivot and
- * replays its cached {@link ShipMesh}, one draw per render layer, each block lit from the world
- * cell under its rotated centre.
+ * replays its cached {@link ShipMesh} sections (16-block cubes, M9 pass 3: an edit re-tessellates only the sections it
+ * touches; sections behind the camera are skipped), one draw per render layer, each block lit from the world cell under
+ * its rotated centre (big ships refresh light round-robin).
  *
  * The mesh is tessellated once per structure (3j); before that, every block was re-tessellated
  * every frame through vanilla's moving-block path.
  */
 public class ShipRenderer extends EntityRenderer<ShipEntity, ShipRenderState> {
-	/** Cached meshes per ship structure (weak: dropped when the structure is replaced or gone). */
-	private final Map<ShipStructure, ShipMesh> meshes = new WeakHashMap<>();
+	/** M9 pass 3: per ship, its 16-block section meshes and their light (weak: dropped with the entity). */
+	private final Map<ShipEntity, Sections> sections = new WeakHashMap<>();
+	/** Blocks whose light is re-sampled per frame per ship; bigger ships refresh round-robin over several frames. */
+	private static final int LIGHT_BUDGET = 16_384;
+
+	private static final class Section {
+		final ShipMesh mesh;
+		final int[] light;
+		final Vec3 centre;
+
+		Section(long key, ShipMesh mesh) {
+			this.mesh = mesh;
+			this.light = new int[mesh.blocks.size()];
+			java.util.Arrays.fill(light, -1);
+			this.centre = new Vec3((BlockPos.getX(key) << 4) + 8, (BlockPos.getY(key) << 4) + 8, (BlockPos.getZ(key) << 4) + 8);
+		}
+	}
+
+	private static final class Sections {
+		ShipStructure structure;
+		final Map<Long, Section> map = new java.util.HashMap<>();
+		final java.util.List<Section> order = new java.util.ArrayList<>();
+		int cursor;
+	}
 
 	public ShipRenderer(EntityRendererProvider.Context context) {
 		super(context);
@@ -44,30 +67,84 @@ public class ShipRenderer extends EntityRenderer<ShipEntity, ShipRenderState> {
 	@Override
 	public void extractRenderState(ShipEntity ship, ShipRenderState state, float partialTicks) {
 		super.extractRenderState(ship, state, partialTicks);
+		state.meshes.clear();
+		state.lights.clear();
 		ShipStructure structure = ship.structure();
-		if (structure == null || !(ship.level() instanceof ClientLevel level)) {
-			state.mesh = null;
-			return;
-		}
-		ShipMesh mesh = meshes.computeIfAbsent(structure, s -> ShipMesh.build(s, level, BlockPos.containing(ship.position())));
-		state.mesh = mesh;
+		if (structure == null || !(ship.level() instanceof ClientLevel level)) return;
+		Sections cache = sections.computeIfAbsent(ship, s -> new Sections());
+		if (cache.structure != structure) rebuild(ship, structure, level, cache);
 		state.orientation.set(ship.orientation(partialTicks));
 		state.pivot = ship.pivot();
 
-		// Light each block from the world cell under its rotated centre.
-		if (state.light.length != mesh.blocks.size()) state.light = new int[mesh.blocks.size()];
 		Vec3 origin = ship.getPosition(partialTicks);
 		Vector3f c = new Vector3f();
 		BlockPos.MutableBlockPos cell = new BlockPos.MutableBlockPos();
-		for (int i = 0; i < mesh.blocks.size(); i++) {
-			BlockPos local = mesh.blocks.get(i);
+		// Light: new sections first (never lit), then a round-robin share of the rest.
+		int budget = LIGHT_BUDGET;
+		int n = cache.order.size();
+		for (int k = 0; k < n && budget > 0; k++) {
+			Section section = cache.order.get((cache.cursor + k) % n);
+			light(section, state, origin, level, c, cell);
+			budget -= section.light.length;
+			if (k == n - 1 || budget <= 0) cache.cursor = (cache.cursor + k + 1) % n;
+		}
+		// Sections well behind the camera aren't drawn (a section's half-diagonal is ~14 blocks).
+		var camera = net.minecraft.client.Minecraft.getInstance().gameRenderer.mainCamera();
+		Vec3 eye = camera.position();
+		Vector3f forward = new Vector3f(camera.forwardVector());
+		for (Section section : cache.order) {
+			if (section.light.length > 0 && section.light[0] == -1) light(section, state, origin, level, c, cell);
+			c.set((float) (section.centre.x - state.pivot.x), (float) (section.centre.y - state.pivot.y), (float) (section.centre.z - state.pivot.z));
+			state.orientation.transform(c);
+			float rx = (float) (origin.x + c.x - eye.x), ry = (float) (origin.y + c.y - eye.y), rz = (float) (origin.z + c.z - eye.z);
+			if (rx * forward.x + ry * forward.y + rz * forward.z < -16) continue;
+			state.meshes.add(section.mesh);
+			state.lights.add(section.light);
+		}
+		extractBlockEntities(ship, level, state, partialTicks, origin, c, cell);
+	}
+
+	/** Lights each block of a section from the world cell under its rotated centre. */
+	private static void light(Section section, ShipRenderState state, Vec3 origin, ClientLevel level, Vector3f c, BlockPos.MutableBlockPos cell) {
+		var blocks = section.mesh.blocks;
+		for (int i = 0; i < blocks.size(); i++) {
+			BlockPos local = blocks.get(i);
 			c.set((float) (local.getX() + 0.5 - state.pivot.x), (float) (local.getY() + 0.5 - state.pivot.y),
 					(float) (local.getZ() + 0.5 - state.pivot.z));
 			state.orientation.transform(c);
 			cell.set(origin.x + c.x, origin.y + c.y, origin.z + c.z);
-			state.light[i] = LightCoordsUtil.pack(level.getBrightness(LightLayer.BLOCK, cell), level.getBrightness(LightLayer.SKY, cell));
+			section.light[i] = LightCoordsUtil.pack(level.getBrightness(LightLayer.BLOCK, cell), level.getBrightness(LightLayer.SKY, cell));
 		}
-		extractBlockEntities(ship, level, state, partialTicks, origin, c, cell);
+	}
+
+	/**
+	 * Re-tessellates what changed: everything for a new snapshot, otherwise the sections of each changed cell and of
+	 * its six neighbours (their faces against it may have been culled or uncovered).
+	 */
+	private static void rebuild(ShipEntity ship, ShipStructure structure, ClientLevel level, Sections cache) {
+		long t0 = System.nanoTime();
+		var changed = ship.takeMeshChanges();
+		it.unimi.dsi.fastutil.longs.LongSet only = null;
+		if (changed != null && cache.structure != null) {
+			only = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
+			for (BlockPos pos : changed) {
+				only.add(ShipMesh.sectionOf(pos));
+				for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) only.add(ShipMesh.sectionOf(pos.relative(d)));
+			}
+		}
+		var built = ShipMesh.buildSections(structure, level, BlockPos.containing(ship.position()), only);
+		if (only == null) cache.map.clear();
+		else for (long key : only) cache.map.remove(key);
+		for (var e : built.entrySet()) cache.map.put(e.getKey(), new Section(e.getKey(), e.getValue()));
+		cache.order.clear();
+		cache.order.addAll(cache.map.values());
+		cache.cursor = 0;
+		cache.structure = structure;
+		long ms = (System.nanoTime() - t0) / 1_000_000;
+		if (structure.entries().size() >= 10_000) {
+			com.starwake.StarwakeMod.LOGGER.info("Big ship mesh: {} blocks, {} of {} sections rebuilt in {} ms", structure.entries().size(),
+					built.size(), cache.map.size(), ms);
+		}
 	}
 
 	/**
@@ -108,16 +185,20 @@ public class ShipRenderer extends EntityRenderer<ShipEntity, ShipRenderState> {
 
 	@Override
 	public void submit(ShipRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
-		ShipMesh mesh = state.mesh;
-		if (mesh != null) {
+		if (!state.meshes.isEmpty() || !state.blockEntities.isEmpty()) {
 			// The pose starts at the entity position (the pivot): rotate, then shift to local space.
 			poseStack.pushPose();
 			poseStack.rotate(state.orientation);
 			poseStack.translate(-state.pivot.x, -state.pivot.y, -state.pivot.z);
-			int[] light = state.light;
+			var meshes = java.util.List.copyOf(state.meshes);
+			var lights = java.util.List.copyOf(state.lights);
 			for (ChunkSectionLayer layer : ChunkSectionLayer.values()) {
-				if (!mesh.has(layer)) continue;
-				collector.submitCustomGeometry(poseStack, renderType(layer), (pose, buffer) -> mesh.emit(layer, pose, buffer, light));
+				boolean any = false;
+				for (ShipMesh mesh : meshes) any |= mesh.has(layer);
+				if (!any) continue;
+				collector.submitCustomGeometry(poseStack, renderType(layer), (pose, buffer) -> {
+					for (int i = 0; i < meshes.size(); i++) meshes.get(i).emit(layer, pose, buffer, lights.get(i));
+				});
 			}
 			var dispatcher = net.minecraft.client.Minecraft.getInstance().getBlockEntityRenderDispatcher();
 			for (int i = 0; i < state.blockEntities.size(); i++) {

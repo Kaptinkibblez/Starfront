@@ -32,15 +32,20 @@ public final class ShipDynamics {
 	public record Thruster(Vector3d position, Vector3d push, double thrust, double burn, Direction nozzle, BlockPos pos) {}
 
 	private double mass;
+	/**
+	 * Running sums over every block (M9 pass 3: blocks can be added and removed one at a time, so editing a
+	 * 262k-block ship doesn't rebuild the model): raw mass, first moments and second moments about the local
+	 * origin, plus each unit cube's own inertia ({@code m/6} per axis).
+	 */
+	private double rawMass, sxx, syy, szz, sxy, sxz, syz, cubeSum;
 	private final Vector3d weightedPos = new Vector3d();
-	private final List<double[]> blocks = new ArrayList<>(); // x, y, z, mass
 	private final List<Thruster> thrusters = new ArrayList<>();
 	/**
 	 * Hull silhouette for air drag (M9 pass 2): the occupied cells projected onto each local plane, so {@code area}
 	 * x/y/z is the cross-section facing air along that axis (blocks²). Collected in add(), counted in finish().
 	 */
-	private final it.unimi.dsi.fastutil.longs.LongOpenHashSet shadowX = new it.unimi.dsi.fastutil.longs.LongOpenHashSet(),
-			shadowY = new it.unimi.dsi.fastutil.longs.LongOpenHashSet(), shadowZ = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
+	private final it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap shadowX = new it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap(),
+			shadowY = new it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap(), shadowZ = new it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap();
 	private final Vector3d area = new Vector3d();
 
 	// Derived by finish().
@@ -67,14 +72,42 @@ public final class ShipDynamics {
 
 	/** Adds one block with explicit stats (a part's quality bonus, M8e-2); mass = JSON mass x massFactor. */
 	public void add(BlockPos pos, BlockState state, boolean clearExhaust, double massFactor, ShipStats.BlockStats stats) {
-		double m = ShipStats.get(state).mass() * massFactor;
+		accumulate(pos, ShipStats.get(state).mass() * massFactor, 1);
+		addThruster(pos, state, clearExhaust, stats);
+	}
+
+	/** Undoes {@link #add} for a block (same mass factor), then call {@link #finish()} again (M9 pass 3). */
+	public void remove(BlockPos pos, BlockState state, double massFactor) {
+		accumulate(pos, ShipStats.get(state).mass() * massFactor, -1);
+		removeThruster(pos);
+	}
+
+	private void accumulate(BlockPos pos, double m, int sign) {
 		double x = pos.getX() + 0.5, y = pos.getY() + 0.5, z = pos.getZ() + 0.5;
-		mass += m;
-		weightedPos.add(x * m, y * m, z * m);
-		blocks.add(new double[] {x, y, z, m});
-		shadowX.add(BlockPos.asLong(0, pos.getY(), pos.getZ()));
-		shadowY.add(BlockPos.asLong(pos.getX(), 0, pos.getZ()));
-		shadowZ.add(BlockPos.asLong(pos.getX(), pos.getY(), 0));
+		double sm = sign * m;
+		rawMass += sm;
+		weightedPos.add(x * sm, y * sm, z * sm);
+		sxx += sm * x * x; syy += sm * y * y; szz += sm * z * z;
+		sxy += sm * x * y; sxz += sm * x * z; syz += sm * y * z;
+		cubeSum += sm / 6.0;
+		shadow(shadowX, BlockPos.asLong(0, pos.getY(), pos.getZ()), sign);
+		shadow(shadowY, BlockPos.asLong(pos.getX(), 0, pos.getZ()), sign);
+		shadow(shadowZ, BlockPos.asLong(pos.getX(), pos.getY(), 0), sign);
+	}
+
+	private static void shadow(it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap counts, long key, int sign) {
+		int n = counts.addTo(key, sign) + sign;
+		if (n <= 0) counts.remove(key);
+	}
+
+	/** Removes the thruster at a block position, if there is one (exhaust or stats changed: re-add it after). */
+	public void removeThruster(BlockPos pos) {
+		thrusters.removeIf(t -> t.pos().equals(pos));
+	}
+
+	/** Adds a block's thruster (if it is one, with a clear exhaust and thrust). */
+	public void addThruster(BlockPos pos, BlockState state, boolean clearExhaust, ShipStats.BlockStats stats) {
+		double x = pos.getX() + 0.5, y = pos.getY() + 0.5, z = pos.getZ() + 0.5;
 		if (state.getBlock() instanceof ThrusterBlock && clearExhaust && stats.thrust() > 0) {
 			Direction nozzle = state.getValue(ThrusterBlock.FACING);
 			Direction push = nozzle.getOpposite();
@@ -85,28 +118,22 @@ public final class ShipDynamics {
 
 	/** Computes centre of mass, inertia and the thruster matrix. Call once after adding blocks. */
 	public ShipDynamics finish() {
-		mass = Math.max(mass, 1);
+		mass = Math.max(rawMass, 1);
 		centre.set(weightedPos).div(mass);
-		double xx = 0, yy = 0, zz = 0, xy = 0, xz = 0, yz = 0;
-		for (double[] b : blocks) {
-			double rx = b[0] - centre.x, ry = b[1] - centre.y, rz = b[2] - centre.z, m = b[3];
-			double cube = m / 6.0; // a unit cube's own inertia about its centre
-			xx += m * (ry * ry + rz * rz) + cube;
-			yy += m * (rx * rx + rz * rz) + cube;
-			zz += m * (rx * rx + ry * ry) + cube;
-			xy -= m * rx * ry;
-			xz -= m * rx * rz;
-			yz -= m * ry * rz;
-		}
+		// Second moments about the centre of mass from the running sums (parallel axis theorem).
+		double cx = centre.x, cy = centre.y, cz = centre.z, wx = weightedPos.x, wy = weightedPos.y, wz = weightedPos.z;
+		double qxx = sxx - 2 * cx * wx + rawMass * cx * cx;
+		double qyy = syy - 2 * cy * wy + rawMass * cy * cy;
+		double qzz = szz - 2 * cz * wz + rawMass * cz * cz;
+		double xx = qyy + qzz + cubeSum, yy = qxx + qzz + cubeSum, zz = qxx + qyy + cubeSum;
+		double xy = -(sxy - cx * wy - cy * wx + rawMass * cx * cy);
+		double xz = -(sxz - cx * wz - cz * wx + rawMass * cx * cz);
+		double yz = -(syz - cy * wz - cz * wy + rawMass * cy * cz);
 		// JOML Matrix3d(m00, m01, m02, m10, ...) is column-major; the tensor is symmetric anyway.
 		inertia.set(xx, xy, xz, xy, yy, yz, xz, yz, zz);
 		inertia.invert(inverseInertia);
 		gyration = Math.max(1.0, Math.sqrt((xx + yy + zz) / (2 * mass)));
-		blocks.clear(); // only needed for the tensor
 		area.set(Math.max(1, shadowX.size()), Math.max(1, shadowY.size()), Math.max(1, shadowZ.size()));
-		shadowX.clear();
-		shadowY.clear();
-		shadowZ.clear();
 
 		columns = new double[thrusters.size()][];
 		for (int k = 0; k < thrusters.size(); k++) {

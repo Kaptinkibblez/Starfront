@@ -164,6 +164,10 @@ public class ShipEntity extends Entity {
 	private final Vector3f lastTickQtOffset = new Vector3f();
 	private @Nullable ResourceKey<Level> orbiting;
 	private boolean sealed;
+	/** Counts structure changes so clients can tell whether a delta applies to what they hold (M9 pass 3). */
+	private int structureVersion;
+	/** The seal needs recomputing (server, lazily on first query: an air flood fill can be big on big ships). */
+	private boolean sealDirty = true;
 
 	// Derived from the structure (recomputed on load; never saved). Keyed by LOCAL direction.
 	private double mass = 1;
@@ -177,19 +181,21 @@ public class ShipEntity extends Entity {
 	private double[] throttles = new double[0];
 	/** Angular velocity in the ship's own frame, radians per tick. */
 	private final Vector3d angularVelocity = new Vector3d();
-	private final List<BlockPos> seats = new ArrayList<>();
+	private final java.util.Set<BlockPos> seats = new java.util.LinkedHashSet<>();
 	/**
 	 * Collision boxes (local) of blocks with any exposed face: the hull used for terrain
 	 * collision. Each is the block's real shape bounds, so retracted landing gear doesn't
 	 * touch the ground and deployed gear reaches below its block.
 	 */
-	private final List<AABB> hull = new ArrayList<>();
+	private final Map<BlockPos, AABB> hull = new HashMap<>();
+	/** Functional parts (anything with ship-system stats: thrusters, plants, coolers, drives, tanks...). M9 pass 3. */
+	private final java.util.Set<BlockPos> components = new java.util.HashSet<>();
 	/** Per block: mass factor, heat limit and armour from its material (M8e-1). */
 	private final Map<BlockPos, ShipMaterials.Rating> ratings = new HashMap<>();
 	/** Re-entry heat soaked by leading-face blocks (a block burns off at 1). */
 	private final Map<BlockPos, Double> heatDose = new HashMap<>();
 	/** Landing gear blocks aboard (local positions). */
-	private final List<BlockPos> gear = new ArrayList<>();
+	private final java.util.Set<BlockPos> gear = new java.util.LinkedHashSet<>();
 
 	/** Server: which seat (local pos) each passenger occupies. The Helm's seat makes you the pilot. */
 	private final Map<UUID, BlockPos> seatOf = new HashMap<>();
@@ -231,13 +237,63 @@ public class ShipEntity extends Entity {
 	public void setStructure(ShipStructure structure) {
 		this.structure = structure;
 		this.pivot = structure.pivot(); // fixed at assembly, kept through edits
+		long t0 = System.nanoTime();
 		recomputeStats();
-		sealed = computeSealed();
+		sealDirty = true;
+		if (structure.entries().size() >= 10_000) {
+			com.starwake.StarwakeMod.LOGGER.info("Big ship model: {} blocks ({}), built in {} ms ({} probes)",
+					structure.entries().size(), level().isClientSide() ? "client" : "server", (System.nanoTime() - t0) / 1_000_000,
+					hullProbes.length / 3);
+		}
 		setBoundingBox(makeBoundingBox(position()));
 	}
 
 	public @Nullable ShipStructure structure() {
 		return structure;
+	}
+
+	/** The structure's version (M9 pass 3; deltas apply only on top of the version they were made from). */
+	public int structureVersion() {
+		return structureVersion;
+	}
+
+	/** Client: a full structure from the server, at its version. */
+	public void setStructure(ShipStructure structure, int version) {
+		structureVersion = version;
+		setStructure(structure);
+		meshAll = true;
+		meshCells.clear();
+	}
+
+	/**
+	 * Client, for the renderer (M9 pass 3): cells changed since it last rebuilt this ship's mesh sections, or "all".
+	 * The renderer reads and clears them with {@link #takeMeshChanges}.
+	 */
+	private final java.util.Set<BlockPos> meshCells = new java.util.HashSet<>();
+	private boolean meshAll = true;
+
+	/** Client renderer: the cells to re-tessellate (null = everything), then forgets them. */
+	public java.util.@Nullable Set<BlockPos> takeMeshChanges() {
+		if (meshAll) {
+			meshAll = false;
+			meshCells.clear();
+			return null;
+		}
+		var out = java.util.Set.copyOf(meshCells);
+		meshCells.clear();
+		return out;
+	}
+
+	/**
+	 * Client: a delta from the server (M9 pass 3). Applies when we hold the version it was made from; returns false
+	 * otherwise (the caller asks for a full resync).
+	 */
+	public boolean applyDelta(int version, Map<BlockPos, ShipStructure.@Nullable Entry> changes) {
+		if (structure == null || version != structureVersion + 1) return false;
+		structureVersion = version;
+		applyIncremental(structure.withChanges(changes), changes);
+		meshCells.addAll(changes.keySet());
+		return true;
 	}
 
 	public Vec3 pivot() {
@@ -250,38 +306,108 @@ public class ShipEntity extends Entity {
 		hull.clear();
 		ratings.clear();
 		gear.clear();
+		components.clear();
 		if (structure == null) return;
 		ShipDynamics model = new ShipDynamics();
-		List<Integer> thrusterIndex = new ArrayList<>();
-		List<ShipStructure.Entry> entries = structure.entries();
-		for (int index = 0; index < entries.size(); index++) {
-			ShipStructure.Entry entry = entries.get(index);
-			BlockState state = entry.state();
-			int before = model.thrusterCount();
-			boolean clear = !(state.getBlock() instanceof ThrusterBlock)
-					|| structure.get(entry.pos().relative(state.getValue(ThrusterBlock.FACING))) == null;
-			ShipMaterials.Rating rating = ShipMaterials.rate(state, ShipMaterials.of(entry.blockEntity()), ShipMaterials.quality(entry.blockEntity()));
-			ratings.put(entry.pos(), rating);
-			model.add(entry.pos(), state, clear, rating.massFactor(), rating.stats());
-			if (model.thrusterCount() > before) thrusterIndex.add(index);
-			if (state.getBlock() instanceof com.starwake.ship.block.LandingGearBlock) gear.add(entry.pos());
-			if (state.getBlock() instanceof HelmBlock) {
-				helmLocal = entry.pos();
-				forward = state.getValue(HelmBlock.FACING);
-			} else if (state.getBlock() instanceof SeatBlock) {
-				seats.add(entry.pos());
-			}
+		for (ShipStructure.Entry entry : structure.entries()) addCell(model, entry);
+		for (ShipStructure.Entry entry : structure.entries()) refreshHull(entry.pos());
+		dynamics = model.finish();
+		afterModelChange();
+	}
+
+	/**
+	 * M9 pass 3: folds a set of changed cells into the derived model without rebuilding it (null entry = removed).
+	 * Mass, inertia and cross-sections are running sums; the hull map is refreshed only around the changes; thrusters
+	 * next to a change are re-checked for a clear exhaust; systems are recomputed over the functional parts only.
+	 */
+	private void applyIncremental(ShipStructure next, Map<BlockPos, ShipStructure.@Nullable Entry> changes) {
+		ShipStructure prev = structure;
+		java.util.Set<BlockPos> exhaustCheck = new java.util.HashSet<>();
+		for (BlockPos pos : changes.keySet()) {
+			BlockState old = prev.get(pos);
+			if (old != null) removeCell(dynamics, pos, old);
 			for (Direction d : Direction.values()) {
-				if (!structure.hasCollision(entry.pos().relative(d)) && structure.hasCollision(entry.pos())) {
-					hull.add(state.getCollisionShape(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, BlockPos.ZERO)
-							.bounds().move(entry.pos()));
-					break;
+				BlockPos n = pos.relative(d);
+				BlockState ns = prev.get(n);
+				if (!changes.containsKey(n) && ns != null && ns.getBlock() instanceof ThrusterBlock
+						&& n.relative(ns.getValue(ThrusterBlock.FACING)).equals(pos)) {
+					exhaustCheck.add(n.immutable());
+					dynamics.removeThruster(n);
 				}
 			}
 		}
-		dynamics = model.finish();
+		structure = next;
+		for (ShipStructure.Entry entry : changes.values()) if (entry != null) addCell(dynamics, entry);
+		for (BlockPos n : exhaustCheck) {
+			BlockState state = next.get(n);
+			ShipMaterials.Rating rating = ratings.get(n);
+			if (state != null && rating != null) dynamics.addThruster(n, state, exhaustClear(n, state), rating.stats());
+		}
+		for (BlockPos pos : changes.keySet()) {
+			refreshHull(pos);
+			for (Direction d : Direction.values()) refreshHull(pos.relative(d));
+		}
+		dynamics.finish();
+		afterModelChange();
+		sealDirty = true;
+		setBoundingBox(makeBoundingBox(position()));
+	}
+
+	private boolean exhaustClear(BlockPos pos, BlockState state) {
+		return !(state.getBlock() instanceof ThrusterBlock) || structure.get(pos.relative(state.getValue(ThrusterBlock.FACING))) == null;
+	}
+
+	private void addCell(ShipDynamics model, ShipStructure.Entry entry) {
+		BlockState state = entry.state();
+		BlockPos pos = entry.pos();
+		ShipMaterials.Rating rating = ShipMaterials.rate(state, ShipMaterials.of(entry.blockEntity()), ShipMaterials.quality(entry.blockEntity()));
+		ratings.put(pos, rating);
+		model.add(pos, state, exhaustClear(pos, state), rating.massFactor(), rating.stats());
+		if (state.getBlock() instanceof com.starwake.ship.block.LandingGearBlock) gear.add(pos);
+		if (state.getBlock() instanceof HelmBlock) {
+			helmLocal = pos;
+			forward = state.getValue(HelmBlock.FACING);
+		} else if (state.getBlock() instanceof SeatBlock) {
+			seats.add(pos);
+		}
+		ShipStats.BlockStats st = rating.stats();
+		if (state.getBlock() instanceof ThrusterBlock || st.powerOutput() > 0 || st.heat() > 0 || st.cooling() > 0 || st.powerDraw() > 0
+				|| st.shieldCapacity() > 0 || st.quantumSpool() > 0 || st.jumpRange() > 0 || st.fuelCapacity() > 0) {
+			components.add(pos);
+		}
+	}
+
+	private void removeCell(ShipDynamics model, BlockPos pos, BlockState state) {
+		ShipMaterials.Rating rating = ratings.remove(pos);
+		model.remove(pos, state, rating == null ? 1.0 : rating.massFactor());
+		gear.remove(pos);
+		seats.remove(pos);
+		components.remove(pos);
+	}
+
+	/** A cell is outer hull if it collides and any face neighbour doesn't. */
+	private void refreshHull(BlockPos pos) {
+		BlockState state = structure.get(pos);
+		if (state == null || !structure.hasCollision(pos)) {
+			hull.remove(pos);
+			return;
+		}
+		for (Direction d : Direction.values()) {
+			if (!structure.hasCollision(pos.relative(d))) {
+				hull.put(pos.immutable(), state.getCollisionShape(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, BlockPos.ZERO).bounds().move(pos));
+				return;
+			}
+		}
+		hull.remove(pos);
+	}
+
+	/** Everything derived from the model: probes, trackers' copy of the model, throttle slots, systems. */
+	private void afterModelChange() {
 		mass = dynamics.mass();
-		computeProbes();
+		// Big ships (M9 pass 3): rebuilding thousands of probes for every block placed would hitch each edit, so an edit
+		// marks them stale and they're rebuilt once edits pause (contacts use the previous set meanwhile).
+		if (hullProbes.length > 0 && hull.size() > PROBE_BUDGET / 4 && tickCount > 0) probesStaleSince = tickCount;
+		else computeProbes();
 		if (level() instanceof ServerLevel && tickCount > 0) {
 			// M9: trackers get the new model (pilots predict with it).
 			var payload = com.starwake.network.ShipDynamicsPayload.of(getId(), dynamics);
@@ -289,27 +415,50 @@ public class ShipEntity extends Entity {
 				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
 			}
 		}
-		thrusterEntries = thrusterIndex.stream().mapToInt(Integer::intValue).toArray();
+		var thrusters = dynamics.thrusters();
+		thrusterEntries = new int[thrusters.size()];
+		for (int k = 0; k < thrusterEntries.length; k++) thrusterEntries[k] = structure.indexOf(thrusters.get(k).pos());
 		throttles = new double[thrusterEntries.length];
 
 		systems = new ShipSystems();
-		for (ShipStructure.Entry entry : structure.entries()) {
-			boolean clear = !(entry.state().getBlock() instanceof ThrusterBlock)
-					|| structure.get(entry.pos().relative(entry.state().getValue(ThrusterBlock.FACING))) == null;
-			ShipMaterials.Rating rating = ratings.get(entry.pos());
-			systems.add(entry.state(), clear, rating == null ? ShipStats.get(entry.state()) : rating.stats());
+		int capacity = 0;
+		for (BlockPos pos : components) {
+			BlockState state = structure.get(pos);
+			if (state == null) continue;
+			ShipMaterials.Rating rating = ratings.get(pos);
+			ShipStats.BlockStats stats = rating == null ? ShipStats.get(state) : rating.stats();
+			systems.add(state, exhaustClear(pos, state), stats);
+			capacity += stats.fuelCapacity();
 		}
+		componentFuelCapacity = capacity;
 		publishSystems();
 	}
 
+	/** Sum of the fuel tanks' capacity (with quality), kept by {@link #afterModelChange()}. */
+	private int componentFuelCapacity;
+
 	/** Server: pushes systems numbers to the synced HUD fields. */
-	/** Unique corners of the hull boxes, as contact probes for {@link com.starwake.ship.physics.ShipMotion}. */
+	/** Tick of the last edit whose probes are still pending (-1 = up to date). */
+	private int probesStaleSince = -1;
+
+	/** Probe count above which big ships are thinned to one probe per lattice cell (M9 pass 3). */
+	private static final int PROBE_BUDGET = 6000;
+
+	/**
+	 * Contact probes for {@link com.starwake.ship.physics.ShipMotion}: the unique corners of the hull boxes. Big ships
+	 * keep one probe per cubic lattice cell (the one farthest from the centre of mass, so silhouettes and sharp edges
+	 * survive), sized to stay near {@link #PROBE_BUDGET}; landing gear always keeps every corner, since that's what
+	 * touches down.
+	 */
 	private void computeProbes() {
-		java.util.LinkedHashSet<Long> seen = new java.util.LinkedHashSet<>();
-		java.util.List<Double> out = new ArrayList<>();
-		double far = 1;
+		probesStaleSince = -1;
+		it.unimi.dsi.fastutil.longs.LongOpenHashSet seen = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
+		it.unimi.dsi.fastutil.doubles.DoubleArrayList out = new it.unimi.dsi.fastutil.doubles.DoubleArrayList();
+		it.unimi.dsi.fastutil.booleans.BooleanArrayList keep = new it.unimi.dsi.fastutil.booleans.BooleanArrayList();
 		Vector3d c = dynamics.centre();
-		for (AABB box : hull) {
+		for (var e : hull.entrySet()) {
+			AABB box = e.getValue();
+			boolean isGear = gear.contains(e.getKey());
 			for (int k = 0; k < 8; k++) {
 				double x = (k & 1) == 0 ? box.minX : box.maxX, y = (k & 2) == 0 ? box.minY : box.maxY, z = (k & 4) == 0 ? box.minZ : box.maxZ;
 				long key = (Math.round(x * 16) & 0x1FFFFF) | ((Math.round(y * 16) & 0x1FFFFF) << 21) | ((Math.round(z * 16) & 0x1FFFFF) << 42);
@@ -318,12 +467,47 @@ public class ShipEntity extends Entity {
 				out.add(x + ((k & 1) == 0 ? 0.001 : -0.001));
 				out.add(y + ((k & 2) == 0 ? 0.001 : -0.001));
 				out.add(z + ((k & 4) == 0 ? 0.001 : -0.001));
-				far = Math.max(far, Math.sqrt((x - c.x) * (x - c.x) + (y - c.y) * (y - c.y) + (z - c.z) * (z - c.z)));
+				keep.add(isGear);
 			}
 		}
-		hullProbes = new double[out.size()];
-		for (int i = 0; i < hullProbes.length; i++) hullProbes[i] = out.get(i);
+		int count = out.size() / 3;
+		double[] probes;
+		if (count <= PROBE_BUDGET) {
+			probes = out.toDoubleArray();
+		} else {
+			// Surface points thin out roughly with the square of the lattice spacing.
+			int cell = (int) Math.ceil(Math.sqrt(count / (double) PROBE_BUDGET));
+			it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap best = new it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap();
+			best.defaultReturnValue(-1);
+			it.unimi.dsi.fastutil.doubles.DoubleArrayList kept = new it.unimi.dsi.fastutil.doubles.DoubleArrayList();
+			for (int i = 0; i < count; i++) {
+				double x = out.getDouble(3 * i), y = out.getDouble(3 * i + 1), z = out.getDouble(3 * i + 2);
+				if (keep.getBoolean(i)) {
+					kept.add(x); kept.add(y); kept.add(z);
+					continue;
+				}
+				long key = BlockPos.asLong(Math.floorDiv((int) Math.floor(x), cell), Math.floorDiv((int) Math.floor(y), cell),
+						Math.floorDiv((int) Math.floor(z), cell));
+				int prev = best.get(key);
+				if (prev < 0 || distSq(out, i, c) > distSq(out, prev, c)) best.put(key, i);
+			}
+			for (int i : best.values()) {
+				kept.add(out.getDouble(3 * i)); kept.add(out.getDouble(3 * i + 1)); kept.add(out.getDouble(3 * i + 2));
+			}
+			probes = kept.toDoubleArray();
+		}
+		double far = 1;
+		for (int i = 0; i < probes.length; i += 3) {
+			double dx = probes[i] - c.x, dy = probes[i + 1] - c.y, dz = probes[i + 2] - c.z;
+			far = Math.max(far, Math.sqrt(dx * dx + dy * dy + dz * dz));
+		}
+		hullProbes = probes;
 		radius = far;
+	}
+
+	private static double distSq(it.unimi.dsi.fastutil.doubles.DoubleArrayList p, int i, Vector3d c) {
+		double dx = p.getDouble(3 * i) - c.x, dy = p.getDouble(3 * i + 1) - c.y, dz = p.getDouble(3 * i + 2) - c.z;
+		return dx * dx + dy * dy + dz * dz;
 	}
 
 	private void publishSystems() {
@@ -342,39 +526,52 @@ public class ShipEntity extends Entity {
 	 * seat; full-collision blocks, doors and trapdoors seal; reaching the edge means a leak.
 	 */
 	private boolean computeSealed() {
-		cabinAir = Set.of();
+		cabinAir = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
 		if (structure == null) return false;
 		BlockPos seat = helmLocal.above();
-		Set<BlockPos> visited = new HashSet<>(List.of(seat));
-		ArrayDeque<BlockPos> queue = new ArrayDeque<>(visited);
+		it.unimi.dsi.fastutil.longs.LongOpenHashSet visited = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
+		it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue queue = new it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue();
+		visited.add(seat.asLong());
+		queue.enqueue(seat.asLong());
 		BlockPos min = structure.min(), max = structure.max();
+		BlockPos.MutableBlockPos next = new BlockPos.MutableBlockPos();
 		while (!queue.isEmpty()) {
-			BlockPos pos = queue.poll();
-			if (pos.getX() < min.getX() || pos.getY() < min.getY() || pos.getZ() < min.getZ() || pos.getX() > max.getX()
-					|| pos.getY() > max.getY() || pos.getZ() > max.getZ() || visited.size() > 32768) {
+			long packed = queue.dequeueLong();
+			int x = BlockPos.getX(packed), y = BlockPos.getY(packed), z = BlockPos.getZ(packed);
+			if (x < min.getX() || y < min.getY() || z < min.getZ() || x > max.getX() || y > max.getY() || z > max.getZ()
+					|| visited.size() > com.starwake.ship.scan.PreflightReport.MAX_CABIN) {
 				return false;
 			}
 			for (Direction direction : Direction.values()) {
-				BlockPos next = pos.relative(direction);
-				if (visited.contains(next) || seals(next)) continue;
-				visited.add(next);
-				queue.add(next);
+				next.set(x + direction.getStepX(), y + direction.getStepY(), z + direction.getStepZ());
+				long key = next.asLong();
+				if (visited.contains(key) || seals(next)) continue;
+				visited.add(key);
+				queue.enqueue(key);
 			}
 		}
-		cabinAir = Set.copyOf(visited);
+		cabinAir = visited;
 		return true;
 	}
 
+	/** Recomputes the seal if the structure changed since (server only; clients never need it). */
+	private void ensureSealed() {
+		if (!sealDirty || level().isClientSide()) return;
+		sealDirty = false;
+		sealed = computeSealed();
+	}
+
 	/** Air cells inside the sealed cabin (empty when the hull leaks). */
-	private Set<BlockPos> cabinAir = Set.of();
+	private it.unimi.dsi.fastutil.longs.LongOpenHashSet cabinAir = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
 
 	/**
 	 * True if a world position is inside this ship's sealed, pressurized cabin (M5 hazards:
 	 * breathable air and a stable temperature whatever the planet outside).
 	 */
 	public boolean isInPressurizedCabin(Vec3 world) {
+		ensureSealed();
 		if (!sealed || cabinAir.isEmpty()) return false;
-		return cabinAir.contains(BlockPos.containing(toLocal(world)));
+		return cabinAir.contains(BlockPos.containing(toLocal(world)).asLong());
 	}
 
 	private boolean seals(BlockPos local) {
@@ -496,19 +693,24 @@ public class ShipEntity extends Entity {
 		ShipStructure next = structure.withChanges(changes);
 		if (removed) {
 			// Something was taken out: whatever no longer connects to the Helm breaks away.
-			java.util.Set<BlockPos> detached = com.starwake.ship.edit.ShipEditing.detached(next, helmLocal);
+			List<BlockPos> gone = new ArrayList<>();
+			for (var change : changes.entrySet()) if (change.getValue() == null) gone.add(change.getKey());
+			java.util.Set<BlockPos> detached = com.starwake.ship.edit.ShipEditing.detached(next, helmLocal, gone);
 			if (!detached.isEmpty() && level() instanceof ServerLevel world) {
 				ShipStructure loose = new ShipStructure(com.starwake.ship.yard.Shipyard.read(yard, plot, detached), next.pivot());
 				com.starwake.ship.yard.Shipyard.clear(yard, plot, detached);
 				com.starwake.ship.edit.ShipEditing.dropDebris(this, world, loose, detached, null);
 				next = next.without(detached);
+				for (BlockPos pos : detached) changes.put(pos, null);
 			}
 		}
 		if (next.entries().isEmpty()) {
 			discard();
 			return;
 		}
-		applyEdit(next);
+		// Changes that put back what was already there aren't changes.
+		changes.entrySet().removeIf(e -> e.getValue() == null && structure.get(e.getKey()) == null);
+		applyEdit(next, changes);
 	}
 
 	@Override
@@ -534,23 +736,43 @@ public class ShipEntity extends Entity {
 	 * recomputed and every tracking client gets the new structure.
 	 */
 	public void applyEdit(ShipStructure next) {
+		applyEdit(next, null);
+	}
+
+	/** Above this many changed cells an edit resyncs the whole ship instead of sending a delta. */
+	private static final int DELTA_LIMIT = 4096;
+
+	/**
+	 * Applies an edited structure. With {@code changes} (the cells that differ from the current structure; null =
+	 * removed) small edits are folded in incrementally and trackers get only those cells (M9 pass 3); otherwise the
+	 * model is rebuilt and the whole ship is resent.
+	 */
+	public void applyEdit(ShipStructure next, @Nullable Map<BlockPos, ShipStructure.@Nullable Entry> changes) {
+		long t0 = System.nanoTime();
 		asleep = false; // its shape (and maybe its support) changed
 		for (Entity passenger : List.copyOf(getPassengers())) {
 			BlockPos seat = seatOf(passenger);
 			if (seat != null && next.get(seat) == null) passenger.stopRiding();
 		}
-		setStructure(next);
-		int capacity = 0;
-		for (ShipStructure.Entry entry : next.entries()) {
-			capacity += ShipMaterials.withQuality(ShipStats.get(entry.state()), ShipMaterials.quality(entry.blockEntity())).fuelCapacity();
-		}
+		boolean delta = changes != null && structure != null && changes.size() <= DELTA_LIMIT;
+		if (delta) applyIncremental(next, changes);
+		else setStructure(next);
+		int capacity = componentFuelCapacity;
 		fuelCapacity = capacity;
 		entityData.set(FUEL_CAPACITY, capacity);
 		if (fuel() > capacity) entityData.set(FUEL, capacity);
 		if (fusion() > fusionCapacity()) entityData.set(FUSION, fusionCapacity());
-		var payload = new com.starwake.network.ShipStructurePayload(getId(), next);
+		long t1 = System.nanoTime();
+		structureVersion++;
+		net.minecraft.network.protocol.common.custom.CustomPacketPayload payload = delta
+				? com.starwake.network.ShipDeltaPayload.of(getId(), structureVersion, next, changes, registryAccess())
+				: new com.starwake.network.ShipStructurePayload(getId(), structureVersion, next);
 		for (ServerPlayer player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(this)) {
 			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
+		}
+		if (next.entries().size() >= 10_000) {
+			com.starwake.StarwakeMod.LOGGER.debug("Big ship edit: {} blocks, {} changed ({}); recompute {} ms, send {} ms", next.entries().size(),
+					changes == null ? "?" : changes.size(), delta ? "delta" : "full", (t1 - t0) / 1_000_000, (System.nanoTime() - t1) / 1_000_000);
 		}
 	}
 
@@ -685,7 +907,10 @@ public class ShipEntity extends Entity {
 		setPos(position.x, position.y, position.z);
 	}
 	public Vec3 lastMove() { return lastMove; }
-	public boolean isSealed() { return sealed; }
+	public boolean isSealed() {
+		ensureSealed();
+		return sealed;
+	}
 	public boolean isGrounded() { return grounded; }
 	public @Nullable ResourceKey<Level> orbiting() { return orbiting; }
 	public void setOrbiting(@Nullable ResourceKey<Level> orbiting) {
@@ -969,9 +1194,23 @@ public class ShipEntity extends Entity {
 	// Ticking
 	// =========================================================================================
 
+	/**
+	 * Ships ignore vanilla's per-tick fluid and inside-block checks (M9 pass 3): both scan every cell of the bounding
+	 * box, which for a 155 m hull is most of a million blocks a tick. Ships don't swim or trip pressure plates.
+	 */
+	@Override
+	protected boolean updateFluidInteraction() {
+		return false;
+	}
+
+	@Override
+	protected void applyEffectsFromBlocks() {
+	}
+
 	@Override
 	public void tick() {
 		super.tick();
+		if (probesStaleSince >= 0 && tickCount - probesStaleSince >= 10 && structure != null) computeProbes();
 		if (level().isClientSide()) clientTick();
 		if (!level().isClientSide() && structure != null) {
 			if (serverTick()) return; // replaced by a copy in another dimension
@@ -1103,7 +1342,17 @@ public class ShipEntity extends Entity {
 		setDeltaMovement(velocity);
 		// M9: rigid-body motion with contacts (slides, tips, settles, shoves other ships).
 		neighbours = nearbyShips(getBoundingBox().expandTowards(velocity).inflate(1.5));
+		long perfStart = System.nanoTime();
 		var result = com.starwake.ship.physics.ShipMotion.step(this, velocity, neighbours, pilot == null);
+		if (structure != null && structure.entries().size() >= 10_000) {
+			perfNanos += System.nanoTime() - perfStart;
+			if (++perfSteps == 100) {
+				com.starwake.StarwakeMod.LOGGER.debug("Big ship physics: {} blocks, {} probes: {} ms/step avg", structure.entries().size(),
+						hullProbes.length / 3, String.format("%.2f", perfNanos / 1e8));
+				perfNanos = 0;
+				perfSteps = 0;
+			}
+		}
 		grounded = result.grounded();
 		if (impactCooldown > 0) impactCooldown--;
 		else {
@@ -2021,7 +2270,7 @@ public class ShipEntity extends Entity {
 	/** True if the ship has landing gear and it's deployed. */
 	public boolean isGearDown() {
 		if (structure == null || gear.isEmpty()) return false;
-		BlockState state = structure.get(gear.get(0));
+		BlockState state = structure.get(gear.iterator().next());
 		return state != null && state.hasProperty(com.starwake.ship.block.LandingGearBlock.DEPLOYED)
 				&& state.getValue(com.starwake.ship.block.LandingGearBlock.DEPLOYED);
 	}
@@ -2031,12 +2280,17 @@ public class ShipEntity extends Entity {
 		if (structure == null || gear.isEmpty() || !(level() instanceof ServerLevel serverLevel)) return;
 		boolean deploy = !isGearDown();
 		ShipStructure before = structure;
-		ShipStructure next = structure;
-		for (BlockPos pos : gear) {
-			BlockState state = next.get(pos);
-			if (state != null) next = next.with(pos, state.setValue(com.starwake.ship.block.LandingGearBlock.DEPLOYED, deploy), next.blockEntity(pos));
+		// One batch for every strut (M9 pass 3: was one structure rebuild per strut, then a full resend).
+		Map<BlockPos, ShipStructure.@Nullable Entry> changes = new java.util.LinkedHashMap<>();
+		Map<BlockPos, ShipStructure.@Nullable Entry> undo = new java.util.LinkedHashMap<>();
+		for (BlockPos pos : List.copyOf(gear)) {
+			ShipStructure.Entry entry = structure.entry(pos);
+			if (entry == null) continue;
+			changes.put(pos, new ShipStructure.Entry(pos, entry.state().setValue(com.starwake.ship.block.LandingGearBlock.DEPLOYED, deploy), entry.blockEntity()));
+			undo.put(pos, entry);
 		}
-		setStructure(next);
+		ShipStructure next = structure.withChanges(changes);
+		applyIncremental(next, changes);
 		if (deploy) {
 			// Extending gear into the ground lifts the ship onto it (or fails if there's no room).
 			boolean placed = false;
@@ -2048,7 +2302,7 @@ public class ShipEntity extends Entity {
 				}
 			}
 			if (!placed) {
-				setStructure(before);
+				applyIncremental(before, undo);
 				if (pilot() instanceof ServerPlayer player) player.sendOverlayMessage(Component.translatable("message.starwake.gear.blocked"));
 				return;
 			}
@@ -2057,7 +2311,8 @@ public class ShipEntity extends Entity {
 			BlockState state = structure.get(pos);
 			if (state != null) com.starwake.ship.yard.Shipyard.set(this, pos, state); // the plot follows (M9)
 		}
-		var payload = new com.starwake.network.ShipStructurePayload(getId(), structure);
+		structureVersion++;
+		var payload = com.starwake.network.ShipDeltaPayload.of(getId(), structureVersion, structure, changes, registryAccess());
 		for (ServerPlayer player : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(this)) {
 			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
 		}
@@ -2097,6 +2352,9 @@ public class ShipEntity extends Entity {
 
 	/** Whether the pilot is holding boost this tick (raises the speed cap). */
 	private boolean boosting;
+
+	private long perfNanos;
+	private int perfSteps;
 
 	/** Parked and not simulating (server, unpiloted only; see the unpiloted branch of the server tick). */
 	private boolean asleep;
@@ -2327,7 +2585,7 @@ public class ShipEntity extends Entity {
 	private double clip(Direction.Axis axis, double distance) {
 		if (distance == 0 || structure == null) return distance;
 		boolean aligned = isAxisAligned();
-		for (AABB local : hull) {
+		for (AABB local : hull.values()) {
 			AABB box = worldBox(local, aligned ? 1.0 : 0.9).deflate(1.0e-7);
 			AABB swept = box.expandTowards(axis == Direction.Axis.X ? distance : 0,
 					axis == Direction.Axis.Y ? distance : 0, axis == Direction.Axis.Z ? distance : 0);
@@ -2370,7 +2628,7 @@ public class ShipEntity extends Entity {
 	private boolean restsOn(ShipEntity carrier) {
 		boolean aligned = isAxisAligned();
 		List<VoxelShape> shapes = new ArrayList<>();
-		for (AABB local : hull) {
+		for (AABB local : hull.values()) {
 			AABB box = worldBox(local, aligned ? 1.0 : 0.9);
 			AABB below = new AABB(box.minX, box.minY - 0.1, box.minZ, box.maxX, box.minY + 0.05, box.maxZ);
 			shapes.clear();
@@ -2398,7 +2656,7 @@ public class ShipEntity extends Entity {
 		boolean aligned = isAxisAligned(rotation);
 		List<ShipEntity> others = nearbyShips(getBoundingBox().move(position.subtract(position())).inflate(2.0));
 		List<VoxelShape> shipShapes = new ArrayList<>();
-		for (AABB local : hull) {
+		for (AABB local : hull.values()) {
 			AABB box = worldBox(local, aligned ? 1.0 : 0.9, position, rotation).deflate(0.05);
 			for (VoxelShape shape : level().getBlockCollisions(null, box)) {
 				if (!shape.isEmpty() && shape.bounds().intersects(box)) return true;
@@ -2469,7 +2727,7 @@ public class ShipEntity extends Entity {
 	// =========================================================================================
 
 	public List<BlockPos> seats() {
-		return seats;
+		return List.copyOf(seats);
 	}
 
 	/** The seat a passenger occupies (server map, or the synced copy on clients). */

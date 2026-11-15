@@ -36,7 +36,8 @@ public final class ShipCommands {
 												.executes(ShipCommands::check)))
 								.then(Commands.literal("assemble")
 										.then(Commands.argument("helm", BlockPosArgument.blockPos())
-												.executes(ShipCommands::assemble)))
+												.executes(ctx -> assemble(ctx, false))
+												.then(Commands.literal("force").executes(ctx -> assemble(ctx, true)))))
 								.then(Commands.literal("blueprint")
 										.then(Commands.argument("id", net.minecraft.commands.arguments.IdentifierArgument.id())
 												.suggests((c, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggestResource(
@@ -138,14 +139,14 @@ public final class ShipCommands {
 	}
 
 	/** Assembles the ship at a Helm without seating anyone (testing and admin builds). */
-	private static int assemble(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+	private static int assemble(CommandContext<CommandSourceStack> ctx, boolean force) throws CommandSyntaxException {
 		BlockPos helm = BlockPosArgument.getLoadedBlockPos(ctx, "helm");
 		CommandSourceStack source = ctx.getSource();
 		if (!source.getLevel().getBlockState(helm).is(ModBlocks.HELM)) {
 			source.sendFailure(Component.translatable("commands.starwake.ship.not_helm"));
 			return 0;
 		}
-		ShipEntity ship = ShipAssembler.assemble(source.getLevel(), helm, null);
+		ShipEntity ship = ShipAssembler.assemble(source.getLevel(), helm, null, force);
 		if (ship == null) {
 			// Show what failed, so "fix the failed checks above" has something above it.
 			PreflightReport report = PreflightReport.analyze(source.getLevel(), ShipScanner.scan(source.getLevel(), helm));

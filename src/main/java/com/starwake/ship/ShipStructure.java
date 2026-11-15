@@ -2,7 +2,7 @@ package com.starwake.ship;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -88,25 +88,19 @@ public final class ShipStructure {
 		if (clientTags != null) return clientTags;
 		var tags = new it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<CompoundTag>();
 		for (int i = 0; i < entries.size(); i++) {
-			Entry entry = entries.get(i);
-			if (!(entry.state().getBlock() instanceof net.minecraft.world.level.block.EntityBlock)) continue;
-			CompoundTag tag = new CompoundTag();
-			if (entry.blockEntity().isPresent()) {
-				var be = net.minecraft.world.level.block.entity.BlockEntity.loadStatic(entry.pos(), entry.state(), entry.blockEntity().get(), registries);
-				if (be != null) tag = be.getUpdateTag(registries);
-			}
-			tags.put(i, tag);
+			CompoundTag tag = clientTag(entries.get(i), registries);
+			if (tag != null) tags.put(i, tag);
 		}
 		clientTags = tags;
 		return tags;
 	}
 
 	private final List<Entry> entries;
-	private final Long2ObjectMap<BlockState> states = new Long2ObjectOpenHashMap<>();
+	private final Long2ObjectOpenHashMap<BlockState> states;
 	private final Vec3i size;
 	private final BlockPos min, max;
 	private final net.minecraft.world.phys.Vec3 pivot;
-	/** Blocks with collision whose neighbour in that direction is empty: the ship's outer skin. */
+	/** Blocks with collision whose neighbour in that direction is empty: the ship's outer skin (built on first use). */
 	private final Map<Direction, List<BlockPos>> outerFaces = new EnumMap<>(Direction.class);
 
 	/** A fresh structure (assembly): the pivot is the centre of the blocks' box. */
@@ -115,11 +109,23 @@ public final class ShipStructure {
 	}
 
 	public ShipStructure(List<Entry> entries, net.minecraft.world.phys.@Nullable Vec3 pivot) {
-		this.entries = List.copyOf(entries);
+		this(List.copyOf(entries), pivot, null, null);
+	}
+
+	/**
+	 * With {@code states} (and optionally {@code index}) already built for {@code entries} (M9 pass 3: an edit patches
+	 * copies of the previous structure's maps instead of rebuilding them from every block).
+	 */
+	private ShipStructure(List<Entry> entries, net.minecraft.world.phys.@Nullable Vec3 pivot, @Nullable Long2ObjectOpenHashMap<BlockState> states,
+			it.unimi.dsi.fastutil.longs.@Nullable Long2IntOpenHashMap index) {
+		this.entries = entries;
+		this.states = states != null ? states : new Long2ObjectOpenHashMap<>(entries.size());
+		this.index = index;
+		boolean fill = states == null;
 		int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
 		int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
 		for (Entry entry : this.entries) {
-			states.put(entry.pos().asLong(), entry.state());
+			if (fill) this.states.put(entry.pos().asLong(), entry.state());
 			minX = Math.min(minX, entry.pos().getX());
 			minY = Math.min(minY, entry.pos().getY());
 			minZ = Math.min(minZ, entry.pos().getZ());
@@ -136,14 +142,6 @@ public final class ShipStructure {
 		this.size = new Vec3i(maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1);
 		this.pivot = pivot != null ? pivot
 				: new net.minecraft.world.phys.Vec3((minX + maxX + 1) / 2.0, (minY + maxY + 1) / 2.0, (minZ + maxZ + 1) / 2.0);
-		for (Direction direction : Direction.values()) {
-			List<BlockPos> face = new ArrayList<>();
-			for (Entry entry : this.entries) {
-				if (!hasCollision(entry.pos()) ) continue;
-				if (!hasCollision(entry.pos().relative(direction))) face.add(entry.pos());
-			}
-			outerFaces.put(direction, List.copyOf(face));
-		}
 	}
 
 	public List<Entry> entries() {
@@ -201,17 +199,80 @@ public final class ShipStructure {
 	 * cell, anything else adds or replaces it. Keeps the pivot.
 	 */
 	public ShipStructure withChanges(Map<BlockPos, @Nullable Entry> changes) {
-		List<Entry> updated = new ArrayList<>(entries.size() + changes.size());
-		for (Entry entry : entries) if (!changes.containsKey(entry.pos())) updated.add(entry);
-		for (Entry entry : changes.values()) if (entry != null) updated.add(entry);
-		return new ShipStructure(updated, pivot);
+		// M9 pass 3: patch copies of the entry list and both maps (array copies) instead of rebuilding them. Removals
+		// swap the last entry into the hole; changes apply in position order so server and clients (which apply the
+		// same delta) end up with identical entry orders (synced throttles refer to entry indices).
+		indexOf(BlockPos.ZERO); // make sure our index exists
+		ArrayList<Entry> updated = new ArrayList<>(entries.size() + changes.size());
+		updated.addAll(entries);
+		var idx = index.clone();
+		var st = states.clone();
+		long[] keys = new long[changes.size()];
+		int n = 0;
+		for (var change : changes.entrySet()) keys[n++] = change.getKey().asLong();
+		java.util.Arrays.sort(keys);
+		Map<Long, @Nullable Entry> byKey = new java.util.HashMap<>();
+		for (var change : changes.entrySet()) byKey.put(change.getKey().asLong(), change.getValue());
+		for (long key : keys) {
+			Entry entry = byKey.get(key);
+			int at = idx.get(key);
+			if (entry == null) {
+				if (at < 0) continue;
+				int last = updated.size() - 1;
+				Entry moved = updated.remove(last);
+				if (at != last) {
+					updated.set(at, moved);
+					idx.put(moved.pos().asLong(), at);
+				}
+				idx.remove(key);
+				st.remove(key);
+			} else {
+				if (at >= 0) updated.set(at, entry);
+				else {
+					idx.put(key, updated.size());
+					updated.add(entry);
+				}
+				st.put(key, entry.state());
+			}
+		}
+		return new ShipStructure(java.util.Collections.unmodifiableList(updated), pivot, st, idx);
 	}
 
 	public Optional<CompoundTag> blockEntity(BlockPos local) {
-		for (Entry entry : entries) {
-			if (entry.pos().equals(local)) return entry.blockEntity();
+		Entry entry = entry(local);
+		return entry == null ? Optional.empty() : entry.blockEntity();
+	}
+
+	/** Entry index per cell, built on first use (structures are immutable). */
+	private it.unimi.dsi.fastutil.longs.@Nullable Long2IntOpenHashMap index;
+
+	/** The entry at a local cell, or null (M9 pass 3: constant time; was a scan). */
+	public @Nullable Entry entry(BlockPos local) {
+		int i = indexOf(local);
+		return i < 0 ? null : entries.get(i);
+	}
+
+	/** Index of the entry at a local cell in {@link #entries()}, or -1. */
+	public int indexOf(BlockPos local) {
+		var map = index;
+		if (map == null) {
+			map = new it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap(entries.size());
+			map.defaultReturnValue(-1);
+			for (int i = 0; i < entries.size(); i++) map.put(entries.get(i).pos().asLong(), i);
+			index = map;
 		}
-		return Optional.empty();
+		return map.get(local.asLong());
+	}
+
+	/**
+	 * What clients may know about a block entity aboard (M9 pass 2): vanilla's {@code getUpdateTag} (sign text, banner
+	 * patterns; never inventories). Empty for block entities that share nothing; null for blocks without one.
+	 */
+	public static @Nullable CompoundTag clientTag(Entry entry, net.minecraft.core.HolderLookup.Provider registries) {
+		if (!(entry.state().getBlock() instanceof net.minecraft.world.level.block.EntityBlock)) return null;
+		if (entry.blockEntity().isEmpty()) return new CompoundTag();
+		var be = net.minecraft.world.level.block.entity.BlockEntity.loadStatic(entry.pos(), entry.state(), entry.blockEntity().get(), registries);
+		return be == null ? new CompoundTag() : be.getUpdateTag(registries);
 	}
 
 	/** Size of the bounding box in blocks. */
@@ -233,7 +294,13 @@ public final class ShipStructure {
 	}
 
 	/** Blocks on the ship's outer skin facing {@code direction}. Used for terrain collision. */
-	public List<BlockPos> outerFace(Direction direction) {
-		return outerFaces.get(direction);
+	public synchronized List<BlockPos> outerFace(Direction direction) {
+		return outerFaces.computeIfAbsent(direction, dir -> {
+			List<BlockPos> face = new ArrayList<>();
+			for (Entry entry : entries) {
+				if (hasCollision(entry.pos()) && !hasCollision(entry.pos().relative(dir))) face.add(entry.pos());
+			}
+			return List.copyOf(face);
+		});
 	}
 }

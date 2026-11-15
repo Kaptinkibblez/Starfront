@@ -526,6 +526,10 @@ commit. **Don't start the next milestone until the user confirms the current one
       performance work (delta block updates instead of full resyncs, per-section meshes, a simplified collision hull).
       Paint/liveries not chosen. Build order: 3a big-ship performance + cap, 3b hull panels + Hull Tool, 3c greebles +
       lighting, 3d hinges/rotors + gear-linked articulation, 3e a large demo blueprint; one jar at the end of M9 still.
+      *Demo ship (user, 2026-11-14: "as close as you can to the Reclaimer while still original"):* an **original** heavy
+      salvage ship of the same class and scale (long industrial hull with exposed frame, big articulated salvage claw,
+      gear-linked swinging engine pods, processing/cargo bay, raised command deck, tractor mounts, hazard-striped greebles),
+      not a copy of the Reclaimer's silhouette, proportions or signature details.
 
 ---
 
@@ -555,7 +559,7 @@ normal gravity.
 ## How ships work (Milestone 3)
 
 - `ship/scan/ShipScanner`: flood fill from the Helm. Stops at air, replaceable blocks and
-  `#starwake:ship_excluded` (hand-written tag JSON in `src/main/resources`). 4096-block cap.
+  `#starwake:ship_excluded` (hand-written tag JSON in `src/main/resources`). Cap 262,144 blocks (M9 pass 3).
 - `ship/scan/PreflightReport`: every functional condition lives here (lift vs mass x
   gravity, exhaust clearance, fuel, pilot room, sealed cabin via air flood fill).
 - `ship/data/ShipStats`: `data/<ns>/starwake/ship_stats/*.json` has `blocks` (ids/#tags/"*"),
@@ -819,8 +823,31 @@ normal gravity.
   - *Kestrel* (`tools/kestrel_blueprint.py`): wedge nose and sloped shoulders from hull stairs/slabs, a Canopy Glass
     bubble (2 clear blocks over the Helm), a spine with 6 plants/coolers, shield, quantum drive and two tanks, side
     sponsons with medium strafe/retro thrusters, four belly VTOL mains around the centre of mass, two rear mains, RCS.
-- Known limits: structure changes resync the whole snapshot (fine for small changes, heavy for 65k-block ships with
-  redstone clocks); radiation from machines aboard isn't counted for nearby players; block entities aboard only tick
+- **Pass 3a, big ships (2026-11-15):** cap **262,144 blocks** (`ShipScanner.MAX_BLOCKS`; cabin flood 1M cells).
+  - *Delta sync:* `ShipEntity.applyEdit(next, changes)`: up to 4096 changed cells are folded in incrementally and sent as
+    `ShipDeltaPayload` (cells + client tags, `version = previous + 1`); more, or no change list, resends the whole
+    `ShipStructurePayload` (now versioned). A client that misses a version asks with `ShipResyncPayload`.
+    `ShipStructure.withChanges` patches clones of the entry list, state map and index (removals swap the last entry into the
+    hole; changes apply in position order so both sides get the same entry order, which synced throttles index into).
+    `outerFace` is built lazily.
+  - *Incremental model:* `ShipDynamics` keeps running sums (mass, first and second moments, shadow counts) with
+    `add`/`remove`/`addThruster`/`removeThruster`; `finish()` derives the centre of mass and inertia. `applyIncremental`
+    removes and adds the changed cells, re-checks thrusters whose nozzle cell changed, refreshes the hull map around them,
+    and rebuilds systems only from `components` (functional parts). The cabin seal is computed lazily (`ensureSealed`).
+  - *Probes:* above `PROBE_BUDGET` (6000) the hull corners are thinned to one per lattice cell (the farthest from the
+    centre of mass; gear keeps all). On big hulls an edit marks probes stale and they're rebuilt 10 ticks later.
+  - *Detachment:* `ShipEditing.detached(structure, helm, removed)` floods from the removed cells' neighbours, at most 4096
+    cells per group; a group that closes off without the Helm breaks away; two big groups that never meet fall back to the
+    full flood.
+  - *Rendering:* `ShipMesh.buildSections` tessellates 16-block sections with face culling between ship blocks;
+    `ShipRenderer` keeps sections per ship and rebuilds only those around changed cells (`ShipEntity.takeMeshChanges`),
+    skips sections behind the camera, and re-samples light round-robin (16k blocks per frame).
+  - Ships skip vanilla's `updateFluidInteraction` and `applyEffectsFromBlocks` (both scanned the whole bounding box
+    every tick: 15 s of server lag for a 212k ship in the ocean).
+  - Measured (212,065 blocks, 150x60x80): assembly ~3.5 s once (lift + plot write 2.5 s), model 0.4 s server / 0.36 s
+    client on load, full mesh 0.5-1 s, physics ~1 ms/step (1071 probes), a block edit 0-2 ms on the server and ~9 ms
+    for its mesh section. Admin: `/starwake ship assemble <helm> force` skips the pre-flight verdict.
+- Known limits: assembly and the first load of a 200k ship still take seconds; radiation from machines aboard isn't counted for nearby players; block entities aboard only tick
   chest lids on the client (no bell swing or campfire smoke yet); contacts beyond entity tracking range aren't shown.
 
 ## How ship editing works (Milestone 4)

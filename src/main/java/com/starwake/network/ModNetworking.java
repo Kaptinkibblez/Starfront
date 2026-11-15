@@ -17,6 +17,7 @@ public final class ModNetworking {
 		PayloadTypeRegistry.clientboundPlay().register(ShipStructurePayload.TYPE, ShipStructurePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ShipStatePayload.TYPE, ShipStatePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ShipBlockEventPayload.TYPE, ShipBlockEventPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ShipDeltaPayload.TYPE, ShipDeltaPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ShipDynamicsPayload.TYPE, ShipDynamicsPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ShipPhysicsPayload.TYPE, ShipPhysicsPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(PlanetListPayload.TYPE, PlanetListPayload.CODEC);
@@ -36,6 +37,7 @@ public final class ModNetworking {
 		PayloadTypeRegistry.serverboundPlay().register(ShipControlPayload.TYPE, ShipControlPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipInputPayload.TYPE, ShipInputPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipFootingPayload.TYPE, ShipFootingPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ShipResyncPayload.TYPE, ShipResyncPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipPowerPayload.TYPE, ShipPowerPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipQuantumPayload.TYPE, ShipQuantumPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipCrewPayload.TYPE, ShipCrewPayload.CODEC);
@@ -51,6 +53,12 @@ public final class ModNetworking {
 					ship.setControls(payload.controls());
 					ship.setStick(payload.stickX(), payload.stickY());
 				}
+			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(ShipResyncPayload.TYPE, (payload, context) -> {
+			// A client missed a structure delta: send it the whole ship again.
+			if (context.player().level().getEntity(payload.entityId()) instanceof com.starwake.ship.ShipEntity ship && ship.structure() != null) {
+				context.responseSender().sendPacket(new ShipStructurePayload(ship.getId(), ship.structureVersion(), ship.structure()));
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(ShipFootingPayload.TYPE,

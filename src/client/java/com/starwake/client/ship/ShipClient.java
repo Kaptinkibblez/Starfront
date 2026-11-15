@@ -162,7 +162,14 @@ public final class ShipClient {
 		ClientTickEvents.END_LEVEL_TICK.register(ShipBlockEntities::tick);
 		ClientPlayNetworking.registerGlobalReceiver(ShipStructurePayload.TYPE, (payload, context) -> {
 			if (context.client().level != null && context.client().level.getEntity(payload.entityId()) instanceof ShipEntity ship) {
-				ship.setStructure(payload.structure());
+				ship.setStructure(payload.structure(), payload.version());
+			}
+		});
+		// M9 pass 3: small edits arrive as deltas; one that doesn't fit what we hold asks for the whole ship again.
+		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.ShipDeltaPayload.TYPE, (payload, context) -> {
+			if (context.client().level != null && context.client().level.getEntity(payload.entityId()) instanceof ShipEntity ship
+					&& !ship.applyDelta(payload.version(), payload.changes())) {
+				ClientPlayNetworking.send(new com.starwake.network.ShipResyncPayload(ship.getId()));
 			}
 		});
 

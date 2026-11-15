@@ -60,7 +60,7 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 	/** Minimum lift-to-weight ratio for takeoff (a small margin so ships can actually climb). */
 	public static final double MIN_LIFT_RATIO = 1.05;
 	/** Cabin flood-fill cap: bigger "cabins" are treated as open to space. */
-	public static final int MAX_CABIN = 32768;
+	public static final int MAX_CABIN = 1 << 20; // M9 pass 3: big ships have big cabins
 
 	public static PreflightReport analyze(Level level, ShipScanner.ShipScan scan) {
 		List<Line> lines = new ArrayList<>();

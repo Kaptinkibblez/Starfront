@@ -38,14 +38,27 @@ final class ShipMesh {
 	private ShipMesh() {}
 
 	/** Tessellates every block of the structure once. {@code reference} is a world cell for AO lookups. */
-	static ShipMesh build(ShipStructure structure, ClientLevel level, BlockPos reference) {
-		ShipMesh mesh = new ShipMesh();
+	/** Section key of a local cell (16-block cubes). */
+	static long sectionOf(BlockPos local) {
+		return BlockPos.asLong(local.getX() >> 4, local.getY() >> 4, local.getZ() >> 4);
+	}
+
+	/**
+	 * M9 pass 3: tessellates the structure into one mesh per 16-block section, in one pass. {@code only}: just these
+	 * sections (null = all). Sections left with no quads are omitted.
+	 */
+	static java.util.Map<Long, ShipMesh> buildSections(ShipStructure structure, ClientLevel level, BlockPos reference,
+			it.unimi.dsi.fastutil.longs.@org.jspecify.annotations.Nullable LongSet only) {
+		java.util.Map<Long, ShipMesh> out = new java.util.HashMap<>();
 		Minecraft minecraft = Minecraft.getInstance();
-		ModelBlockRenderer renderer = new ModelBlockRenderer(minecraft.options.ambientOcclusion().get(), false, minecraft.getBlockColors());
+		ModelBlockRenderer renderer = new ModelBlockRenderer(minecraft.options.ambientOcclusion().get(), true, minecraft.getBlockColors());
 		var models = minecraft.getModelManager().getBlockStateModelSet();
 		boolean cutoutLeaves = minecraft.options.cutoutLeaves().get();
 		for (ShipStructure.Entry entry : structure.entries()) {
 			if (entry.state().getRenderShape() != RenderShape.MODEL) continue;
+			long key = sectionOf(entry.pos());
+			if (only != null && !only.contains(key)) continue;
+			ShipMesh mesh = out.computeIfAbsent(key, k -> new ShipMesh());
 			int index = mesh.blocks.size();
 			mesh.blocks.add(entry.pos());
 			ShipBlockRenderState getter = new ShipBlockRenderState(structure, entry.pos(), entry.state());
@@ -61,7 +74,9 @@ final class ShipMesh {
 									instance.getColor(0), instance.getColor(1), instance.getColor(2), instance.getColor(3), instance.overlayCoords())),
 					0, 0, 0, getter, reference, entry.state(), models.get(entry.state()), entry.state().getSeed(local));
 		}
-		return mesh;
+		// Blocks whose every face was culled draw nothing: drop them so the per-frame light pass skips them.
+		out.values().removeIf(m -> m.quadCount() == 0);
+		return out;
 	}
 
 	/** Replays one layer's quads with per-block light ({@code light[i]} for block i). */

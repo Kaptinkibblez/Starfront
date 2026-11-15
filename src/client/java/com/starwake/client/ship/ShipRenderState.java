@@ -7,8 +7,9 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState;
 
 /** Per-frame render state for a ship: the block states to draw (cached per ship). */
 public final class ShipRenderState extends EntityRenderState {
-	ShipMesh mesh;
-	int[] light = new int[0];
+	/** Visible mesh sections and their light arrays (parallel lists). */
+	final java.util.List<ShipMesh> meshes = new java.util.ArrayList<>();
+	final java.util.List<int[]> lights = new java.util.ArrayList<>();
 	final Quaternionf orientation = new Quaternionf();
 	Vec3 pivot = Vec3.ZERO;
 	/** Block entities aboard (M9 pass 2): local position and the renderer's own state, per frame. */

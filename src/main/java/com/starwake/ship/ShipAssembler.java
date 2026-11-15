@@ -53,9 +53,17 @@ public final class ShipAssembler {
 	 * @return the new ship, or null if the check failed
 	 */
 	public static @Nullable ShipEntity assemble(ServerLevel level, BlockPos helm, @Nullable ServerPlayer pilot) {
+		return assemble(level, helm, pilot, false);
+	}
+
+	/** {@code force}: admin/testing only, skips the pre-flight verdict (a ship that can't fly still assembles). */
+	public static @Nullable ShipEntity assemble(ServerLevel level, BlockPos helm, @Nullable ServerPlayer pilot, boolean force) {
+		long t0 = System.nanoTime();
 		ShipScanner.ShipScan scan = ShipScanner.scan(level, helm);
+		long t1 = System.nanoTime();
 		PreflightReport report = PreflightReport.analyze(level, scan);
-		if (!report.canFly()) {
+		long t2 = System.nanoTime();
+		if (!report.canFly() && !(force && !scan.tooBig())) {
 			return null;
 		}
 
@@ -92,7 +100,13 @@ public final class ShipAssembler {
 			com.starwake.ship.yard.Shipyard.writeFresh(yard, plot, entries);
 			ship.setPlot(plot);
 		}
+		long t3 = System.nanoTime();
 		ship.initialize(new ShipStructure(entries), helm.subtract(min), forward, fuel, capacity);
+		long t4 = System.nanoTime();
+		if (entries.size() >= 10_000) {
+			com.starwake.StarwakeMod.LOGGER.info("Big ship assembled: {} blocks; scan {} ms, pre-flight {} ms, lift + plot {} ms, initialise {} ms",
+					entries.size(), (t1 - t0) / 1_000_000, (t2 - t1) / 1_000_000, (t3 - t2) / 1_000_000, (t4 - t3) / 1_000_000);
+		}
 		ship.addFusion(fusion);
 		// The entity position is the pivot (structure centre), not the min corner.
 		ship.setPos(min.getX() + ship.pivot().x, min.getY() + ship.pivot().y, min.getZ() + ship.pivot().z);

@@ -46,7 +46,7 @@ public final class ShipInteraction {
 		});
 		EntityTrackingEvents.START_TRACKING.register((entity, player) -> {
 			if (entity instanceof ShipEntity ship && ship.structure() != null) {
-				ServerPlayNetworking.send(player, new ShipStructurePayload(ship.getId(), ship.structure()));
+				ServerPlayNetworking.send(player, new ShipStructurePayload(ship.getId(), ship.structureVersion(), ship.structure()));
 				ServerPlayNetworking.send(player, com.starwake.network.ShipDynamicsPayload.of(ship.getId(), ship.dynamics()));
 			}
 		});

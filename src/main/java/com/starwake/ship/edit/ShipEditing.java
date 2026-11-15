@@ -164,6 +164,57 @@ public final class ShipEditing {
 	}
 
 	/** Blocks no longer connected (6-neighbour) to the Helm. */
+	/** Cells a local search may visit per group before it counts the group as "big" (M9 pass 3). */
+	private static final int LOCAL_SEARCH = 4096;
+
+	/**
+	 * Detachment after removing {@code removed} cells (M9 pass 3), without flooding the whole ship: a bounded search
+	 * from each surviving neighbour of a removed cell. A group that closes off below the limit without the Helm broke
+	 * away; groups that grow past it are assumed attached. Only when two or more big groups never met does it fall
+	 * back to the full flood fill from the Helm (a ship cut in two).
+	 */
+	public static Set<BlockPos> detached(ShipStructure structure, BlockPos helm, java.util.Collection<BlockPos> removed) {
+		List<BlockPos> starts = new ArrayList<>();
+		for (BlockPos pos : removed) {
+			for (Direction d : Direction.values()) {
+				BlockPos n = pos.relative(d);
+				if (structure.get(n) != null) starts.add(n.immutable());
+			}
+		}
+		Set<BlockPos> claimed = new HashSet<>();
+		Set<BlockPos> detached = new HashSet<>();
+		int big = 0;
+		for (BlockPos start : starts) {
+			if (claimed.contains(start)) continue;
+			Set<BlockPos> group = new HashSet<>();
+			ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+			group.add(start);
+			queue.add(start);
+			boolean overflow = false, hasHelm = start.equals(helm);
+			while (!queue.isEmpty()) {
+				if (group.size() > LOCAL_SEARCH) {
+					overflow = true;
+					break;
+				}
+				BlockPos pos = queue.poll();
+				for (Direction d : Direction.values()) {
+					BlockPos next = pos.relative(d);
+					if (structure.get(next) != null && group.add(next)) {
+						queue.add(next);
+						if (next.equals(helm)) hasHelm = true;
+					}
+				}
+			}
+			claimed.addAll(group);
+			if (overflow) {
+				if (++big >= 2) return detached(structure, helm);
+			} else if (!hasHelm) {
+				detached.addAll(group);
+			}
+		}
+		return detached;
+	}
+
 	public static Set<BlockPos> detached(ShipStructure structure, BlockPos helm) {
 		Set<BlockPos> reached = new HashSet<>();
 		ArrayDeque<BlockPos> queue = new ArrayDeque<>();
