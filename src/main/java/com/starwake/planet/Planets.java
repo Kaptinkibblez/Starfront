@@ -109,18 +109,32 @@ public final class Planets {
 	/** M9: gravity for a level on either side (clients look the planet up in the synced planet list). */
 	public static double gravityOf(Level level) {
 		if (!level.isClientSide()) return gravityOf(level.dimension());
-		for (PlanetRef ref : all(level.registryAccess())) {
-			if (ref.planet().dimension().equals(level.dimension())) return ref.planet().gravity();
-		}
-		return 1.0;
+		PlanetRef ref = index(level.registryAccess()).get(level.dimension());
+		return ref == null ? 1.0 : ref.planet().gravity();
 	}
+
+	/**
+	 * M9: gravity multiplier for non-living entities (items, projectiles): the planet's gravity, 0 in space. Cached
+	 * per level instance (it's asked per entity per tick).
+	 */
+	public static double gravityFactor(Level level) {
+		Object[] cache = GRAVITY_CACHE.get();
+		if (cache[0] == level && cache[1] instanceof Integer gen && gen == ProceduralPlanets.generation()) return (Double) cache[2];
+		PlanetRef ref = level.isClientSide() ? index(level.registryAccess()).get(level.dimension()) : byDimension.get(level.dimension());
+		double g = ref == null ? 1.0 : ref.planet().destination() ? ref.planet().gravity() : 0.0;
+		cache[0] = level;
+		cache[1] = ProceduralPlanets.generation();
+		cache[2] = g;
+		return g;
+	}
+
+	private static final ThreadLocal<Object[]> GRAVITY_CACHE = ThreadLocal.withInitial(() -> new Object[3]);
 
 	/** M9: air density for a level on either side. */
 	public static double airDensityOf(Level level) {
 		if (!level.isClientSide()) return airDensityOf(level.dimension());
-		for (PlanetRef ref : all(level.registryAccess())) {
-			if (ref.planet().dimension().equals(level.dimension())) return ref.planet().destination() ? ref.planet().airDensity() : 0.0;
-		}
+		PlanetRef ref = index(level.registryAccess()).get(level.dimension());
+		if (ref != null) return ref.planet().destination() ? ref.planet().airDensity() : 0.0;
 		return 1.0;
 	}
 

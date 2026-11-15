@@ -532,6 +532,22 @@ commit. **Don't start the next milestone until the user confirms the current one
       not a copy of the Reclaimer's silhouette, proportions or signature details. **Ships pass 3 done (3a-3e, 2026-11-15).**
     - [x] **Ships pass 4 (2026-11-15):** auto-connecting hull pieces (slopes, curves, coves at 1:1/1:2/1:4, wedge, plates,
       pillar, frame) replace Hull Panels and Hull Forms; pre-flight checks the gear-up pose. Details below.
+    - The user wants to revisit hull shapes later ("im picky"); moved on to planets 2026-11-15.
+  - **M9 planets, space and galaxy (decisions 2026-11-15).** Audit: airless worlds lit like night, items/arrows at Earth
+    gravity, overlapping space HUD markers, another system's space listed as a planet, vanilla sun on every planet, Earth
+    plants on lethal worlds, endless flat planets, empty space between planets. Choices:
+    - *Real sky:* the system's own star (colour/size from its class, both stars of a binary), the other planets and moons at
+      their true direction and size with phases; day length follows the planet.
+    - *Full alien pass:* per-archetype palettes and flora that fit the conditions (no Earth plants where it's lethal), new
+      terrain features (canyons, spires, lava fields, ice shelves), more variety between planets of one type.
+    - *Finite wrapping planets:* a square surface sized from the radius, **8-32 km around** (moon ~8, Earth-size ~32);
+      walking off one edge brings you back at the other; the space position matches exactly.
+    - *Moons:* **0-3 per planet** (bigger planets more), airless barren/frozen/volcanic, landable, shown in both skies.
+    - *Asteroid belts:* **real 3D block fields** in space between the rocky and outer planets, generated on approach, mined
+      with tools in EVA or from a ship; real compositions (S silicate, C carbonaceous, M metal, icy).
+    - *Moving orbits:* **real Kepler period ratios, sped up** (innermost planet a few in-game days, outer ones weeks);
+      positions from game time on both sides.
+    - Not chosen: gas giants.
 
 ---
 

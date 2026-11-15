@@ -50,8 +50,9 @@ public final class HubHud {
 			g.fill(x - 1, y - 1, x + 2, y + 2, 0xFF081018);
 			String label = hub.name();
 			String range = SolarSystem.formatDistance(distance);
-			g.text(font, label, x - font.width(label) / 2, y + 8, color);
-			g.text(font, range, x - font.width(range) / 2, y + 18, 0xFF7F95AA);
+			int ly = HudLabels.place(HudLabels.frame(), x, y + 8, Math.max(font.width(label), font.width(range)), 20, 21);
+			g.text(font, label, x - font.width(label) / 2, ly, color);
+			g.text(font, range, x - font.width(range) / 2, ly + 10, 0xFF7F95AA);
 		}
 	}
 }

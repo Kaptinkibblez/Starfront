@@ -20,7 +20,9 @@
     "minecraft:visual/sky_color": "#000000",
     "minecraft:visual/fog_color": "#08080c",
     "minecraft:visual/cloud_color": "#00000000",
-    "minecraft:visual/cloud_height": 220.0
+    "minecraft:visual/cloud_height": 220.0,
+    "minecraft:visual/fog_start_distance": 1024.0,
+    "minecraft:visual/fog_end_distance": 2048.0
   },
   "coordinate_scale": 1.0,
   "default_clock": "starwake:barren",

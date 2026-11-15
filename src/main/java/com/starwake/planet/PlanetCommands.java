@@ -57,7 +57,8 @@ public final class PlanetCommands {
 	}
 
 	private static int list(CommandContext<CommandSourceStack> ctx) {
-		var planets = Planets.all(ctx.getSource().getServer().registryAccess());
+		// Only places you can land on: each system's space level is a planet entry too, but not a destination.
+		var planets = Planets.all(ctx.getSource().getServer().registryAccess()).stream().filter(p -> p.planet().destination()).toList();
 		ctx.getSource().sendSuccess(() -> Component.translatable("commands.starwake.planet.list.header", planets.size()), false);
 		planets.forEach(planet -> ctx.getSource().sendSuccess(() -> Component.translatable(
 				"commands.starwake.planet.list.entry",

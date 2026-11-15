@@ -540,6 +540,10 @@ def dimension_type_json(kind, s):
         "minecraft:visual/cloud_color": s["cloud"],
         "minecraft:visual/cloud_height": 220.0,
     }
+    if s["airless"]:
+        # No air, no haze: vacuum shows the horizon sharp (the dark fog colour had swallowed the terrain).
+        attributes["minecraft:visual/fog_start_distance"] = 1024.0
+        attributes["minecraft:visual/fog_end_distance"] = 2048.0
     if s["particles"]:
         attributes["minecraft:visual/ambient_particles"] = [{"particle": s["particles"], "probability": 0.006}]
     return {
