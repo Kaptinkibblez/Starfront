@@ -29,12 +29,14 @@ import net.minecraft.world.phys.Vec3;
  * @param mass         a star's mass in solar masses (sets its planets' orbital periods); ignored for planets
  * @param moonOrbit    for a moon: its distance from the parent planet and starting angle (its {@code position} is
  *                     then only its neighbourhood, placed well away from the parent's)
+ * @param wrap         M9: the surface is finite and wraps around ({@link #circumference()} blocks each way); the
+ *                     Overworld stays endless
  *
  * <p>M9: {@code position} is the body's fixed <em>neighbourhood</em> in the space dimension (where you fly
  * around it, where stations stand) and its place at game time 0; the body itself orbits (see {@link SolarSystem}).
  */
 public record Body(Optional<Component> name, Vec3 position, double radius, double atmosphere, double worldRadius,
-		int color, int secondaryColor, int atmosphereColor, boolean star, double mass, Optional<MoonOrbit> moonOrbit) {
+		int color, int secondaryColor, int atmosphereColor, boolean star, double mass, Optional<MoonOrbit> moonOrbit, boolean wrap) {
 	/** A moon's orbit around its planet: distance (blocks) and the angle at time 0 (radians). */
 	public record MoonOrbit(double distance, double phase) {
 		public static final Codec<MoonOrbit> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -45,12 +47,12 @@ public record Body(Optional<Component> name, Vec3 position, double radius, doubl
 
 	public Body(Optional<Component> name, Vec3 position, double radius, double atmosphere, double worldRadius,
 			int color, int secondaryColor, int atmosphereColor, boolean star) {
-		this(name, position, radius, atmosphere, worldRadius, color, secondaryColor, atmosphereColor, star, 1.0, Optional.empty());
+		this(name, position, radius, atmosphere, worldRadius, color, secondaryColor, atmosphereColor, star, 1.0, Optional.empty(), false);
 	}
 
 	public Body(Optional<Component> name, Vec3 position, double radius, double atmosphere, double worldRadius,
 			int color, int secondaryColor, int atmosphereColor, boolean star, double mass) {
-		this(name, position, radius, atmosphere, worldRadius, color, secondaryColor, atmosphereColor, star, mass, Optional.empty());
+		this(name, position, radius, atmosphere, worldRadius, color, secondaryColor, atmosphereColor, star, mass, Optional.empty(), false);
 	}
 
 	public static final Codec<Body> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -64,8 +66,23 @@ public record Body(Optional<Component> name, Vec3 position, double radius, doubl
 			ExtraCodecs.STRING_RGB_COLOR.optionalFieldOf("atmosphere_color", 0xFF9FC8FF).forGetter(Body::atmosphereColor),
 			Codec.BOOL.optionalFieldOf("star", false).forGetter(Body::star),
 			Codec.doubleRange(0.01, 1000).optionalFieldOf("mass", 1.0).forGetter(Body::mass),
-			MoonOrbit.CODEC.optionalFieldOf("moon_orbit").forGetter(Body::moonOrbit)
+			MoonOrbit.CODEC.optionalFieldOf("moon_orbit").forGetter(Body::moonOrbit),
+			Codec.BOOL.optionalFieldOf("wrap", false).forGetter(Body::wrap)
 	).apply(i, Body::new));
+
+	/** Surface size of a wrapping planet, each way (blocks, a multiple of 16): longitude x world radius around. */
+	public int circumference() {
+		return Math.max(256, (int) Math.round(2 * Math.PI * worldRadius / 16.0) * 16);
+	}
+
+	/**
+	 * M9: surface size for a body of this radius: 8 km around for a small moon up to 32 km for an Earth-size world.
+	 * Returns the world radius that gives it (circumference / 2 pi).
+	 */
+	public static double worldRadiusFor(double radius) {
+		double around = Math.clamp(8000 + (radius - 500) * (24000.0 / 3500.0), 8000, 32000);
+		return Math.round(around / 512.0) * 512 / (2 * Math.PI);
+	}
 
 	/** Radius at which the planet takes over: the atmosphere, or the surface if it has none. */
 	public double entryRadius() {

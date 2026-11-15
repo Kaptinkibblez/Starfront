@@ -48,6 +48,7 @@ public final class StarwakeMod implements ModInitializer {
 		com.starwake.registry.ModNuclear.init();
 		com.starwake.registry.ModGear.init();
 		com.starwake.worldgen.CraterFeature.init();
+		com.starwake.worldgen.WrapDensity.init();
 		com.starwake.registry.ModSounds.init();
 		ModBlockEntities.init();
 		ModEntities.init();
@@ -84,6 +85,7 @@ public final class StarwakeMod implements ModInitializer {
 		PlanetGravity.init();
 		com.starwake.planet.PlanetHazards.init();
 		PlanetTravel.init();
+		com.starwake.planet.PlanetWrap.init();
 		PlanetCommands.init();
 
 		// Ships: data-driven stats, console networking.

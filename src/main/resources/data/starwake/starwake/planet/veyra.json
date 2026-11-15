@@ -12,10 +12,11 @@
     ],
     "radius": 2600,
     "atmosphere": 3000,
-    "world_radius": 16000,
+    "world_radius": 3585.443,
     "color": "#9C4A26",
     "secondary_color": "#C98A52",
-    "atmosphere_color": "#6FE0D0"
+    "atmosphere_color": "#6FE0D0",
+    "wrap": true
   },
   "air_density": 0.6,
   "hazards": {

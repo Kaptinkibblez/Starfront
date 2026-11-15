@@ -109,14 +109,54 @@
     "min_y": -64
   },
   "noise_router": {
-    "chunk_surface_level": "minecraft:overworld/chunk_surface_level",
-    "continents": "minecraft:overworld/continents",
-    "depth": "minecraft:overworld/depth",
-    "erosion": "minecraft:overworld/erosion",
-    "final_density": "minecraft:overworld/final_density",
-    "ridges": "minecraft:overworld/ridges",
-    "temperature": "minecraft:overworld/temperature",
-    "vegetation": "minecraft:overworld/vegetation"
+    "chunk_surface_level": {
+      "type": "starwake:wrap",
+      "input": "minecraft:overworld/chunk_surface_level",
+      "period": 22528,
+      "blend": 96
+    },
+    "continents": {
+      "type": "starwake:wrap",
+      "input": "minecraft:overworld/continents",
+      "period": 22528,
+      "blend": 96
+    },
+    "depth": {
+      "type": "starwake:wrap",
+      "input": "minecraft:overworld/depth",
+      "period": 22528,
+      "blend": 96
+    },
+    "erosion": {
+      "type": "starwake:wrap",
+      "input": "minecraft:overworld/erosion",
+      "period": 22528,
+      "blend": 96
+    },
+    "final_density": {
+      "type": "starwake:wrap",
+      "input": "minecraft:overworld/final_density",
+      "period": 22528,
+      "blend": 96
+    },
+    "ridges": {
+      "type": "starwake:wrap",
+      "input": "minecraft:overworld/ridges",
+      "period": 22528,
+      "blend": 96
+    },
+    "temperature": {
+      "type": "starwake:wrap",
+      "input": "minecraft:overworld/temperature",
+      "period": 22528,
+      "blend": 96
+    },
+    "vegetation": {
+      "type": "starwake:wrap",
+      "input": "minecraft:overworld/vegetation",
+      "period": 22528,
+      "blend": 96
+    }
   },
   "sea_level": -64,
   "spawn_target": [

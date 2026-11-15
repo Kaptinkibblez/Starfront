@@ -1149,6 +1149,26 @@ normal gravity.
   in the Overworld's day sky; from the moon Brameolvax the star with its glare and the Overworld rising as a lit globe.
   Known limit: everything stays on the equatorial path (no latitude or axial tilt); vanilla's starfield stays.
 
+- **Finite wrapping planets.** `Body.wrap` + `Body.circumference()` (= 2 pi `world_radius`, rounded to 16). Size from the
+  radius (`Body.worldRadiusFor`): 8 km around at radius <= 500 up to 32 km at >= 4000, rounded to 512 so the edges fall on
+  chunk boundaries. Every procedural planet and moon wraps; Veyra too (22,528; JSON `wrap` + world_radius 3585.443, and its
+  noise router wrapped in its noise_settings JSON); the **Overworld stays endless** (vanilla). The surface is the square
+  [-L/2, L/2) in X and Z; longitude = X / world_radius, so leaving and entering match the sphere exactly around the equator.
+  - Terrain: `worldgen/WrapDensity` (density function type `starwake:wrap`, `input`, `period`, `blend` 96), applied to all
+    eight `NoiseRouter` functions (`WrapDensity.wrap`, by `PlanetGenerators.create(..., period)`), so terrain and the climate
+    that picks biomes repeat. Over the last `blend` blocks before a tile's upper edge, the input cross-fades into itself one
+    period back, so the edges meet exactly. 26.3 samples terrain as volumes (`DensitySampler.sampleVolume`): a volume in one
+    tile copy is passed to the input shifted by whole periods (interpolation and caches intact); in the blend band it's
+    sampled as whole volumes here and one period back (two to four calls) and cross-faded per point; only volumes that
+    straddle an edge go point by point. (Point-by-point sampling of the band stalled the server for minutes: interpolated
+    functions re-sample their input for every point.) Not wrapped: surface-rule noise, aquifers, features, structures.
+  - Crossing (`planet/PlanetWrap`, END_LEVEL_TICK on wrapping planets): ships (with crew, `SpaceTravel.jump`) and players
+    every tick, everything else once a second, move one circumference back (same velocity and look); players within 16
+    blocks of a ship are left to the ship. Within 64 blocks of an edge the far side's chunks get a ticket.
+  - Verified 2026-11-15 on Veyra: the views from x = 11,240 and x = -11,288 match exactly; flying east across x = 11,264 put
+    the player at -11,250; the seam from above is continuous. Known limits: HUD distances (hub beacons) don't take the short
+    way around; chunks generated beyond the new edges in older worlds stay, unreachable.
+
 ## How trading works (Milestone 7)
 
 - **Factions** (`trade/Faction`, synced registry `data/<ns>/starwake/faction/*.json`): name, code,

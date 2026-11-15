@@ -45,7 +45,8 @@ public final class PlanetGenerators {
 		return Climate.parameters(temperature, open, continentalness, open, open, open, 0);
 	}
 
-	public static ChunkGenerator create(RegistryAccess access, ProceduralPlanets.Spec spec) {
+	/** {@code period}: the surface size of a wrapping planet (0 = endless). */
+	public static ChunkGenerator create(RegistryAccess access, ProceduralPlanets.Spec spec, int period) {
 		HolderGetter<Biome> biomes = access.lookupOrThrow(Registries.BIOME);
 		NoiseGeneratorSettings base = access.lookupOrThrow(Registries.NOISE_SETTINGS).getOrThrow(spec.terrain()).value();
 
@@ -83,7 +84,7 @@ public final class PlanetGenerators {
 				base.noiseSettings(),
 				spec.stone(),
 				dry ? Blocks.AIR.defaultBlockState() : spec.fluid(),
-				base.noiseRouter(),
+				period > 0 ? com.starwake.worldgen.WrapDensity.wrap(base.noiseRouter(), period, 96) : base.noiseRouter(),
 				Holder.direct(surface),
 				base.spawnTarget(),
 				spec.seaLevel(),

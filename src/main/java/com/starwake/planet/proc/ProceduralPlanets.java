@@ -222,8 +222,8 @@ public final class ProceduralPlanets {
 			float temperature = parent.planet().hazards().temperature() - 25 + (float) (mr.nextDouble() * 30)
 					+ (type.equals("volcanic") ? 40 : 0);
 			Body bb = base.ref().planet().body().orElseThrow();
-			Body body = new Body(Optional.empty(), at, radius, 0, 8000, bb.color(), bb.secondaryColor(), bb.atmosphereColor(), false, 1.0,
-					Optional.of(new Body.MoonOrbit(distance, mr.nextDouble() * Math.PI * 2)));
+			Body body = new Body(Optional.empty(), at, radius, 0, Body.worldRadiusFor(radius), bb.color(), bb.secondaryColor(),
+					bb.atmosphereColor(), false, 1.0, Optional.of(new Body.MoonOrbit(distance, mr.nextDouble() * Math.PI * 2)), true);
 			Planet b = base.ref().planet();
 			Planet planet = new Planet(b.name(), b.dimension(), gravity, true, Optional.of(body), 0,
 					new Hazards(false, 0, temperature), Optional.of(Component.translatable("planet.starwake.moon." + type)),
@@ -302,7 +302,8 @@ public final class ProceduralPlanets {
 
 		var colors = a.colors();
 		Body body = new Body(Optional.empty(), position, radius, air > 0.01 ? radius * (1.08 + 0.12 * Math.min(air, 1.5)) : 0,
-				16000, pick(r, colors.surface()), pick(r, colors.secondary()), pick(r, colors.atmosphere()), false);
+				Body.worldRadiusFor(radius), pick(r, colors.surface()), pick(r, colors.secondary()), pick(r, colors.atmosphere()), false,
+				1.0, Optional.empty(), true);
 		String name = PlanetNames.generate(r);
 		ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, id);
 		Planet planet = new Planet(Component.literal(name), dimension, gravity, true, Optional.of(body), air, hazards,
@@ -333,7 +334,8 @@ public final class ProceduralPlanets {
 		for (Generated g : generated) {
 			RuntimeLevelConfig config = new RuntimeLevelConfig()
 					.setDimensionType(g.spec().dimensionType())
-					.setGenerator(PlanetGenerators.create(server.registryAccess(), g.spec()))
+					.setGenerator(PlanetGenerators.create(server.registryAccess(), g.spec(),
+							g.ref().planet().body().filter(com.starwake.galaxy.Body::wrap).map(com.starwake.galaxy.Body::circumference).orElse(0)))
 					.setSeed(g.spec().seed())
 					.setShouldTickTime(true)
 					.setMirrorOverworldGameRules(true)
