@@ -529,7 +529,7 @@ commit. **Don't start the next milestone until the user confirms the current one
       *Demo ship (user, 2026-11-14: "as close as you can to the Reclaimer while still original"):* an **original** heavy
       salvage ship of the same class and scale (long industrial hull with exposed frame, big articulated salvage claw,
       gear-linked swinging engine pods, processing/cargo bay, raised command deck, tractor mounts, hazard-striped greebles),
-      not a copy of the Reclaimer's silhouette, proportions or signature details.
+      not a copy of the Reclaimer's silhouette, proportions or signature details. **Ships pass 3 done (3a-3e, 2026-11-15).**
 
 ---
 
@@ -902,6 +902,17 @@ normal gravity.
     pairs with an east hinge at 270).
   - Verified 2026-11-15: a Kestrel with two hinged main-engine pods passes pre-flight; gear up swings both nozzles from down
     to back (seen from outside), gear down swings them back.
+- **Pass 3e, the Magpie (2026-11-15):** `starwake:magpie` (`tools/magpie_blueprint.py <out.json>`), an original heavy
+  salvage ship at true scale: 152 x 40 x 34 m, ~20,600 blocks, ~25,600 t. A tapered hexagonal hull (narrow keel, bevelled
+  shoulders) with ribbed side belts and sponsons; an off-centre bridge island (helm, four seats, radar rotor, mast and
+  beacon); an exposed lattice spine with ribs and pipes; a hinged salvage claw (boom, two jaws, floodlights) under the bow;
+  two hinged engine pods (15 Mk III mains each) at the centre of mass, pointing down with gear down and back with gear up;
+  a processing bay (two catwalk levels, cargo racks, heatsinks, tanks, ceiling lights, belly-door hazard trim); tractor
+  rotors under the bow; aft systems decks (50 plants, 17 coolers, 30 tanks, 6 shields, 2 quantum drives); belly lift
+  banks, stern mains, bow retro mains, RCS; 10 gear struts. Pre-flight: lift 2.24x, accel fwd 18 / back 4 / side 2.8 / up
+  45 m/s^2, pitch 15 / yaw 7 / roll 105 deg/s^2, cabin sealed, ready for space. The generator replicates
+  `PanelGeometry.orient` (up x clockwise fronts) and keeps a clear gap around hinged parts (`KEEP_CLEAR`) so details on
+  the hull don't weld them on. Verified: placed, assembled in one go, climbed straight into orbit.
 - Known limits: assembly and the first load of a 200k ship still take seconds; lights aboard ships glow but don't light
   the world around the ship (no moving light sources yet); Hull Panels mirror as a turn (asymmetric
   shapes aren't flipped); radiation from machines aboard isn't counted for nearby players; block entities aboard only tick
