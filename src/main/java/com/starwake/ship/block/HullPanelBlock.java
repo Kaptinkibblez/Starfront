@@ -39,16 +39,7 @@ public class HullPanelBlock extends HullPlatingBlock {
 
 	@Override
 	public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
-		Direction up = context.getClickedFace();
-		Direction front = null;
-		for (Direction d : context.getNearestLookingDirections()) {
-			if (d.getAxis() != up.getAxis()) {
-				front = d.getOpposite();
-				break;
-			}
-		}
-		if (front == null) front = up.getAxis() == Direction.Axis.Y ? Direction.NORTH : Direction.UP;
-		return defaultBlockState().setValue(ORIENT, PanelGeometry.orient(up, front));
+		return defaultBlockState().setValue(ORIENT, PanelGeometry.placement(context));
 	}
 
 	@Override
@@ -73,9 +64,7 @@ public class HullPanelBlock extends HullPlatingBlock {
 
 	@Override
 	protected BlockState rotate(BlockState state, Rotation rotation) {
-		int orient = state.getValue(ORIENT);
-		Direction up = rotation.rotate(PanelGeometry.up(orient)), front = rotation.rotate(PanelGeometry.front(orient));
-		return state.setValue(ORIENT, PanelGeometry.orient(up, front));
+		return state.setValue(ORIENT, PanelGeometry.rotated(state.getValue(ORIENT), rotation));
 	}
 
 	@Override

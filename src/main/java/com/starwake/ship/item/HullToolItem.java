@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Hull Tool (M9 pass 3): reshapes placed Hull Panels, on the ground or aboard an assembled ship (the use runs in the
+ * Hull Tool (M9 pass 3): reshapes placed Hull Panels (and greebles: next detail; lights: next colour), on the ground or aboard an assembled ship (the use runs in the
  * ship's shipyard plot like any other item). Use on a panel: the next shape of the tool's family (a panel of another
  * family first jumps to that family). Sneak-use: turn it a quarter about its up axis. Use in the air: switch the
  * tool's family (slopes, curves, plates, frames).
@@ -56,12 +56,24 @@ public class HullToolItem extends Item {
 		Level level = context.getLevel();
 		BlockPos pos = context.getClickedPos();
 		BlockState state = level.getBlockState(pos);
-		if (!(state.getBlock() instanceof HullPanelBlock)) return InteractionResult.PASS;
+		boolean greeble = state.getBlock() instanceof com.starwake.ship.block.GreebleBlock;
+		boolean light = state.getBlock() instanceof com.starwake.ship.block.ShipLightBlock;
+		if (!(state.getBlock() instanceof HullPanelBlock) && !greeble && !light) return InteractionResult.PASS;
 		if (level.isClientSide()) return InteractionResult.SUCCESS;
 		Player player = context.getPlayer();
 		BlockState next;
 		if (player != null && player.isSecondaryUseActive()) {
 			next = state.setValue(HullPanelBlock.ORIENT, PanelGeometry.turned(state.getValue(HullPanelBlock.ORIENT), 1));
+		} else if (greeble) {
+			var target = state.getValue(com.starwake.ship.block.GreebleBlock.SHAPE).next(1);
+			next = state.setValue(com.starwake.ship.block.GreebleBlock.SHAPE, target);
+			if (player != null) player.sendOverlayMessage(Component.translatable("message.starwake.hull_tool.shape",
+					Component.translatable("greeble.starwake." + target.getSerializedName())));
+		} else if (light) {
+			var target = state.getValue(com.starwake.ship.block.ShipLightBlock.COLOR).next();
+			next = state.setValue(com.starwake.ship.block.ShipLightBlock.COLOR, target);
+			if (player != null) player.sendOverlayMessage(Component.translatable("message.starwake.hull_tool.color",
+					Component.translatable("light.starwake.color." + target.getSerializedName())));
 		} else {
 			PanelShape shape = state.getValue(HullPanelBlock.SHAPE);
 			PanelShape.Family want = family(context.getItemInHand());

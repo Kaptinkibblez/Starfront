@@ -19,6 +19,9 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		// Hull plating keeps its alloy (M8e-1); every Mk tier of every ship part keeps its material and quality (M8e-2).
 		materialDrop(ModBlocks.HULL_PLATING);
 		materialDrop(ModBlocks.HULL_PANEL);
+		// Greebles and lights drop themselves keeping their shape / type and colour (M9 pass 3).
+		add(ModBlocks.GREEBLE, stateDrop(ModBlocks.GREEBLE, com.starwake.ship.block.GreebleBlock.SHAPE));
+		add(ModBlocks.SHIP_LIGHT, stateDrop(ModBlocks.SHIP_LIGHT, com.starwake.ship.block.ShipLightBlock.TYPE, com.starwake.ship.block.ShipLightBlock.COLOR));
 		dropSelf(ModBlocks.CANOPY_GLASS);
 		dropSelf(ModBlocks.HULL_PLATING_STAIRS);
 		add(ModBlocks.HULL_PLATING_SLAB, createSlabItemTable(ModBlocks.HULL_PLATING_SLAB));
@@ -55,6 +58,15 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		add(ModPlanetBlocks.TUFT_GRASS, createShearsOrSilkTouchOnlyDrop(ModPlanetBlocks.TUFT_GRASS));
 		dropSelf(ModPlanetBlocks.PUFFBALL);
 		ModPlanetBlocks.ores().forEach(ore -> add(ore.block(), createOreDrop(ore.block(), ore.raw())));
+	}
+
+	private net.minecraft.world.level.storage.loot.LootTable.Builder stateDrop(net.minecraft.world.level.block.Block block,
+			net.minecraft.world.level.block.state.properties.Property<?>... properties) {
+		var copy = net.minecraft.world.level.storage.loot.functions.CopyBlockState.copyState(block);
+		for (var property : properties) copy.copy(property);
+		return net.minecraft.world.level.storage.loot.LootTable.lootTable().withPool(applyExplosionCondition(block,
+				net.minecraft.world.level.storage.loot.LootPool.lootPool().setRolls(net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders.exactly(1))
+						.add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(block).apply(copy))));
 	}
 
 	/** Drops itself with the block entity's material components (composition, temper, quality). */

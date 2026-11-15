@@ -1,11 +1,17 @@
 package com.starwake.client.ship;
 
-import com.mojang.blaze3d.platform.Transparency;
 import com.starwake.StarwakeMod;
 import com.starwake.registry.ModBlocks;
+import com.starwake.ship.block.GreebleBlock;
 import com.starwake.ship.block.HullPanelBlock;
+import com.starwake.ship.block.ShipLightBlock;
+import java.util.HashMap;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.ToIntFunction;
+import net.minecraft.world.level.block.Block;
 import com.starwake.ship.panel.PanelGeometry;
-import com.starwake.ship.panel.PanelShape;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -26,47 +32,71 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Renders Hull Panels (M9 pass 3): a Fabric block-state resolver gives every panel state a model baked straight from
- * {@link PanelGeometry}'s polygons (true slopes and curves; block-model JSON only has axis-aligned boxes). Faces lying
- * on the cube's boundary are cull faces, so panels hide against neighbours like ordinary blocks; the rest always draw.
- * Ships use the same baked model through vanilla's block renderer.
+ * Renders blocks built from {@link PanelGeometry} solids (M9 pass 3): Hull Panels, greebles and ship lights. A Fabric
+ * block-state resolver gives every state a model baked straight from the solids' polygons (true slopes and curves;
+ * block-model JSON only has axis-aligned boxes). Each face's texture comes from its solid's texture key; lenses of lit
+ * lights are emissive. Faces on the cube's boundary are cull faces, so these blocks hide against neighbours like
+ * ordinary ones. Ships use the same baked models through vanilla's block renderer.
  */
-public final class HullPanelModel {
-	private static final Identifier TEXTURE = StarwakeMod.id("block/hull_plating");
+public final class ShapedBlockModels {
+	private ShapedBlockModels() {}
 
-	private HullPanelModel() {}
+	/** How one block maps its states to geometry, textures and emission. */
+	private record Spec(Function<BlockState, PanelGeometry.Shape> shape, ToIntFunction<BlockState> orient,
+			BiFunction<BlockState, String, Identifier> texture, BiPredicate<BlockState, String> emissive) {}
 
 	public static void init() {
-		ModelLoadingPlugin.register(context -> context.registerBlockStateResolver(ModBlocks.HULL_PANEL, resolver -> {
-			Root root = new Root();
+		Identifier hull = StarwakeMod.id("block/hull_plating");
+		register(ModBlocks.HULL_PANEL, new Spec(s -> s.getValue(HullPanelBlock.SHAPE), s -> s.getValue(HullPanelBlock.ORIENT),
+				(s, key) -> hull, (s, key) -> false));
+		register(ModBlocks.GREEBLE, new Spec(s -> s.getValue(GreebleBlock.SHAPE), s -> s.getValue(GreebleBlock.ORIENT),
+				(s, key) -> key.equals("hull") ? hull : StarwakeMod.id("block/greeble_" + key), (s, key) -> false));
+		register(ModBlocks.SHIP_LIGHT, new Spec(s -> s.getValue(ShipLightBlock.TYPE), s -> s.getValue(ShipLightBlock.ORIENT),
+				(s, key) -> !key.equals("lens") ? StarwakeMod.id("block/greeble_" + key)
+						: StarwakeMod.id("block/ship_light_" + (ShipLightBlock.lit(s) ? s.getValue(ShipLightBlock.COLOR).getSerializedName() : "off")),
+				(s, key) -> key.equals("lens") && ShipLightBlock.lit(s)));
+	}
+
+	private static void register(Block block, Spec spec) {
+		ModelLoadingPlugin.register(context -> context.registerBlockStateResolver(block, resolver -> {
+			Root root = new Root(spec);
 			for (BlockState state : resolver.block().getStateDefinition().getPossibleStates()) resolver.setModel(state, root);
 		}));
 	}
 
-	private static final class Root implements BlockStateModel.UnbakedRoot {
+	private record Root(Spec spec) implements BlockStateModel.UnbakedRoot {
 		@Override
 		public void resolveDependencies(ResolvableModel.Resolver resolver) {
 		}
 
 		@Override
 		public BlockStateModel bake(BlockState state, ModelBaker baker) {
-			Material.Baked material = baker.materials().get(new Material(TEXTURE), () -> "starwake:hull_panel");
-			BakedQuad.MaterialInfo info = baker.interner().materialInfo(BakedQuad.MaterialInfo.of(material, Transparency.NONE, -1, null, 0));
-			return new Baked(bakePart(state.getValue(HullPanelBlock.SHAPE), state.getValue(HullPanelBlock.ORIENT), material, info));
+			return new Baked(bakePart(state, spec, baker));
 		}
 
 		@Override
 		public Object visualEqualityGroup(BlockState state) {
-			return state.getValue(HullPanelBlock.SHAPE).ordinal() * 100 + state.getValue(HullPanelBlock.ORIENT);
+			return state;
 		}
 	}
 
-	private static Part bakePart(PanelShape shape, int orient, Material.Baked material, BakedQuad.MaterialInfo info) {
+	private static Part bakePart(BlockState state, Spec spec, ModelBaker baker) {
 		Map<Direction, List<BakedQuad>> culled = new EnumMap<>(Direction.class);
 		for (Direction d : Direction.values()) culled.put(d, new ArrayList<>());
 		List<BakedQuad> free = new ArrayList<>();
-		var sprite = material.sprite();
-		for (double[][] face : PanelGeometry.faces(shape)) {
+		int orient = spec.orient().applyAsInt(state);
+		Map<String, Material.Baked> materials = new HashMap<>();
+		Map<String, BakedQuad.MaterialInfo> infos = new HashMap<>();
+		Material.Baked particle = null;
+		for (PanelGeometry.Face f : PanelGeometry.faces(spec.shape().apply(state))) {
+			String key = f.tex();
+			Material.Baked material = materials.computeIfAbsent(key,
+					k -> baker.materials().get(new Material(spec.texture().apply(state, k)), () -> "starwake:shaped/" + k));
+			if (particle == null) particle = material;
+			BakedQuad.MaterialInfo info = infos.computeIfAbsent(key, k -> baker.interner().materialInfo(BakedQuad.MaterialInfo.of(material,
+					material.sprite().transparency(), -1, null, spec.emissive().test(state, k) ? 15 : 0)));
+			double[][] face = f.v();
+			var sprite = material.sprite();
 			// UVs project the model-space face onto its dominant axis plane (the texture follows the shape).
 			double[] n = PanelGeometry.normal(face);
 			int axis = Math.abs(n[0]) >= Math.abs(n[1]) && Math.abs(n[0]) >= Math.abs(n[2]) ? 0 : Math.abs(n[1]) >= Math.abs(n[2]) ? 1 : 2;
@@ -79,7 +109,7 @@ public final class HullPanelModel {
 				double u = axis == 0 ? p[2] : p[0], v = axis == 1 ? p[2] : 1 - p[1];
 				uv[i] = UVPair.pack(sprite.getU((float) clamp(u)), sprite.getV((float) clamp(v)));
 			}
-			// Faces with more than four corners become a fan of triangles (each a quad with a repeated corner).
+			// Faces with more than four corners become a fan (each piece a quad, triangles repeat a corner).
 			for (int k = 1; k + 1 < count; k += 2) {
 				int a = 0, b = k, c = k + 1, d = Math.min(k + 2, count - 1);
 				if (count == 4) d = 3;
@@ -89,7 +119,8 @@ public final class HullPanelModel {
 				if (count == 4) break;
 			}
 		}
-		return new Part(culled, free, material);
+		if (particle == null) particle = baker.materials().get(new Material(StarwakeMod.id("block/hull_plating")), () -> "starwake:shaped");
+		return new Part(culled, free, particle);
 	}
 
 	private static double clamp(double v) {

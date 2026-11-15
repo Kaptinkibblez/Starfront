@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "G": "minecraft:glowstone_dust",
+    "I": "minecraft:iron_ingot",
+    "P": "minecraft:glass_pane"
+  },
+  "pattern": [
+    " P ",
+    "IGI"
+  ],
+  "result": {
+    "count": 4,
+    "id": "starwake:ship_light"
+  }
+}

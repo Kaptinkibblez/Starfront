@@ -66,6 +66,21 @@ public final class ModBlocks {
 					.sound(SoundType.METAL)
 					.requiresCorrectToolForDrops());
 
+	/** Greeble (M9 pass 3): surface detail for hulls and interiors (shape cycled with the Hull Tool). */
+	public static final Block GREEBLE = register("greeble", com.starwake.ship.block.GreebleBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.METAL)
+					.strength(3.0f, 6.0f)
+					.sound(SoundType.METAL)
+					.requiresCorrectToolForDrops());
+
+	/** Ship Light (M9 pass 3): strip, panel, running, flood, landing lights and the nav beacon, in five colours. */
+	public static final Block SHIP_LIGHT = register("ship_light", com.starwake.ship.block.ShipLightBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.METAL)
+					.strength(1.0f, 3.0f)
+					.sound(SoundType.METAL));
+
 	/** Regolith: the bedrock-to-surface stone of rocky planets (Veyra's "stone"). */
 	public static final Block REGOLITH = register("regolith", Block::new,
 			BlockBehaviour.Properties.of()

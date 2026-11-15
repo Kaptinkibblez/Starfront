@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "modifier": {
+            "type": "minecraft:copy_state",
+            "block": "starwake:ship_light",
+            "properties": [
+              "type",
+              "color"
+            ]
+          },
+          "name": "starwake:ship_light"
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

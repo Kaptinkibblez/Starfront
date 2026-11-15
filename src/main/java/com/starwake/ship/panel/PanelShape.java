@@ -7,7 +7,7 @@ import net.minecraft.util.StringRepresentable;
  * {@link PanelGeometry}; every shape is described in model space with its "up" along +Y and its front (the low edge of
  * a slope, the open side of a curve) toward -Z (north).
  */
-public enum PanelShape implements StringRepresentable {
+public enum PanelShape implements StringRepresentable, PanelGeometry.Shape {
 	// Slopes and wedges
 	SLOPE("slope", Family.SLOPES, true),
 	SLOPE_2_LOW("slope_2_low", Family.SLOPES, true),
@@ -70,6 +70,11 @@ public enum PanelShape implements StringRepresentable {
 		Family f = Family.values()[(family.ordinal() + 1) % Family.values().length];
 		for (PanelShape s : values()) if (s.family == f) return s;
 		return this;
+	}
+
+	@Override
+	public java.util.List<PanelGeometry.Solid> solids() {
+		return PanelGeometry.panelSolids(this);
 	}
 
 	@Override

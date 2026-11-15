@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "modifier": {
+            "type": "minecraft:copy_state",
+            "block": "starwake:greeble",
+            "properties": [
+              "shape"
+            ]
+          },
+          "name": "starwake:greeble"
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

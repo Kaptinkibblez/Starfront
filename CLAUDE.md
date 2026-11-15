@@ -867,7 +867,22 @@ normal gravity.
     (`PanelShape.seals`); hull stairs and slabs now seal too.
   - Recipes: stonecutter hull plating -> 2 panels (plain steel); Fabricator 2 plates -> 8 panels (keeps the alloy); Hull
     Tool from iron, copper and sticks.
-- Known limits: assembly and the first load of a 200k ship still take seconds; Hull Panels mirror as a turn (asymmetric
+- **Pass 3c, greebles and lights (2026-11-15):** `PanelGeometry` is generic: anything implementing `PanelGeometry.Shape`
+  (a list of `Solid`s, each with a texture key) gets faces, collision, outline and volume (caches keyed by shape). Helpers:
+  `px(...)` (box in sixteenths), `extrude`, `arc`, `poly`, `placement(ctx)`, `rotated(orient, rotation)`.
+  - `starwake:greeble` (`ship/block/GreebleBlock`, `ship/panel/GreebleShape`): vent, pipe, twin pipes, conduit, seam,
+    antenna, railing, ladder rungs (decor: not climbable), catwalk grate, ribbed panel, hazard trim, cargo rack, external
+    tank, heatsink. Mounted on the clicked face; wall pieces run along model Z (vertical on a wall).
+  - `starwake:ship_light` (`ship/block/ShipLightBlock`, `ship/panel/LightType`): strip, panel, running, flood, landing,
+    beacon; colours white/red/green/amber/blue; `on` (empty-hand use toggles) and `flash` (the beacon flashes 3 on / 27 off
+    by scheduled ticks). Block light per type while lit; the lens is emissive.
+  - `client/ship/ShapedBlockModels` (was HullPanelModel) bakes all three blocks from one `Spec` per block (shape, orient,
+    texture per key, emissive keys); texture transparency comes from the sprite (the grate is cutout).
+  - Hull Tool: greebles = next detail, lights = next colour; sneak-use turns both. Loot keeps the shape / type and colour
+    (`copy_state`). Textures: `tools/greeble_textures.py`. Recipes: stonecutter plating -> 4 greebles; 4 lights from a glass
+    pane, glowstone dust and iron.
+- Known limits: assembly and the first load of a 200k ship still take seconds; lights aboard ships glow but don't light
+  the world around the ship (no moving light sources yet); Hull Panels mirror as a turn (asymmetric
   shapes aren't flipped); radiation from machines aboard isn't counted for nearby players; block entities aboard only tick
   chest lids on the client (no bell swing or campfire smoke yet); contacts beyond entity tracking range aren't shown.
 

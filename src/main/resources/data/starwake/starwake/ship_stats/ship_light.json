@@ -1,0 +1,8 @@
+{
+  "blocks": [
+    "starwake:ship_light"
+  ],
+  "mass": 0.1,
+  "heat_limit": 600,
+  "armor": 1
+}

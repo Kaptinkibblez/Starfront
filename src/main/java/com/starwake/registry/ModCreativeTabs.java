@@ -45,6 +45,24 @@ public final class ModCreativeTabs {
 								.with(com.starwake.ship.block.HullPanelBlock.SHAPE, shape));
 						output.accept(panel);
 					}
+					for (com.starwake.ship.panel.GreebleShape shape : com.starwake.ship.panel.GreebleShape.values()) {
+						if (shape == com.starwake.ship.panel.GreebleShape.VENT) continue;
+						ItemStack greeble = new ItemStack(ModBlocks.GREEBLE);
+						greeble.set(net.minecraft.core.component.DataComponents.BLOCK_STATE, net.minecraft.world.item.component.BlockItemStateProperties.EMPTY
+								.with(com.starwake.ship.block.GreebleBlock.SHAPE, shape));
+						output.accept(greeble);
+					}
+					for (com.starwake.ship.panel.LightType type : com.starwake.ship.panel.LightType.values()) {
+						for (com.starwake.ship.panel.LightType.Color color : com.starwake.ship.panel.LightType.Color.values()) {
+							if (type == com.starwake.ship.panel.LightType.STRIP && color == com.starwake.ship.panel.LightType.Color.WHITE) continue;
+							if (type != com.starwake.ship.panel.LightType.BEACON && type != com.starwake.ship.panel.LightType.RUNNING
+									&& color != com.starwake.ship.panel.LightType.Color.WHITE) continue;
+							ItemStack light = new ItemStack(ModBlocks.SHIP_LIGHT);
+							light.set(net.minecraft.core.component.DataComponents.BLOCK_STATE, net.minecraft.world.item.component.BlockItemStateProperties.EMPTY
+									.with(com.starwake.ship.block.ShipLightBlock.TYPE, type).with(com.starwake.ship.block.ShipLightBlock.COLOR, color));
+							output.accept(light);
+						}
+					}
 					ModItems.all().forEach(output::accept);
 					ModMetalworks.moulds().forEach(output::accept);
 					output.accept(ModProcess.GAS_CYLINDER);

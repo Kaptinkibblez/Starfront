@@ -23,9 +23,18 @@ public final class PanelGeometry {
 	private static final Direction[] UP = new Direction[ORIENTATIONS], FRONT = new Direction[ORIENTATIONS];
 	private static final Matrix3f[] MATRIX = new Matrix3f[ORIENTATIONS];
 	private static final int RES = 16;
-	private static final VoxelShape[][] SHAPES = new VoxelShape[PanelShape.values().length][ORIENTATIONS];
-	private static final double[] VOLUME = new double[PanelShape.values().length];
-	private static final List<List<double[][]>> FACES = new ArrayList<>();
+	private static final java.util.Map<Shape, VoxelShape[]> SHAPES = new java.util.concurrent.ConcurrentHashMap<>();
+	private static final java.util.Map<Shape, VoxelShape[]> OUTLINES = new java.util.concurrent.ConcurrentHashMap<>();
+	private static final java.util.Map<Shape, Double> VOLUME = new java.util.concurrent.ConcurrentHashMap<>();
+	private static final java.util.Map<Shape, List<Face>> FACES = new java.util.concurrent.ConcurrentHashMap<>();
+
+	/** Anything built from solids (panel shapes, greebles, lights): M9 pass 3. */
+	public interface Shape {
+		List<Solid> solids();
+	}
+
+	/** One face in model space: outward-wound vertices {x, y, z} and its texture key. */
+	public record Face(double[][] v, String tex) {}
 
 	static {
 		int i = 0;
@@ -45,7 +54,6 @@ public final class PanelGeometry {
 				front = front.getClockWise(up.getAxis());
 			}
 		}
-		for (PanelShape shape : PanelShape.values()) FACES.add(buildFaces(solids(shape)));
 	}
 
 	private PanelGeometry() {}
@@ -63,6 +71,25 @@ public final class PanelGeometry {
 	public static int orient(Direction up, Direction front) {
 		for (int i = 0; i < ORIENTATIONS; i++) if (UP[i] == up && FRONT[i] == front) return i;
 		return up.ordinal() * 4; // front parallel to up: any front
+	}
+
+	/** Orientation for a placement: up out of the clicked face, front toward the player. */
+	public static int placement(net.minecraft.world.item.context.BlockPlaceContext context) {
+		Direction up = context.getClickedFace();
+		Direction front = null;
+		for (Direction d : context.getNearestLookingDirections()) {
+			if (d.getAxis() != up.getAxis()) {
+				front = d.getOpposite();
+				break;
+			}
+		}
+		if (front == null) front = up.getAxis() == Direction.Axis.Y ? Direction.NORTH : Direction.UP;
+		return orient(up, front);
+	}
+
+	/** The orientation turned by a block rotation (structure rotation, ship disassembly). */
+	public static int rotated(int orient, net.minecraft.world.level.block.Rotation rotation) {
+		return orient(rotation.rotate(UP[orient]), rotation.rotate(FRONT[orient]));
 	}
 
 	public static Direction up(int orient) {
@@ -86,43 +113,47 @@ public final class PanelGeometry {
 		return v.add(0.5f, 0.5f, 0.5f);
 	}
 
-	/** Faces in model space (outward winding, hidden ones dropped): each an array of {x, y, z} vertices. */
-	public static List<double[][]> faces(PanelShape shape) {
-		return FACES.get(shape.ordinal());
+	/** Faces in model space (outward winding, hidden ones dropped). */
+	public static List<Face> faces(Shape shape) {
+		return FACES.computeIfAbsent(shape, s -> buildFaces(s.solids()));
 	}
 
 	/** Share of the cube the shape fills (mass scales with it). */
-	public static double volume(PanelShape shape) {
-		if (VOLUME[shape.ordinal()] == 0) shape(shape, 0);
-		return VOLUME[shape.ordinal()];
+	public static double volume(Shape shape) {
+		Double v = VOLUME.get(shape);
+		if (v == null) {
+			shape(shape, 0);
+			v = VOLUME.get(shape);
+		}
+		return v;
 	}
-
-	private static final VoxelShape[][] OUTLINES = new VoxelShape[PanelShape.values().length][ORIENTATIONS];
 
 	/**
 	 * Selection outline: a coarser 4-step version (a 16-step staircase draws as stripes); thin shapes that vanish at
 	 * that resolution keep the fine shape.
 	 */
-	public static VoxelShape outline(PanelShape shape, int orient) {
-		VoxelShape cached = OUTLINES[shape.ordinal()][orient];
+	public static VoxelShape outline(Shape shape, int orient) {
+		VoxelShape[] all = OUTLINES.computeIfAbsent(shape, s -> new VoxelShape[ORIENTATIONS]);
+		VoxelShape cached = all[orient];
 		if (cached != null) return cached;
 		VoxelShape coarse = voxelize(shape, orient, 4, false);
 		if (coarse.isEmpty()) coarse = shape(shape, orient);
-		OUTLINES[shape.ordinal()][orient] = coarse;
+		all[orient] = coarse;
 		return coarse;
 	}
 
 	/** Collision and occlusion shape (16 steps), cached. */
-	public static VoxelShape shape(PanelShape shape, int orient) {
-		VoxelShape cached = SHAPES[shape.ordinal()][orient];
+	public static VoxelShape shape(Shape shape, int orient) {
+		VoxelShape[] all = SHAPES.computeIfAbsent(shape, s -> new VoxelShape[ORIENTATIONS]);
+		VoxelShape cached = all[orient];
 		if (cached != null) return cached;
 		VoxelShape result = voxelize(shape, orient, RES, true);
-		SHAPES[shape.ordinal()][orient] = result;
+		all[orient] = result;
 		return result;
 	}
 
-	private static VoxelShape voxelize(PanelShape shape, int orient, int RES, boolean recordVolume) {
-		List<Solid> solids = solids(shape);
+	private static VoxelShape voxelize(Shape shape, int orient, int RES, boolean recordVolume) {
+		List<Solid> solids = shape.solids();
 		Matrix3f inverse = new Matrix3f(MATRIX[orient]).transpose();
 		boolean[][][] filled = new boolean[RES][RES][RES];
 		int count = 0;
@@ -139,7 +170,7 @@ public final class PanelGeometry {
 				}
 			}
 		}
-		if (recordVolume) VOLUME[shape.ordinal()] = Math.max(1.0 / (RES * RES * RES), count / (double) (RES * RES * RES));
+		if (recordVolume) VOLUME.put(shape, Math.max(1.0 / (RES * RES * RES), count / (double) (RES * RES * RES)));
 		VoxelShape result = Shapes.empty();
 		boolean[][][] used = new boolean[RES][RES][RES];
 		for (int x = 0; x < RES; x++) {
@@ -175,11 +206,14 @@ public final class PanelGeometry {
 	// Solids
 	// ---------------------------------------------------------------------------------------------
 
-	private interface Solid {
+	public interface Solid {
 		boolean inside(double x, double y, double z);
 
 		/** Faces with any winding; {@link #buildFaces} orients them outward. */
 		List<double[][]> rawFaces();
+
+		/** Texture key of every face (the block's model maps keys to textures). */
+		String tex();
 	}
 
 	private static boolean inside(List<Solid> solids, double x, double y, double z) {
@@ -189,7 +223,11 @@ public final class PanelGeometry {
 	}
 
 	/** A 2D profile swept along one axis from lo to hi. Axis 0 = X with (u, v) = (z, y); 1 = Y with (x, z); 2 = Z with (x, y). */
-	private record Extrusion(int axis, double lo, double hi, double[][] profile) implements Solid {
+	private record Extrusion(int axis, double lo, double hi, double[][] profile, String tex) implements Solid {
+		Extrusion(int axis, double lo, double hi, double[][] profile) {
+			this(axis, lo, hi, profile, "hull");
+		}
+
 		double[] at(double u, double v, double t) {
 			return switch (axis) {
 				case 0 -> new double[] {t, v, u};
@@ -223,7 +261,11 @@ public final class PanelGeometry {
 	}
 
 	/** A solid given by a test and its faces (corners). */
-	private record Faceted(Inside test, List<double[][]> faces) implements Solid {
+	private record Faceted(Inside test, List<double[][]> faces, String tex) implements Solid {
+		Faceted(Inside test, List<double[][]> faces) {
+			this(test, faces, "hull");
+		}
+
 		@Override
 		public boolean inside(double x, double y, double z) {
 			return test.inside(x, y, z);
@@ -240,11 +282,28 @@ public final class PanelGeometry {
 		boolean inside(double x, double y, double z);
 	}
 
-	private static Extrusion box(double x0, double y0, double z0, double x1, double y1, double z1) {
-		return new Extrusion(1, y0, y1, new double[][] {{x0, z0}, {x1, z0}, {x1, z1}, {x0, z1}});
+	private static Solid box(double x0, double y0, double z0, double x1, double y1, double z1) {
+		return box(x0, y0, z0, x1, y1, z1, "hull");
 	}
 
-	private static double[][] arc(double cu, double cv, double r, double fromDeg, double toDeg, int n) {
+	/** An axis-aligned box in model space (0..1) with a texture key. */
+	public static Solid box(double x0, double y0, double z0, double x1, double y1, double z1, String tex) {
+		return new Extrusion(1, y0, y1, new double[][] {{x0, z0}, {x1, z0}, {x1, z1}, {x0, z1}}, tex);
+	}
+
+	/** Same box in sixteenths (block-model units). */
+	public static Solid px(double x0, double y0, double z0, double x1, double y1, double z1, String tex) {
+		return box(x0 / 16, y0 / 16, z0 / 16, x1 / 16, y1 / 16, z1 / 16, tex);
+	}
+
+	/**
+	 * A 2D profile swept along an axis: 0 = X with (u, v) = (z, y); 1 = Y with (x, z); 2 = Z with (x, y).
+	 */
+	public static Solid extrude(int axis, double lo, double hi, double[][] profile, String tex) {
+		return new Extrusion(axis, lo, hi, profile, tex);
+	}
+
+	public static double[][] arc(double cu, double cv, double r, double fromDeg, double toDeg, int n) {
 		double[][] out = new double[n + 1][];
 		for (int i = 0; i <= n; i++) {
 			double a = Math.toRadians(fromDeg + (toDeg - fromDeg) * i / n);
@@ -253,7 +312,7 @@ public final class PanelGeometry {
 		return out;
 	}
 
-	private static double[][] concat(double[][]... parts) {
+	public static double[][] concat(double[][]... parts) {
 		List<double[]> out = new ArrayList<>();
 		for (double[][] part : parts) {
 			for (double[] p : part) {
@@ -271,7 +330,7 @@ public final class PanelGeometry {
 		return out.toArray(double[][]::new);
 	}
 
-	private static double[][] poly(double... uv) {
+	public static double[][] poly(double... uv) {
 		double[][] out = new double[uv.length / 2][];
 		for (int i = 0; i < out.length; i++) out[i] = new double[] {uv[2 * i], uv[2 * i + 1]};
 		return out;
@@ -279,7 +338,7 @@ public final class PanelGeometry {
 
 	private static final double T = 2 / 16.0;
 
-	private static List<Solid> solids(PanelShape shape) {
+	static List<Solid> panelSolids(PanelShape shape) {
 		List<Solid> s = new ArrayList<>();
 		switch (shape) {
 			case SLOPE -> s.add(new Extrusion(0, 0, 1, poly(0, 0, 1, 0, 1, 1)));
@@ -367,8 +426,8 @@ public final class PanelGeometry {
 	// Face building
 	// ---------------------------------------------------------------------------------------------
 
-	private static List<double[][]> buildFaces(List<Solid> solids) {
-		List<double[][]> out = new ArrayList<>();
+	private static List<Face> buildFaces(List<Solid> solids) {
+		List<Face> out = new ArrayList<>();
 		for (Solid solid : solids) {
 			for (double[][] face : solid.rawFaces()) {
 				double[] n = normal(face);
@@ -381,7 +440,7 @@ public final class PanelGeometry {
 					n = new double[] {-n[0], -n[1], -n[2]};
 				}
 				if (inside(solids, c[0] + n[0] * e, c[1] + n[1] * e, c[2] + n[2] * e)) continue; // buried in another part
-				out.add(face);
+				out.add(new Face(face, solid.tex()));
 			}
 		}
 		return List.copyOf(out);

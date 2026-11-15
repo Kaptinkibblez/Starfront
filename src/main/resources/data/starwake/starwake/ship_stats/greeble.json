@@ -1,0 +1,8 @@
+{
+  "blocks": [
+    "starwake:greeble"
+  ],
+  "mass": 0.3,
+  "heat_limit": 800,
+  "armor": 2
+}
