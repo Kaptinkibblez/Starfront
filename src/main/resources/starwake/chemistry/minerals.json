@@ -1141,5 +1141,78 @@
   "raw": null,
   "registered": false,
   "worldgen": null
+ },
+ {
+  "id": "kamacite",
+  "formula": "Fe0.93Ni0.07",
+  "color": [
+   "#4a4a50",
+   "#c8c8d2"
+  ],
+  "tool": "iron",
+  "composition": {
+   "Fe": 0.92,
+   "Ni": 0.07,
+   "Co": 0.01
+  },
+  "trace": [
+   "Pt",
+   "Ir",
+   "Os",
+   "Pd",
+   "Ge",
+   "Ga"
+  ],
+  "block": "starwake:kamacite_ore",
+  "raw": "starwake:raw_kamacite",
+  "registered": true,
+  "worldgen": null
+ },
+ {
+  "id": "olivine",
+  "formula": "(Mg,Fe)2SiO4",
+  "color": [
+   "#4a5a2a",
+   "#a8b85a"
+  ],
+  "tool": "stone",
+  "composition": {
+   "Mg": 0.28,
+   "Fe": 0.13,
+   "Si": 0.19,
+   "O": 0.4
+  },
+  "trace": [
+   "Ni",
+   "Cr"
+  ],
+  "block": "starwake:olivine_ore",
+  "raw": "starwake:raw_olivine",
+  "registered": true,
+  "worldgen": null
+ },
+ {
+  "id": "serpentine",
+  "formula": "Mg3Si2O5(OH)4",
+  "color": [
+   "#1e2420",
+   "#5a6a50"
+  ],
+  "tool": "stone",
+  "composition": {
+   "Mg": 0.26,
+   "Si": 0.2,
+   "O": 0.52,
+   "H": 0.02
+  },
+  "trace": [
+   "Fe",
+   "C",
+   "Ni"
+  ],
+  "block": "starwake:serpentine_ore",
+  "raw": "starwake:raw_serpentine",
+  "registered": true,
+  "worldgen": null
  }
 ]

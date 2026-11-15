@@ -177,7 +177,12 @@ public final class ProceduralPlanets {
 			long seed = RandomSupport.mixStafford13(worldSeed ^ parent.key().identifier().toString().hashCode() * 0x632BE59BD9B4E019L);
 			result.addAll(moons(access, parent, seed, taken));
 		}
-		addSystem(com.starwake.galaxy.Galaxy.HOME, result, List.of());
+		// The asteroid belt (M9): three fields between the rocky and outer planets.
+		List<Double> orbits = new ArrayList<>();
+		for (PlanetRef parent : parents) parent.planet().body().ifPresent(b -> orbits.add(Math.hypot(b.position().x, b.position().z)));
+		List<PlanetRef> fields = com.starwake.galaxy.AsteroidBelts.fields(com.starwake.galaxy.Galaxy.HOME, "Solace",
+				com.starwake.ship.SpaceTravel.SPACE, 1.0, worldSeed, orbits, taken);
+		addSystem(com.starwake.galaxy.Galaxy.HOME, result, fields);
 		result.forEach(ProceduralPlanets::log);
 	}
 
@@ -223,7 +228,7 @@ public final class ProceduralPlanets {
 					+ (type.equals("volcanic") ? 40 : 0);
 			Body bb = base.ref().planet().body().orElseThrow();
 			Body body = new Body(Optional.empty(), at, radius, 0, Body.worldRadiusFor(radius), bb.color(), bb.secondaryColor(),
-					bb.atmosphereColor(), false, 1.0, Optional.of(new Body.MoonOrbit(distance, mr.nextDouble() * Math.PI * 2)), true);
+					bb.atmosphereColor(), false, 1.0, Optional.of(new Body.MoonOrbit(distance, mr.nextDouble() * Math.PI * 2)), true, false);
 			Planet b = base.ref().planet();
 			Planet planet = new Planet(b.name(), b.dimension(), gravity, true, Optional.of(body), 0,
 					new Hazards(false, 0, temperature), Optional.of(Component.translatable("planet.starwake.moon." + type)),
@@ -303,7 +308,7 @@ public final class ProceduralPlanets {
 		var colors = a.colors();
 		Body body = new Body(Optional.empty(), position, radius, air > 0.01 ? radius * (1.08 + 0.12 * Math.min(air, 1.5)) : 0,
 				Body.worldRadiusFor(radius), pick(r, colors.surface()), pick(r, colors.secondary()), pick(r, colors.atmosphere()), false,
-				1.0, Optional.empty(), true);
+				1.0, Optional.empty(), true, false);
 		String name = PlanetNames.generate(r);
 		ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, id);
 		Planet planet = new Planet(Component.literal(name), dimension, gravity, true, Optional.of(body), air, hazards,

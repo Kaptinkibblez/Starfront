@@ -149,7 +149,7 @@ public final class SpaceRenderer {
 		Vec3 starPos = bodies.stream().filter(e -> e.body().star()).map(e -> e.body().position()).findFirst().orElse(Vec3.ZERO);
 		List<Draw> draws = new ArrayList<>();
 		for (SolarSystem.Entry entry : bodies) {
-			if (entry.key().equals(skip)) continue;
+			if (entry.key().equals(skip) || entry.body().field()) continue; // fields are real blocks, not spheres
 			Body body = entry.body();
 			Vec3 at = entry.at(t);
 			Vec3 rel = at.subtract(eye);

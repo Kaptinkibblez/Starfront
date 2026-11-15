@@ -486,6 +486,52 @@
    "K": 0.01
   }
  },
+ "starwake:raw_kamacite": {
+  "mass": 2.0,
+  "assay": {
+   "Fe": 0.8418,
+   "Ni": 0.069,
+   "Co": 0.0092,
+   "FeS": 0.063857,
+   "Fe3O4": 0.015964,
+   "Pt": 1.2e-05,
+   "Ir": 3e-06,
+   "Os": 3e-06,
+   "Pd": 4e-06,
+   "Ru": 5e-06,
+   "Rh": 1e-06,
+   "Au": 1e-06,
+   "Ge": 0.0001,
+   "Ga": 5e-05
+  }
+ },
+ "starwake:raw_olivine": {
+  "mass": 2.0,
+  "assay": {
+   "Mg2SiO4": 0.4675,
+   "Fe2SiO4": 0.1275,
+   "MgSiO3": 0.255,
+   "Fe": 0.075899,
+   "FeS": 0.048299,
+   "Ni": 0.0228,
+   "Cr": 0.003,
+   "Pt": 1e-06,
+   "Ir": 0.0
+  }
+ },
+ "starwake:raw_serpentine": {
+  "mass": 2.0,
+  "assay": {
+   "Mg3Si2O5(OH)4": 0.6,
+   "Fe3O4": 0.15,
+   "H2O": 0.10674,
+   "C": 0.07116,
+   "FeS": 0.0593,
+   "Ni": 0.01,
+   "Cr": 0.0025,
+   "Zn": 0.0003
+  }
+ },
  "minecraft:cinnabar": {
   "mass": 2.0,
   "assay": {

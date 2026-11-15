@@ -190,6 +190,8 @@ with open(os.path.join(ROOT, "..", "..", "starwake", "chemistry", "minerals.json
     MINERALS = [m for m in json.load(_f) if m["registered"]]
 for _m in MINERALS:
     _g = _m["worldgen"]
+    if _g is None:
+        continue  # asteroid-only minerals (M9): no planet worldgen
     ORE_SPECS[_m["id"]] = (_m["block"], _g["size"], _g["count"], _g["min_y"], _g["max_y"])
 
 # Minerals each archetype adds to all of its biomes, chosen by where they form on Earth:
@@ -665,7 +667,7 @@ def main():
         write(f"timeline/{kind}_day.json", timeline_json(kind, s, veyra))
         write(f"tags/timeline/in_{kind}.json", {"values": ["#minecraft:universal", f"starwake:{kind}_day"]})
     placed = {f.split("ore_", 1)[1] for a in ARCHETYPES.values() for b in a["biomes"] for f in b["features"] if "/ore_" in f}
-    missing = [m["id"] for m in MINERALS if m["id"] not in placed]
+    missing = [m["id"] for m in MINERALS if m["id"] not in placed and m["worldgen"] is not None]  # belt minerals: asteroids
     assert not missing, f"minerals never generated: {missing}"
     print(f"{len(ARCHETYPES)} archetypes, {sum(len(a['biomes']) for a in ARCHETYPES.values())} biomes, "
           f"{sum(1 for f in FEATURES if f[2] is not None)} features")

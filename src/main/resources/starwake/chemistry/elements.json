@@ -18,6 +18,7 @@
    "borax",
    "gypsum",
    "ice",
+   "serpentine",
    "water"
   ]
  },
@@ -117,7 +118,8 @@
    "calcite",
    "coal",
    "graphite",
-   "magnesite"
+   "magnesite",
+   "serpentine"
   ]
  },
  {
@@ -172,9 +174,11 @@
    "magnesite",
    "monazite",
    "nitratine",
+   "olivine",
    "pollucite",
    "pyrolusite",
    "quartz",
+   "serpentine",
    "spodumene",
    "uraninite",
    "water",
@@ -262,7 +266,9 @@
    "calcite",
    "chromite",
    "ilmenite",
-   "magnesite"
+   "magnesite",
+   "olivine",
+   "serpentine"
   ]
  },
  {
@@ -303,8 +309,10 @@
   "radioactive": false,
   "sources": [
    "beryl",
+   "olivine",
    "pollucite",
    "quartz",
+   "serpentine",
    "spodumene",
    "zircon"
   ]
@@ -517,7 +525,8 @@
   "occurrence": "primordial",
   "radioactive": false,
   "sources": [
-   "chromite"
+   "chromite",
+   "olivine"
   ]
  },
  {
@@ -564,8 +573,11 @@
    "columbite",
    "hematite",
    "ilmenite",
+   "kamacite",
    "magnesite",
+   "olivine",
    "pentlandite",
+   "serpentine",
    "sphalerite",
    "wolframite"
   ]
@@ -586,6 +598,7 @@
   "radioactive": false,
   "sources": [
    "cobaltite",
+   "kamacite",
    "pentlandite",
    "pyrolusite"
   ]
@@ -606,8 +619,11 @@
   "radioactive": false,
   "sources": [
    "cobaltite",
+   "kamacite",
+   "olivine",
    "pentlandite",
-   "pyrolusite"
+   "pyrolusite",
+   "serpentine"
   ]
  },
  {
@@ -664,6 +680,7 @@
   "radioactive": false,
   "sources": [
    "bauxite",
+   "kamacite",
    "sphalerite"
   ]
  },
@@ -682,6 +699,7 @@
   "occurrence": "primordial",
   "radioactive": false,
   "sources": [
+   "kamacite",
    "sphalerite"
   ]
  },
@@ -953,6 +971,7 @@
   "occurrence": "primordial",
   "radioactive": false,
   "sources": [
+   "kamacite",
    "pentlandite",
    "sperrylite"
   ]
@@ -1522,6 +1541,7 @@
   "occurrence": "primordial",
   "radioactive": false,
   "sources": [
+   "kamacite",
    "sperrylite"
   ]
  },
@@ -1540,6 +1560,7 @@
   "occurrence": "primordial",
   "radioactive": false,
   "sources": [
+   "kamacite",
    "sperrylite"
   ]
  },
@@ -1558,6 +1579,7 @@
   "occurrence": "primordial",
   "radioactive": false,
   "sources": [
+   "kamacite",
    "pentlandite",
    "sperrylite"
   ]

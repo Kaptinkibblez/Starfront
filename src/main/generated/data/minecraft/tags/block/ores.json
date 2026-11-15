@@ -33,6 +33,9 @@
     "starwake:sylvite_ore",
     "starwake:borax_ore",
     "starwake:nitratine_ore",
+    "starwake:kamacite_ore",
+    "starwake:olivine_ore",
+    "starwake:serpentine_ore",
     "starwake:ferrite_ore"
   ]
 }

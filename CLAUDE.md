@@ -1169,6 +1169,24 @@ normal gravity.
     the player at -11,250; the seam from above is continuous. Known limits: HUD distances (hub beacons) don't take the short
     way around; chunks generated beyond the new edges in older worlds stay, unreachable.
 
+- **Asteroid belts** (`galaxy/AsteroidBelts`): each system has a belt at 2.5 Mm x sqrt(luminosity) (+/-10%), pushed 300 km
+  at a time until it's 250 km clear of every planet orbit, with three **fields** (`Body.field`, radius 800 m), planet entries
+  `starwake:<system>_belt_a|b|c` ("Solace Belt, Field A", archetype label "Asteroid field") in the system's space dimension,
+  added as extras next to the stars (home: `generateHome`; others: `StarSystems.plan`). Fields are quantum destinations
+  (arrival just outside), don't orbit (static frames), aren't drawn as spheres and aren't entered like planets.
+  - Asteroids: ~150 per field (one every ~120 m), radius 3-25 (mostly small), lumpy and often elongated
+    (`Asteroid.radiusToward`), types S 45% (olivine ore with kamacite flecks under a fine-regolith skin), C 35% (serpentine
+    ore with packed-ice pockets), M 12% (kamacite ore, olivine, 1.5% sperrylite), icy 8% (packed + blue ice, serpentine
+    skin). They're placed into space chunks the first time those generate (`ServerChunkEvents.CHUNK_LOAD`, `generated`):
+    the parts inside the chunk are queued and placed at the end of the level tick (24 per tick). (Placing during the event,
+    even through `server.execute`, which runs inline on the server thread, asks for the loading chunk and deadlocks.)
+  - New asteroid minerals (`tools/periodic_table.py`, no planet worldgen; `tools/chemistry_process.py` species + ores):
+    **kamacite** (Fe 91.5 / Ni 7.5 / Co 1 metal with troilite and magnetite, Pt 12 ppm, Ir/Os 3, Pd 4, Ru 5, Ge 100, Ga 50),
+    **olivine** (forsterite, fayalite, enstatite with Fe-Ni grains and troilite), **serpentine** (Mg3Si2O5(OH)4 with
+    magnetite, water and organic carbon). Species Mg2SiO4, MgSiO3, Mg3Si2O5(OH)4.
+  - HUD: SpaceHud labels nearer bodies (and the quantum target) first, drops labels with no free spot
+    (`HudLabels.tryPlace`) and only labels moons within 300 km. Verified 2026-11-15: Field C full of S, C, M and icy rocks.
+
 ## How trading works (Milestone 7)
 
 - **Factions** (`trade/Faction`, synced registry `data/<ns>/starwake/faction/*.json`): name, code,

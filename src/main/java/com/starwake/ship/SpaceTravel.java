@@ -106,7 +106,7 @@ public final class SpaceTravel {
 				ship.setDeltaMovement(out.scale(0.5));
 				continue;
 			}
-			if (!body.enterable() || distance >= body.body().entryRadius()) continue;
+			if (!body.enterable() || body.body().field() || distance >= body.body().entryRadius()) continue;
 			ServerLevel destination = level.getServer().getLevel(body.dimension());
 			if (destination == null) continue;
 			double[] lonLat = SolarSystem.lonLat(body.body(), ship.position());

@@ -86,6 +86,7 @@ public final class StarwakeMod implements ModInitializer {
 		com.starwake.planet.PlanetHazards.init();
 		PlanetTravel.init();
 		com.starwake.planet.PlanetWrap.init();
+		com.starwake.galaxy.AsteroidBelts.init();
 		PlanetCommands.init();
 
 		// Ships: data-driven stats, console networking.

@@ -236,6 +236,10 @@ M = [
     ("quartz", "SiO2", ("#d8d4d0", "#ffffff"), "stone", {"Si": 0.47, "O": 0.53}, [], None),  # amethyst / quartz
     ("calcite", "CaCO3", ("#e8e4dc", "#ffffff"), "wood", {"Ca": 0.40, "C": 0.12, "O": 0.48}, ["Mg", "Sr"], None),
     ("gypsum", "CaSO4·2H2O", ("#e8e4dc", "#ffffff"), "wood", {"Ca": 0.23, "S": 0.19, "O": 0.56, "H": 0.02}, ["Sr"], None),  # selenite
+    # Asteroid minerals (M9 belts; no planet worldgen): M-type metal, S-type silicate, C-type hydrated clay.
+    ("kamacite", "Fe0.93Ni0.07", ("#4a4a50", "#c8c8d2"), "iron", {"Fe": 0.92, "Ni": 0.07, "Co": 0.01}, ["Pt", "Ir", "Os", "Pd", "Ge", "Ga"], None),
+    ("olivine", "(Mg,Fe)2SiO4", ("#4a5a2a", "#a8b85a"), "stone", {"Mg": 0.28, "Fe": 0.13, "Si": 0.19, "O": 0.40}, ["Ni", "Cr"], None),
+    ("serpentine", "Mg3Si2O5(OH)4", ("#1e2420", "#5a6a50"), "stone", {"Mg": 0.26, "Si": 0.20, "O": 0.52, "H": 0.02}, ["Fe", "C", "Ni"], None),
 ]
 # Minerals that are vanilla or existing blocks: which block carries the composition.
 EXISTING_BLOCKS = {

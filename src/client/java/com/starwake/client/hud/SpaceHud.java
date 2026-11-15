@@ -71,7 +71,12 @@ public final class SpaceHud {
 		boolean quantumMode = ship != null && (ship.quantumState() & ShipEntity.QT_MODE) != 0;
 
 		// Body markers. Labels that would overlap one already drawn step down until clear.
-		for (SolarSystem.Entry body : SolarSystem.bodies(minecraft.level)) {
+		// The quantum target, then nearer bodies, get first pick of label space.
+		double now = SpaceRenderer.time(partial);
+		java.util.List<SolarSystem.Entry> ordered = new java.util.ArrayList<>(SolarSystem.bodies(minecraft.level));
+		ordered.sort(java.util.Comparator.<SolarSystem.Entry>comparingInt(e -> e.key().identifier().toString().equals(target) ? 0 : 1)
+				.thenComparingDouble(e -> e.at(now).distanceToSqr(eye)));
+		for (SolarSystem.Entry body : ordered) {
 			if (ship != null && ship.isJumping()) break; // leaving this system: no markers in the tunnel
 			Vec3 rel = body.at(SpaceRenderer.time(partial)).subtract(eye);
 			double distance = rel.length();
@@ -87,7 +92,11 @@ public final class SpaceHud {
 			boolean above = y + s + 22 > h - 34;
 			int ly = above ? y - s - 22 : y + s + 3;
 			int lw = Math.max(font.width(label), font.width(range));
-			ly = HudLabels.place(HudLabels.frame(), x, ly, lw, 20, above ? -21 : 21);
+			// Distant moons keep their bracket but not a label (they'd crowd their planet's); a label with no free
+			// spot is dropped rather than drawn over another.
+			if (!selected && body.planet().isMoon() && distance > 300_000) continue;
+			ly = HudLabels.tryPlace(HudLabels.frame(), x, ly, lw, 20, above ? -21 : 21);
+			if (ly == Integer.MIN_VALUE) continue;
 			graphics.text(font, label, x - font.width(label) / 2, ly, color);
 			graphics.text(font, range, x - font.width(range) / 2, ly + 10, DIM);
 			if (selected) graphics.text(font, "QT", x - font.width("QT") / 2, above ? y + s + 3 : y - s - 11, QT);

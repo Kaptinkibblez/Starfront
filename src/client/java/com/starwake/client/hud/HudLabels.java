@@ -34,6 +34,19 @@ public final class HudLabels {
 		return y;
 	}
 
+	/** Like {@link #place}, but returns {@link Integer#MIN_VALUE} (and reserves nothing) when no free spot is found. */
+	public static int tryPlace(long currentFrame, int x, int y, int w, int h, int step) {
+		sync(currentFrame);
+		int left = x - w / 2 - 2, right = x + w / 2 + 2;
+		for (int tries = 0; tries < 6; tries++, y += step) {
+			if (!overlaps(left, y - 1, right, y + h)) {
+				PLACED.add(new int[] {left, y - 1, right, y + h});
+				return y;
+			}
+		}
+		return Integer.MIN_VALUE;
+	}
+
 	private static boolean overlaps(int x0, int y0, int x1, int y1) {
 		for (int[] r : PLACED) if (x0 < r[2] && x1 > r[0] && y0 < r[3] && y1 > r[1]) return true;
 		return false;

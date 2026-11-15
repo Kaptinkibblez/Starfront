@@ -182,7 +182,7 @@ public final class SolarSystem {
 		java.util.Map<ResourceKey<Planet>, Entry> planets = new java.util.HashMap<>();
 		List<Entry> out = new ArrayList<>();
 		for (Entry e : entries) {
-			if (e.body().star() || e.body().moonOrbit().isPresent()) continue;
+			if (e.body().star() || e.body().field() || e.body().moonOrbit().isPresent()) continue;
 			Vec3 p = e.body().position();
 			double radius = Math.hypot(p.x - centre.x, p.z - centre.z);
 			double period = PERIOD_AT_1MM * Math.pow(radius / 1.0e6, 1.5) / Math.sqrt(mass);
@@ -190,8 +190,8 @@ public final class SolarSystem {
 					new Orbit(centre, radius, Math.atan2(p.z - centre.z, p.x - centre.x), p.y, Math.max(period, 2400), null)));
 		}
 		for (Entry e : entries) {
-			if (e.body().star()) {
-				out.add(e);
+			if (e.body().star() || e.body().field()) {
+				out.add(e); // stars and asteroid fields stay put
 			} else if (e.body().moonOrbit().isPresent()) {
 				Entry parent = e.planet().parent().map(planets::get).orElse(null);
 				if (parent == null || parent.orbit() == null) {

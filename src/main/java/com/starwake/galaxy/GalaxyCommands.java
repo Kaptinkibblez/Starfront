@@ -59,6 +59,12 @@ public final class GalaxyCommands {
 		double t = SolarSystem.time(level);
 		int n = 0;
 		for (SolarSystem.Entry e : SolarSystem.bodies(level)) {
+			if (e.body().field()) {
+				var p = e.body().position();
+				ctx.getSource().sendSuccess(() -> Component.literal(String.format(java.util.Locale.ROOT, "%s: asteroid field at (%.0f, %.0f, %.0f)",
+						e.displayName().getString(), p.x, p.y, p.z)), false);
+				continue;
+			}
 			if (e.orbit() == null) continue;
 			var at = e.at(t);
 			double days = e.orbit().period() / 24000.0;

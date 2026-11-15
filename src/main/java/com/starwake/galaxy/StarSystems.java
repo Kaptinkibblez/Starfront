@@ -165,6 +165,10 @@ public final class StarSystems {
 		for (ProceduralPlanets.Generated g : planets) {
 			withMoons.addAll(ProceduralPlanets.moons(access, g.ref(), RandomSupport.mixStafford13(star.seed() ^ g.ref().key().identifier().hashCode()), taken));
 		}
+		// The asteroid belt (M9).
+		List<Double> orbits = new ArrayList<>();
+		for (ProceduralPlanets.Generated g : planets) g.ref().planet().body().ifPresent(b -> orbits.add(Math.hypot(b.position().x, b.position().z)));
+		stars.addAll(AsteroidBelts.fields(id, star.name(), spaceKey, scale, star.seed(), orbits, taken));
 		Plan plan = new Plan(List.copyOf(stars), List.copyOf(withMoons));
 		PLANS.put(star.id(), plan);
 		return plan;

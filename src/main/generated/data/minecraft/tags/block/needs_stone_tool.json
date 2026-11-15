@@ -36,6 +36,8 @@
     "starwake:celestine_ore",
     "starwake:fluorite_ore",
     "starwake:apatite_ore",
-    "starwake:magnesite_ore"
+    "starwake:magnesite_ore",
+    "starwake:olivine_ore",
+    "starwake:serpentine_ore"
   ]
 }

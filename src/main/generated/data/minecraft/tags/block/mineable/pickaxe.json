@@ -144,6 +144,9 @@
     "starwake:magnesite_ore",
     "starwake:sylvite_ore",
     "starwake:borax_ore",
-    "starwake:nitratine_ore"
+    "starwake:nitratine_ore",
+    "starwake:kamacite_ore",
+    "starwake:olivine_ore",
+    "starwake:serpentine_ore"
   ]
 }

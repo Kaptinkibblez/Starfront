@@ -71,6 +71,9 @@ sp("Fe2O3", "Hematite", "oxide", 5.26, 1565, 9999, flags=["weak_magnetic"], colo
 sp("Fe3O4", "Magnetite", "oxide", 5.17, 1597, 9999, flags=["magnetic"], color="#2a2a2e")
 sp("FeO", "Wustite", "oxide", 5.7, 1377, 3414, color="#3a3634")
 sp("Fe2SiO4", "Fayalite", "silicate", 4.39, 1205, 9999, color="#4a4038")
+sp("Mg2SiO4", "Forsterite", "silicate", 3.27, 1890, 9999, color="#8aa050")
+sp("MgSiO3", "Enstatite", "silicate", 3.2, 1557, 9999, color="#6a6450")
+sp("Mg3Si2O5(OH)4", "Serpentine", "silicate", 2.55, 1550, 9999, color="#3a4a34")
 sp("CaSiO3", "Wollastonite", "silicate", 2.9, 1540, 9999, color="#cfc8b8")
 # Copper, nickel, cobalt, lead, zinc, tin, molybdenum
 sp("CuFeS2", "Chalcopyrite", "sulfide", 4.2, 950, 9999, flags=["floats"], color="#c8a838")
@@ -339,6 +342,15 @@ ORES = {
     "starwake:raw_sylvite": ore({"KCl": 0.7, "NaCl": 0.3}, 0.9, {"Rb": 300, "Br": 2000}, gangue={"CaSO4(H2O)2": 0.6, "SiO2": 0.4}),
     "starwake:raw_borax": ore({"Na2B4O7(H2O)10": 1.0}, 0.8, {"Li": 300}),
     "starwake:raw_nitratine": ore({"NaNO3": 1.0}, 0.75, {"I": 600, "K": 10000}),
+    # Asteroids (M9): meteoric iron (kamacite with troilite; PGMs and Ge/Ga at real iron-meteorite levels), ordinary
+    # chondrite (olivine + pyroxene with metal grains), carbonaceous chondrite (serpentine clay, magnetite, organics, water).
+    "starwake:raw_kamacite": ore({"Fe": 0.915, "Ni": 0.075, "Co": 0.01}, 0.92, {"Pt": 12, "Ir": 3, "Os": 3, "Pd": 4, "Ru": 5, "Rh": 1,
+                                                                             "Au": 1, "Ge": 100, "Ga": 50},
+                                 gangue={"FeS": 0.8, "Fe3O4": 0.2}),
+    "starwake:raw_olivine": ore({"Mg2SiO4": 0.55, "Fe2SiO4": 0.15, "MgSiO3": 0.3}, 0.85, {"Ni": 9000, "Cr": 3000, "Pt": 1, "Ir": 0.5},
+                                gangue={"Fe": 0.55, "FeS": 0.35, "Ni": 0.1}),
+    "starwake:raw_serpentine": ore({"Mg3Si2O5(OH)4": 0.8, "Fe3O4": 0.2}, 0.75, {"Ni": 10000, "Cr": 2500, "Zn": 300},
+                                   gangue={"H2O": 0.45, "C": 0.3, "FeS": 0.25}),
     "minecraft:cinnabar": ore({"HgS": 1.0}, 0.7, {"Se": 200, "Sb": 500}),
     "minecraft:sulfur": ore({"S": 1.0}, 0.9, {"Se": 300, "Te": 50}, gangue={"CaSO4(H2O)2": 0.7, "CaCO3": 0.3}),
     "starwake:halite": ore({"NaCl": 0.95, "KCl": 0.03, "CaSO4(H2O)2": 0.02}, 0.95, {"Br": 300, "I": 20}, gangue={"SiO2": 1.0}, mass=1.0),

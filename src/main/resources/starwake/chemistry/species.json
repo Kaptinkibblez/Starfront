@@ -136,6 +136,42 @@
   "color": "#4a4038"
  },
  {
+  "id": "Mg2SiO4",
+  "name": "Forsterite",
+  "formula": "Mg2SiO4",
+  "kind": "silicate",
+  "density": 3.27,
+  "melting": 1890,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#8aa050"
+ },
+ {
+  "id": "MgSiO3",
+  "name": "Enstatite",
+  "formula": "MgSiO3",
+  "kind": "silicate",
+  "density": 3.2,
+  "melting": 1557,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#6a6450"
+ },
+ {
+  "id": "Mg3Si2O5(OH)4",
+  "name": "Serpentine",
+  "formula": "Mg3Si2O5(OH)4",
+  "kind": "silicate",
+  "density": 2.55,
+  "melting": 1550,
+  "boiling": 9999,
+  "flags": [],
+  "toxicity": 0.0,
+  "color": "#3a4a34"
+ },
+ {
   "id": "CaSiO3",
   "name": "Wollastonite",
   "formula": "CaSiO3",
