@@ -1137,6 +1137,18 @@ normal gravity.
   - Verified 2026-11-15: 17 moons around Solace (Overworld 3, Veyra 1); a Kestrel flown from 22 km toward Brameolvax moved
     into its neighbourhood at 16 km with every other marker continuous; frozen and volcanic moon surfaces load.
 
+- **Planet skies** (`client/sky/PlanetSky`, COLLECT_SUBMITS on any planet or moon whose system has a star; the vanilla
+  sun and moon are cancelled by `client/mixin/SkyRendererMixin`). Day and night stay vanilla (the planet's timeline drives
+  the sun angle and light level), so the system's star is drawn exactly where the vanilla sun would be. `skyRotation`
+  maps system directions into the sky: planet -> star becomes the vanilla sun direction (-sin a, cos a, 0), the next
+  direction along the orbital plane follows the sun's daily path, system up becomes north (-Z) (an observer on the
+  equator). Bodies come from `SpaceRenderer.draws(bodies, eye, t, reach, sky, skip, alpha)` (eye = the planet's moving
+  position; the planet itself skipped) and `SpaceRenderer.submit`: true direction and apparent size, lit from the star
+  (phases), sphere geometry turned with the sky (poles stay north), the unlit side see-through (`lit`), planets faded by
+  daylight (`0.3 + 1.4 x star brightness`), only the star in rain, a wide soft glare around the star. Verified: Solace
+  in the Overworld's day sky; from the moon Brameolvax the star with its glare and the Overworld rising as a lit globe.
+  Known limit: everything stays on the equatorial path (no latitude or axial tilt); vanilla's starfield stays.
+
 ## How trading works (Milestone 7)
 
 - **Factions** (`trade/Faction`, synced registry `data/<ns>/starwake/faction/*.json`): name, code,

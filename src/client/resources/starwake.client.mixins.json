@@ -10,7 +10,8 @@
 		"MinecraftMixin",
 		"WeatherMixin",
 		"ClientLevelWeatherMixin",
-		"SignEditorMixin"
+		"SignEditorMixin",
+		"SkyRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -98,7 +98,8 @@ public final class SpaceRenderer {
 		return minecraft.level == null ? 0 : SolarSystem.time(minecraft.level) + partialTick;
 	}
 
-	private record Draw(Body body, int[][] surface, double scale, Vec3 centre, Vec3 toStar) {}
+	/** One body to draw: camera-relative centre, scale toward the camera, direction to its star, opacity. */
+	public record Draw(Body body, int[][] surface, double scale, Vec3 centre, Vec3 toStar, float alpha, org.joml.@Nullable Matrix3d sky) {}
 
 	private static void render(LevelRenderContext context) {
 		Minecraft minecraft = Minecraft.getInstance();
@@ -109,22 +110,7 @@ public final class SpaceRenderer {
 		double reach = Math.min(camera.depthFar * 0.6, 1400);
 
 		List<SolarSystem.Entry> bodies = SolarSystem.bodies(minecraft.level);
-		double t = time(partial);
-		Vec3 starPos = bodies.stream().filter(e -> e.body().star()).map(e -> e.body().position()).findFirst().orElse(Vec3.ZERO);
-
-		// Far to near, so nearer bodies paint over farther ones.
-		List<Draw> draws = new ArrayList<>();
-		for (SolarSystem.Entry entry : bodies) {
-			Body body = entry.body();
-			Vec3 at = entry.at(t);
-			Vec3 rel = at.subtract(eye);
-			double distance = rel.length();
-			if (distance <= body.radius() * 1.001) continue; // inside it (you'd be on the surface by now)
-			double k = Math.min(1.0, reach / distance);
-			int[][] surface = SURFACE.computeIfAbsent(entry.key(), key -> surfaceColors(body, key.identifier().hashCode()));
-			draws.add(new Draw(body, surface, k, rel.scale(k), body.star() ? Vec3.ZERO : starPos.subtract(at).normalize()));
-		}
-		draws.sort((a, b) -> Double.compare(b.centre.lengthSqr() / (b.scale * b.scale), a.centre.lengthSqr() / (a.scale * a.scale)));
+		List<Draw> draws = draws(bodies, eye, time(partial), reach, null, null, 1f);
 
 		// Quantum streaks: direction and strength of travel.
 		ShipEntity ship = localShip();
@@ -149,6 +135,47 @@ public final class SpaceRenderer {
 		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.debugQuads(), (pose, buffer) -> {
 			drawStars(pose, buffer, starDistance, streak);
 			if (streak.lengthSqr() == 0) drawNeighbours(pose, buffer, starDistance * 0.99f, neighbours);
+			for (Draw draw : draws) drawBody(pose, buffer, draw);
+		});
+	}
+
+	/**
+	 * The bodies seen from {@code eye} (system coordinates), scaled toward the camera so direction and apparent size
+	 * are exact, far to near. {@code sky} (optional) turns system directions into world directions (a planet's sky);
+	 * {@code skip} leaves one body out (the planet you're standing on); {@code alpha} fades all but stars (daylight).
+	 */
+	public static List<Draw> draws(List<SolarSystem.Entry> bodies, Vec3 eye, double t, double reach,
+			org.joml.@Nullable Matrix3d sky, net.minecraft.resources.@Nullable ResourceKey<com.starwake.planet.Planet> skip, float alpha) {
+		Vec3 starPos = bodies.stream().filter(e -> e.body().star()).map(e -> e.body().position()).findFirst().orElse(Vec3.ZERO);
+		List<Draw> draws = new ArrayList<>();
+		for (SolarSystem.Entry entry : bodies) {
+			if (entry.key().equals(skip)) continue;
+			Body body = entry.body();
+			Vec3 at = entry.at(t);
+			Vec3 rel = at.subtract(eye);
+			double distance = rel.length();
+			if (distance <= body.radius() * 1.001) continue; // inside it (you'd be on the surface by now)
+			double k = Math.min(1.0, reach / distance);
+			Vec3 toStar = body.star() ? Vec3.ZERO : starPos.subtract(at).normalize();
+			if (sky != null) {
+				rel = turn(sky, rel);
+				toStar = turn(sky, toStar);
+			}
+			int[][] surface = SURFACE.computeIfAbsent(entry.key(), key -> surfaceColors(body, key.identifier().hashCode()));
+			draws.add(new Draw(body, surface, k, rel.scale(k), toStar, body.star() ? 1f : alpha, sky));
+		}
+		draws.sort((a, b) -> Double.compare(b.centre.lengthSqr() / (b.scale * b.scale), a.centre.lengthSqr() / (a.scale * a.scale)));
+		return draws;
+	}
+
+	private static Vec3 turn(org.joml.Matrix3d m, Vec3 v) {
+		org.joml.Vector3d r = m.transform(new org.joml.Vector3d(v.x, v.y, v.z));
+		return new Vec3(r.x, r.y, r.z);
+	}
+
+	/** Submits bodies (from {@link #draws}) as camera-relative geometry. */
+	public static void submit(LevelRenderContext context, List<Draw> draws) {
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.debugQuads(), (pose, buffer) -> {
 			for (Draw draw : draws) drawBody(pose, buffer, draw);
 		});
 	}
@@ -228,7 +255,7 @@ public final class SpaceRenderer {
 		if (r < minRadius) {
 			int dot = body.star() ? body.color() : shade(body, ARGB.srgbLerp(0.5f, body.color(), body.secondaryColor()),
 					new float[] {(float) (-cx / distance), (float) (-cy / distance), (float) (-cz / distance)}, draw.toStar);
-			billboard(pose, buffer, cx, cy, cz, minRadius, ARGB.opaque(dot));
+			billboard(pose, buffer, cx, cy, cz, minRadius, fade(ARGB.opaque(dot), draw.alpha));
 			if (body.star()) ring(pose, buffer, cx, cy, cz, minRadius, minRadius * 3, ARGB.color(160, body.atmosphereColor()));
 			return;
 		}
@@ -237,23 +264,44 @@ public final class SpaceRenderer {
 		double atmosphere = body.star() ? body.radius() * 1.8 : Math.max(body.atmosphere(), body.radius() * 1.04);
 		float limb = (float) (r * distance / Math.sqrt(Math.max(1.0e-6, distance * distance - (double) r * r)));
 		float glowOuter = (float) (limb * atmosphere / body.radius());
-		ring(pose, buffer, cx, cy, cz, limb * 0.985f, glowOuter, ARGB.color(body.star() ? 230 : 150, body.atmosphereColor()));
+		ring(pose, buffer, cx, cy, cz, limb * 0.985f, glowOuter, fade(ARGB.color(body.star() ? 230 : 150, body.atmosphereColor()), draw.alpha));
+		// Seen through an atmosphere (a planet's sky), a star also gets a wide soft glare.
+		if (body.star() && draw.sky != null) ring(pose, buffer, cx, cy, cz, limb, limb * 7f, ARGB.color(70, body.color()));
 
 		// The sphere: only the hemisphere facing the camera.
 		int[][] surface = draw.surface;
 		Vec3 sun = draw.toStar;
 		for (int i = 0; i < LAT; i++) {
 			for (int j = 0; j < LON; j++) {
-				float[] a = SPHERE[i][j], b = SPHERE[i][j + 1], c = SPHERE[i + 1][j + 1], d = SPHERE[i + 1][j];
+				float[] a = turned(draw, SPHERE[i][j]), b = turned(draw, SPHERE[i][j + 1]), c = turned(draw, SPHERE[i + 1][j + 1]),
+						d = turned(draw, SPHERE[i + 1][j]);
 				float nx = a[0] + b[0] + c[0] + d[0], ny = a[1] + b[1] + c[1] + d[1], nz = a[2] + b[2] + c[2] + d[2];
 				// Facing test: normal against the view ray to the quad.
 				if (nx * (cx + nx * r * 0.25f) + ny * (cy + ny * r * 0.25f) + nz * (cz + nz * r * 0.25f) >= 0) continue;
-				vertex(pose, buffer, cx, cy, cz, r, a, shade(body, surface[i][j], a, sun));
-				vertex(pose, buffer, cx, cy, cz, r, b, shade(body, surface[i][j + 1], b, sun));
-				vertex(pose, buffer, cx, cy, cz, r, c, shade(body, surface[i + 1][j + 1], c, sun));
-				vertex(pose, buffer, cx, cy, cz, r, d, shade(body, surface[i + 1][j], d, sun));
+				vertex(pose, buffer, cx, cy, cz, r, a, fade(shade(body, surface[i][j], a, sun), draw.alpha * lit(draw, a, sun)));
+				vertex(pose, buffer, cx, cy, cz, r, b, fade(shade(body, surface[i][j + 1], b, sun), draw.alpha * lit(draw, b, sun)));
+				vertex(pose, buffer, cx, cy, cz, r, c, fade(shade(body, surface[i + 1][j + 1], c, sun), draw.alpha * lit(draw, c, sun)));
+				vertex(pose, buffer, cx, cy, cz, r, d, fade(shade(body, surface[i + 1][j], d, sun), draw.alpha * lit(draw, d, sun)));
 			}
 		}
+	}
+
+	/** A sphere point turned with the sky (so a body's poles stay along the sky's north axis), or as is. */
+	private static float[] turned(Draw draw, float[] n) {
+		if (draw.sky == null) return n;
+		org.joml.Vector3d v = draw.sky.transform(new org.joml.Vector3d(n[0], n[1], n[2]));
+		return new float[] {(float) v.x, (float) v.y, (float) v.z};
+	}
+
+	/** In a planet's sky the unlit side is see-through (the daytime sky shows through a crescent moon's dark side). */
+	private static float lit(Draw draw, float[] n, Vec3 sun) {
+		if (draw.sky == null || draw.body.star()) return 1f;
+		double light = n[0] * sun.x + n[1] * sun.y + n[2] * sun.z;
+		return (float) Mth.clamp(0.1 + light * 2.0, 0.1, 1.0);
+	}
+
+	private static int fade(int color, float alpha) {
+		return alpha >= 1f ? color : ARGB.color(Math.round(ARGB.alpha(color) * alpha), color);
 	}
 
 	private static int shade(Body body, int color, float[] n, Vec3 sun) {
