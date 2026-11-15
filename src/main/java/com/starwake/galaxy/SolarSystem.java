@@ -31,8 +31,24 @@ import org.jspecify.annotations.Nullable;
  * arrives nose-down. (Scaffold; a real spherical planet is a much later overhaul.)
  */
 public final class SolarSystem {
-	/** A planet (or star) placed in space. */
-	public record Entry(ResourceKey<Planet> key, Planet planet, Body body) {
+	/**
+	 * A planet (or star) placed in space. {@code orbit} is null for stars (they stay put) and bodies without a star.
+	 */
+	public record Entry(ResourceKey<Planet> key, Planet planet, Body body, @Nullable Orbit orbit) {
+		public Entry(ResourceKey<Planet> key, Planet planet, Body body) {
+			this(key, planet, body, null);
+		}
+
+		/** Where the body really is at game time {@code t} (the moving orbit; its neighbourhood stays at body.position). */
+		public Vec3 at(double t) {
+			return orbit == null ? body.position() : orbit.at(t);
+		}
+
+		/** How far the body has moved from its neighbourhood at time {@code t}. */
+		public Vec3 drift(double t) {
+			return orbit == null ? Vec3.ZERO : orbit.at(t).subtract(body.position());
+		}
+
 		public Component displayName() {
 			return body.name().orElse(planet.name());
 		}
@@ -95,7 +111,7 @@ public final class SolarSystem {
 				ref.planet().body().ifPresent(body -> bySystem.computeIfAbsent(ref.planet().system(), k -> new ArrayList<>())
 						.add(new Entry(ref.key(), ref.planet(), body)));
 			}
-			bySystem.replaceAll((k, v) -> List.copyOf(v));
+			bySystem.replaceAll((k, v) -> List.copyOf(withOrbits(v)));
 			cached = java.util.Map.copyOf(bySystem);
 			cachedFor = planets;
 		}
@@ -110,9 +126,100 @@ public final class SolarSystem {
 	/** Any body in any loaded system, by key. */
 	public static Optional<Entry> get(RegistryAccess access, ResourceKey<Planet> key) {
 		for (var ref : Planets.all(access)) {
-			if (ref.key().equals(key) && ref.planet().body().isPresent()) return Optional.of(new Entry(ref.key(), ref.planet(), ref.planet().body().get()));
+			if (ref.key().equals(key) && ref.planet().body().isPresent()) {
+				for (Entry e : bodies(access, ref.planet().system())) if (e.key().equals(key)) return Optional.of(e);
+			}
 		}
 		return Optional.empty();
+	}
+
+	// ---------------------------------------------------------------------------------------
+	// Orbits (M9): real Kepler period ratios, sped up; positions from game time on both sides
+	// ---------------------------------------------------------------------------------------
+	//
+	// Every planet circles its system's centre (the star; the stars' mass-weighted centre for a binary) in
+	// the plane of the space slab, starting where its JSON position puts it at game time 0. Period =
+	// PERIOD_AT_1MM x (a / 1 Mm)^1.5 / sqrt(M): the Overworld (1.8 Mm from Solace) takes ~7 in-game days,
+	// Veyra (5.6 Mm) ~40.
+	//
+	// Local frames: each body keeps a fixed neighbourhood in the space dimension around its JSON position
+	// (where you fly, where stations and builds stand). Inside it, space is the body's own frame, carried
+	// along its orbit; between neighbourhoods space stays where it is (quantum travel skips that gap). So the
+	// directions and distances you see and fly by (other bodies, phases, quantum routes) follow the moving
+	// orbits, while nothing built in space is ever left behind.
+
+	/** Orbital period at 1 Mm around one solar mass, in ticks (3 in-game days). */
+	public static final double PERIOD_AT_1MM = 72_000;
+
+	/** A circular orbit in the slab's plane. */
+	public record Orbit(Vec3 centre, double radius, double phase, double height, double period) {
+		public Vec3 at(double t) {
+			double a = phase + 2 * Math.PI * (t / period);
+			return new Vec3(centre.x + radius * Math.cos(a), height, centre.z + radius * Math.sin(a));
+		}
+	}
+
+	private static List<Entry> withOrbits(List<Entry> entries) {
+		double mass = 0, cx = 0, cz = 0;
+		for (Entry e : entries) {
+			if (!e.body().star()) continue;
+			mass += e.body().mass();
+			cx += e.body().position().x * e.body().mass();
+			cz += e.body().position().z * e.body().mass();
+		}
+		if (mass <= 0) return entries;
+		Vec3 centre = new Vec3(cx / mass, 0, cz / mass);
+		List<Entry> out = new ArrayList<>();
+		for (Entry e : entries) {
+			if (e.body().star()) {
+				out.add(e);
+				continue;
+			}
+			Vec3 p = e.body().position();
+			double radius = Math.hypot(p.x - centre.x, p.z - centre.z);
+			double period = PERIOD_AT_1MM * Math.pow(radius / 1.0e6, 1.5) / Math.sqrt(mass);
+			out.add(new Entry(e.key(), e.planet(), e.body(),
+					new Orbit(centre, radius, Math.atan2(p.z - centre.z, p.x - centre.x), p.y, Math.max(period, 2400))));
+		}
+		return out;
+	}
+
+	/**
+	 * Orbit time: the Overworld clock's total ticks, the same on every level and on both sides. Sleeping or
+	 * {@code /time add} moves the planets along with the day; with the daylight cycle off they stand still.
+	 */
+	public static double time(Level level) {
+		return level.getOverworldClockTime();
+	}
+
+	/** Neighbourhood radius: inside, space moves with the body; out to twice this it blends into fixed space. */
+	public static double neighbourhood(Body body) {
+		return body.entryRadius() + 60_000;
+	}
+
+	/**
+	 * A point of the space dimension in system coordinates (where it really is at time {@code t}): inside a body's
+	 * neighbourhood, carried along that body's orbit.
+	 */
+	public static Vec3 toSystem(List<Entry> bodies, Vec3 physical, double t) {
+		for (Entry e : bodies) {
+			if (e.orbit() == null) continue;
+			double n = neighbourhood(e.body());
+			double d = physical.distanceTo(e.body().position());
+			if (d >= 2 * n) continue;
+			double w = d <= n ? 1 : 1 - (d - n) / n;
+			return physical.add(e.drift(t).scale(w));
+		}
+		return physical;
+	}
+
+	public static Vec3 toSystem(Level level, Vec3 physical) {
+		return toSystem(bodies(level), physical, time(level));
+	}
+
+	/** The point of the space dimension inside {@code body}'s neighbourhood that is at system point {@code system}. */
+	public static Vec3 toPhysical(Entry body, Vec3 system, double t) {
+		return system.subtract(body.drift(t));
 	}
 
 	public static Optional<Entry> forDimension(RegistryAccess access, ResourceKey<Level> dimension) {
@@ -182,21 +289,30 @@ public final class SolarSystem {
 	 * line to its centre, {@code standoff} blocks outside its atmosphere.
 	 */
 	public static Vec3 arrivalPoint(Entry target, Vec3 from, double standoff) {
-		Vec3 centre = target.body().position();
+		return arrivalPoint(target.body().position(), target, from, standoff);
+	}
+
+	/** {@link #arrivalPoint} around an explicit centre (system coordinates: the target's moving position). */
+	public static Vec3 arrivalPoint(Vec3 centre, Entry target, Vec3 from, double standoff) {
 		Vec3 back = from.subtract(centre).normalize();
 		return centre.add(back.scale(target.body().entryRadius() + standoff));
 	}
 
 	/** The first body (other than {@code ignore}) whose sphere the segment passes through. */
 	public static Optional<Entry> obstruction(Level level, Vec3 from, Vec3 to, @Nullable ResourceKey<Planet> ignore) {
+		return obstruction(level, from, to, ignore, time(level));
+	}
+
+	/** {@link #obstruction} in system coordinates at time {@code t} (bodies where they really are). */
+	public static Optional<Entry> obstruction(Level level, Vec3 from, Vec3 to, @Nullable ResourceKey<Planet> ignore, double t) {
 		Vec3 seg = to.subtract(from);
 		double len2 = seg.lengthSqr();
 		for (Entry e : bodies(level)) {
 			if (e.key().equals(ignore)) continue;
-			Vec3 c = e.body().position();
-			double t = len2 == 0 ? 0 : Mth.clamp(c.subtract(from).dot(seg) / len2, 0, 1);
+			Vec3 c = e.at(t);
+			double u = len2 == 0 ? 0 : Mth.clamp(c.subtract(from).dot(seg) / len2, 0, 1);
 			double r = e.body().entryRadius() * (e.body().star() ? 1.5 : 1.0);
-			if (from.add(seg.scale(t)).distanceToSqr(c) < r * r) return Optional.of(e);
+			if (from.add(seg.scale(u)).distanceToSqr(c) < r * r) return Optional.of(e);
 		}
 		return Optional.empty();
 	}

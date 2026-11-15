@@ -1094,6 +1094,31 @@ normal gravity.
 - Known limits: a planet's sky colour comes from its archetype, not its star; a star's light
   doesn't tint its planets yet.
 
+## How planets, space and the galaxy work after M9
+
+- **Fixes:** airless archetypes get `fog_start_distance` 1024 / `fog_end_distance` 2048 (`tools/planet_data.py`; the
+  near-black fog had hidden the sunlit ground). `EntityGravityMixin` scales `Entity.getGravity()` (final) for non-living
+  entities by `Planets.gravityFactor(level)` (planet gravity, 0 in space; cached per level). World-marker labels share
+  `client/hud/HudLabels` (per-frame layout; SpaceHud and HubHud). `/starwake planet list` shows destinations only.
+- **Moving orbits, local frames** (`galaxy/SolarSystem` "Orbits"; user's choice after the conflict was explained: at the
+  chosen speed the Overworld moves ~1,300 m/s, faster than any ship, and would leave stations and builds behind):
+  - Each planet circles its system's centre (mass-weighted centre of its stars) in the slab's plane, starting at its JSON
+    position at time 0. Period = `PERIOD_AT_1MM` (72,000 ticks) x (a / 1 Mm)^1.5 / sqrt(M) (Overworld 7.2 days, Veyra 40,
+    inner Solace worlds ~4). `Body.mass` = a star's solar masses (generated systems pass the real one). Stars stay put.
+  - Orbit time = the **Overworld clock** (`level.getOverworldClockTime()`, both sides): sleeping or `execute in
+    minecraft:overworld run time add` moves the planets; with the daylight cycle off they stand still.
+  - **Local frames:** the JSON position is the body's fixed **neighbourhood** in the space dimension (radius
+    `entryRadius + 60 km`, blending out to twice that): flying, entering, stations and builds stay there. Inside it, space
+    is the body's frame carried along its orbit (`toSystem(physical)` adds the body's `drift(t)`; `toPhysical(body, p)`
+    removes it). Everything that looks or aims across the system uses system coordinates: `SpaceRenderer` (eye =
+    `systemPosition(camera)`, bodies at `Entry.at(t)`, lit from the star, so phases change), SpaceHud markers, Starmap
+    (bodies and orbit circles where they are now), quantum auto-target, alignment and obstruction.
+  - **Quantum routes** (`SpaceTravel.route`): from = the ship's system position; aims where the target will be when the
+    jump ends (two passes); `Route.arrival` = the physical drop-out point in the target's neighbourhood. `QuantumJump`
+    holds from/to in system coordinates plus `arrival` (saved as `quantum_arrival`; older saves fall back to `to`).
+    `QT_OFFSET` = the travelled system point minus the hull's own system position.
+  - Admin: `/starwake galaxy orbits` (radius, period, position now, distance from the neighbourhood).
+
 ## How trading works (Milestone 7)
 
 - **Factions** (`trade/Faction`, synced registry `data/<ns>/starwake/faction/*.json`): name, code,

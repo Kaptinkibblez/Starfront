@@ -38,9 +38,15 @@ public class StarmapApp implements WristcomApp {
 	private static Vec3 here() {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.level == null || minecraft.player == null) return Vec3.ZERO;
-		if (SpaceTravel.isSpace(minecraft.level)) return minecraft.player.position();
+		if (SpaceTravel.isSpace(minecraft.level)) return com.starwake.client.space.SpaceRenderer.systemPosition(minecraft.player.position(), 0);
 		return SolarSystem.forDimension(minecraft.level.registryAccess(), minecraft.level.dimension())
-				.map(b -> b.body().position()).orElse(Vec3.ZERO);
+				.map(b -> b.at(now())).orElse(Vec3.ZERO);
+	}
+
+	/** Orbit time now (the map shows bodies where they really are). */
+	private static double now() {
+		Minecraft minecraft = Minecraft.getInstance();
+		return minecraft.level == null ? 0 : SolarSystem.time(minecraft.level);
 	}
 
 	@Override
@@ -75,8 +81,9 @@ public class StarmapApp implements WristcomApp {
 		Vec3 here = here();
 		// Fit the map to the bodies (and you): centre on their bounding box.
 		double minX = here.x, maxX = here.x, minZ = here.z, maxZ = here.z;
+		double t = now();
 		for (SolarSystem.Entry b : bodies) {
-			Vec3 p = b.body().position();
+			Vec3 p = b.at(t);
 			minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
 			minZ = Math.min(minZ, p.z); maxZ = Math.max(maxZ, p.z);
 		}
@@ -89,9 +96,10 @@ public class StarmapApp implements WristcomApp {
 		g.fill(x, y, x + size, y + size, 0x40000814);
 		g.outline(x, y, size, size, WristcomScreen.FAINT);
 		for (SolarSystem.Entry b : bodies) {
-			Vec3 p = b.body().position();
-			double orbit = Math.hypot(p.x, p.z) * scale;
-			if (!b.body().star() && orbit > 2) circle(g, cx, cy, orbit, WristcomScreen.FAINT);
+			if (b.orbit() == null) continue;
+			double orbit = b.orbit().radius() * scale;
+			int ox = cx + (int) Math.round(b.orbit().centre().x * scale), oz = cy + (int) Math.round(b.orbit().centre().z * scale);
+			if (orbit > 2) circle(g, ox, oz, orbit, WristcomScreen.FAINT);
 		}
 		// Route line from you to each destination (dim) and the bodies themselves.
 		int hx = cx + (int) Math.round(here.x * scale), hz = cy + (int) Math.round(here.z * scale);
@@ -99,7 +107,7 @@ public class StarmapApp implements WristcomApp {
 		// overlap one already drawn, so close neighbours stay readable.
 		List<int[]> placed = new java.util.ArrayList<>();
 		for (SolarSystem.Entry b : bodies) {
-			Vec3 p = b.body().position();
+			Vec3 p = b.at(t);
 			int px = cx + (int) Math.round(p.x * scale), pz = cy + (int) Math.round(p.z * scale);
 			int r = b.body().star() ? 5 : 3;
 			g.fill(px - r, pz - r, px + r + 1, pz + r + 1, b.body().star() ? 0xFFFFD27A : b.body().color() | 0xFF000000);
@@ -124,7 +132,7 @@ public class StarmapApp implements WristcomApp {
 			if (!b.enterable()) continue;
 			if (16 + (row + 1) * ROW > height) break;
 			int ry = y + 19 + row * ROW;
-			double distance = Math.max(0, here.distanceTo(b.body().position()) - b.body().entryRadius());
+			double distance = Math.max(0, here.distanceTo(b.at(t)) - b.body().entryRadius());
 			int room = x + width - 32 - listX;
 			g.text(font, font.plainSubstrByWidth(b.displayName().getString(), room), listX, ry, WristcomScreen.TEXT, false);
 			g.text(font, SolarSystem.formatDistance(distance), listX, ry + 10, WristcomScreen.DIM, false);

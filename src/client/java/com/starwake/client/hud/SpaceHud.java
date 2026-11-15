@@ -73,7 +73,7 @@ public final class SpaceHud {
 		// Body markers. Labels that would overlap one already drawn step down until clear.
 		for (SolarSystem.Entry body : SolarSystem.bodies(minecraft.level)) {
 			if (ship != null && ship.isJumping()) break; // leaving this system: no markers in the tunnel
-			Vec3 rel = body.body().position().subtract(eye);
+			Vec3 rel = body.at(SpaceRenderer.time(partial)).subtract(eye);
 			double distance = rel.length();
 			int[] screen = HudProjection.project(mvp, forward, rel, w, h);
 			if (screen == null) continue;
@@ -132,7 +132,7 @@ public final class SpaceHud {
 			graphics.text(font, Component.translatable("hud.starwake.qt.travel", name), x, y, QT);
 			graphics.text(font, "ETA " + SolarSystem.formatTime(ship.quantumInfo()), x, y + 11, TEXT);
 			if (target != null) {
-				double left = Math.max(0, eye.distanceTo(target.body().position()) - target.body().entryRadius());
+				double left = Math.max(0, eye.distanceTo(target.at(SpaceRenderer.time(0))) - target.body().entryRadius());
 				String range = SolarSystem.formatDistance(left);
 				graphics.text(font, range, x + width - font.width(range), y + 11, TEXT);
 			}

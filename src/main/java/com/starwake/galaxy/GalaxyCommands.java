@@ -36,6 +36,7 @@ public final class GalaxyCommands {
 				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.literal("galaxy")
 						.then(Commands.literal("here").executes(GalaxyCommands::here))
+						.then(Commands.literal("orbits").executes(GalaxyCommands::orbits))
 						.then(Commands.literal("near")
 								.executes(ctx -> near(ctx, 10))
 								.then(Commands.argument("ly", DoubleArgumentType.doubleArg(1, 60))
@@ -50,6 +51,25 @@ public final class GalaxyCommands {
 
 	private static Galaxy.Star current(CommandSourceStack source) {
 		return Galaxy.star(SolarSystem.systemOf(source.getLevel())).orElse(Galaxy.home());
+	}
+
+	/** Every body of the caller's system: orbit radius, period, where it is now and how far it has moved. */
+	private static int orbits(CommandContext<CommandSourceStack> ctx) {
+		var level = ctx.getSource().getLevel();
+		double t = SolarSystem.time(level);
+		int n = 0;
+		for (SolarSystem.Entry e : SolarSystem.bodies(level)) {
+			if (e.orbit() == null) continue;
+			var at = e.at(t);
+			double days = e.orbit().period() / 24000.0;
+			ctx.getSource().sendSuccess(() -> Component.literal(String.format(java.util.Locale.ROOT,
+					"%s: a %.2f Mm, period %.1f days, now (%.0f, %.0f), %.0f km from its neighbourhood",
+					e.displayName().getString(), e.orbit().radius() / 1e6, days, at.x, at.z, e.drift(t).length() / 1000)), false);
+			n++;
+		}
+		final int count = n;
+		ctx.getSource().sendSuccess(() -> Component.literal("t = " + (long) t + " (" + count + " orbits)"), false);
+		return n;
 	}
 
 	private static int here(CommandContext<CommandSourceStack> ctx) {

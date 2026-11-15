@@ -26,9 +26,18 @@ import net.minecraft.world.phys.Vec3;
  * @param secondaryColor second surface colour (continents, bands)
  * @param atmosphereColor glow around the limb
  * @param star         emissive light source (the planets are lit from it); can't be entered
+ * @param mass         a star's mass in solar masses (sets its planets' orbital periods); ignored for planets
+ *
+ * <p>M9: {@code position} is the body's fixed <em>neighbourhood</em> in the space dimension (where you fly
+ * around it, where stations stand) and its place at game time 0; the body itself orbits (see {@link SolarSystem}).
  */
 public record Body(Optional<Component> name, Vec3 position, double radius, double atmosphere, double worldRadius,
-		int color, int secondaryColor, int atmosphereColor, boolean star) {
+		int color, int secondaryColor, int atmosphereColor, boolean star, double mass) {
+	public Body(Optional<Component> name, Vec3 position, double radius, double atmosphere, double worldRadius,
+			int color, int secondaryColor, int atmosphereColor, boolean star) {
+		this(name, position, radius, atmosphere, worldRadius, color, secondaryColor, atmosphereColor, star, 1.0);
+	}
+
 	public static final Codec<Body> CODEC = RecordCodecBuilder.create(i -> i.group(
 			ComponentSerialization.CODEC.optionalFieldOf("name").forGetter(Body::name),
 			Vec3.CODEC.fieldOf("position").forGetter(Body::position),
@@ -38,7 +47,8 @@ public record Body(Optional<Component> name, Vec3 position, double radius, doubl
 			ExtraCodecs.STRING_RGB_COLOR.optionalFieldOf("color", 0xFF808080).forGetter(Body::color),
 			ExtraCodecs.STRING_RGB_COLOR.optionalFieldOf("secondary_color", 0xFF606060).forGetter(Body::secondaryColor),
 			ExtraCodecs.STRING_RGB_COLOR.optionalFieldOf("atmosphere_color", 0xFF9FC8FF).forGetter(Body::atmosphereColor),
-			Codec.BOOL.optionalFieldOf("star", false).forGetter(Body::star)
+			Codec.BOOL.optionalFieldOf("star", false).forGetter(Body::star),
+			Codec.doubleRange(0.01, 1000).optionalFieldOf("mass", 1.0).forGetter(Body::mass)
 	).apply(i, Body::new));
 
 	/** Radius at which the planet takes over: the atmosphere, or the surface if it has none. */

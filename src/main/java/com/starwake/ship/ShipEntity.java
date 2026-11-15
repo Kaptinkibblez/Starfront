@@ -1521,8 +1521,11 @@ public class ShipEntity extends Entity {
 	//    to quantum speed along the line to the target, cruises, and drops out just outside its
 	//    atmosphere. Long trips take minutes. Nothing can steer or stop it once committed.
 
-	/** A jump in progress. */
-	private record QuantumJump(ResourceKey<com.starwake.planet.Planet> target, Vec3 from, Vec3 to, int elapsed) {
+	/**
+	 * A jump in progress: {@code from}/{@code to} in system coordinates (the moving orbits), {@code arrival} the physical
+	 * drop-out point in the target's neighbourhood.
+	 */
+	private record QuantumJump(ResourceKey<com.starwake.planet.Planet> target, Vec3 from, Vec3 to, Vec3 arrival, int elapsed) {
 		double distance() { return from.distanceTo(to); }
 	}
 
@@ -1589,7 +1592,8 @@ public class ShipEntity extends Entity {
 		double bestAngle = Math.toRadians(10);
 		for (var body : com.starwake.galaxy.SolarSystem.bodies(level())) {
 			if (!body.enterable()) continue;
-			Vec3 to = body.body().position().subtract(position());
+			Vec3 to = body.at(com.starwake.galaxy.SolarSystem.time(level()))
+					.subtract(com.starwake.galaxy.SolarSystem.toSystem(level(), position()));
 			double angle = Math.acos(Mth.clamp(nose.dot(to.normalize()), -1, 1));
 			if (angle < bestAngle) {
 				bestAngle = angle;
@@ -1614,7 +1618,7 @@ public class ShipEntity extends Entity {
 			entityData.set(QT_INFO, 0);
 		} else {
 			SpaceTravel.Route route = SpaceTravel.route(this, target);
-			Vec3 dir = route.arrival().subtract(position()).normalize();
+			Vec3 dir = route.direction();
 			if (Math.acos(Mth.clamp(nose.dot(dir), -1, 1)) < Math.toRadians(physics.quantumAlignDegrees())) state |= QT_ALIGNED;
 			if (route.obstruction() != null) state |= QT_OBSTRUCTED;
 			if (route.tooClose()) state |= QT_TOO_CLOSE;
@@ -1643,7 +1647,7 @@ public class ShipEntity extends Entity {
 		var target = com.starwake.galaxy.SolarSystem.get(level().registryAccess(), quantumTarget).orElseThrow();
 		SpaceTravel.Route route = SpaceTravel.route(this, target);
 		useFusion(route.fuel());
-		jump = new QuantumJump(target.key(), position(), route.arrival(), 0);
+		jump = new QuantumJump(target.key(), route.from(), route.arrivalSystem(), route.arrival(), 0);
 		quantumMode = false;
 		entityData.set(QUANTUM, -1f);
 		entityData.set(QT_STATE, QT_TRAVEL);
@@ -1660,17 +1664,19 @@ public class ShipEntity extends Entity {
 	/** Advances a jump in progress; at the end, moves the ship to the drop-out point. */
 	private void tickJump(ShipPhysics physics) {
 		QuantumJump j = jump;
-		jump = new QuantumJump(j.target(), j.from(), j.to(), j.elapsed() + 1);
+		jump = new QuantumJump(j.target(), j.from(), j.to(), j.arrival(), j.elapsed() + 1);
 		double distance = j.distance();
 		double total = com.starwake.galaxy.SolarSystem.travelTicks(distance, physics.quantumSpeed(), physics.quantumRamp());
 		double travelled = com.starwake.galaxy.SolarSystem.travelled(distance, physics.quantumSpeed(), physics.quantumRamp(), jump.elapsed());
-		Vec3 offset = j.to().subtract(j.from()).normalize().scale(travelled).add(j.from().subtract(position()));
+		// The hull holds still; the offset says where it really is now, relative to its own system position.
+		Vec3 offset = j.to().subtract(j.from()).normalize().scale(travelled).add(j.from())
+				.subtract(com.starwake.galaxy.SolarSystem.toSystem(level(), position()));
 		entityData.set(QT_OFFSET, new Vector3f((float) offset.x, (float) offset.y, (float) offset.z));
 		entityData.set(QT_INFO, (int) Math.ceil(total - jump.elapsed()));
 		if (level() instanceof ServerLevel serverLevel && (int) Math.ceil(total) - jump.elapsed() == 100) {
 			// 5 s out: start loading the drop-out point so the ship arrives into ready chunks.
 			serverLevel.getChunkSource().addTicketWithRadius(net.minecraft.server.level.TicketType.PORTAL,
-					net.minecraft.world.level.ChunkPos.containing(BlockPos.containing(j.to())), 3);
+					net.minecraft.world.level.ChunkPos.containing(BlockPos.containing(j.arrival())), 3);
 		}
 		if (jump.elapsed() < total) return;
 
@@ -1679,10 +1685,10 @@ public class ShipEntity extends Entity {
 		entityData.set(QT_STATE, 0);
 		entityData.set(QT_TARGET, "");
 		entityData.set(QT_OFFSET, new Vector3f());
-		Vec3 arrival = j.to();
+		Vec3 arrival = j.arrival();
 		com.starwake.galaxy.SolarSystem.get(level().registryAccess(), j.target()).ifPresent(t -> setOrbiting(t.dimension()));
 		SpaceTravel.jump(this, arrival);
-		setDeltaMovement(arrival.subtract(j.from()).normalize().scale(0.6)); // a little momentum out of the jump
+		setDeltaMovement(j.to().subtract(j.from()).normalize().scale(0.6)); // a little momentum out of the jump
 		if (level() instanceof ServerLevel serverLevel) {
 			serverLevel.playSound(null, BlockPos.containing(position()), com.starwake.registry.ModSounds.QUANTUM_EXIT,
 					net.minecraft.sounds.SoundSource.NEUTRAL, 2.0f, 0.7f);
@@ -2972,7 +2978,9 @@ public class ShipEntity extends Entity {
 			var from = input.read("quantum_from", Vec3.CODEC);
 			var to = input.read("quantum_to", Vec3.CODEC);
 			if (from.isPresent() && to.isPresent()) {
-				jump = new QuantumJump(target, from.get(), to.get(), input.getIntOr("quantum_elapsed", 0));
+				// Saves from before moving orbits have no separate drop-out point: the end was physical then.
+				Vec3 arrival = input.read("quantum_arrival", Vec3.CODEC).orElse(to.get());
+				jump = new QuantumJump(target, from.get(), to.get(), arrival, input.getIntOr("quantum_elapsed", 0));
 				entityData.set(QT_STATE, QT_TRAVEL);
 				entityData.set(QT_TARGET, target.identifier().toString());
 			}
@@ -3015,6 +3023,7 @@ public class ShipEntity extends Entity {
 			output.store("quantum_target", ResourceKey.codec(com.starwake.planet.Planets.REGISTRY_KEY), jump.target());
 			output.store("quantum_from", Vec3.CODEC, jump.from());
 			output.store("quantum_to", Vec3.CODEC, jump.to());
+			output.store("quantum_arrival", Vec3.CODEC, jump.arrival());
 			output.putInt("quantum_elapsed", jump.elapsed());
 		}
 		if (structure != null) {

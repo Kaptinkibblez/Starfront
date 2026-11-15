@@ -127,7 +127,7 @@ public final class StarSystems {
 		// The star, and its companion on a close orbit (planets circle both, outside it).
 		List<PlanetRef> stars = new ArrayList<>();
 		double starRadius = Math.clamp(star.radius() * SOLAR_RADIUS, 32, 900_000);
-		stars.add(starRef(id + "/star", star.name(), spaceKey, Vec3.ZERO, starRadius, star.color(), id));
+		stars.add(starRef(id + "/star", star.name(), spaceKey, Vec3.ZERO, starRadius, star.color(), id, star.mass()));
 		double minOrbit = Math.max(starRadius * 8, 150_000);
 		double luminosity = star.luminosity();
 		if (star.companion().isPresent()) {
@@ -136,7 +136,7 @@ public final class StarSystems {
 			double separation = Math.max((starRadius + cr) * 6, 300_000 + r.nextDouble() * 900_000);
 			double angle = r.nextDouble() * Math.PI * 2;
 			stars.add(starRef(id + "/companion", star.name() + " B", spaceKey,
-					new Vec3(Math.cos(angle) * separation, 0, Math.sin(angle) * separation), cr, c.color() | 0xFF000000, id));
+					new Vec3(Math.cos(angle) * separation, 0, Math.sin(angle) * separation), cr, c.color() | 0xFF000000, id, c.mass()));
 			minOrbit = Math.max(minOrbit, separation * 3);
 			luminosity += c.luminosity();
 		}
@@ -192,9 +192,9 @@ public final class StarSystems {
 	}
 
 	private static PlanetRef starRef(String path, String name, ResourceKey<net.minecraft.world.level.Level> space, Vec3 position,
-			double radius, int color, String system) {
+			double radius, int color, String system, double mass) {
 		Body body = new Body(Optional.of(Component.literal(name)), position, radius, 0, 20000, color | 0xFF000000,
-				color | 0xFF000000, color | 0xFF000000, true);
+				color | 0xFF000000, color | 0xFF000000, true, Math.clamp(mass, 0.01, 1000));
 		Planet planet = new Planet(Component.literal(name), space, 0.15, false, Optional.of(body), 0, SPACE_HAZARDS, Optional.empty(), system);
 		return new PlanetRef(ResourceKey.create(Planets.REGISTRY_KEY, StarwakeMod.id(path)), planet);
 	}

@@ -211,20 +211,38 @@ public final class SpaceTravel {
 	// Quantum routes
 	// =========================================================================================
 
-	/** A possible quantum jump from where the ship is now. */
+	/**
+	 * A possible quantum jump from where the ship is now. {@code from} and {@code arrivalSystem} are system
+	 * coordinates (bodies where they really are, see {@link SolarSystem}); {@code arrival} is the physical drop-out
+	 * point inside the target's neighbourhood.
+	 */
 	public record Route(SolarSystem.Entry target, Vec3 arrival, double distance, int fuel, double ticks,
-			SolarSystem.@Nullable Entry obstruction, boolean tooClose) {}
+			SolarSystem.@Nullable Entry obstruction, boolean tooClose, Vec3 from, Vec3 arrivalSystem) {
+		/** Direction to fly, in system coordinates (the same in physical space: frames only translate). */
+		public Vec3 direction() {
+			return arrivalSystem.subtract(from).normalize();
+		}
+	}
 
 	public static Route route(ShipEntity ship, SolarSystem.Entry target) {
 		ShipPhysics physics = ShipPhysics.get();
-		Vec3 from = ship.position();
-		Vec3 arrival = SolarSystem.arrivalPoint(target, from, physics.quantumStandoff());
+		double t = SolarSystem.time(ship.level());
+		Vec3 from = SolarSystem.toSystem(ship.level(), ship.position());
+		// Aim where the target will be when the jump ends (two passes: the trip time barely changes).
+		Vec3 centre = target.at(t);
+		Vec3 arrival = SolarSystem.arrivalPoint(centre, target, from, physics.quantumStandoff());
+		double ticks = 0;
+		for (int pass = 0; pass < 2; pass++) {
+			ticks = SolarSystem.travelTicks(from.distanceTo(arrival), physics.quantumSpeed(), physics.quantumRamp());
+			centre = target.at(t + ticks);
+			arrival = SolarSystem.arrivalPoint(centre, target, from, physics.quantumStandoff());
+		}
 		double distance = from.distanceTo(arrival);
-		boolean tooClose = from.distanceTo(target.body().position()) - target.body().entryRadius()
-				< physics.quantumMinDistance();
-		var obstruction = SolarSystem.obstruction(ship.level(), from, arrival, target.key()).orElse(null);
-		return new Route(target, arrival, distance, physics.quantumFuel(distance),
-				SolarSystem.travelTicks(distance, physics.quantumSpeed(), physics.quantumRamp()), obstruction, tooClose);
+		ticks = SolarSystem.travelTicks(distance, physics.quantumSpeed(), physics.quantumRamp());
+		boolean tooClose = from.distanceTo(target.at(t)) - target.body().entryRadius() < physics.quantumMinDistance();
+		var obstruction = SolarSystem.obstruction(ship.level(), from, arrival, target.key(), t).orElse(null);
+		Vec3 physical = SolarSystem.toPhysical(target, arrival, t + ticks);
+		return new Route(target, physical, distance, physics.quantumFuel(distance), ticks, obstruction, tooClose, from, arrival);
 	}
 
 	/** Quantum destinations from where the ship is, nearest first. */

@@ -85,8 +85,17 @@ public final class SpaceRenderer {
 
 	/** Where the camera "really" is in the system: camera + any quantum travel offset. */
 	public static Vec3 systemPosition(Vec3 camera, float partialTick) {
+		Minecraft minecraft = Minecraft.getInstance();
+		Vec3 system = minecraft.level == null ? camera
+				: SolarSystem.toSystem(SolarSystem.bodies(minecraft.level), camera, time(partialTick));
 		ShipEntity ship = localShip();
-		return ship == null || !ship.isQuantumTravelling() ? camera : camera.add(ship.quantumOffset(partialTick));
+		return ship == null || !ship.isQuantumTravelling() ? system : system.add(ship.quantumOffset(partialTick));
+	}
+
+	/** Orbit time for this frame (game time plus the partial tick, so bodies glide). */
+	public static double time(float partialTick) {
+		Minecraft minecraft = Minecraft.getInstance();
+		return minecraft.level == null ? 0 : SolarSystem.time(minecraft.level) + partialTick;
 	}
 
 	private record Draw(Body body, int[][] surface, double scale, Vec3 centre, Vec3 toStar) {}
@@ -100,18 +109,20 @@ public final class SpaceRenderer {
 		double reach = Math.min(camera.depthFar * 0.6, 1400);
 
 		List<SolarSystem.Entry> bodies = SolarSystem.bodies(minecraft.level);
+		double t = time(partial);
 		Vec3 starPos = bodies.stream().filter(e -> e.body().star()).map(e -> e.body().position()).findFirst().orElse(Vec3.ZERO);
 
 		// Far to near, so nearer bodies paint over farther ones.
 		List<Draw> draws = new ArrayList<>();
 		for (SolarSystem.Entry entry : bodies) {
 			Body body = entry.body();
-			Vec3 rel = body.position().subtract(eye);
+			Vec3 at = entry.at(t);
+			Vec3 rel = at.subtract(eye);
 			double distance = rel.length();
 			if (distance <= body.radius() * 1.001) continue; // inside it (you'd be on the surface by now)
 			double k = Math.min(1.0, reach / distance);
 			int[][] surface = SURFACE.computeIfAbsent(entry.key(), key -> surfaceColors(body, key.identifier().hashCode()));
-			draws.add(new Draw(body, surface, k, rel.scale(k), body.star() ? Vec3.ZERO : starPos.subtract(body.position()).normalize()));
+			draws.add(new Draw(body, surface, k, rel.scale(k), body.star() ? Vec3.ZERO : starPos.subtract(at).normalize()));
 		}
 		draws.sort((a, b) -> Double.compare(b.centre.lengthSqr() / (b.scale * b.scale), a.centre.lengthSqr() / (a.scale * a.scale)));
 
