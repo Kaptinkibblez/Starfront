@@ -97,11 +97,13 @@ public final class ShipMaterials {
 			return new Rating(base.mass() <= 0 ? 1 : stats.mass() / base.mass(), base.heatLimit(), base.armor(), stats);
 		}
 		ShipStats.BlockStats stats = base;
-		if (material == null) return new Rating(1, stats.heatLimit(), stats.armor(), stats);
+		// Hull panels (M9 pass 3) weigh what their shape holds.
+		double fill = state.getBlock() instanceof com.starwake.ship.block.HullPanelBlock ? com.starwake.ship.block.HullPanelBlock.volume(state) : 1;
+		if (material == null) return new Rating(fill, stats.heatLimit(), stats.armor(), stats);
 		HullTuning tuning = HullTuning.get();
 		MaterialProperties p = material.properties();
 		double toughness = p.tensileStrength() * Math.min(40, p.elongation());
 		double armor = stats.armor() * Math.max(0.1, Math.min(5, toughness / tuning.referenceToughness()));
-		return new Rating(p.density() / tuning.referenceDensity(), p.serviceTemp(), armor, stats);
+		return new Rating(fill * p.density() / tuning.referenceDensity(), p.serviceTemp(), armor, stats);
 	}
 }

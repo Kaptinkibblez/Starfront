@@ -588,6 +588,9 @@ public class ShipEntity extends Entity {
 			return !state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.OPEN)
 					|| !state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.OPEN);
 		}
+		// Hull panels seal unless they're open frames or pillars (M9 pass 3); hull stairs and slabs are airtight pieces too.
+		if (state.getBlock() instanceof com.starwake.ship.block.HullPanelBlock) return state.getValue(com.starwake.ship.block.HullPanelBlock.SHAPE).seals();
+		if (state.is(com.starwake.registry.ModBlocks.HULL_PLATING_STAIRS) || state.is(com.starwake.registry.ModBlocks.HULL_PLATING_SLAB)) return true;
 		return state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
 	}
 

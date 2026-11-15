@@ -49,6 +49,11 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				stairBuilder(com.starwake.registry.ModBlocks.HULL_PLATING_STAIRS, net.minecraft.world.item.crafting.Ingredient.of(com.starwake.registry.ModBlocks.HULL_PLATING))
 						.unlockedBy("has_hull", has(com.starwake.registry.ModBlocks.HULL_PLATING)).save(output);
 				slab(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.HULL_PLATING_SLAB, com.starwake.registry.ModBlocks.HULL_PLATING);
+				// Hull Panels (M9 pass 3): plain steel from plating (the Fabricator makes them in any alloy), and the Hull Tool.
+				stonecutterResultFromBase(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.HULL_PANEL, com.starwake.registry.ModBlocks.HULL_PLATING, 2);
+				shaped(RecipeCategory.TOOLS, com.starwake.registry.ModItems.HULL_TOOL).pattern(" IC").pattern(" SI").pattern("S  ")
+						.define('I', Items.IRON_INGOT).define('C', Items.COPPER_INGOT).define('S', Items.STICK)
+						.unlockedBy("has_hull", has(com.starwake.registry.ModBlocks.HULL_PLATING)).save(output);
 				shaped(RecipeCategory.REDSTONE, ModMachines.FLUID_TANK).pattern("IGI").pattern("G G").pattern("IGI")
 						.define('I', Items.IRON_INGOT).define('G', Items.GLASS).unlockedBy("has_glass", has(Items.GLASS)).save(output);
 				shaped(RecipeCategory.REDSTONE, ModMachines.CONVEYOR, 6).pattern("KKK").pattern("IRI")

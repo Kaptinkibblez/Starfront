@@ -847,7 +847,28 @@ normal gravity.
   - Measured (212,065 blocks, 150x60x80): assembly ~3.5 s once (lift + plot write 2.5 s), model 0.4 s server / 0.36 s
     client on load, full mesh 0.5-1 s, physics ~1 ms/step (1071 probes), a block edit 0-2 ms on the server and ~9 ms
     for its mesh section. Admin: `/starwake ship assemble <helm> force` skips the pre-flight verdict.
-- Known limits: assembly and the first load of a 200k ship still take seconds; radiation from machines aboard isn't counted for nearby players; block entities aboard only tick
+- **Pass 3b, Hull Panels (2026-11-15):** `starwake:hull_panel` (`ship/block/HullPanelBlock`, extends `HullPlatingBlock` so it
+  keeps its alloy; mass x the shape's filled volume) with `shape` (22 `ship/panel/PanelShape`s in four families: slopes 1:1,
+  1:2 low/high, 1:4 a-d, outer/inner corner, peak; quarter round, cove, rounded corner, cylinder, half round; half/quarter
+  plate, angled armour plate, fin; open frame, lattice beam, rib) and `orient` (24 rotations: up x four fronts).
+  - *Geometry* (`ship/panel/PanelGeometry`, both sides): each shape is a union of solids (2D profiles extruded along an
+    axis, or faceted solids for corners) answering `inside(x, y, z)` and listing faces; faces are wound outward by probing
+    `inside` and dropped when buried in another part. Collision and occlusion = a 16^3 voxelisation merged into boxes; the
+    selection outline is a 4^3 one (16 steps drew as stripes) unless that's empty (fins). Rotations come from vanilla
+    `OctahedralGroup` (proper ones only); model space has up = +Y and front = -Z.
+  - *Rendering* (`client/ship/HullPanelModel`): a Fabric `ModelLoadingPlugin` block-state resolver bakes each state's faces
+    into `BakedQuad`s (triangles = a repeated corner) with the hull plating texture projected on each face's dominant
+    axis; faces on the cube boundary are cull faces. The datagen blockstate (stairs model) only satisfies validation; the
+    item shows the stairs model. Ships draw panels through the same baked model.
+  - *Placing:* up = the clicked face, front = toward the player. The item's `block_state` component presets the shape
+    (the creative tab lists every shape). *Hull Tool* (`ship/item/HullToolItem`): use on a panel = next shape in the tool's
+    family (a panel from another family jumps to it); sneak-use = turn a quarter about up; use in the air = next family.
+    Works aboard ships through the plot. Seals: every shape except frames, lattice, rib, cylinder, half round and fin
+    (`PanelShape.seals`); hull stairs and slabs now seal too.
+  - Recipes: stonecutter hull plating -> 2 panels (plain steel); Fabricator 2 plates -> 8 panels (keeps the alloy); Hull
+    Tool from iron, copper and sticks.
+- Known limits: assembly and the first load of a 200k ship still take seconds; Hull Panels mirror as a turn (asymmetric
+  shapes aren't flipped); radiation from machines aboard isn't counted for nearby players; block entities aboard only tick
   chest lids on the client (no bell swing or campfire smoke yet); contacts beyond entity tracking range aren't shown.
 
 ## How ship editing works (Milestone 4)

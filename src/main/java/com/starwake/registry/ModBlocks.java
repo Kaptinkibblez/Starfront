@@ -55,6 +55,17 @@ public final class ModBlocks {
 					.sound(SoundType.METAL)
 					.requiresCorrectToolForDrops());
 
+	/**
+	 * Hull Panel (M9 pass 3): shape-cycling hull piece (slopes, curves, plates, frames) that keeps its alloy. Reshaped
+	 * with the Hull Tool.
+	 */
+	public static final Block HULL_PANEL = register("hull_panel", com.starwake.ship.block.HullPanelBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.METAL)
+					.strength(5.0f, 6.0f)
+					.sound(SoundType.METAL)
+					.requiresCorrectToolForDrops());
+
 	/** Regolith: the bedrock-to-surface stone of rocky planets (Veyra's "stone"). */
 	public static final Block REGOLITH = register("regolith", Block::new,
 			BlockBehaviour.Properties.of()

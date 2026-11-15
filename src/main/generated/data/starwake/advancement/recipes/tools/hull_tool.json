@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_hull": {
+      "conditions": {
+        "items": [
+          {
+            "items": "starwake:hull_plating"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "starwake:hull_tool"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_hull"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "starwake:hull_tool"
+    ]
+  }
+}

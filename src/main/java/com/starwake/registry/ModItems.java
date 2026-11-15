@@ -31,6 +31,9 @@ public final class ModItems {
 	public static final Item SURVEY_SUIT = register("survey_suit", com.starwake.planet.SurveySuitItem::new,
 			new Item.Properties().humanoidArmor(SURVEY_SUIT_MATERIAL, net.minecraft.world.item.equipment.ArmorType.CHESTPLATE));
 
+	/** Hull Tool (M9 pass 3): cycles a Hull Panel's shape, turns it, switches shape family. */
+	public static final Item HULL_TOOL = register("hull_tool", com.starwake.ship.item.HullToolItem::new, new Item.Properties().stacksTo(1));
+
 	private ModItems() {}
 
 	/** Registers an item under {@code starwake:<name>}. */

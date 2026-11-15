@@ -18,6 +18,7 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 	public void generate() {
 		// Hull plating keeps its alloy (M8e-1); every Mk tier of every ship part keeps its material and quality (M8e-2).
 		materialDrop(ModBlocks.HULL_PLATING);
+		materialDrop(ModBlocks.HULL_PANEL);
 		dropSelf(ModBlocks.CANOPY_GLASS);
 		dropSelf(ModBlocks.HULL_PLATING_STAIRS);
 		add(ModBlocks.HULL_PLATING_SLAB, createSlabItemTable(ModBlocks.HULL_PLATING_SLAB));

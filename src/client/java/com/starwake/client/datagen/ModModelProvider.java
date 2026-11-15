@@ -31,6 +31,11 @@ public final class ModModelProvider extends FabricModelProvider {
 		// Plain full cube: textures/block/<name>.png on all six faces.
 		generators.family(ModBlocks.HULL_PLATING).stairs(ModBlocks.HULL_PLATING_STAIRS).slab(ModBlocks.HULL_PLATING_SLAB);
 		generators.createTrivialCube(ModBlocks.CANOPY_GLASS);
+		// Hull Panel (M9 pass 3): rendered by client/ship/HullPanelModel (a block-state resolver that bakes every shape);
+		// this blockstate only satisfies validation. The item shows the stairs model.
+		net.minecraft.resources.Identifier stairs = net.minecraft.client.data.models.model.ModelLocationUtils.getModelLocation(ModBlocks.HULL_PLATING_STAIRS);
+		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(ModBlocks.HULL_PANEL, BlockModelGenerators.plainVariant(stairs)));
+		generators.registerSimpleItemModel(ModBlocks.HULL_PANEL.asItem(), stairs);
 		generators.createTrivialCube(ModBlocks.REGOLITH);
 		generators.createTrivialCube(ModBlocks.RUST_SAND);
 		generators.createTrivialCube(ModBlocks.FERRITE_ORE);
@@ -209,6 +214,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.generateFlatItem(ModItems.RAW_FERRITE, ModelTemplates.FLAT_ITEM);
 		ModPlanetBlocks.ores().forEach(ore -> generators.generateFlatItem(ore.raw(), ModelTemplates.FLAT_ITEM));
 		generators.generateFlatItem(ModItems.SURVEY_SUIT, ModelTemplates.FLAT_ITEM);
+		generators.generateFlatItem(ModItems.HULL_TOOL, ModelTemplates.FLAT_HANDHELD_ITEM);
 		generators.generateFlatItem(com.starwake.registry.ModHubBlocks.SEALED_CARGO, ModelTemplates.FLAT_ITEM);
 		generators.generateFlatItem(com.starwake.registry.ModProcess.GAS_CYLINDER, ModelTemplates.FLAT_ITEM);
 		com.starwake.registry.ModMetalworks.moulds().forEach(m -> generators.generateFlatItem(m, ModelTemplates.FLAT_ITEM));
