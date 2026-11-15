@@ -85,6 +85,17 @@ public final class SpaceTravel {
 			ship.setDeltaMovement(ship.getDeltaMovement().multiply(1, 0, 1));
 		}
 
+		// Moons (M9): flying into where a moon really is moves you into its neighbourhood, and back out.
+		Vec3 moonFrame = moonTransfer(level, ship.position());
+		if (moonFrame != null) {
+			boolean moved = jump(ship, moonFrame);
+			if (moved && ship.getFirstPassenger() instanceof ServerPlayer pilot) {
+				var frame = SolarSystem.frameOf(SolarSystem.bodies(level), moonFrame);
+				if (frame != null) pilot.sendOverlayMessage(Component.translatable("message.starwake.moon_space", frame.displayName()));
+			}
+			return moved;
+		}
+
 		// Flying into a planet's atmosphere takes you down to its surface.
 		for (SolarSystem.Entry body : SolarSystem.bodies(level)) {
 			double distance = ship.position().distanceTo(body.body().position());
@@ -181,6 +192,31 @@ public final class SpaceTravel {
 					? "message.starwake.entered_space" : "message.starwake.entered_atmosphere", planetName(to, to.dimension())));
 		}
 		return true;
+	}
+
+	/**
+	 * Where a ship at {@code physical} should be moved to change frames (M9), or null: from a planet's neighbourhood
+	 * into a moon's when its system position is inside the moon's capture radius; from a moon's back into its
+	 * planet's when it's 25% beyond (hysteresis). The system position stays the same either way.
+	 */
+	public static @Nullable Vec3 moonTransfer(Level level, Vec3 physical) {
+		List<SolarSystem.Entry> bodies = SolarSystem.bodies(level);
+		SolarSystem.Entry frame = SolarSystem.frameOf(bodies, physical);
+		if (frame == null || frame.orbit() == null) return null;
+		double t = SolarSystem.time(level);
+		Vec3 system = physical.add(frame.drift(t));
+		if (frame.planet().isMoon()) {
+			if (physical.distanceTo(frame.body().position()) <= 1.25 * SolarSystem.captureRadius(frame)) return null;
+			for (SolarSystem.Entry parent : bodies) {
+				if (parent.key().equals(frame.planet().parent().orElse(null))) return SolarSystem.toPhysical(parent, system, t);
+			}
+			return null;
+		}
+		for (SolarSystem.Entry moon : bodies) {
+			if (!moon.planet().parent().map(frame.key()::equals).orElse(false)) continue;
+			if (system.distanceTo(moon.at(t)) < SolarSystem.captureRadius(moon)) return SolarSystem.toPhysical(moon, system, t);
+		}
+		return null;
 	}
 
 	/** Completes a quantum jump: moves the ship and crew to {@code arrival} in the same level. */

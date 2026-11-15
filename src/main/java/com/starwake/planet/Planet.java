@@ -26,9 +26,19 @@ import net.minecraft.world.level.Level;
  * @param hazards     air, toxicity and temperature for unprotected players (M5)
  * @param archetype   for procedural planets: the archetype's display name ("Frozen world")
  * @param system      the star system it belongs to (M6): {@code solace} or a galaxy system id
+ * @param parent      for a moon (M9): the planet it circles
  */
 public record Planet(Component name, ResourceKey<Level> dimension, double gravity, boolean destination, Optional<Body> body,
-		double airDensity, Hazards hazards, Optional<Component> archetype, String system) {
+		double airDensity, Hazards hazards, Optional<Component> archetype, String system, Optional<ResourceKey<Planet>> parent) {
+	public Planet(Component name, ResourceKey<Level> dimension, double gravity, boolean destination, Optional<Body> body,
+			double airDensity, Hazards hazards, Optional<Component> archetype, String system) {
+		this(name, dimension, gravity, destination, body, airDensity, hazards, archetype, system, Optional.empty());
+	}
+
+	public boolean isMoon() {
+		return parent.isPresent();
+	}
+
 	public static final Codec<Planet> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ComponentSerialization.CODEC.fieldOf("name").forGetter(Planet::name),
 			Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(Planet::dimension),
@@ -38,6 +48,7 @@ public record Planet(Component name, ResourceKey<Level> dimension, double gravit
 			Codec.doubleRange(0.0, 10.0).optionalFieldOf("air_density", 1.0).forGetter(Planet::airDensity),
 			Hazards.CODEC.optionalFieldOf("hazards", Hazards.EARTHLIKE).forGetter(Planet::hazards),
 			ComponentSerialization.CODEC.optionalFieldOf("archetype").forGetter(Planet::archetype),
-			Codec.STRING.optionalFieldOf("system", "solace").forGetter(Planet::system)
+			Codec.STRING.optionalFieldOf("system", "solace").forGetter(Planet::system),
+			ResourceKey.codec(Planets.REGISTRY_KEY).optionalFieldOf("parent").forGetter(Planet::parent)
 	).apply(instance, Planet::new));
 }

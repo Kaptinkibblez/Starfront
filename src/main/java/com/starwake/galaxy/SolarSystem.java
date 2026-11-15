@@ -143,19 +143,29 @@ public final class SolarSystem {
 	// Veyra (5.6 Mm) ~40.
 	//
 	// Local frames: each body keeps a fixed neighbourhood in the space dimension around its JSON position
-	// (where you fly, where stations and builds stand). Inside it, space is the body's own frame, carried
-	// along its orbit; between neighbourhoods space stays where it is (quantum travel skips that gap). So the
-	// directions and distances you see and fly by (other bodies, phases, quantum routes) follow the moving
-	// orbits, while nothing built in space is ever left behind.
+	// (where you fly, where stations and builds stand); every point belongs to the nearest one. Space there is
+	// the body's own frame, carried along its orbit (quantum travel crosses between them). So the directions
+	// and distances you see and fly by (other bodies, phases, quantum routes) follow the moving orbits, while
+	// nothing built in space is ever left behind.
+	//
+	// Moons circle their planet (period MOON_PERIOD_AT_100KM x (d / 100 km)^1.5 / sqrt(planet mass)); their
+	// neighbourhoods sit ~1,000 km from the planet's. A ship flying into a moon's capture radius (where the
+	// moon really is) moves into the moon's neighbourhood at the matching point, and back out again
+	// (SpaceTravel.tickMoonFrames).
 
 	/** Orbital period at 1 Mm around one solar mass, in ticks (3 in-game days). */
 	public static final double PERIOD_AT_1MM = 72_000;
+	/** A moon's period at 100 km around an Overworld-mass planet, in ticks (4 in-game days). */
+	public static final double MOON_PERIOD_AT_100KM = 96_000;
+	/** Extra room around a moon in which space is the moon's frame (a ship flying into it transfers there). */
+	public static final double MOON_CAPTURE = 20_000;
 
-	/** A circular orbit in the slab's plane. */
-	public record Orbit(Vec3 centre, double radius, double phase, double height, double period) {
+	/** A circular orbit in the slab's plane, around a fixed centre or around another orbit (moons). */
+	public record Orbit(Vec3 centre, double radius, double phase, double height, double period, @Nullable Orbit around) {
 		public Vec3 at(double t) {
 			double a = phase + 2 * Math.PI * (t / period);
-			return new Vec3(centre.x + radius * Math.cos(a), height, centre.z + radius * Math.sin(a));
+			Vec3 c = around == null ? centre : around.at(t);
+			return new Vec3(c.x + radius * Math.cos(a), around == null ? height : c.y, c.z + radius * Math.sin(a));
 		}
 	}
 
@@ -169,17 +179,34 @@ public final class SolarSystem {
 		}
 		if (mass <= 0) return entries;
 		Vec3 centre = new Vec3(cx / mass, 0, cz / mass);
+		java.util.Map<ResourceKey<Planet>, Entry> planets = new java.util.HashMap<>();
 		List<Entry> out = new ArrayList<>();
 		for (Entry e : entries) {
-			if (e.body().star()) {
-				out.add(e);
-				continue;
-			}
+			if (e.body().star() || e.body().moonOrbit().isPresent()) continue;
 			Vec3 p = e.body().position();
 			double radius = Math.hypot(p.x - centre.x, p.z - centre.z);
 			double period = PERIOD_AT_1MM * Math.pow(radius / 1.0e6, 1.5) / Math.sqrt(mass);
-			out.add(new Entry(e.key(), e.planet(), e.body(),
-					new Orbit(centre, radius, Math.atan2(p.z - centre.z, p.x - centre.x), p.y, Math.max(period, 2400))));
+			planets.put(e.key(), new Entry(e.key(), e.planet(), e.body(),
+					new Orbit(centre, radius, Math.atan2(p.z - centre.z, p.x - centre.x), p.y, Math.max(period, 2400), null)));
+		}
+		for (Entry e : entries) {
+			if (e.body().star()) {
+				out.add(e);
+			} else if (e.body().moonOrbit().isPresent()) {
+				Entry parent = e.planet().parent().map(planets::get).orElse(null);
+				if (parent == null || parent.orbit() == null) {
+					out.add(e);
+					continue;
+				}
+				var m = e.body().moonOrbit().get();
+				// Planet mass relative to the Overworld's, from surface gravity and radius (M ~ g r^2).
+				double rel = Math.max(0.01, parent.planet().gravity() * Math.pow(parent.body().radius() / 4000.0, 2));
+				double period = MOON_PERIOD_AT_100KM * Math.pow(m.distance() / 1.0e5, 1.5) / Math.sqrt(rel);
+				out.add(new Entry(e.key(), e.planet(), e.body(),
+						new Orbit(Vec3.ZERO, m.distance(), m.phase(), 0, Math.max(period, 2400), parent.orbit())));
+			} else {
+				out.add(planets.get(e.key()));
+			}
 		}
 		return out;
 	}
@@ -192,25 +219,36 @@ public final class SolarSystem {
 		return level.getOverworldClockTime();
 	}
 
-	/** Neighbourhood radius: inside, space moves with the body; out to twice this it blends into fixed space. */
-	public static double neighbourhood(Body body) {
-		return body.entryRadius() + 60_000;
+	/**
+	 * The body whose frame a point of the space dimension is in: the one whose neighbourhood centre (its JSON
+	 * position) is nearest. Neighbourhoods are hundreds of km apart, so nobody flies across a boundary except
+	 * through quantum travel or a moon transfer.
+	 */
+	public static @Nullable Entry frameOf(List<Entry> bodies, Vec3 physical) {
+		Entry best = null;
+		double bestDistance = Double.MAX_VALUE;
+		for (Entry e : bodies) {
+			double d = physical.distanceToSqr(e.body().position());
+			if (d < bestDistance) {
+				bestDistance = d;
+				best = e;
+			}
+		}
+		return best;
 	}
 
 	/**
-	 * A point of the space dimension in system coordinates (where it really is at time {@code t}): inside a body's
-	 * neighbourhood, carried along that body's orbit.
+	 * A point of the space dimension in system coordinates (where it really is at time {@code t}): carried along
+	 * the orbit of the body whose neighbourhood it's in.
 	 */
 	public static Vec3 toSystem(List<Entry> bodies, Vec3 physical, double t) {
-		for (Entry e : bodies) {
-			if (e.orbit() == null) continue;
-			double n = neighbourhood(e.body());
-			double d = physical.distanceTo(e.body().position());
-			if (d >= 2 * n) continue;
-			double w = d <= n ? 1 : 1 - (d - n) / n;
-			return physical.add(e.drift(t).scale(w));
-		}
-		return physical;
+		Entry frame = frameOf(bodies, physical);
+		return frame == null ? physical : physical.add(frame.drift(t));
+	}
+
+	/** Radius around a moon (where it really is) inside which space is the moon's own frame. */
+	public static double captureRadius(Entry moon) {
+		return moon.body().entryRadius() + MOON_CAPTURE;
 	}
 
 	public static Vec3 toSystem(Level level, Vec3 physical) {

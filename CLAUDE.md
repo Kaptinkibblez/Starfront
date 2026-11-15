@@ -1117,7 +1117,25 @@ normal gravity.
     jump ends (two passes); `Route.arrival` = the physical drop-out point in the target's neighbourhood. `QuantumJump`
     holds from/to in system coordinates plus `arrival` (saved as `quantum_arrival`; older saves fall back to `to`).
     `QT_OFFSET` = the travelled system point minus the hull's own system position.
-  - Admin: `/starwake galaxy orbits` (radius, period, position now, distance from the neighbourhood).
+  - Admin: `/starwake galaxy orbits` (radius, period, position now, distance from the neighbourhood; for moons, where they
+    appear in their planet's neighbourhood and their capture radius).
+- **Moons** (`ProceduralPlanets.moons`, called for every planet at home, hand-made ones included, and per planet in
+  `StarSystems.plan`): 0-1 (radius < 1.8 km), 0-2 (< 3.5 km) or 1-3 moons; barren, frozen or volcanic (the first may be
+  tidally heated, +40 C), radius 12-30% of the parent's (300-2500), gravity from size, airless, the barren (black, vacuum)
+  sky whatever the terrain. Ids `<parent path>_m<n>` (`starwake:overworld_m1`), names from `PlanetNames`, archetype label
+  "Barren/Frozen/Volcanic moon"; `Planet.parent` links them. Each is a Fantasy level like any procedural planet.
+  - `Body.moonOrbit` (distance, phase): first moon 12-18 entry radii out (>= 30 km), each next x1.6-2.4. Period =
+    `MOON_PERIOD_AT_100KM` (96,000 ticks) x (d / 100 km)^1.5 / sqrt(g r^2 relative to the Overworld). `Orbit.around` = the
+    parent's orbit, so moons ride along with it.
+  - A moon's `position` is only its neighbourhood, ~900 km + 350 km per index from the parent's (>= 400 km from
+    everything). Frames: every point of space belongs to the body whose neighbourhood centre is nearest (`frameOf`).
+  - **Moon transfer** (`SpaceTravel.moonTransfer`, in `checkAltitude`): a ship in a planet's frame whose system position
+    comes within `captureRadius` (moon entry radius + 20 km) of where a moon really is jumps (same level, crew carried) to
+    the matching point of the moon's neighbourhood; a ship more than 1.25x that from the moon's centre jumps back into the
+    planet's. The system position doesn't change, so it's invisible (overlay "Approaching <moon/planet>"). Quantum travel
+    to a moon lands in its neighbourhood directly.
+  - Verified 2026-11-15: 17 moons around Solace (Overworld 3, Veyra 1); a Kestrel flown from 22 km toward Brameolvax moved
+    into its neighbourhood at 16 km with every other marker continuous; frozen and volcanic moon surfaces load.
 
 ## How trading works (Milestone 7)
 

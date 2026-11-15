@@ -160,7 +160,12 @@ public final class StarSystems {
 			long seed = RandomSupport.mixStafford13(star.seed() + n * 0x9E3779B97F4A7C15L);
 			planets.add(ProceduralPlanets.create(archetype, pid, id, seed, taken, distance, scale));
 		}
-		Plan plan = new Plan(List.copyOf(stars), List.copyOf(planets));
+		// Moons (M9) for each planet.
+		List<ProceduralPlanets.Generated> withMoons = new ArrayList<>(planets);
+		for (ProceduralPlanets.Generated g : planets) {
+			withMoons.addAll(ProceduralPlanets.moons(access, g.ref(), RandomSupport.mixStafford13(star.seed() ^ g.ref().key().identifier().hashCode()), taken));
+		}
+		Plan plan = new Plan(List.copyOf(stars), List.copyOf(withMoons));
 		PLANS.put(star.id(), plan);
 		return plan;
 	}

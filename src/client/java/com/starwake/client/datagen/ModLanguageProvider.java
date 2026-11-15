@@ -807,6 +807,10 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("planet.starwake.veyra", "Veyra");
 		builder.add("planet.starwake.overworld", "Overworld");
 		builder.add("planet.starwake.space", "Deep Space");
+		builder.add("planet.starwake.moon.barren", "Barren moon");
+		builder.add("message.starwake.moon_space", "Approaching %s");
+		builder.add("planet.starwake.moon.frozen", "Frozen moon");
+		builder.add("planet.starwake.moon.volcanic", "Volcanic moon");
 
 		// Commands
 		builder.add("commands.starwake.planet.unknown", "Unknown planet: %s");

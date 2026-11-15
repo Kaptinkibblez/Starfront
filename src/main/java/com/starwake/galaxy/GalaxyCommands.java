@@ -65,6 +65,15 @@ public final class GalaxyCommands {
 			ctx.getSource().sendSuccess(() -> Component.literal(String.format(java.util.Locale.ROOT,
 					"%s: a %.2f Mm, period %.1f days, now (%.0f, %.0f), %.0f km from its neighbourhood",
 					e.displayName().getString(), e.orbit().radius() / 1e6, days, at.x, at.z, e.drift(t).length() / 1000)), false);
+			e.planet().parent().ifPresent(parentKey -> {
+				for (SolarSystem.Entry parent : SolarSystem.bodies(level)) {
+					if (!parent.key().equals(parentKey)) continue;
+					var seen = SolarSystem.toPhysical(parent, at, t);
+					ctx.getSource().sendSuccess(() -> Component.literal(String.format(java.util.Locale.ROOT,
+							"  moon of %s, seen in its neighbourhood at (%.0f, %.0f, %.0f), capture %.0f km",
+							parent.displayName().getString(), seen.x, seen.y, seen.z, SolarSystem.captureRadius(e) / 1000)), false);
+				}
+			});
 			n++;
 		}
 		final int count = n;

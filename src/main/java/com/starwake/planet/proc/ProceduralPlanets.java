@@ -165,8 +165,80 @@ public final class ProceduralPlanets {
 			long seed = RandomSupport.mixStafford13(worldSeed + index * 0x9E3779B97F4A7C15L);
 			result.add(create(archetype, StarwakeMod.id(SYSTEM + "_" + index), com.starwake.galaxy.Galaxy.HOME, seed, taken, Double.NaN, 1.0));
 		}
+		// Moons for every planet, hand-made (Overworld, Veyra) and generated.
+		List<PlanetRef> parents = new ArrayList<>();
+		Planets.registry(server).listElements().forEach(ref -> {
+			if (ref.value().destination() && ref.value().body().isPresent() && !ref.value().body().get().star()) {
+				parents.add(new PlanetRef(ref.key(), ref.value()));
+			}
+		});
+		result.forEach(g -> parents.add(g.ref()));
+		for (PlanetRef parent : parents) {
+			long seed = RandomSupport.mixStafford13(worldSeed ^ parent.key().identifier().toString().hashCode() * 0x632BE59BD9B4E019L);
+			result.addAll(moons(access, parent, seed, taken));
+		}
 		addSystem(com.starwake.galaxy.Galaxy.HOME, result, List.of());
 		result.forEach(ProceduralPlanets::log);
+	}
+
+	/**
+	 * Moons of one planet (M9): 0-1 for small planets, 0-2 for mid-size, 1-3 for large; airless barren, frozen or
+	 * volcanic (the innermost may be tidally heated), sized and weighted from the parent. Each orbits the parent
+	 * ({@link Body.MoonOrbit}); its {@code position} is its own neighbourhood in space, ~1,000 km from the parent's.
+	 */
+	public static List<Generated> moons(RegistryAccess access, PlanetRef parent, long seed, List<Vec3> taken) {
+		Body pb = parent.planet().body().orElse(null);
+		if (pb == null || parent.planet().isMoon()) return List.of();
+		Registry<PlanetArchetype> archetypes = access.lookupOrThrow(PlanetArchetype.REGISTRY_KEY);
+		RandomSource r = RandomSource.create(seed);
+		int count = pb.radius() < 1800 ? (r.nextDouble() < 0.4 ? 1 : 0)
+				: pb.radius() < 3500 ? r.nextInt(3) : 1 + r.nextInt(3);
+		List<Generated> out = new ArrayList<>();
+		// First moon 12-18 entry radii out: its capture sphere (+20 km) stays clear of ships leaving the planet.
+		double distance = Math.max(pb.entryRadius() * (12 + r.nextDouble() * 6), 30_000);
+		for (int n = 1; n <= count; n++) {
+			String type = n == 1 && r.nextDouble() < 0.3 ? "volcanic" : r.nextDouble() < 0.5 ? "frozen" : "barren";
+			var holder = archetypes.get(StarwakeMod.id(type)).orElse(null);
+			if (holder == null) continue;
+			final int index = n;
+			Identifier id = parent.key().identifier().withPath(path -> path + "_m" + index);
+			long moonSeed = RandomSupport.mixStafford13(seed + n * 0x9E3779B97F4A7C15L);
+			Generated base = create(holder, id, parent.planet().system(), moonSeed, new ArrayList<>(), 1.0e6, 1.0);
+			RandomSource mr = RandomSource.create(moonSeed ^ 0x5DEECE66DL);
+
+			// Its neighbourhood: well away from the parent's and everything else's.
+			Vec3 at = pb.position();
+			for (int attempt = 0; attempt < 24; attempt++) {
+				double angle = mr.nextDouble() * Math.PI * 2;
+				double away = 900_000 + 350_000 * (n - 1) + attempt * 50_000;
+				Vec3 p = pb.position().add(Math.cos(angle) * away, 0, Math.sin(angle) * away);
+				at = p;
+				if (taken.stream().allMatch(o -> o.distanceTo(p) > 400_000)) break;
+			}
+			taken.add(at);
+
+			double radius = Math.clamp(pb.radius() * (0.12 + mr.nextDouble() * 0.18), 300, 2500);
+			double gravity = Math.clamp(parent.planet().gravity() * radius / pb.radius() * (0.7 + mr.nextDouble() * 0.5), 0.05, 0.6);
+			float temperature = parent.planet().hazards().temperature() - 25 + (float) (mr.nextDouble() * 30)
+					+ (type.equals("volcanic") ? 40 : 0);
+			Body bb = base.ref().planet().body().orElseThrow();
+			Body body = new Body(Optional.empty(), at, radius, 0, 8000, bb.color(), bb.secondaryColor(), bb.atmosphereColor(), false, 1.0,
+					Optional.of(new Body.MoonOrbit(distance, mr.nextDouble() * Math.PI * 2)));
+			Planet b = base.ref().planet();
+			Planet planet = new Planet(b.name(), b.dimension(), gravity, true, Optional.of(body), 0,
+					new Hazards(false, 0, temperature), Optional.of(Component.translatable("planet.starwake.moon." + type)),
+					b.system(), Optional.of(parent.key()));
+			// Airless: every moon gets the black vacuum sky, whatever its terrain.
+			Spec spec = base.spec();
+			var airless = archetypes.get(StarwakeMod.id("barren"));
+			if (airless.isPresent() && !airless.get().value().dimensionTypes().isEmpty()) {
+				spec = new Spec(airless.get().value().dimensionTypes().getFirst(), spec.terrain(), spec.stone(), spec.fluid(),
+						spec.seaLevel(), spec.biomes(), spec.seed());
+			}
+			out.add(new Generated(new PlanetRef(base.ref().key(), planet), base.archetype(), spec));
+			distance *= 1.6 + mr.nextDouble() * 0.8;
+		}
+		return out;
 	}
 
 	public static void log(Generated g) {

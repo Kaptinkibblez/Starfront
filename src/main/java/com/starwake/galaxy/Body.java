@@ -27,15 +27,30 @@ import net.minecraft.world.phys.Vec3;
  * @param atmosphereColor glow around the limb
  * @param star         emissive light source (the planets are lit from it); can't be entered
  * @param mass         a star's mass in solar masses (sets its planets' orbital periods); ignored for planets
+ * @param moonOrbit    for a moon: its distance from the parent planet and starting angle (its {@code position} is
+ *                     then only its neighbourhood, placed well away from the parent's)
  *
  * <p>M9: {@code position} is the body's fixed <em>neighbourhood</em> in the space dimension (where you fly
  * around it, where stations stand) and its place at game time 0; the body itself orbits (see {@link SolarSystem}).
  */
 public record Body(Optional<Component> name, Vec3 position, double radius, double atmosphere, double worldRadius,
-		int color, int secondaryColor, int atmosphereColor, boolean star, double mass) {
+		int color, int secondaryColor, int atmosphereColor, boolean star, double mass, Optional<MoonOrbit> moonOrbit) {
+	/** A moon's orbit around its planet: distance (blocks) and the angle at time 0 (radians). */
+	public record MoonOrbit(double distance, double phase) {
+		public static final Codec<MoonOrbit> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.doubleRange(100, 1.0e7).fieldOf("distance").forGetter(MoonOrbit::distance),
+				Codec.DOUBLE.optionalFieldOf("phase", 0.0).forGetter(MoonOrbit::phase)
+		).apply(i, MoonOrbit::new));
+	}
+
 	public Body(Optional<Component> name, Vec3 position, double radius, double atmosphere, double worldRadius,
 			int color, int secondaryColor, int atmosphereColor, boolean star) {
-		this(name, position, radius, atmosphere, worldRadius, color, secondaryColor, atmosphereColor, star, 1.0);
+		this(name, position, radius, atmosphere, worldRadius, color, secondaryColor, atmosphereColor, star, 1.0, Optional.empty());
+	}
+
+	public Body(Optional<Component> name, Vec3 position, double radius, double atmosphere, double worldRadius,
+			int color, int secondaryColor, int atmosphereColor, boolean star, double mass) {
+		this(name, position, radius, atmosphere, worldRadius, color, secondaryColor, atmosphereColor, star, mass, Optional.empty());
 	}
 
 	public static final Codec<Body> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -48,7 +63,8 @@ public record Body(Optional<Component> name, Vec3 position, double radius, doubl
 			ExtraCodecs.STRING_RGB_COLOR.optionalFieldOf("secondary_color", 0xFF606060).forGetter(Body::secondaryColor),
 			ExtraCodecs.STRING_RGB_COLOR.optionalFieldOf("atmosphere_color", 0xFF9FC8FF).forGetter(Body::atmosphereColor),
 			Codec.BOOL.optionalFieldOf("star", false).forGetter(Body::star),
-			Codec.doubleRange(0.01, 1000).optionalFieldOf("mass", 1.0).forGetter(Body::mass)
+			Codec.doubleRange(0.01, 1000).optionalFieldOf("mass", 1.0).forGetter(Body::mass),
+			MoonOrbit.CODEC.optionalFieldOf("moon_orbit").forGetter(Body::moonOrbit)
 	).apply(i, Body::new));
 
 	/** Radius at which the planet takes over: the atmosphere, or the surface if it has none. */
