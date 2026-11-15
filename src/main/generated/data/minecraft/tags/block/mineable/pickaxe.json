@@ -8,6 +8,8 @@
     "starwake:hull_panel",
     "starwake:greeble",
     "starwake:ship_light",
+    "starwake:hinge",
+    "starwake:rotor",
     "starwake:helm",
     "starwake:thruster",
     "starwake:main_engine",

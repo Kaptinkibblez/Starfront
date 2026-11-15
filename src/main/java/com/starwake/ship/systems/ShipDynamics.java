@@ -135,15 +135,59 @@ public final class ShipDynamics {
 		gyration = Math.max(1.0, Math.sqrt((xx + yy + zz) / (2 * mass)));
 		area.set(Math.max(1, shadowX.size()), Math.max(1, shadowY.size()), Math.max(1, shadowZ.size()));
 
-		columns = new double[thrusters.size()][];
-		for (int k = 0; k < thrusters.size(); k++) {
+		buildColumns();
+		return this;
+	}
+
+	/**
+	 * M9 pass 3: a rigid motion for articulated thrusters (a hinge or rotor turning part of the ship about a pivot).
+	 * Positions and pushes are in ship-local block coordinates.
+	 */
+	public record Pose(Vector3d pivot, org.joml.Quaterniond rotation) {
+		public Vector3d point(Vector3d p) {
+			return rotation.transform(new Vector3d(p).sub(pivot)).add(pivot);
+		}
+
+		public Vector3d direction(Vector3d d) {
+			return rotation.transform(new Vector3d(d));
+		}
+	}
+
+	private java.util.function.Function<BlockPos, @org.jspecify.annotations.Nullable Pose> poses = pos -> null;
+	private Vector3d[] posedPosition = new Vector3d[0], posedPush = new Vector3d[0];
+
+	/** Re-poses articulated thrusters (null = not articulated) and rebuilds the thruster matrix. */
+	public void articulate(java.util.function.Function<BlockPos, @org.jspecify.annotations.Nullable Pose> poses) {
+		this.poses = poses;
+		buildColumns();
+	}
+
+	/** A thruster's current position and push direction (articulation applied). */
+	public Vector3d position(int k) {
+		return posedPosition[k];
+	}
+
+	public Vector3d push(int k) {
+		return posedPush[k];
+	}
+
+	private void buildColumns() {
+		int n = thrusters.size();
+		columns = new double[n][];
+		posedPosition = new Vector3d[n];
+		posedPush = new Vector3d[n];
+		for (int k = 0; k < n; k++) {
 			Thruster t = thrusters.get(k);
-			Vector3d r = new Vector3d(t.position()).sub(centre);
-			Vector3d torque = r.cross(t.push(), new Vector3d());
-			columns[k] = new double[] {t.push().x * t.thrust(), t.push().y * t.thrust(), t.push().z * t.thrust(),
+			Pose pose = poses.apply(t.pos());
+			Vector3d position = pose == null ? new Vector3d(t.position()) : pose.point(t.position());
+			Vector3d push = pose == null ? new Vector3d(t.push()) : pose.direction(t.push());
+			posedPosition[k] = position;
+			posedPush[k] = push;
+			Vector3d r = new Vector3d(position).sub(centre);
+			Vector3d torque = r.cross(push, new Vector3d());
+			columns[k] = new double[] {push.x * t.thrust(), push.y * t.thrust(), push.z * t.thrust(),
 					torque.x * t.thrust(), torque.y * t.thrust(), torque.z * t.thrust()};
 		}
-		return this;
 	}
 
 	/**
@@ -187,14 +231,7 @@ public final class ShipDynamics {
 			d.thrusters.add(new Thruster(pos, push, thrust, burn, nozzle, buf.readBlockPos()));
 		}
 		d.area.set(buf.readDouble(), buf.readDouble(), buf.readDouble());
-		d.columns = new double[d.thrusters.size()][];
-		for (int k = 0; k < d.thrusters.size(); k++) {
-			Thruster t = d.thrusters.get(k);
-			Vector3d r = new Vector3d(t.position()).sub(d.centre);
-			Vector3d torque = r.cross(t.push(), new Vector3d());
-			d.columns[k] = new double[] {t.push().x * t.thrust(), t.push().y * t.thrust(), t.push().z * t.thrust(),
-					torque.x * t.thrust(), torque.y * t.thrust(), torque.z * t.thrust()};
-		}
+		d.buildColumns();
 		return d;
 	}
 
@@ -241,8 +278,8 @@ public final class ShipDynamics {
 	/** Raw thrust pushing along a local direction, ignoring balance. */
 	public double rawThrust(Direction push) {
 		double sum = 0;
-		for (Thruster t : thrusters) {
-			if (t.nozzle().getOpposite() == push) sum += t.thrust();
+		for (int k = 0; k < thrusters.size(); k++) {
+			if (pushesAlong(k, push)) sum += thrusters.get(k).thrust();
 		}
 		return sum;
 	}
@@ -484,7 +521,7 @@ public final class ShipDynamics {
 	public double balancedThrust(Vector3d direction) {
 		Vector3d unit = new Vector3d(direction).normalize();
 		double raw = 0;
-		for (Thruster t : thrusters) raw += Math.max(0, t.push().dot(unit)) * t.thrust();
+		for (int k = 0; k < thrusters.size(); k++) raw += Math.max(0, posedPush[k].dot(unit)) * thrusters.get(k).thrust();
 		if (raw <= 0) return 0;
 		List<double[]> rows = List.of(new double[] {unit.x, unit.y, unit.z, 0, 0, 0},
 				new double[] {0, 0, 0, 1, 0, 0}, new double[] {0, 0, 0, 0, 1, 0}, new double[] {0, 0, 0, 0, 0, 1});
@@ -510,10 +547,16 @@ public final class ShipDynamics {
 	/** Fuel burned per tick by the thrusters pushing along a local direction, all at full throttle. */
 	public double burnPushing(Direction push) {
 		double sum = 0;
-		for (Thruster t : thrusters) {
-			if (t.nozzle().getOpposite() == push) sum += t.burn();
+		for (int k = 0; k < thrusters.size(); k++) {
+			if (pushesAlong(k, push)) sum += thrusters.get(k).burn();
 		}
 		return sum;
+	}
+
+	/** Whether thruster k (as posed) pushes mostly along a local direction. */
+	private boolean pushesAlong(int k, Direction push) {
+		Vector3d p = posedPush[k];
+		return p.x * push.getStepX() + p.y * push.getStepY() + p.z * push.getStepZ() > 0.7;
 	}
 
 	/** Fuel burned per tick at these throttles (before boost/power scaling). */

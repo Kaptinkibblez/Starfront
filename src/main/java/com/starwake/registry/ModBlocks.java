@@ -81,6 +81,12 @@ public final class ModBlocks {
 					.strength(1.0f, 3.0f)
 					.sound(SoundType.METAL));
 
+	/** Hinge and Rotor (M9 pass 3): turn the part built on their face as a sub-assembly (hinges follow the landing gear). */
+	public static final Block HINGE = register("hinge", p -> new com.starwake.ship.block.JointBlock(false, p),
+			BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0f, 6.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
+	public static final Block ROTOR = register("rotor", p -> new com.starwake.ship.block.JointBlock(true, p),
+			BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0f, 6.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
+
 	/** Regolith: the bedrock-to-surface stone of rocky planets (Veyra's "stone"). */
 	public static final Block REGOLITH = register("regolith", Block::new,
 			BlockBehaviour.Properties.of()

@@ -79,6 +79,8 @@ public class ShipEntity extends Entity {
 	 * {@code "uuid=packedPos;uuid=packedPos"} (26.3 has no compound-tag data serializer).
 	 */
 	private static final EntityDataAccessor<String> SEATS = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
+	/** M9 pass 3: hinge angles of the ship's sub-assemblies ({@link com.starwake.ship.articulation.Articulations#encode}). */
+	private static final EntityDataAccessor<String> JOINTS = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
 	// Ship systems state for the client HUD (computed server-side, where ship stats data lives).
 	private static final EntityDataAccessor<Integer> FUEL_CAPACITY = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	/** M8f: fusion fuel (D + He-3) units for the quantum and jump drives; capacity is 10 x the propellant capacity. */
@@ -415,6 +417,11 @@ public class ShipEntity extends Entity {
 				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, payload);
 			}
 		}
+		// M9 pass 3: hinges and rotors (sub-assemblies) and the thruster poses they give.
+		var oldJoints = articulations;
+		articulations = com.starwake.ship.articulation.Articulations.detect(structure, helmLocal, oldJoints);
+		if (level().isClientSide() && !articulations.sameLayout(oldJoints)) meshAll = true;
+		applyArticulation();
 		var thrusters = dynamics.thrusters();
 		thrusterEntries = new int[thrusters.size()];
 		for (int k = 0; k < thrusterEntries.length; k++) thrusterEntries[k] = structure.indexOf(thrusters.get(k).pos());
@@ -438,6 +445,26 @@ public class ShipEntity extends Entity {
 	private int componentFuelCapacity;
 
 	/** Server: pushes systems numbers to the synced HUD fields. */
+	/** Moving sub-assemblies (M9 pass 3). */
+	private com.starwake.ship.articulation.Articulations articulations = com.starwake.ship.articulation.Articulations.NONE;
+
+	public com.starwake.ship.articulation.Articulations articulations() {
+		return articulations;
+	}
+
+	/** Poses articulated thrusters for the flight computer from the current joint angles. */
+	private void applyArticulation() {
+		if (!articulations.isEmpty()) dynamics.articulate(articulations.poses(level().getGameTime()));
+	}
+
+	/** Server, each tick: hinges follow the landing gear (gear-down pose when the ship has no gear). */
+	private void tickJoints() {
+		if (articulations.isEmpty()) return;
+		boolean moved = articulations.tickServer(gear.isEmpty() || isGearDown());
+		if (moved) entityData.set(JOINTS, articulations.encode());
+		if (moved || articulations.hasRotors()) applyArticulation();
+	}
+
 	/** Tick of the last edit whose probes are still pending (-1 = up to date). */
 	private int probesStaleSince = -1;
 
@@ -799,6 +826,7 @@ public class ShipEntity extends Entity {
 		builder.define(FUEL, 0);
 		builder.define(ORIENTATION, new Quaternionf());
 		builder.define(SEATS, "");
+		builder.define(JOINTS, "");
 		builder.define(FUEL_CAPACITY, 0);
 		builder.define(FUSION, 0);
 		builder.define(SHIELD, 0f);
@@ -1055,6 +1083,30 @@ public class ShipEntity extends Entity {
 	}
 
 	/** A local direction rotated into world space. */
+	/** M9 pass 3: a local point on cell {@code cell}'s sub-assembly, turned by its joint (unchanged on the rigid hull). */
+	public Vec3 posed(BlockPos cell, Vec3 local) {
+		int g = articulations.groupOf(cell);
+		if (g < 0) return local;
+		var p = articulations.joint(g).pivot();
+		var v = articulations.rotation(g, level().getGameTime(), 1).transform(new org.joml.Vector3d(local.x - p.x, local.y - p.y, local.z - p.z));
+		return new Vec3(v.x + p.x, v.y + p.y, v.z + p.z);
+	}
+
+	/** A local direction on cell {@code cell}'s sub-assembly, turned by its joint. */
+	public Vec3 posedDirection(BlockPos cell, Vec3 local) {
+		int g = articulations.groupOf(cell);
+		if (g < 0) return local;
+		var v = articulations.rotation(g, level().getGameTime(), 1).transform(new org.joml.Vector3d(local.x, local.y, local.z));
+		return new Vec3(v.x, v.y, v.z);
+	}
+
+	/** A local direction vector in world space. */
+	public Vec3 worldDirection(Vec3 local) {
+		Vector3f v = new Vector3f((float) local.x, (float) local.y, (float) local.z);
+		orientation().transform(v);
+		return new Vec3(v.x, v.y, v.z);
+	}
+
 	public Vec3 worldDirection(Direction local) {
 		Vector3f v = new Vector3f(local.getStepX(), local.getStepY(), local.getStepZ());
 		orientation().transform(v);
@@ -1216,6 +1268,7 @@ public class ShipEntity extends Entity {
 		if (probesStaleSince >= 0 && tickCount - probesStaleSince >= 10 && structure != null) computeProbes();
 		if (level().isClientSide()) clientTick();
 		if (!level().isClientSide() && structure != null) {
+			tickJoints();
 			if (serverTick()) return; // replaced by a copy in another dimension
 			sendPilotState();
 			if (lastTickPos != null && (movementThisTick().lengthSqr() > 0 || !orientation().equals(lastTickOrientation, 1.0e-7f))) {
@@ -1954,6 +2007,7 @@ public class ShipEntity extends Entity {
 
 	public void setServerDynamics(ShipDynamics dynamics) {
 		this.serverDynamics = dynamics;
+		if (!articulations.isEmpty()) dynamics.articulate(articulations.poses(level().getGameTime()));
 	}
 
 	public boolean isPredicting() {
@@ -1993,6 +2047,13 @@ public class ShipEntity extends Entity {
 
 	/** Client tick: predict the ship we pilot; otherwise follow the server. */
 	private void clientTick() {
+		if (!articulations.isEmpty()) {
+			articulations.tickClient();
+			if (articulations.moving() || articulations.hasRotors()) {
+				applyArticulation();
+				if (serverDynamics != null) serverDynamics.articulate(articulations.poses(level().getGameTime()));
+			}
+		}
 		PilotHook hook = pilotHook;
 		boolean local = hook != null && structure != null && serverDynamics != null && hook.isLocalPilot(this)
 				&& jumpTicks < 0 && entityData.get(QT_STATE) != QT_TRAVEL;
@@ -2096,6 +2157,7 @@ public class ShipEntity extends Entity {
 	public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
 		super.onSyncedDataUpdated(accessor);
 		if (shownOrientations == null) return; // called from the superclass constructor
+		if (accessor.equals(JOINTS) && level().isClientSide() && articulations != null) articulations.decode(entityData.get(JOINTS));
 		if (accessor.equals(ORIENTATION) && level().isClientSide() && !predicting) {
 			Quaternionf q = new Quaternionf(entityData.get(ORIENTATION));
 			if (!shownReady) {

@@ -19,6 +19,8 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		// Hull plating keeps its alloy (M8e-1); every Mk tier of every ship part keeps its material and quality (M8e-2).
 		materialDrop(ModBlocks.HULL_PLATING);
 		materialDrop(ModBlocks.HULL_PANEL);
+		dropSelf(ModBlocks.HINGE);
+		dropSelf(ModBlocks.ROTOR);
 		// Greebles and lights drop themselves keeping their shape / type and colour (M9 pass 3).
 		add(ModBlocks.GREEBLE, stateDrop(ModBlocks.GREEBLE, com.starwake.ship.block.GreebleBlock.SHAPE));
 		add(ModBlocks.SHIP_LIGHT, stateDrop(ModBlocks.SHIP_LIGHT, com.starwake.ship.block.ShipLightBlock.TYPE, com.starwake.ship.block.ShipLightBlock.COLOR));

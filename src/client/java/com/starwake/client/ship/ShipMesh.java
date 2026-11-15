@@ -47,9 +47,12 @@ final class ShipMesh {
 	 * M9 pass 3: tessellates the structure into one mesh per 16-block section, in one pass. {@code only}: just these
 	 * sections (null = all). Sections left with no quads are omitted.
 	 */
-	static java.util.Map<Long, ShipMesh> buildSections(ShipStructure structure, ClientLevel level, BlockPos reference,
-			it.unimi.dsi.fastutil.longs.@org.jspecify.annotations.Nullable LongSet only) {
-		java.util.Map<Long, ShipMesh> out = new java.util.HashMap<>();
+	/** A mesh section: 16-block cube {@code section} of articulation group {@code group} (-1 = the rigid hull). */
+	record Key(int group, long section) {}
+
+	static java.util.Map<Key, ShipMesh> buildSections(ShipStructure structure, ClientLevel level, BlockPos reference,
+			it.unimi.dsi.fastutil.longs.@org.jspecify.annotations.Nullable LongSet only, com.starwake.ship.articulation.Articulations joints) {
+		java.util.Map<Key, ShipMesh> out = new java.util.HashMap<>();
 		Minecraft minecraft = Minecraft.getInstance();
 		ModelBlockRenderer renderer = new ModelBlockRenderer(minecraft.options.ambientOcclusion().get(), true, minecraft.getBlockColors());
 		var models = minecraft.getModelManager().getBlockStateModelSet();
@@ -58,10 +61,11 @@ final class ShipMesh {
 			if (entry.state().getRenderShape() != RenderShape.MODEL) continue;
 			long key = sectionOf(entry.pos());
 			if (only != null && !only.contains(key)) continue;
-			ShipMesh mesh = out.computeIfAbsent(key, k -> new ShipMesh());
+			int group = joints.groupOf(entry.pos());
+			ShipMesh mesh = out.computeIfAbsent(new Key(group, key), k -> new ShipMesh());
 			int index = mesh.blocks.size();
 			mesh.blocks.add(entry.pos());
-			ShipBlockRenderState getter = new ShipBlockRenderState(structure, entry.pos(), entry.state());
+			ShipBlockRenderState getter = new ShipBlockRenderState(structure, entry.pos(), entry.state(), joints, group);
 			getter.blockPos = reference;
 			getter.lightEngine = level.getLightEngine();
 			getter.cardinalLighting = level.cardinalLighting();

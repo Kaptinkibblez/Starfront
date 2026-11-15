@@ -22,6 +22,10 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModBlocks.CANOPY_GLASS, "Canopy Glass");
 		builder.add(ModBlocks.HULL_PANEL, "Hull Panel");
 		builder.add(ModBlocks.GREEBLE, "Greeble");
+		builder.add(ModBlocks.HINGE, "Hinge");
+		builder.add(ModBlocks.ROTOR, "Rotor");
+		builder.add("message.starwake.hinge", "Hinge: %s° with gear down, %s° with gear up (use: gear-up angle, sneak-use: gear-down angle)");
+		builder.add("message.starwake.rotor", "Rotor: %s rpm");
 		builder.add(ModBlocks.SHIP_LIGHT, "Ship Light");
 		builder.add("message.starwake.hull_tool.color", "Light: %s");
 		builder.add("greeble.starwake.vent", "Vent");

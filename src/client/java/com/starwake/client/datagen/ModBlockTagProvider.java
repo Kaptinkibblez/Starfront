@@ -24,7 +24,7 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(
 				key(ModBlocks.HULL_PLATING), key(ModBlocks.REGOLITH), key(ModBlocks.FERRITE_ORE));
 		builder(BlockTags.NEEDS_STONE_TOOL).add(key(ModBlocks.HULL_PLATING), key(ModBlocks.FERRITE_ORE));
-		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(key(ModBlocks.HULL_PLATING_STAIRS), key(ModBlocks.HULL_PLATING_SLAB), key(ModBlocks.HULL_PANEL), key(ModBlocks.GREEBLE), key(ModBlocks.SHIP_LIGHT));
+		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(key(ModBlocks.HULL_PLATING_STAIRS), key(ModBlocks.HULL_PLATING_SLAB), key(ModBlocks.HULL_PANEL), key(ModBlocks.GREEBLE), key(ModBlocks.SHIP_LIGHT), key(ModBlocks.HINGE), key(ModBlocks.ROTOR));
 		builder(BlockTags.NEEDS_STONE_TOOL).add(key(ModBlocks.HULL_PLATING_STAIRS), key(ModBlocks.HULL_PLATING_SLAB), key(ModBlocks.HULL_PANEL));
 		builder(BlockTags.STAIRS).add(key(ModBlocks.HULL_PLATING_STAIRS));
 		builder(BlockTags.SLABS).add(key(ModBlocks.HULL_PLATING_SLAB));
@@ -82,7 +82,7 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		var motion = builder(BlockTags.BLOCKS_MOTION_NO_LEAVES);
 		// Landing gear isn't a solid cube, so it stays out.
 		var thin = java.util.Set.of(com.starwake.registry.ModMachines.COPPER_CABLE, com.starwake.registry.ModMachines.ALUMINIUM_CABLE,
-				com.starwake.registry.ModMachines.FLUID_PIPE, com.starwake.registry.ModMachines.CONVEYOR, com.starwake.registry.ModMachines.SOLAR_PANEL, ModBlocks.SHIP_LIGHT, ModBlocks.GREEBLE);
+				com.starwake.registry.ModMachines.FLUID_PIPE, com.starwake.registry.ModMachines.CONVEYOR, com.starwake.registry.ModMachines.SOLAR_PANEL, ModBlocks.SHIP_LIGHT, ModBlocks.GREEBLE, ModBlocks.HINGE, ModBlocks.ROTOR);
 		ModBlocks.all().stream().filter(block -> !(block instanceof com.starwake.ship.block.LandingGearBlock) && !thin.contains(block)
 				&& !ModPlanetBlocks.nonSolid().contains(block)).forEach(block -> motion.add(key(block)));
 		builder(BlockTags.SAND).add(key(ModPlanetBlocks.FINE_REGOLITH), key(ModPlanetBlocks.VOLCANIC_ASH));

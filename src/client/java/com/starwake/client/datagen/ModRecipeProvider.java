@@ -55,6 +55,12 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				shaped(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.SHIP_LIGHT, 4).pattern(" P ").pattern("IGI")
 						.define('P', Items.GLASS_PANE).define('G', Items.GLOWSTONE_DUST).define('I', Items.IRON_INGOT)
 						.unlockedBy("has_glowstone", has(Items.GLOWSTONE_DUST)).save(output);
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModBlocks.HINGE).pattern("III").pattern("IPI").pattern("ICI")
+						.define('I', Items.IRON_INGOT).define('P', Items.PISTON).define('C', Items.COPPER_INGOT)
+						.unlockedBy("has_piston", has(Items.PISTON)).save(output);
+				shaped(RecipeCategory.REDSTONE, com.starwake.registry.ModBlocks.ROTOR).pattern("III").pattern("IRI").pattern("ICI")
+						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE_BLOCK).define('C', Items.COPPER_INGOT)
+						.unlockedBy("has_redstone_block", has(Items.REDSTONE_BLOCK)).save(output);
 				shaped(RecipeCategory.TOOLS, com.starwake.registry.ModItems.HULL_TOOL).pattern(" IC").pattern(" SI").pattern("S  ")
 						.define('I', Items.IRON_INGOT).define('C', Items.COPPER_INGOT).define('S', Items.STICK)
 						.unlockedBy("has_hull", has(com.starwake.registry.ModBlocks.HULL_PLATING)).save(output);

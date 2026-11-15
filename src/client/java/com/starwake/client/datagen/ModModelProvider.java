@@ -36,6 +36,14 @@ public final class ModModelProvider extends FabricModelProvider {
 		net.minecraft.resources.Identifier stairs = net.minecraft.client.data.models.model.ModelLocationUtils.getModelLocation(ModBlocks.HULL_PLATING_STAIRS);
 		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(ModBlocks.HULL_PANEL, BlockModelGenerators.plainVariant(stairs)));
 		generators.registerSimpleItemModel(ModBlocks.HULL_PANEL.asItem(), stairs);
+		// Hinge and Rotor (M9 pass 3): resolver-rendered too; items are plain cubes.
+		for (Block block : new Block[] {ModBlocks.HINGE, ModBlocks.ROTOR}) {
+			net.minecraft.resources.Identifier itemModel = ModelTemplates.CUBE_ALL.createWithSuffix(block, "_item",
+					new TextureMapping().put(TextureSlot.ALL, new net.minecraft.client.resources.model.sprite.Material(com.starwake.StarwakeMod.id("block/greeble_dark"))),
+					generators.modelOutput);
+			generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(itemModel)));
+			generators.registerSimpleItemModel(block.asItem(), itemModel);
+		}
 		// Greebles and lights (M9 pass 3) render through the same resolver; their items are thin plates.
 		for (Block block : new Block[] {ModBlocks.GREEBLE, ModBlocks.SHIP_LIGHT}) {
 			net.minecraft.resources.Identifier tex = com.starwake.StarwakeMod.id(block == ModBlocks.GREEBLE ? "block/greeble_vent" : "block/ship_light_white");

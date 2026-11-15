@@ -38,8 +38,12 @@ public class ShipRenderer extends EntityRenderer<ShipEntity, ShipRenderState> {
 		final ShipMesh mesh;
 		final int[] light;
 		final Vec3 centre;
+		/** Articulation group (-1 = the rigid hull). */
+		final int group;
 
-		Section(long key, ShipMesh mesh) {
+		Section(ShipMesh.Key k, ShipMesh mesh) {
+			long key = k.section();
+			this.group = k.group();
 			this.mesh = mesh;
 			this.light = new int[mesh.blocks.size()];
 			java.util.Arrays.fill(light, -1);
@@ -49,7 +53,7 @@ public class ShipRenderer extends EntityRenderer<ShipEntity, ShipRenderState> {
 
 	private static final class Sections {
 		ShipStructure structure;
-		final Map<Long, Section> map = new java.util.HashMap<>();
+		final Map<ShipMesh.Key, Section> map = new java.util.HashMap<>();
 		final java.util.List<Section> order = new java.util.ArrayList<>();
 		int cursor;
 	}
@@ -69,6 +73,7 @@ public class ShipRenderer extends EntityRenderer<ShipEntity, ShipRenderState> {
 		super.extractRenderState(ship, state, partialTicks);
 		state.meshes.clear();
 		state.lights.clear();
+		state.groups.clear();
 		ShipStructure structure = ship.structure();
 		if (structure == null || !(ship.level() instanceof ClientLevel level)) return;
 		Sections cache = sections.computeIfAbsent(ship, s -> new Sections());
@@ -97,9 +102,19 @@ public class ShipRenderer extends EntityRenderer<ShipEntity, ShipRenderState> {
 			c.set((float) (section.centre.x - state.pivot.x), (float) (section.centre.y - state.pivot.y), (float) (section.centre.z - state.pivot.z));
 			state.orientation.transform(c);
 			float rx = (float) (origin.x + c.x - eye.x), ry = (float) (origin.y + c.y - eye.y), rz = (float) (origin.z + c.z - eye.z);
-			if (rx * forward.x + ry * forward.y + rz * forward.z < -16) continue;
+			if (section.group < 0 && rx * forward.x + ry * forward.y + rz * forward.z < -16) continue;
 			state.meshes.add(section.mesh);
 			state.lights.add(section.light);
+			state.groups.add(section.group);
+		}
+		// Articulated groups (M9 pass 3): each turns about its joint's pivot.
+		var joints = ship.articulations();
+		state.jointPivots.clear();
+		state.jointRotations.clear();
+		for (int i = 0; i < joints.count(); i++) {
+			var q = joints.rotation(i, ship.level().getGameTime(), partialTicks);
+			state.jointPivots.add(joints.joint(i).pivot());
+			state.jointRotations.add(new org.joml.Quaternionf((float) q.x, (float) q.y, (float) q.z, (float) q.w));
 		}
 		extractBlockEntities(ship, level, state, partialTicks, origin, c, cell);
 	}
@@ -132,9 +147,12 @@ public class ShipRenderer extends EntityRenderer<ShipEntity, ShipRenderState> {
 				for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) only.add(ShipMesh.sectionOf(pos.relative(d)));
 			}
 		}
-		var built = ShipMesh.buildSections(structure, level, BlockPos.containing(ship.position()), only);
+		var built = ShipMesh.buildSections(structure, level, BlockPos.containing(ship.position()), only, ship.articulations());
 		if (only == null) cache.map.clear();
-		else for (long key : only) cache.map.remove(key);
+		else {
+			final var gone = only;
+			cache.map.keySet().removeIf(key -> gone.contains(key.section()));
+		}
 		for (var e : built.entrySet()) cache.map.put(e.getKey(), new Section(e.getKey(), e.getValue()));
 		cache.order.clear();
 		cache.order.addAll(cache.map.values());
@@ -192,13 +210,26 @@ public class ShipRenderer extends EntityRenderer<ShipEntity, ShipRenderState> {
 			poseStack.translate(-state.pivot.x, -state.pivot.y, -state.pivot.z);
 			var meshes = java.util.List.copyOf(state.meshes);
 			var lights = java.util.List.copyOf(state.lights);
-			for (ChunkSectionLayer layer : ChunkSectionLayer.values()) {
-				boolean any = false;
-				for (ShipMesh mesh : meshes) any |= mesh.has(layer);
-				if (!any) continue;
-				collector.submitCustomGeometry(poseStack, renderType(layer), (pose, buffer) -> {
-					for (int i = 0; i < meshes.size(); i++) meshes.get(i).emit(layer, pose, buffer, lights.get(i));
-				});
+			var groups = java.util.List.copyOf(state.groups);
+			for (int g = -1; g < state.jointRotations.size(); g++) {
+				final int group = g;
+				poseStack.pushPose();
+				if (g >= 0) {
+					// Turn the sub-assembly about its joint's pivot (ship-local coordinates).
+					var p = state.jointPivots.get(g);
+					poseStack.translate(p.x, p.y, p.z);
+					poseStack.rotate(state.jointRotations.get(g));
+					poseStack.translate(-p.x, -p.y, -p.z);
+				}
+				for (ChunkSectionLayer layer : ChunkSectionLayer.values()) {
+					boolean any = false;
+					for (int i = 0; i < meshes.size(); i++) any |= groups.get(i) == group && meshes.get(i).has(layer);
+					if (!any) continue;
+					collector.submitCustomGeometry(poseStack, renderType(layer), (pose, buffer) -> {
+						for (int i = 0; i < meshes.size(); i++) if (groups.get(i) == group) meshes.get(i).emit(layer, pose, buffer, lights.get(i));
+					});
+				}
+				poseStack.popPose();
 			}
 			var dispatcher = net.minecraft.client.Minecraft.getInstance().getBlockEntityRenderDispatcher();
 			for (int i = 0; i < state.blockEntities.size(); i++) {

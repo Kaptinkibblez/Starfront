@@ -10,6 +10,10 @@ public final class ShipRenderState extends EntityRenderState {
 	/** Visible mesh sections and their light arrays (parallel lists). */
 	final java.util.List<ShipMesh> meshes = new java.util.ArrayList<>();
 	final java.util.List<int[]> lights = new java.util.ArrayList<>();
+	/** Articulation group of each mesh, and each group's pivot and rotation this frame (M9 pass 3). */
+	final java.util.List<Integer> groups = new java.util.ArrayList<>();
+	final java.util.List<org.joml.Vector3d> jointPivots = new java.util.ArrayList<>();
+	final java.util.List<org.joml.Quaternionf> jointRotations = new java.util.ArrayList<>();
 	final Quaternionf orientation = new Quaternionf();
 	Vec3 pivot = Vec3.ZERO;
 	/** Block entities aboard (M9 pass 2): local position and the renderer's own state, per frame. */

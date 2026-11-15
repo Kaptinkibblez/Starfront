@@ -43,9 +43,10 @@ public final class ThrusterEffects {
 				if (!(state.getBlock() instanceof ThrusterBlock)) continue;
 				float throttle = fire.getValue();
 				Direction nozzle = state.getValue(ThrusterBlock.FACING);
-				Vec3 out = ship.worldDirection(nozzle);
-				Vec3 at = ship.toWorld(Vec3.atCenterOf(entry.pos()).add(nozzle.getStepX() * 0.6, nozzle.getStepY() * 0.6,
-						nozzle.getStepZ() * 0.6));
+				// Thrusters on hinged parts (M9 pass 3) fire from where the part has turned to.
+				Vec3 dir = new Vec3(nozzle.getStepX(), nozzle.getStepY(), nozzle.getStepZ());
+				Vec3 out = ship.worldDirection(ship.posedDirection(entry.pos(), dir));
+				Vec3 at = ship.toWorld(ship.posed(entry.pos(), Vec3.atCenterOf(entry.pos()).add(dir.scale(0.6))));
 
 				boolean main = state.is(ModBlocks.MAIN_ENGINE), rcs = state.is(ModBlocks.MANEUVERING_THRUSTER);
 				int puffs = main ? 3 : 1;

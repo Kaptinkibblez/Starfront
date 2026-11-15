@@ -51,6 +51,10 @@ public final class ShapedBlockModels {
 				(s, key) -> hull, (s, key) -> false));
 		register(ModBlocks.GREEBLE, new Spec(s -> s.getValue(GreebleBlock.SHAPE), s -> s.getValue(GreebleBlock.ORIENT),
 				(s, key) -> key.equals("hull") ? hull : StarwakeMod.id("block/greeble_" + key), (s, key) -> false));
+		for (Block joint : new Block[] {ModBlocks.HINGE, ModBlocks.ROTOR}) {
+			register(joint, new Spec(s -> ((com.starwake.ship.block.JointBlock) s.getBlock()).shape(), com.starwake.ship.block.JointBlock::orient,
+					(s, key) -> StarwakeMod.id("block/greeble_" + key), (s, key) -> false));
+		}
 		register(ModBlocks.SHIP_LIGHT, new Spec(s -> s.getValue(ShipLightBlock.TYPE), s -> s.getValue(ShipLightBlock.ORIENT),
 				(s, key) -> !key.equals("lens") ? StarwakeMod.id("block/greeble_" + key)
 						: StarwakeMod.id("block/ship_light_" + (ShipLightBlock.lit(s) ? s.getValue(ShipLightBlock.COLOR).getSerializedName() : "off")),

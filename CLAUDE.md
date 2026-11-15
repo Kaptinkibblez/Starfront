@@ -881,6 +881,27 @@ normal gravity.
   - Hull Tool: greebles = next detail, lights = next colour; sneak-use turns both. Loot keeps the shape / type and colour
     (`copy_state`). Textures: `tools/greeble_textures.py`. Recipes: stonecutter plating -> 4 greebles; 4 lights from a glass
     pane, glowstone dust and iron.
+- **Pass 3d, hinges and rotors (2026-11-15):** `starwake:hinge` / `starwake:rotor` (`ship/block/JointBlock`, rendered by
+  `ShapedBlockModels` from `ship/panel/JointShape`): `facing` = the side the moving part is built on and the turning axis;
+  hinge `down_angle` / `up_angle` (15-degree steps; empty-hand use steps the gear-up angle, sneak-use the gear-down one);
+  rotor `speed` (0, 2, 6, 15, 30 rpm; use steps it).
+  - `ship/articulation/Articulations` (rebuilt in `afterModelChange` on both sides): each joint's group = the cells reached
+    from its facing neighbour without passing the joint (invalid, so rigid, if it reaches the Helm, another group or 65,536
+    cells). Pivot = centre of the joint's facing face. Hinges move at 45 degrees/s toward the gear-down angle when the gear is
+    down (or the ship has none) and the gear-up angle otherwise; the server syncs them in `JOINTS` ("x,y,z=deg;"), clients
+    interpolate. Rotors turn from game time on both sides (no sync).
+  - Thrust: `ShipDynamics.articulate(poses)` re-poses thrusters (position + push) and rebuilds the allocation columns; the
+    server, the client copy and the pilot's predicted model (`setServerDynamics`) all apply it. `pushesAlong` (raw thrust,
+    burn by direction) uses posed pushes.
+  - Rendering: mesh sections are keyed by (group, section) (`ShipMesh.Key`); faces between groups aren't culled
+    (`ShipBlockRenderState` treats other groups as air); each group is drawn with its joint's rotation about the pivot.
+    Thruster flames follow (`ShipEntity.posed` / `posedDirection`).
+  - Collision, probes, walking, raycasts, mass and block entities use the as-built pose: **build parts in their gear-down
+    pose** (the landed one). Nested joints turn with their outer group only. A lone pod on one side unbalances the flight
+    computer (it trades translation for torque balance); build them in pairs (mirror the angles: a west hinge at 90 degrees
+    pairs with an east hinge at 270).
+  - Verified 2026-11-15: a Kestrel with two hinged main-engine pods passes pre-flight; gear up swings both nozzles from down
+    to back (seen from outside), gear down swings them back.
 - Known limits: assembly and the first load of a 200k ship still take seconds; lights aboard ships glow but don't light
   the world around the ship (no moving light sources yet); Hull Panels mirror as a turn (asymmetric
   shapes aren't flipped); radiation from machines aboard isn't counted for nearby players; block entities aboard only tick

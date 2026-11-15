@@ -19,8 +19,14 @@ final class ShipBlockRenderState extends MovingBlockRenderState {
 	private final ShipStructure structure;
 	final BlockPos local;
 
-	ShipBlockRenderState(ShipStructure structure, BlockPos local, BlockState state) {
+	private final com.starwake.ship.articulation.Articulations joints;
+	private final int group;
+
+	/** {@code group}: this block's articulation group; neighbours in another group count as air (they move apart). */
+	ShipBlockRenderState(ShipStructure structure, BlockPos local, BlockState state, com.starwake.ship.articulation.Articulations joints, int group) {
 		this.structure = structure;
+		this.joints = joints;
+		this.group = group;
 		this.local = local;
 		this.blockState = state;
 		this.randomSeedPos = local;
@@ -28,8 +34,9 @@ final class ShipBlockRenderState extends MovingBlockRenderState {
 
 	@Override
 	public BlockState getBlockState(BlockPos pos) {
-		BlockState state = structure.get(local.getX() + pos.getX() - blockPos.getX(),
-				local.getY() + pos.getY() - blockPos.getY(), local.getZ() + pos.getZ() - blockPos.getZ());
+		int x = local.getX() + pos.getX() - blockPos.getX(), y = local.getY() + pos.getY() - blockPos.getY(), z = local.getZ() + pos.getZ() - blockPos.getZ();
+		BlockState state = structure.get(x, y, z);
+		if (state != null && !joints.isEmpty() && joints.groupOf(BlockPos.asLong(x, y, z)) != group) return Blocks.AIR.defaultBlockState();
 		return state == null ? Blocks.AIR.defaultBlockState() : state;
 	}
 
