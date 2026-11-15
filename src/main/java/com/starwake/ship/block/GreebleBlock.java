@@ -22,13 +22,28 @@ import org.jspecify.annotations.Nullable;
  * hazard trim, cargo racks, tanks, heatsinks). One block with a {@link GreebleShape} and an orientation; the Hull Tool
  * cycles the shape and turns it. Placed like a Hull Panel: mounted on the clicked face, front toward you.
  */
-public class GreebleBlock extends Block {
+public class GreebleBlock extends Block implements ShapedBlock {
 	public static final EnumProperty<GreebleShape> SHAPE = EnumProperty.create("shape", GreebleShape.class);
-	public static final IntegerProperty ORIENT = HullPanelBlock.ORIENT;
+	
 
 	public GreebleBlock(Properties properties) {
 		super(properties);
 		registerDefaultState(defaultBlockState().setValue(SHAPE, GreebleShape.VENT).setValue(ORIENT, PanelGeometry.orient(Direction.UP, Direction.NORTH)));
+	}
+
+	@Override
+	public com.starwake.ship.panel.PanelGeometry.Shape shapeOf(BlockState state) {
+		return state.getValue(SHAPE);
+	}
+
+	@Override
+	public int orientOf(BlockState state) {
+		return state.getValue(ORIENT);
+	}
+
+	@Override
+	public boolean seals(BlockState state) {
+		return false;
 	}
 
 	@Override

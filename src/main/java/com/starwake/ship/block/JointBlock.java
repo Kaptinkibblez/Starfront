@@ -33,7 +33,7 @@ import org.jspecify.annotations.Nullable;
  * on a sub-assembly push along their turned direction. Build the part in its gear-down pose: that's the pose collision
  * uses.
  */
-public class JointBlock extends Block {
+public class JointBlock extends Block implements ShapedBlock {
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
 	/** Hinge angle with gear down / up, in 15-degree steps. */
 	public static final IntegerProperty DOWN_ANGLE = IntegerProperty.create("down_angle", 0, 23);
@@ -54,6 +54,16 @@ public class JointBlock extends Block {
 
 	public boolean isRotor() {
 		return rotor;
+	}
+
+	@Override
+	public com.starwake.ship.panel.PanelGeometry.Shape shapeOf(BlockState state) {
+		return shape();
+	}
+
+	@Override
+	public int orientOf(BlockState state) {
+		return orient(state);
 	}
 
 	public JointShape shape() {

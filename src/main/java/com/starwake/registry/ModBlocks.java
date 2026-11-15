@@ -27,6 +27,10 @@ import net.minecraft.world.level.material.MapColor;
  * ({@code setId}). The {@link #register} helper handles that, so call sites stay one line.
  */
 public final class ModBlocks {
+	private static final com.starwake.ship.panel.ProfileShape.Profile SLOPE = com.starwake.ship.panel.ProfileShape.Profile.SLOPE,
+			CURVE = com.starwake.ship.panel.ProfileShape.Profile.CURVE, COVE = com.starwake.ship.panel.ProfileShape.Profile.COVE,
+			RIDGE = com.starwake.ship.panel.ProfileShape.Profile.RIDGE;
+
 	private static final List<Block> ALL = new ArrayList<>();
 
 	/**
@@ -56,23 +60,29 @@ public final class ModBlocks {
 					.requiresCorrectToolForDrops());
 
 	/**
-	 * Hull Panel (M9 pass 3): shape-cycling hull piece (slopes, curves, plates, frames) that keeps its alloy. Reshaped
-	 * with the Hull Tool.
+	 * Hull pieces (M9 pass 4): auto-connecting slopes, curves (convex) and coves (concave) at 1:1, 1:2 and 1:4, the wedge,
+	 * plates, the pillar and the frame. All keep their alloy like Hull Plating.
 	 */
-	public static final Block HULL_PANEL = register("hull_panel", com.starwake.ship.block.HullPanelBlock::new,
-			BlockBehaviour.Properties.of()
-					.mapColor(MapColor.METAL)
-					.strength(5.0f, 6.0f)
-					.sound(SoundType.METAL)
-					.requiresCorrectToolForDrops());
+	public static final Block HULL_SLOPE = hull("hull_slope", p -> new com.starwake.ship.block.ProfileHullBlock.One(SLOPE, p));
+	public static final Block HULL_SLOPE_2 = hull("hull_slope_2", p -> new com.starwake.ship.block.ProfileHullBlock.Two(SLOPE, p));
+	public static final Block HULL_SLOPE_4 = hull("hull_slope_4", p -> new com.starwake.ship.block.ProfileHullBlock.Four(SLOPE, p));
+	public static final Block HULL_CURVE = hull("hull_curve", p -> new com.starwake.ship.block.ProfileHullBlock.One(CURVE, p));
+	public static final Block HULL_CURVE_2 = hull("hull_curve_2", p -> new com.starwake.ship.block.ProfileHullBlock.Two(CURVE, p));
+	public static final Block HULL_CURVE_4 = hull("hull_curve_4", p -> new com.starwake.ship.block.ProfileHullBlock.Four(CURVE, p));
+	public static final Block HULL_COVE = hull("hull_cove", p -> new com.starwake.ship.block.ProfileHullBlock.One(COVE, p));
+	public static final Block HULL_COVE_2 = hull("hull_cove_2", p -> new com.starwake.ship.block.ProfileHullBlock.Two(COVE, p));
+	public static final Block HULL_COVE_4 = hull("hull_cove_4", p -> new com.starwake.ship.block.ProfileHullBlock.Four(COVE, p));
+	public static final Block HULL_WEDGE = hull("hull_wedge", p -> new com.starwake.ship.block.ProfileHullBlock.One(RIDGE, p));
+	public static final Block HULL_PLATE = hull("hull_plate", p -> new com.starwake.ship.block.HullPieceBlock.Plate(4, p));
+	public static final Block HULL_HALF_PLATE = hull("hull_half_plate", p -> new com.starwake.ship.block.HullPieceBlock.Plate(8, p));
+	public static final Block HULL_PILLAR = hull("hull_pillar", com.starwake.ship.block.HullPieceBlock.Pillar::new);
+	public static final Block HULL_FRAME = hull("hull_frame", com.starwake.ship.block.HullPieceBlock.Frame::new);
 
-	/** Hull Form (M9 pass 4): deformable hull block; the Hull Tool moves its four top corners in eighths. */
-	public static final Block HULL_FORM = register("hull_form", com.starwake.ship.block.HullFormBlock::new,
-			BlockBehaviour.Properties.of()
-					.mapColor(MapColor.METAL)
-					.strength(5.0f, 6.0f)
-					.sound(SoundType.METAL)
-					.requiresCorrectToolForDrops());
+	/** Every hull piece (alloy-keeping, shaped): for datagen, the block entity type and recipes. */
+	public static List<Block> hullPieces() {
+		return List.of(HULL_SLOPE, HULL_SLOPE_2, HULL_SLOPE_4, HULL_CURVE, HULL_CURVE_2, HULL_CURVE_4, HULL_COVE, HULL_COVE_2, HULL_COVE_4,
+				HULL_WEDGE, HULL_PLATE, HULL_HALF_PLATE, HULL_PILLAR, HULL_FRAME);
+	}
 
 	/** Greeble (M9 pass 3): surface detail for hulls and interiors (shape cycled with the Hull Tool). */
 	public static final Block GREEBLE = register("greeble", com.starwake.ship.block.GreebleBlock::new,
@@ -227,6 +237,11 @@ public final class ModBlocks {
 
 		ALL.add(block);
 		return block;
+	}
+
+	private static Block hull(String name, Function<BlockBehaviour.Properties, Block> factory) {
+		return register(name, factory, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0f, 6.0f)
+				.sound(SoundType.METAL).requiresCorrectToolForDrops());
 	}
 
 	/** All Starwake blocks in registration order (used by datagen and the creative tab). */

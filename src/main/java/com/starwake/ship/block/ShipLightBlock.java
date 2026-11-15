@@ -32,10 +32,10 @@ import org.jspecify.annotations.Nullable;
  * the colour and turns it. Light reaches the world where the block really is; on an assembled ship the lens still glows
  * (ships don't carry block light with them yet).
  */
-public class ShipLightBlock extends Block {
+public class ShipLightBlock extends Block implements ShapedBlock {
 	public static final EnumProperty<LightType> TYPE = EnumProperty.create("type", LightType.class);
 	public static final EnumProperty<LightType.Color> COLOR = EnumProperty.create("color", LightType.Color.class);
-	public static final IntegerProperty ORIENT = HullPanelBlock.ORIENT;
+	
 	public static final BooleanProperty ON = BooleanProperty.create("on");
 	/** The beacon's flash phase (always true for steady lights). */
 	public static final BooleanProperty FLASH = BooleanProperty.create("flash");
@@ -52,6 +52,33 @@ public class ShipLightBlock extends Block {
 
 	private static int lightLevel(BlockState state) {
 		return lit(state) ? state.getValue(TYPE).level() : 0;
+	}
+
+	@Override
+	public com.starwake.ship.panel.PanelGeometry.Shape shapeOf(BlockState state) {
+		return state.getValue(TYPE);
+	}
+
+	@Override
+	public int orientOf(BlockState state) {
+		return state.getValue(ORIENT);
+	}
+
+	@Override
+	public boolean seals(BlockState state) {
+		return false;
+	}
+
+	/** The lens shows the light's colour while lit (emissive, see {@link #emissive}), dim glass otherwise. */
+	@Override
+	public String texture(BlockState state, String key) {
+		if (!key.equals("lens")) return ShapedBlock.super.texture(state, key);
+		return "block/ship_light_" + (lit(state) ? state.getValue(COLOR).getSerializedName() : "off");
+	}
+
+	@Override
+	public boolean emissive(BlockState state, String key) {
+		return key.equals("lens") && lit(state);
 	}
 
 	@Override

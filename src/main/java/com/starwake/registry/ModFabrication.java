@@ -67,7 +67,8 @@ public final class ModFabrication {
 
 	/** Hull plating plus every tier of every ship part except fuel tanks (M8e-2). */
 	private static Block[] materialBlocks() {
-		java.util.List<Block> blocks = new java.util.ArrayList<>(java.util.List.of(ModBlocks.HULL_PLATING, ModBlocks.HULL_PANEL, ModBlocks.HULL_FORM));
+		java.util.List<Block> blocks = new java.util.ArrayList<>(java.util.List.of(ModBlocks.HULL_PLATING));
+		blocks.addAll(ModBlocks.hullPieces());
 		blocks.addAll(java.util.List.of(ModShipParts.materialBlocks()));
 		return blocks.toArray(Block[]::new);
 	}

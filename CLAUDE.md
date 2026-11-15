@@ -530,6 +530,8 @@ commit. **Don't start the next milestone until the user confirms the current one
       salvage ship of the same class and scale (long industrial hull with exposed frame, big articulated salvage claw,
       gear-linked swinging engine pods, processing/cargo bay, raised command deck, tractor mounts, hazard-striped greebles),
       not a copy of the Reclaimer's silhouette, proportions or signature details. **Ships pass 3 done (3a-3e, 2026-11-15).**
+    - [x] **Ships pass 4 (2026-11-15):** auto-connecting hull pieces (slopes, curves, coves at 1:1/1:2/1:4, wedge, plates,
+      pillar, frame) replace Hull Panels and Hull Forms; pre-flight checks the gear-up pose. Details below.
 
 ---
 
@@ -847,26 +849,12 @@ normal gravity.
   - Measured (212,065 blocks, 150x60x80): assembly ~3.5 s once (lift + plot write 2.5 s), model 0.4 s server / 0.36 s
     client on load, full mesh 0.5-1 s, physics ~1 ms/step (1071 probes), a block edit 0-2 ms on the server and ~9 ms
     for its mesh section. Admin: `/starwake ship assemble <helm> force` skips the pre-flight verdict.
-- **Pass 3b, Hull Panels (2026-11-15):** `starwake:hull_panel` (`ship/block/HullPanelBlock`, extends `HullPlatingBlock` so it
-  keeps its alloy; mass x the shape's filled volume) with `shape` (22 `ship/panel/PanelShape`s in four families: slopes 1:1,
-  1:2 low/high, 1:4 a-d, outer/inner corner, peak; quarter round, cove, rounded corner, cylinder, half round; half/quarter
-  plate, angled armour plate, fin; open frame, lattice beam, rib) and `orient` (24 rotations: up x four fronts).
-  - *Geometry* (`ship/panel/PanelGeometry`, both sides): each shape is a union of solids (2D profiles extruded along an
-    axis, or faceted solids for corners) answering `inside(x, y, z)` and listing faces; faces are wound outward by probing
-    `inside` and dropped when buried in another part. Collision and occlusion = a 16^3 voxelisation merged into boxes; the
-    selection outline is a 4^3 one (16 steps drew as stripes) unless that's empty (fins). Rotations come from vanilla
-    `OctahedralGroup` (proper ones only); model space has up = +Y and front = -Z.
-  - *Rendering* (`client/ship/HullPanelModel`): a Fabric `ModelLoadingPlugin` block-state resolver bakes each state's faces
-    into `BakedQuad`s (triangles = a repeated corner) with the hull plating texture projected on each face's dominant
-    axis; faces on the cube boundary are cull faces. The datagen blockstate (stairs model) only satisfies validation; the
-    item shows the stairs model. Ships draw panels through the same baked model.
-  - *Placing:* up = the clicked face, front = toward the player. The item's `block_state` component presets the shape
-    (the creative tab lists every shape). *Hull Tool* (`ship/item/HullToolItem`): use on a panel = next shape in the tool's
-    family (a panel from another family jumps to it); sneak-use = turn a quarter about up; use in the air = next family.
-    Works aboard ships through the plot. Seals: every shape except frames, lattice, rib, cylinder, half round and fin
-    (`PanelShape.seals`); hull stairs and slabs now seal too.
-  - Recipes: stonecutter hull plating -> 2 panels (plain steel); Fabricator 2 plates -> 8 panels (keeps the alloy); Hull
-    Tool from iron, copper and sticks.
+- **Pass 3b, Hull Panels (2026-11-15; replaced in pass 4):** the single shape-cycling `starwake:hull_panel` was replaced by
+  the auto-connecting hull pieces below. What stays from 3b: `PanelGeometry` (shapes as unions of solids answering
+  `inside(x, y, z)` and listing faces wound outward by a probe bounded to the cube; buried faces dropped; collision 16^3 and
+  outline 4^3 voxelisations built straight into a `BitSetDiscreteVoxelShape`; 24 rotations from vanilla `OctahedralGroup`,
+  model up = +Y, front = -Z) and baked rendering through a Fabric `ModelLoadingPlugin` block-state resolver. Hull stairs
+  and slabs seal.
 - **Pass 3c, greebles and lights (2026-11-15):** `PanelGeometry` is generic: anything implementing `PanelGeometry.Shape`
   (a list of `Solid`s, each with a texture key) gets faces, collision, outline and volume (caches keyed by shape). Helpers:
   `px(...)` (box in sixteenths), `extrude`, `arc`, `poly`, `placement(ctx)`, `rotated(orient, rotation)`.
@@ -909,25 +897,47 @@ normal gravity.
   two hinged engine pods (15 Mk III mains each) at the centre of mass, pointing down with gear down and back with gear up;
   a processing bay (two catwalk levels, cargo racks, heatsinks, tanks, ceiling lights, belly-door hazard trim); tractor
   rotors under the bow; aft systems decks (50 plants, 17 coolers, 30 tanks, 6 shields, 2 quantum drives); belly lift
-  banks, stern mains, bow retro mains, RCS; 10 gear struts. Pre-flight: lift 2.24x, accel fwd 18 / back 4 / side 2.8 / up
+  banks, stern mains, bow retro mains, RCS; 10 gear struts. Pre-flight: lift 2.24x (2.44x since pass 4), accel fwd 18 / back 4 / side 2.8 / up
   45 m/s^2, pitch 15 / yaw 7 / roll 105 deg/s^2, cabin sealed, ready for space. The generator replicates
   `PanelGeometry.orient` (up x clockwise fronts) and keeps a clear gap around hinged parts (`KEEP_CLEAR`) so details on
   the hull don't weld them on. Verified: placed, assembled in one go, climbed straight into orbit.
-- **Pass 4, Hull Forms (2026-11-15, user: "as smooth or ridged as I'd like"):** `starwake:hull_form`
-  (`ship/block/HullFormBlock`, extends `HullPlatingBlock`: keeps its alloy, mass x fill) with `facing` (the side it rises
-  toward) and four corner heights `h0..h3` (0..8 eighths; 6 x 9^4 = 39,366 states). Geometry `ship/panel/FormShape`: top
-  surface = two triangles split along the higher diagonal (ridges stay sharp), straight edges so neighbours with equal
-  corners meet seamlessly; any slope ratio, corner, wedge, taper or twist is a set of corner heights; smooth curves are
-  gentle steps across many blocks (e.g. a cosine dome over an 8x8 patch). Hull Tool on a form: click near a corner = that
-  corner, near an edge = both its corners, elsewhere = the whole top; use raises an eighth, sneak-use lowers; every form
-  with the same facing around a moved corner's column moves its matching corner too (`cornerOffset` / `cornerAt`). A form
-  can't be lowered to nothing. Placing: facing = the clicked face, full height. Recipes: stonecutter plating -> 1, Fabricator
-  2 plates -> 4 (alloy kept). `PanelGeometry` now builds voxel shapes straight into a `BitSetDiscreteVoxelShape` (vanilla
-  caches every state's shapes at startup; merging boxes per state took minutes for 39k states, now ~20 s datagen).
-  Verified in the client: dome and ridge render, the tool raised an edge and both neighbours followed.
+- **Pass 4, auto-connecting hull pieces (2026-11-15).** The user tried a deformable Hull Form (four corner heights, raised
+  and lowered with the tool) and rejected it as "too liberal for mc, plus bad for symmetry", choosing instead separate
+  block types with dynamic shapes that connect like stairs. Hull Form and Hull Panel are gone.
+  - Blocks (`registry/ModBlocks.hullPieces()`, all extend `HullPlatingBlock`: alloy kept, mass x the shape's filled volume):
+    `hull_slope`, `hull_slope_2`, `hull_slope_4` (1:1, 1:2, 1:4), `hull_curve[_2|_4]` (convex quarter round), `hull_cove[_2|_4]`
+    (concave), `hull_wedge` (a peaked ridge ending in a point), `hull_plate` (4 px), `hull_half_plate` (8 px),
+    `hull_pillar` (round column, `axis`), `hull_frame` (truss node with rails toward connected neighbours; alone = an open
+    cube). Frames and pillars don't seal; every profile piece and plate does.
+  - Profiles (`ship/block/ProfileHullBlock`, geometry `ship/panel/ProfileShape`): state = `orient` (up x front), `conn`
+    (straight / outer / inner / end), `mirror`, `part` (and `part2` for corners) = the piece's section of an N-block run.
+    `connect` runs on placement and every neighbour update: the vanilla stairs rule generalised to any up direction (a
+    matching piece behind, turned across = outer corner; in front = inner corner), the run section counted from same-block,
+    same-orient neighbours toward the front (mod N), a corner's second section from the neighbour. Height over (x, z):
+    t = (part + z) / N through the profile (slope t, curve sqrt(1-(1-t)^2), cove 1-sqrt(1-t^2)); outer corners take the
+    lower of the two runs (curves round off spherically), inner the higher. The surface is a triangle grid (curves 8x8,
+    ridge 2-4, slopes 1-4) and `facetHeight` (the drawn surface) is the inside test, so curved chords aren't dropped as
+    buried. Wedges end in a point (`end`) where the ridge stops.
+  - `ship/block/ShapedBlock`: the interface for every model-baked block (pieces, greebles, lights, joints): shared `ORIENT`
+    (0-23), `shapeOf`, `orientOf`, `seals`, `texture(state, key)`, `emissive`. `ShapedBlockModels` registers every
+    `ShapedBlock` in `ModBlocks.all()`. `ShipMaterials` fill and `ShipEntity.sealsCabin` go through it.
+  - Hull Tool (`ship/item/HullToolItem`): use = turn a quarter about up (greebles: next detail; lights: next colour;
+    pillars: next axis); sneak-use = flip upside down with the same front. Profiles re-fit after every change.
+  - Blueprints: `ShipBlueprints.place` runs two `updateFromNeighbourShapes` passes over profile pieces and frames after
+    placing, so runs and corners connect. The Kestrel uses `hull_slope`; the Magpie maps its old panel shapes to slopes,
+    curves and frames.
+  - Recipes: stonecutter plating -> 1 piece (plate 4, half plate and frame 2); Fabricator 2 plates -> 4 (plate -> 8), alloy
+    kept.
+  - **Gear-up pre-flight** (found while checking the Magpie): with the gear up its pods swung back and the hull sank (only
+    48 fixed lift engines, 0.86x). `Articulations.gearUpPoses` poses every hinged part of the world blocks at its gear-up
+    angle (same grouping rule as `detect`); pre-flight re-runs the balanced lift solve in that pose: "Gear up: lift X (Nx)",
+    WARN below 1.15x. The Magpie's belly banks are now twice as dense (lift 2.44x gear down, 1.30x gear up).
+  - Verified 2026-11-15 in the client: slope rings form crisp hip corners, curve rings a pillow with spherical corners; 1:2
+    and 1:4 runs read smooth; an L of slopes forms an inner corner; the wedge ends in a point. Kestrel (342 blocks, 1.89x)
+    and Magpie (20,683 blocks) pass pre-flight; the Magpie hovers at the same altitude with the gear up, and its pods
+    swing from down to aft and back (seen from outside).
 - Known limits: assembly and the first load of a 200k ship still take seconds; lights aboard ships glow but don't light
-  the world around the ship (no moving light sources yet); Hull Panels mirror as a turn (asymmetric
-  shapes aren't flipped); radiation from machines aboard isn't counted for nearby players; block entities aboard only tick
+  the world around the ship (no moving light sources yet); radiation from machines aboard isn't counted for nearby players; block entities aboard only tick
   chest lids on the client (no bell swing or campfire smoke yet); contacts beyond entity tracking range aren't shown.
 
 ## How ship editing works (Milestone 4)

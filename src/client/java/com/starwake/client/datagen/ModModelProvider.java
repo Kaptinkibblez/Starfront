@@ -31,15 +31,17 @@ public final class ModModelProvider extends FabricModelProvider {
 		// Plain full cube: textures/block/<name>.png on all six faces.
 		generators.family(ModBlocks.HULL_PLATING).stairs(ModBlocks.HULL_PLATING_STAIRS).slab(ModBlocks.HULL_PLATING_SLAB);
 		generators.createTrivialCube(ModBlocks.CANOPY_GLASS);
-		// Hull Panel (M9 pass 3): rendered by client/ship/HullPanelModel (a block-state resolver that bakes every shape);
-		// this blockstate only satisfies validation. The item shows the stairs model.
+		// Hull pieces (M9 pass 4): rendered by client/ship/ShapedBlockModels (block-state resolvers); these blockstates only
+		// satisfy validation. Items: stairs for the run pieces, the slab for plates, the plating cube otherwise.
 		net.minecraft.resources.Identifier stairs = net.minecraft.client.data.models.model.ModelLocationUtils.getModelLocation(ModBlocks.HULL_PLATING_STAIRS);
-		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(ModBlocks.HULL_PANEL, BlockModelGenerators.plainVariant(stairs)));
-		generators.registerSimpleItemModel(ModBlocks.HULL_PANEL.asItem(), stairs);
-		// Hull Form (M9 pass 4): resolver-rendered; the item shows plain plating.
+		net.minecraft.resources.Identifier slab = net.minecraft.client.data.models.model.ModelLocationUtils.getModelLocation(ModBlocks.HULL_PLATING_SLAB);
 		net.minecraft.resources.Identifier plating = net.minecraft.client.data.models.model.ModelLocationUtils.getModelLocation(ModBlocks.HULL_PLATING);
-		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(ModBlocks.HULL_FORM, BlockModelGenerators.plainVariant(plating)));
-		generators.registerSimpleItemModel(ModBlocks.HULL_FORM.asItem(), plating);
+		for (Block piece : ModBlocks.hullPieces()) {
+			net.minecraft.resources.Identifier model = piece instanceof com.starwake.ship.block.ProfileHullBlock ? stairs
+					: piece instanceof com.starwake.ship.block.HullPieceBlock.Plate ? slab : plating;
+			generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(piece, BlockModelGenerators.plainVariant(model)));
+			generators.registerSimpleItemModel(piece.asItem(), model);
+		}
 		// Hinge and Rotor (M9 pass 3): resolver-rendered too; items are plain cubes.
 		for (Block block : new Block[] {ModBlocks.HINGE, ModBlocks.ROTOR}) {
 			net.minecraft.resources.Identifier itemModel = ModelTemplates.CUBE_ALL.createWithSuffix(block, "_item",

@@ -1,6 +1,6 @@
 # Generates the Kestrel blueprint: an original light fighter (M9 pass 2 redesign).
 #
-# No wings (starships don't fly on wings): a sloped wedge fuselage shaped with Hull Plating Stairs and Slabs,
+# No wings (starships don't fly on wings): a sloped wedge fuselage shaped with auto-connecting Hull Slopes and slabs,
 # a frameless Canopy Glass bubble, side sponsons carrying the strafe/retro thrusters far from the centre of mass
 # (yaw authority), four belly main engines for VTOL lift around the centre of mass, two rear mains, RCS for roll
 # and pitch, and enough power plants that the engines get full power at the default 60/20/20 split.
@@ -101,11 +101,12 @@ palette = {
     "b": "starwake:hull_plating_slab[type=bottom]",
     "t": "starwake:hull_plating_slab[type=bottom]",
     "s": "starwake:hull_plating_slab[type=top]",
-    # Stairs: "facing" is the tall side. n = slope descending toward the nose; w/e = slopes down to the west/east.
-    "n": "starwake:hull_plating_stairs[facing=south,half=bottom]",
-    "w": "starwake:hull_plating_stairs[facing=east,half=bottom]",
-    "e": "starwake:hull_plating_stairs[facing=west,half=bottom]",
-    "v": "starwake:hull_plating_stairs[facing=south,half=top]",
+    # Hull Slopes (M9 pass 4; auto-connecting, so corners form where runs meet). orient = up x front (low side):
+    # n = low side toward the nose; w/e = low side west/east; v = hung under the chin (up = down).
+    "n": "starwake:hull_slope[orient=4]",
+    "w": "starwake:hull_slope[orient=7]",
+    "e": "starwake:hull_slope[orient=5]",
+    "v": "starwake:hull_slope[orient=0]",
     "f": "starwake:hull_plating_slab[type=bottom]",
     "K": "starwake:helm[facing=north]", "J": "starwake:seat",
     "P": "starwake:power_plant", "C": "starwake:cooler", "S": "starwake:shield_generator",

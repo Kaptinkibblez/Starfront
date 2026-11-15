@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "starwake:hull_plating",
+  "result": {
+    "id": "starwake:hull_slope_4"
+  }
+}

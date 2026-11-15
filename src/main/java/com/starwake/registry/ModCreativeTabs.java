@@ -37,14 +37,6 @@ public final class ModCreativeTabs {
 				.icon(() -> new ItemStack(ModBlocks.HULL_PLATING))
 				.displayItems((parameters, output) -> {
 					ModBlocks.all().forEach(output::accept);
-					// Every other Hull Panel shape, pre-set (the item places with that shape).
-					for (com.starwake.ship.panel.PanelShape shape : com.starwake.ship.panel.PanelShape.values()) {
-						if (shape == com.starwake.ship.panel.PanelShape.SLOPE) continue;
-						ItemStack panel = new ItemStack(ModBlocks.HULL_PANEL);
-						panel.set(net.minecraft.core.component.DataComponents.BLOCK_STATE, net.minecraft.world.item.component.BlockItemStateProperties.EMPTY
-								.with(com.starwake.ship.block.HullPanelBlock.SHAPE, shape));
-						output.accept(panel);
-					}
 					for (com.starwake.ship.panel.GreebleShape shape : com.starwake.ship.panel.GreebleShape.values()) {
 						if (shape == com.starwake.ship.panel.GreebleShape.VENT) continue;
 						ItemStack greeble = new ItemStack(ModBlocks.GREEBLE);

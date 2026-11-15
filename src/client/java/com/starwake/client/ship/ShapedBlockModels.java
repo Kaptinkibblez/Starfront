@@ -2,9 +2,7 @@ package com.starwake.client.ship;
 
 import com.starwake.StarwakeMod;
 import com.starwake.registry.ModBlocks;
-import com.starwake.ship.block.GreebleBlock;
-import com.starwake.ship.block.HullPanelBlock;
-import com.starwake.ship.block.ShipLightBlock;
+import com.starwake.ship.block.ShapedBlock;
 import java.util.HashMap;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -45,22 +43,13 @@ public final class ShapedBlockModels {
 	private record Spec(Function<BlockState, PanelGeometry.Shape> shape, ToIntFunction<BlockState> orient,
 			BiFunction<BlockState, String, Identifier> texture, BiPredicate<BlockState, String> emissive) {}
 
+	/** Registers every {@link ShapedBlock}: hull pieces, greebles, lights, hinges and rotors. */
 	public static void init() {
-		Identifier hull = StarwakeMod.id("block/hull_plating");
-		register(ModBlocks.HULL_PANEL, new Spec(s -> s.getValue(HullPanelBlock.SHAPE), s -> s.getValue(HullPanelBlock.ORIENT),
-				(s, key) -> hull, (s, key) -> false));
-		register(ModBlocks.HULL_FORM, new Spec(com.starwake.ship.block.HullFormBlock::shape, com.starwake.ship.block.HullFormBlock::orient,
-				(s, key) -> hull, (s, key) -> false));
-		register(ModBlocks.GREEBLE, new Spec(s -> s.getValue(GreebleBlock.SHAPE), s -> s.getValue(GreebleBlock.ORIENT),
-				(s, key) -> key.equals("hull") ? hull : StarwakeMod.id("block/greeble_" + key), (s, key) -> false));
-		for (Block joint : new Block[] {ModBlocks.HINGE, ModBlocks.ROTOR}) {
-			register(joint, new Spec(s -> ((com.starwake.ship.block.JointBlock) s.getBlock()).shape(), com.starwake.ship.block.JointBlock::orient,
-					(s, key) -> StarwakeMod.id("block/greeble_" + key), (s, key) -> false));
+		for (Block block : ModBlocks.all()) {
+			if (!(block instanceof ShapedBlock shaped)) continue;
+			register(block, new Spec(shaped::shapeOf, shaped::orientOf, (s, key) -> Identifier.parse("starwake:" + shaped.texture(s, key)),
+					shaped::emissive));
 		}
-		register(ModBlocks.SHIP_LIGHT, new Spec(s -> s.getValue(ShipLightBlock.TYPE), s -> s.getValue(ShipLightBlock.ORIENT),
-				(s, key) -> !key.equals("lens") ? StarwakeMod.id("block/greeble_" + key)
-						: StarwakeMod.id("block/ship_light_" + (ShipLightBlock.lit(s) ? s.getValue(ShipLightBlock.COLOR).getSerializedName() : "off")),
-				(s, key) -> key.equals("lens") && ShipLightBlock.lit(s)));
 	}
 
 	private static void register(Block block, Spec spec) {

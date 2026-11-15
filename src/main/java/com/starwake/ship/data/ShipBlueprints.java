@@ -80,6 +80,7 @@ public final class ShipBlueprints {
 			palette.put(entry.getKey().charAt(0), BlockStateParser.parseForBlock(blocks, entry.getValue(), false).blockState());
 		}
 		BlockPos helm = null;
+		List<BlockPos> shaped = new java.util.ArrayList<>();
 		for (int y = 0; y < blueprint.layers().size(); y++) {
 			List<String> rows = blueprint.layers().get(y);
 			for (int z = 0; z < rows.size(); z++) {
@@ -90,8 +91,19 @@ public final class ShipBlueprints {
 					BlockPos pos = origin.offset(x, y, z);
 					level.setBlock(pos, state, Block.UPDATE_CLIENTS);
 					if (state.getBlock() instanceof com.starwake.ship.block.HelmBlock) helm = pos;
+					if (state.getBlock() instanceof com.starwake.ship.block.ProfileHullBlock
+							|| state.getBlock() instanceof com.starwake.ship.block.HullPieceBlock.Frame) shaped.add(pos);
 					if (level.getBlockEntity(pos) instanceof FuelTankBlockEntity tank) tank.refill(tank.capacity());
 				}
+			}
+		}
+		// Auto-connecting hull pieces fit themselves to their neighbours (placement above skips neighbour updates). Two
+		// passes: a corner reads its neighbour's run section, which the first pass works out.
+		for (int pass = 0; pass < 2; pass++) {
+			for (BlockPos pos : shaped) {
+				BlockState state = level.getBlockState(pos);
+				BlockState fitted = Block.updateFromNeighbourShapes(state, level, pos);
+				if (fitted != state) level.setBlock(pos, fitted, Block.UPDATE_CLIENTS);
 			}
 		}
 		return helm;

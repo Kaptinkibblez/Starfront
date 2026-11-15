@@ -1,8 +1,20 @@
 {
   "blocks": [
     "starwake:hull_plating",
-    "starwake:hull_panel",
-    "starwake:hull_form"
+    "starwake:hull_slope",
+    "starwake:hull_slope_2",
+    "starwake:hull_slope_4",
+    "starwake:hull_curve",
+    "starwake:hull_curve_2",
+    "starwake:hull_curve_4",
+    "starwake:hull_cove",
+    "starwake:hull_cove_2",
+    "starwake:hull_cove_4",
+    "starwake:hull_wedge",
+    "starwake:hull_plate",
+    "starwake:hull_half_plate",
+    "starwake:hull_pillar",
+    "starwake:hull_frame"
   ],
   "mass": 1.5,
   "heat_limit": 800,

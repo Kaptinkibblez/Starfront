@@ -104,6 +104,48 @@ public final class Articulations {
 		return out;
 	}
 
+	/**
+	 * Pre-flight (world blocks, before assembly): every hinge's part posed at its gear-up angle, so the report can check
+	 * the cruise pose too. Same grouping rule as {@link #detect}; null for blocks that don't move.
+	 */
+	public static java.util.function.Function<BlockPos, ShipDynamics.@Nullable Pose> gearUpPoses(java.util.Set<BlockPos> ship,
+			net.minecraft.world.level.Level level, BlockPos helm) {
+		Map<BlockPos, ShipDynamics.Pose> poses = new HashMap<>();
+		for (BlockPos pos : ship) {
+			BlockState state = level.getBlockState(pos);
+			if (!(state.getBlock() instanceof JointBlock joint) || joint.isRotor()) continue;
+			Direction facing = state.getValue(JointBlock.FACING);
+			double angle = state.getValue(JointBlock.UP_ANGLE) * 15.0;
+			BlockPos start = pos.relative(facing);
+			if (angle == 0 || !ship.contains(start) || poses.containsKey(start)) continue;
+			java.util.Set<BlockPos> cells = new java.util.HashSet<>(List.of(start));
+			java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>(cells);
+			boolean valid = true;
+			while (!queue.isEmpty() && valid) {
+				BlockPos cell = queue.poll();
+				for (Direction d : Direction.values()) {
+					BlockPos next = cell.relative(d);
+					if (next.equals(pos) || cells.contains(next) || !ship.contains(next)) continue;
+					if (next.equals(helm) || cells.size() >= MAX_GROUP || poses.containsKey(next)) {
+						valid = false;
+						break;
+					}
+					cells.add(next);
+					queue.add(next);
+				}
+			}
+			if (!valid) continue;
+			Vector3d pivot = new Vector3d(pos.getX() + 0.5 + facing.getStepX() * 0.5, pos.getY() + 0.5 + facing.getStepY() * 0.5,
+					pos.getZ() + 0.5 + facing.getStepZ() * 0.5);
+			// Same as the flying ship: the hinge angle turns the part from its as-built pose.
+			double rad = Math.toRadians(angle);
+			ShipDynamics.Pose pose = new ShipDynamics.Pose(pivot,
+					new Quaterniond().fromAxisAngleRad(facing.getStepX(), facing.getStepY(), facing.getStepZ(), rad));
+			for (BlockPos cell : cells) poses.put(cell, pose);
+		}
+		return poses.isEmpty() ? null : poses::get;
+	}
+
 	private int indexOf(BlockPos hinge) {
 		for (int i = 0; i < joints.size(); i++) if (joints.get(i).hinge().equals(hinge)) return i;
 		return -1;

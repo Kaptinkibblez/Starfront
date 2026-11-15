@@ -327,92 +327,6 @@ public final class PanelGeometry {
 		return out;
 	}
 
-	private static final double T = 2 / 16.0;
-
-	static List<Solid> panelSolids(PanelShape shape) {
-		List<Solid> s = new ArrayList<>();
-		switch (shape) {
-			case SLOPE -> s.add(new Extrusion(0, 0, 1, poly(0, 0, 1, 0, 1, 1)));
-			case SLOPE_2_LOW -> s.add(new Extrusion(0, 0, 1, poly(0, 0, 1, 0, 1, 0.5)));
-			case SLOPE_2_HIGH -> s.add(new Extrusion(0, 0, 1, poly(0, 0, 1, 0, 1, 1, 0, 0.5)));
-			case SLOPE_4_A -> s.add(new Extrusion(0, 0, 1, poly(0, 0, 1, 0, 1, 0.25)));
-			case SLOPE_4_B -> s.add(new Extrusion(0, 0, 1, poly(0, 0, 1, 0, 1, 0.5, 0, 0.25)));
-			case SLOPE_4_C -> s.add(new Extrusion(0, 0, 1, poly(0, 0, 1, 0, 1, 0.75, 0, 0.5)));
-			case SLOPE_4_D -> s.add(new Extrusion(0, 0, 1, poly(0, 0, 1, 0, 1, 1, 0, 0.75)));
-			case PEAK -> s.add(new Extrusion(0, 0, 1, poly(0, 0, 1, 0, 0.5, 1)));
-			case CORNER -> {
-				double[] a = {0, 0, 0}, b = {1, 0, 0}, c = {1, 0, 1}, d = {0, 0, 1}, top = {1, 1, 1};
-				s.add(new Faceted((x, y, z) -> y <= Math.min(x, z),
-						List.of(new double[][] {a, b, c, d}, new double[][] {b, c, top}, new double[][] {d, c, top},
-								new double[][] {a, b, top}, new double[][] {a, top, d})));
-			}
-			case INNER_CORNER -> {
-				double[] a = {0, 0, 0}, b = {1, 0, 0}, c = {1, 0, 1}, d = {0, 0, 1};
-				double[] bt = {1, 1, 0}, ct = {1, 1, 1}, dt = {0, 1, 1};
-				s.add(new Faceted((x, y, z) -> y <= Math.max(x, z),
-						List.of(new double[][] {a, b, c, d}, new double[][] {b, c, ct, bt}, new double[][] {d, c, ct, dt},
-								new double[][] {a, b, bt}, new double[][] {a, d, dt}, new double[][] {a, bt, ct}, new double[][] {a, ct, dt})));
-			}
-			case QUARTER_ROUND -> s.add(new Extrusion(0, 0, 1, concat(poly(1, 0), arc(1, 0, 1, 90, 180, 8))));
-			case COVE -> s.add(new Extrusion(0, 0, 1, concat(poly(0, 0, 1, 0, 1, 1), arc(0, 1, 1, 0, -90, 8))));
-			case ROUND_CORNER -> s.add(roundCorner());
-			case CYLINDER -> s.add(new Extrusion(1, 0, 1, concat(arc(0.5, 0.5, 0.5, 0, 360, 16))));
-			case HALF_ROUND -> s.add(new Extrusion(0, 0, 1, concat(arc(0.5, 0, 0.5, 0, 180, 8))));
-			case HALF_PLATE -> s.add(box(0, 0, 0, 1, 0.5, 1));
-			case QUARTER_PLATE -> s.add(box(0, 0, 0, 1, 0.25, 1));
-			case ARMOR_PLATE -> s.add(new Extrusion(0, 0, 1, poly(0, 0, 0.25, 0, 1, 0.75, 1, 1)));
-			case FIN -> s.add(new Extrusion(0, 7 / 16.0, 9 / 16.0, poly(0, 0, 1, 0, 1, 1, 0.6, 1)));
-			case FRAME -> {
-				for (double a : new double[] {0, 1 - T}) {
-					for (double b : new double[] {0, 1 - T}) {
-						s.add(box(a, 0, b, a + T, 1, b + T));           // vertical edges
-						s.add(box(0, a, b, 1, a + T, b + T));           // edges along X
-						s.add(box(a, b, 0, a + T, b + T, 1));           // edges along Z
-					}
-				}
-			}
-			case LATTICE -> {
-				for (double a : new double[] {0, 1 - T}) {
-					for (double b : new double[] {0, 1 - T}) s.add(box(a, b, 0, a + T, b + T, 1)); // rails along Z
-				}
-				double[][] band = poly(0, 0, 0.18, 0, 1, 0.82, 1, 1, 0.82, 1, 0, 0.18);
-				s.add(new Extrusion(0, 0, T, band));       // west face brace (z, y)
-				s.add(new Extrusion(0, 1 - T, 1, band));   // east face brace
-				double[][] flat = poly(0, 0, 0.18, 0, 1, 0.82, 1, 1, 0.82, 1, 0, 0.18);
-				s.add(new Extrusion(1, 0, T, flat));       // bottom brace (x, z)
-				s.add(new Extrusion(1, 1 - T, 1, flat));   // top brace
-			}
-			case RIB -> s.add(new Extrusion(0, 6 / 16.0, 10 / 16.0, concat(arc(1, 0, 1, 90, 180, 8), arc(1, 0, 0.8, 180, 90, 8))));
-		}
-		return s;
-	}
-
-	/** An eighth of a sphere of radius 1 centred on the bottom south-east corner: two quarter-rounds meeting. */
-	private static Solid roundCorner() {
-		int n = 6;
-		List<double[][]> faces = new ArrayList<>();
-		double[][][] grid = new double[n + 1][n + 1][];
-		for (int i = 0; i <= n; i++) {
-			double th = Math.PI / 2 * i / n;
-			for (int j = 0; j <= n; j++) {
-				double ph = Math.PI / 2 * j / n;
-				grid[i][j] = new double[] {1 - Math.cos(ph) * Math.cos(th), Math.sin(ph), 1 - Math.cos(ph) * Math.sin(th)};
-			}
-		}
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
-				if (j == n - 1) faces.add(new double[][] {grid[i][j], grid[i + 1][j], grid[i][j + 1]});
-				else faces.add(new double[][] {grid[i][j], grid[i + 1][j], grid[i + 1][j + 1], grid[i][j + 1]});
-			}
-		}
-		double[] centre = {1, 0, 1};
-		for (int i = 0; i < n; i++) faces.add(new double[][] {centre, grid[i][0], grid[i + 1][0]});   // bottom
-		double[] axis = {1, 0, 1};
-		for (int j = 0; j < n; j++) faces.add(new double[][] {axis, grid[0][j], grid[0][j + 1]});     // south face (z = 1)
-		for (int j = 0; j < n; j++) faces.add(new double[][] {axis, grid[n][j], grid[n][j + 1]});     // east face (x = 1)
-		return new Faceted((x, y, z) -> (x - 1) * (x - 1) + y * y + (z - 1) * (z - 1) <= 1, faces);
-	}
-
 	// ---------------------------------------------------------------------------------------------
 	// Face building
 	// ---------------------------------------------------------------------------------------------
@@ -426,7 +340,7 @@ public final class PanelGeometry {
 				if (len < 1e-9) continue;
 				double[] c = centroid(face);
 				double e = 1e-4 / len;
-				if (solid.inside(c[0] + n[0] * e, c[1] + n[1] * e, c[2] + n[2] * e)) {
+				if (inside(List.of(solid), c[0] + n[0] * e, c[1] + n[1] * e, c[2] + n[2] * e)) { // bounded: faces on the cube's sides
 					face = reversed(face);
 					n = new double[] {-n[0], -n[1], -n[2]};
 				}

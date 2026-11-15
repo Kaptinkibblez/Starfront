@@ -98,8 +98,8 @@ public final class ShipMaterials {
 		}
 		ShipStats.BlockStats stats = base;
 		// Hull panels (M9 pass 3) weigh what their shape holds.
-		double fill = state.getBlock() instanceof com.starwake.ship.block.HullPanelBlock ? com.starwake.ship.block.HullPanelBlock.volume(state)
-				: state.getBlock() instanceof com.starwake.ship.block.HullFormBlock ? com.starwake.ship.block.HullFormBlock.volume(state) : 1;
+		double fill = state.getBlock() instanceof com.starwake.ship.block.ShapedBlock shaped
+				? com.starwake.ship.panel.PanelGeometry.volume(shaped.shapeOf(state)) : 1;
 		if (material == null) return new Rating(fill, stats.heatLimit(), stats.armor(), stats);
 		HullTuning tuning = HullTuning.get();
 		MaterialProperties p = material.properties();

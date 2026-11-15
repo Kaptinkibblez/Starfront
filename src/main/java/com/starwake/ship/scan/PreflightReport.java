@@ -1,6 +1,7 @@
 package com.starwake.ship.scan;
 
 import com.starwake.planet.Planets;
+import com.starwake.ship.articulation.Articulations;
 import com.starwake.registry.ModBlocks;
 import com.starwake.ship.block.FuelTankBlockEntity;
 import com.starwake.ship.block.HelmBlock;
@@ -168,6 +169,16 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 			if (lift < rawLift * 0.85) {
 				lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.lift_wasted", pct(1 - lift / rawLift))));
 			}
+		}
+		// Gear-up pose (M9 pass 4): hinged engine pods swing for cruise, so the hull must still hover without them.
+		var cruise = Articulations.gearUpPoses(ship, level, scan.helm());
+		if (cruise != null && thrusters > 0) {
+			dynamics.articulate(cruise);
+			double cruiseLift = dynamics.balancedThrust(new Vector3d(0, 1, 0)) * engineFactor;
+			dynamics.articulate(pos -> null);
+			lines.add(new Line(cruiseLift < weight * MIN_LIFT_RATIO ? Status.WARN : Status.PASS,
+					Component.translatable(cruiseLift < weight * MIN_LIFT_RATIO ? "preflight.starwake.lift_gear_up_low" : "preflight.starwake.lift_gear_up",
+							fmt(cruiseLift), fmt2(cruiseLift / weight))));
 		}
 		if (blocked > 0) {
 			lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.blocked_exhaust", blocked)));

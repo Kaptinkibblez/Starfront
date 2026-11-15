@@ -33,8 +33,17 @@ def orient(up, front):
     raise ValueError((up, front))
 
 
+# Old panel shape names -> the auto-connecting hull pieces (M9 pass 4); corners and run sections fit themselves on
+# placement (the blueprint loader runs a shape pass), so a corner is just a slope where two runs meet.
+PIECE = {"slope": "hull_slope", "corner": "hull_slope", "slope_2_low": "hull_slope_2", "slope_2_high": "hull_slope_2",
+         "quarter_round": "hull_curve", "half_round": "hull_curve", "frame": None, "lattice": None, "rib": None}
+
+
 def panel(shape, up="up", front="north"):
-    return f"starwake:hull_panel[shape={shape},orient={orient(up, front)}]"
+    block = PIECE[shape]
+    if block is None:
+        return "starwake:hull_frame"
+    return f"starwake:{block}[orient={orient(up, front)}]"
 
 
 def greeble(shape, up="up", front="north"):
@@ -241,7 +250,7 @@ for z in range(108, 132):
 # --- lift: fixed belly engines (two banks fore and aft of the bay) + engine pods on hinges ---------------------------
 LIFT = []
 for z in list(range(22, 38, 4)) + list(range(108, 132, 4)):
-    for x in range(HX0 + 5, HX1 - 4, 4):
+    for x in range(HX0 + 5, HX1 - 4, 2):                                       # dense enough to hover with the pods swung back
         LIFT.append((x, HY0 - 1, z))
 for (x, y, z) in LIFT:
     put(x, y, z, "starwake:main_engine_mk3[facing=down]")

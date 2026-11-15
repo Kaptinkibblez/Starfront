@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "starwake:hull_plating",
+  "result": {
+    "count": 4,
+    "id": "starwake:hull_plate"
+  }
+}
