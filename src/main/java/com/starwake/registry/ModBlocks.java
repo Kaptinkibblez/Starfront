@@ -66,6 +66,14 @@ public final class ModBlocks {
 					.sound(SoundType.METAL)
 					.requiresCorrectToolForDrops());
 
+	/** Hull Form (M9 pass 4): deformable hull block; the Hull Tool moves its four top corners in eighths. */
+	public static final Block HULL_FORM = register("hull_form", com.starwake.ship.block.HullFormBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.METAL)
+					.strength(5.0f, 6.0f)
+					.sound(SoundType.METAL)
+					.requiresCorrectToolForDrops());
+
 	/** Greeble (M9 pass 3): surface detail for hulls and interiors (shape cycled with the Hull Tool). */
 	public static final Block GREEBLE = register("greeble", com.starwake.ship.block.GreebleBlock::new,
 			BlockBehaviour.Properties.of()

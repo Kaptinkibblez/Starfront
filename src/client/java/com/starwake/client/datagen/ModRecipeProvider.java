@@ -51,6 +51,7 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				slab(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.HULL_PLATING_SLAB, com.starwake.registry.ModBlocks.HULL_PLATING);
 				// Hull Panels (M9 pass 3): plain steel from plating (the Fabricator makes them in any alloy), and the Hull Tool.
 				stonecutterResultFromBase(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.HULL_PANEL, com.starwake.registry.ModBlocks.HULL_PLATING, 2);
+				stonecutterResultFromBase(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.HULL_FORM, com.starwake.registry.ModBlocks.HULL_PLATING, 1);
 				stonecutterResultFromBase(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.GREEBLE, com.starwake.registry.ModBlocks.HULL_PLATING, 4);
 				shaped(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.SHIP_LIGHT, 4).pattern(" P ").pattern("IGI")
 						.define('P', Items.GLASS_PANE).define('G', Items.GLOWSTONE_DUST).define('I', Items.IRON_INGOT)

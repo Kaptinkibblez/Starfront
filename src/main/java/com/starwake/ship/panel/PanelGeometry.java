@@ -113,6 +113,13 @@ public final class PanelGeometry {
 		return v.add(0.5f, 0.5f, 0.5f);
 	}
 
+	/** Block space back to model space for an orientation (the inverse of {@link #transform}). */
+	public static Vector3f inverse(int orient, double x, double y, double z) {
+		Vector3f v = new Vector3f((float) (x - 0.5), (float) (y - 0.5), (float) (z - 0.5));
+		new Matrix3f(MATRIX[orient]).transpose().transform(v);
+		return v.add(0.5f, 0.5f, 0.5f);
+	}
+
 	/** Faces in model space (outward winding, hidden ones dropped). */
 	public static List<Face> faces(Shape shape) {
 		return FACES.computeIfAbsent(shape, s -> buildFaces(s.solids()));
@@ -171,36 +178,15 @@ public final class PanelGeometry {
 			}
 		}
 		if (recordVolume) VOLUME.put(shape, Math.max(1.0 / (RES * RES * RES), count / (double) (RES * RES * RES)));
-		VoxelShape result = Shapes.empty();
-		boolean[][][] used = new boolean[RES][RES][RES];
-		for (int x = 0; x < RES; x++) {
-			for (int z = 0; z < RES; z++) {
-				for (int y = 0; y < RES; y++) {
-					if (!filled[x][y][z] || used[x][y][z]) continue;
-					int y1 = y;
-					while (y1 + 1 < RES && filled[x][y1 + 1][z] && !used[x][y1 + 1][z]) y1++;
-					int z1 = z;
-					while (z1 + 1 < RES && column(filled, used, x, y, y1, z1 + 1)) z1++;
-					int x1 = x;
-					while (x1 + 1 < RES && slab(filled, used, x1 + 1, y, y1, z, z1)) x1++;
-					for (int a = x; a <= x1; a++) for (int b = y; b <= y1; b++) for (int c = z; c <= z1; c++) used[a][b][c] = true;
-					result = Shapes.or(result, Shapes.box(x / (double) RES, y / (double) RES, z / (double) RES,
-							(x1 + 1) / (double) RES, (y1 + 1) / (double) RES, (z1 + 1) / (double) RES));
-				}
-			}
-		}
-		return result.optimize();
+		// Straight into a bitset voxel shape: vanilla caches every block state's shapes at startup, and merging hundreds of
+		// boxes one by one per state (Hull Forms have ~40k states) took minutes.
+		if (count == 0) return Shapes.empty();
+		var bits = new net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape(RES, RES, RES);
+		for (int x = 0; x < RES; x++) for (int y = 0; y < RES; y++) for (int z = 0; z < RES; z++) if (filled[x][y][z]) bits.fill(x, y, z);
+		return new net.minecraft.world.phys.shapes.CubeVoxelShape(bits);
 	}
 
-	private static boolean column(boolean[][][] filled, boolean[][][] used, int x, int y0, int y1, int z) {
-		for (int y = y0; y <= y1; y++) if (!filled[x][y][z] || used[x][y][z]) return false;
-		return true;
-	}
 
-	private static boolean slab(boolean[][][] filled, boolean[][][] used, int x, int y0, int y1, int z0, int z1) {
-		for (int z = z0; z <= z1; z++) if (!column(filled, used, x, y0, y1, z)) return false;
-		return true;
-	}
 
 	// ---------------------------------------------------------------------------------------------
 	// Solids
@@ -277,8 +263,13 @@ public final class PanelGeometry {
 		}
 	}
 
+	/** A solid given by an inside test and its faces (any winding). */
+	public static Solid faceted(Inside test, List<double[][]> faces, String tex) {
+		return new Faceted(test, faces, tex);
+	}
+
 	@FunctionalInterface
-	private interface Inside {
+	public interface Inside {
 		boolean inside(double x, double y, double z);
 	}
 

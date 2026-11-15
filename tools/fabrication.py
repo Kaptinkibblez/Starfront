@@ -58,6 +58,8 @@ BLUEPRINTS = {
                      "inputs": [form("plate", 2, main=True, mn={"yield": 100})]},
     "hull_panel": {"output": "starwake:hull_panel", "count": 8, "order": 1, "energy": 400,
                    "inputs": [form("plate", 2, main=True, mn={"yield": 100})]},
+    "hull_form": {"output": "starwake:hull_form", "count": 4, "order": 2, "energy": 400,
+                  "inputs": [form("plate", 2, main=True, mn={"yield": 100})]},
     "structural_frame": {"output": "starwake:structural_frame", "order": 10, "energy": 600,
                          "inputs": [form("rod", 4, main=True, mn={"yield": 250})]},
     "pressure_vessel": {"output": "starwake:pressure_vessel", "order": 11, "energy": 1200,

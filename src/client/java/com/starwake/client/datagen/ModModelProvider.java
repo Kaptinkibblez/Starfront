@@ -36,6 +36,10 @@ public final class ModModelProvider extends FabricModelProvider {
 		net.minecraft.resources.Identifier stairs = net.minecraft.client.data.models.model.ModelLocationUtils.getModelLocation(ModBlocks.HULL_PLATING_STAIRS);
 		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(ModBlocks.HULL_PANEL, BlockModelGenerators.plainVariant(stairs)));
 		generators.registerSimpleItemModel(ModBlocks.HULL_PANEL.asItem(), stairs);
+		// Hull Form (M9 pass 4): resolver-rendered; the item shows plain plating.
+		net.minecraft.resources.Identifier plating = net.minecraft.client.data.models.model.ModelLocationUtils.getModelLocation(ModBlocks.HULL_PLATING);
+		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(ModBlocks.HULL_FORM, BlockModelGenerators.plainVariant(plating)));
+		generators.registerSimpleItemModel(ModBlocks.HULL_FORM.asItem(), plating);
 		// Hinge and Rotor (M9 pass 3): resolver-rendered too; items are plain cubes.
 		for (Block block : new Block[] {ModBlocks.HINGE, ModBlocks.ROTOR}) {
 			net.minecraft.resources.Identifier itemModel = ModelTemplates.CUBE_ALL.createWithSuffix(block, "_item",

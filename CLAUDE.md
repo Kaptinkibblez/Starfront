@@ -913,6 +913,18 @@ normal gravity.
   45 m/s^2, pitch 15 / yaw 7 / roll 105 deg/s^2, cabin sealed, ready for space. The generator replicates
   `PanelGeometry.orient` (up x clockwise fronts) and keeps a clear gap around hinged parts (`KEEP_CLEAR`) so details on
   the hull don't weld them on. Verified: placed, assembled in one go, climbed straight into orbit.
+- **Pass 4, Hull Forms (2026-11-15, user: "as smooth or ridged as I'd like"):** `starwake:hull_form`
+  (`ship/block/HullFormBlock`, extends `HullPlatingBlock`: keeps its alloy, mass x fill) with `facing` (the side it rises
+  toward) and four corner heights `h0..h3` (0..8 eighths; 6 x 9^4 = 39,366 states). Geometry `ship/panel/FormShape`: top
+  surface = two triangles split along the higher diagonal (ridges stay sharp), straight edges so neighbours with equal
+  corners meet seamlessly; any slope ratio, corner, wedge, taper or twist is a set of corner heights; smooth curves are
+  gentle steps across many blocks (e.g. a cosine dome over an 8x8 patch). Hull Tool on a form: click near a corner = that
+  corner, near an edge = both its corners, elsewhere = the whole top; use raises an eighth, sneak-use lowers; every form
+  with the same facing around a moved corner's column moves its matching corner too (`cornerOffset` / `cornerAt`). A form
+  can't be lowered to nothing. Placing: facing = the clicked face, full height. Recipes: stonecutter plating -> 1, Fabricator
+  2 plates -> 4 (alloy kept). `PanelGeometry` now builds voxel shapes straight into a `BitSetDiscreteVoxelShape` (vanilla
+  caches every state's shapes at startup; merging boxes per state took minutes for 39k states, now ~20 s datagen).
+  Verified in the client: dome and ridge render, the tool raised an edge and both neighbours followed.
 - Known limits: assembly and the first load of a 200k ship still take seconds; lights aboard ships glow but don't light
   the world around the ship (no moving light sources yet); Hull Panels mirror as a turn (asymmetric
   shapes aren't flipped); radiation from machines aboard isn't counted for nearby players; block entities aboard only tick

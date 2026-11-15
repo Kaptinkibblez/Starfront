@@ -49,6 +49,8 @@ public final class ShapedBlockModels {
 		Identifier hull = StarwakeMod.id("block/hull_plating");
 		register(ModBlocks.HULL_PANEL, new Spec(s -> s.getValue(HullPanelBlock.SHAPE), s -> s.getValue(HullPanelBlock.ORIENT),
 				(s, key) -> hull, (s, key) -> false));
+		register(ModBlocks.HULL_FORM, new Spec(com.starwake.ship.block.HullFormBlock::shape, com.starwake.ship.block.HullFormBlock::orient,
+				(s, key) -> hull, (s, key) -> false));
 		register(ModBlocks.GREEBLE, new Spec(s -> s.getValue(GreebleBlock.SHAPE), s -> s.getValue(GreebleBlock.ORIENT),
 				(s, key) -> key.equals("hull") ? hull : StarwakeMod.id("block/greeble_" + key), (s, key) -> false));
 		for (Block joint : new Block[] {ModBlocks.HINGE, ModBlocks.ROTOR}) {

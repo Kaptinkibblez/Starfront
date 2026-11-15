@@ -1,7 +1,8 @@
 {
   "blocks": [
     "starwake:hull_plating",
-    "starwake:hull_panel"
+    "starwake:hull_panel",
+    "starwake:hull_form"
   ],
   "mass": 1.5,
   "heat_limit": 800,

@@ -56,6 +56,10 @@ public class HullToolItem extends Item {
 		Level level = context.getLevel();
 		BlockPos pos = context.getClickedPos();
 		BlockState state = level.getBlockState(pos);
+		if (state.getBlock() instanceof com.starwake.ship.block.HullFormBlock) {
+			if (!level.isClientSide()) shapeForm(context, level, pos, state);
+			return InteractionResult.SUCCESS;
+		}
 		boolean greeble = state.getBlock() instanceof com.starwake.ship.block.GreebleBlock;
 		boolean light = state.getBlock() instanceof com.starwake.ship.block.ShipLightBlock;
 		if (!(state.getBlock() instanceof HullPanelBlock) && !greeble && !light) return InteractionResult.PASS;
@@ -84,6 +88,76 @@ public class HullToolItem extends Item {
 		level.setBlock(pos, next, Block.UPDATE_ALL);
 		level.playSound(null, pos, SoundEvents.SMITHING_TABLE_USE, SoundSource.BLOCKS, 0.4f, 1.6f);
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * Hull Forms (M9 pass 4): the click picks a corner (near one), an edge (near its middle) or the whole top; use raises
+	 * it an eighth, sneak-use lowers it. Forms around that share a moved corner (same facing) move with it.
+	 */
+	private static void shapeForm(UseOnContext context, Level level, BlockPos pos, BlockState state) {
+		int orient = com.starwake.ship.block.HullFormBlock.orient(state);
+		var hit = context.getClickLocation();
+		var m = PanelGeometry.inverse(orient, hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ());
+		double u = Math.max(0, Math.min(1, m.x)), v = Math.max(0, Math.min(1, m.z));
+		double[][] corner = {{0, 0}, {1, 0}, {1, 1}, {0, 1}};
+		java.util.List<Integer> targets = new java.util.ArrayList<>();
+		for (int c = 0; c < 4; c++) if (Math.hypot(u - corner[c][0], v - corner[c][1]) < 0.3) targets.add(c);
+		if (targets.isEmpty()) {
+			double[] edgeDist = {v, 1 - u, 1 - v, u}; // edge k joins corners k and k+1
+			int best = 0;
+			for (int k = 1; k < 4; k++) if (edgeDist[k] < edgeDist[best]) best = k;
+			if (edgeDist[best] < 0.2) {
+				targets.add(best);
+				targets.add((best + 1) % 4);
+			} else {
+				for (int c = 0; c < 4; c++) targets.add(c);
+			}
+		}
+		Player player = context.getPlayer();
+		int delta = player != null && player.isSecondaryUseActive() ? -1 : 1;
+		java.util.Map<BlockPos, BlockState> changes = new java.util.LinkedHashMap<>();
+		changes.put(pos, state);
+		var facing = state.getValue(com.starwake.ship.block.HullFormBlock.FACING);
+		int newHeight = 0;
+		for (int c : targets) {
+			int h = Math.max(0, Math.min(com.starwake.ship.panel.FormShape.STEPS, state.getValue(com.starwake.ship.block.HullFormBlock.CORNER[c]) + delta));
+			newHeight = h;
+			int[] o = com.starwake.ship.block.HullFormBlock.cornerOffset(state, c);
+			// Every form whose boundary holds this corner's column: the four cells around it across the facing axis.
+			for (int da = -1; da <= 0; da++) {
+				for (int db = -1; db <= 0; db++) {
+					int dx = 0, dy = 0, dz = 0;
+					switch (facing.getAxis()) {
+						case X -> { dy = o[1] + da; dz = o[2] + db; }
+						case Y -> { dx = o[0] + da; dz = o[2] + db; }
+						case Z -> { dx = o[0] + da; dy = o[1] + db; }
+					}
+					BlockPos other = pos.offset(dx, dy, dz);
+					BlockState current = changes.containsKey(other) ? changes.get(other) : level.getBlockState(other);
+					if (!(current.getBlock() instanceof com.starwake.ship.block.HullFormBlock)
+							|| current.getValue(com.starwake.ship.block.HullFormBlock.FACING) != facing) continue;
+					int k = com.starwake.ship.block.HullFormBlock.cornerAt(current, o[0] - dx, o[1] - dy, o[2] - dz);
+					if (k < 0) continue;
+					BlockState next = current.setValue(com.starwake.ship.block.HullFormBlock.CORNER[k], h);
+					if (com.starwake.ship.block.HullFormBlock.volume(next) <= 1.0 / 4096 && isFlat(next)) continue; // keep something
+					changes.put(other.immutable(), next);
+				}
+			}
+		}
+		for (var e : changes.entrySet()) {
+			if (e.getValue() != level.getBlockState(e.getKey())) level.setBlock(e.getKey(), e.getValue(), Block.UPDATE_ALL);
+		}
+		level.playSound(null, pos, SoundEvents.SMITHING_TABLE_USE, SoundSource.BLOCKS, 0.35f, 1.4f + 0.05f * newHeight);
+		if (player != null) {
+			player.sendOverlayMessage(Component.translatable("message.starwake.hull_tool.form",
+					Component.translatable("message.starwake.hull_tool.form." + (targets.size() == 1 ? "corner" : targets.size() == 2 ? "edge" : "top")),
+					newHeight));
+		}
+	}
+
+	private static boolean isFlat(BlockState state) {
+		for (var p : com.starwake.ship.block.HullFormBlock.CORNER) if (state.getValue(p) > 0) return false;
+		return true;
 	}
 
 	private static PanelShape first(PanelShape.Family family) {
