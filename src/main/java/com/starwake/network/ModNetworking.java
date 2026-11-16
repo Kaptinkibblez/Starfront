@@ -27,6 +27,10 @@ public final class ModNetworking {
 		PayloadTypeRegistry.serverboundPlay().register(JumpTargetPayload.TYPE, JumpTargetPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(LogisticsProbePayload.TYPE, LogisticsProbePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ConfigSyncPayload.TYPE, ConfigSyncPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(KioskPayload.TYPE, KioskPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(TradeIntelPayload.TYPE, TradeIntelPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(TradeIntelPayload.Request.TYPE, TradeIntelPayload.Request.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(KioskPayload.Action.TYPE, KioskPayload.Action.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(CargoPayload.TYPE, CargoPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(CargoPayload.TYPE, CargoPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(CommsPayload.TYPE, CommsPayload.CODEC);
@@ -105,6 +109,10 @@ public final class ModNetworking {
 		});
 		ServerPlayNetworking.registerGlobalReceiver(CargoPayload.TYPE,
 				(payload, context) -> ServerPlayNetworking.send(context.player(), com.starwake.ship.ShipCargo.manifest(context.player(), payload.ship())));
+		ServerPlayNetworking.registerGlobalReceiver(TradeIntelPayload.Request.TYPE, (payload, context) -> ServerPlayNetworking.send(context.player(),
+				com.starwake.trade.EconomySim.intel(context.player(), payload.hub(), payload.item())));
+		ServerPlayNetworking.registerGlobalReceiver(KioskPayload.Action.TYPE,
+				(payload, context) -> com.starwake.trade.kiosk.TradeKioskBlock.act(context.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(CommsPayload.TYPE, (payload, context) -> com.starwake.comms.Comms.handle(context.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(LogisticsProbePayload.TYPE,
 				(payload, context) -> com.starwake.logistics.LogisticsProbe.answer(context.player(), payload.pos()));

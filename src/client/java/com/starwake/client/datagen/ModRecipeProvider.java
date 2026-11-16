@@ -72,6 +72,10 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				shaped(RecipeCategory.REDSTONE, ModMachines.CONVEYOR, 6).pattern("KKK").pattern("IRI")
 						.define('K', Items.DRIED_KELP).define('I', Items.IRON_INGOT).define('R', Items.REDSTONE)
 						.unlockedBy("has_iron", has(Items.IRON_INGOT)).save(output);
+				// Trade Kiosk (M9 player shop).
+				shaped(RecipeCategory.DECORATIONS, com.starwake.registry.ModHubBlocks.TRADE_KIOSK).pattern("IGI").pattern("ICI").pattern("III")
+						.define('I', Items.IRON_INGOT).define('G', Items.GLASS_PANE).define('C', Items.CHEST)
+						.unlockedBy("has_chest", has(Items.CHEST)).save(output);
 				// Belt pieces (M9): built from belts.
 				shaped(RecipeCategory.REDSTONE, ModMachines.CONVEYOR_SPLITTER, 2).pattern(" B ").pattern("BRB")
 						.define('B', ModMachines.CONVEYOR).define('R', Items.REDSTONE).unlockedBy("has_belt", has(ModMachines.CONVEYOR)).save(output);

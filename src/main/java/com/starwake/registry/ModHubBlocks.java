@@ -25,6 +25,15 @@ public final class ModHubBlocks {
 	public static final Block OUTFITTER_TERMINAL = terminal("outfitter_terminal", TerminalBlock.Kind.OUTFITTER, MapColor.COLOR_ORANGE);
 	public static final Block CONTRACT_BOARD = terminal("contract_board", TerminalBlock.Kind.CONTRACTS, MapColor.COLOR_PURPLE);
 
+	/** Trade Kiosk (M9): a player shop. */
+	public static final Block TRADE_KIOSK = ModBlocks.register("trade_kiosk", com.starwake.trade.kiosk.TradeKioskBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN).strength(3.0f, 1200.0f).sound(SoundType.METAL).lightLevel(s -> 9)
+					.requiresCorrectToolForDrops());
+	public static final net.minecraft.world.level.block.entity.BlockEntityType<com.starwake.trade.kiosk.TradeKioskBlockEntity> TRADE_KIOSK_BE =
+			net.minecraft.core.Registry.register(net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE, com.starwake.StarwakeMod.id("trade_kiosk"),
+					net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.create(
+							com.starwake.trade.kiosk.TradeKioskBlockEntity::new, TRADE_KIOSK).build());
+
 	/** Sealed Cargo: a courier contract's package (tagged with its contract). */
 	public static final Item SEALED_CARGO = ModItems.register("sealed_cargo", Item::new, new Item.Properties().stacksTo(1));
 

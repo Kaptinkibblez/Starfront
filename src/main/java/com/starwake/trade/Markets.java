@@ -34,12 +34,11 @@ import net.minecraft.world.level.saveddata.SavedDataType;
  * ({@link Economy#priceFactor}); hostile factions won't trade.
  */
 public final class Markets {
-	private static final double TAU = 6000; // ticks
-	private static final double PRODUCER_EQ = 0.8, CONSUMER_EQ = 0.15, MAX_FILL = 1.5;
+	static final double PRODUCER_START = 0.8, CONSUMER_START = 0.15, MAX_FILL = 1.5;
 	private static final double SPREAD = 0.08;
 
 	/** What a hub trades in one item. */
-	public record Listing(Identifier item, double base, double mult, int capacity, boolean producer) {}
+	public record Listing(Identifier item, double base, double mult, int capacity, boolean producer, String group) {}
 
 	private static final Map<String, List<Listing>> LISTINGS = new HashMap<>();
 	private static int listingsFor = -1;
@@ -72,7 +71,7 @@ public final class Markets {
 		group.items().entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(e -> {
 			if (local != null && !local.contains(e.getKey())) return;
 			if (!BuiltInRegistries.ITEM.containsKey(e.getKey())) return;
-			out.putIfAbsent(e.getKey(), new Listing(e.getKey(), e.getValue(), trade.price(), trade.stock(), producer));
+			out.putIfAbsent(e.getKey(), new Listing(e.getKey(), e.getValue(), trade.price(), trade.stock(), producer, trade.group()));
 		});
 	}
 
@@ -102,29 +101,35 @@ public final class Markets {
 
 	// ---------------------------------------------------------------------------------------
 
-	private static double equilibrium(Listing l) {
-		return l.capacity() * (l.producer() ? PRODUCER_EQ : CONSUMER_EQ);
+	/**
+	 * M9: a listing's stock is a fill level (fraction of its capacity) that the background simulation moves
+	 * ({@link EconomySim}: production, consumption, virtual haulers); players move it by trading. Capacity grows with the
+	 * hub's tier and with market depth (active traders), so the fill, and the price, stay meaningful at any population.
+	 */
+	static double fill(State state, String hub, Listing l) {
+		return state.fill(hub, l.item().toString(), l.producer() ? PRODUCER_START : CONSUMER_START, l.capacity());
 	}
 
-	/** Current stock (drifted toward equilibrium since it was last touched). */
-	private static double stock(State state, String hub, Listing l, long now) {
-		double[] s = state.stock(hub, l.item().toString(), equilibrium(l), now);
-		double eq = equilibrium(l);
-		double dt = Math.max(0, now - s[1]);
-		return eq + (s[0] - eq) * Math.exp(-dt / TAU);
+	/** Units a listing holds at full fill at this hub right now. */
+	static double capacity(MinecraftServer server, TradeHubs.Hub hub, Listing l) {
+		return Math.max(1, l.capacity() * EconomySim.capacityFactor(server, hub));
 	}
 
-	private static double mid(Listing l, double stock) {
-		double fill = Math.clamp(stock / l.capacity(), 0, MAX_FILL);
-		return l.base() * l.mult() * Math.pow(2, 1 - 2 * fill);
+	/** The mid price at a fill (history samples). */
+	static double midPrice(Listing l, double fill) {
+		return mid(l, fill);
 	}
 
-	private static long buyUnit(Listing l, double stock, double rep) {
-		return Math.max(1, (long) Math.ceil(mid(l, stock) * (1 + SPREAD) * rep * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.BUY_PRICES)));
+	private static double mid(Listing l, double fill) {
+		return l.base() * l.mult() * Math.pow(2, 1 - 2 * Math.clamp(fill, 0, MAX_FILL));
 	}
 
-	private static long sellUnit(Listing l, double stock, double rep) {
-		return Math.max(1, (long) Math.floor(mid(l, stock) * (1 - SPREAD) / rep * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.SELL_PRICES)));
+	private static long buyUnit(Listing l, double fill, double rep) {
+		return Math.max(1, (long) Math.ceil(mid(l, fill) * (1 + SPREAD) * rep * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.BUY_PRICES)));
+	}
+
+	private static long sellUnit(Listing l, double fill, double rep) {
+		return Math.max(1, (long) Math.floor(mid(l, fill) * (1 - SPREAD) / rep * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.SELL_PRICES)));
 	}
 
 	/** Prices and stock for the market screen. */
@@ -135,12 +140,13 @@ public final class Markets {
 		double rep = Economy.priceFactor(Economy.rep(player, hub.faction()));
 		List<MarketPayload.Quote> quotes = new ArrayList<>();
 		for (Listing l : listings(server, hub)) {
-			double s = stock(state, hub.id(), l, now);
+			double f = fill(state, hub.id(), l), cap = capacity(server, hub, l);
 			Item item = BuiltInRegistries.ITEM.getValue(l.item());
 			int have = player.getInventory().countItem(item);
-			quotes.add(new MarketPayload.Quote(l.item(), (int) Math.floor(s), (int) (l.capacity() * MAX_FILL), buyUnit(l, s, rep),
-					sellUnit(l, s, rep), l.producer(), have));
+			quotes.add(new MarketPayload.Quote(l.item(), (int) Math.floor(f * cap), (int) (cap * MAX_FILL), buyUnit(l, f, rep),
+					sellUnit(l, f, rep), l.producer(), have));
 		}
+		EconomySim.remember(player, hub, quotes, now);
 		return new MarketPayload(hub.id(), title, hub.faction(), Economy.credits(player), quotes, industrialOffers(player, hub, rep));
 	}
 
@@ -151,13 +157,14 @@ public final class Markets {
 		if (l == null || count <= 0) return Component.translatable("message.starwake.trade.not_traded");
 		State state = state(server);
 		long now = server.overworld().getGameTime();
-		double s = stock(state, hub.id(), l, now);
-		if (s < count) return Component.translatable("message.starwake.trade.out_of_stock");
+		double f = fill(state, hub.id(), l), cap = capacity(server, hub, l);
+		if (f * cap < count) return Component.translatable("message.starwake.trade.out_of_stock");
 		double rep = Economy.priceFactor(Economy.rep(player, hub.faction()));
 		long total = 0;
-		for (int i = 0; i < count; i++) total += buyUnit(l, s - i, rep);
+		for (int i = 0; i < count; i++) total += buyUnit(l, f - i / cap, rep);
 		if (!Economy.spend(player, total)) return Component.translatable("message.starwake.trade.no_credits", total);
-		state.put(hub.id(), l.item().toString(), s - count, now);
+		state.setFill(hub.id(), l.item().toString(), f - count / cap, now);
+		EconomySim.recordTrade(server, player, hub, l.item(), -count);
 		Item item = BuiltInRegistries.ITEM.getValue(itemId);
 		int left = count;
 		while (left > 0) {
@@ -180,15 +187,16 @@ public final class Markets {
 		if (count <= 0) return Component.translatable("message.starwake.trade.none_to_sell");
 		State state = state(server);
 		long now = server.overworld().getGameTime();
-		double s = stock(state, hub.id(), l, now);
-		int room = (int) Math.floor(l.capacity() * MAX_FILL - s);
+		double f = fill(state, hub.id(), l), cap = capacity(server, hub, l);
+		int room = (int) Math.floor((MAX_FILL - f) * cap);
 		count = Math.min(count, room);
 		if (count <= 0) return Component.translatable("message.starwake.trade.full");
 		double rep = Economy.priceFactor(Economy.rep(player, hub.faction()));
 		long total = 0;
-		for (int i = 0; i < count; i++) total += sellUnit(l, s + i, rep);
+		for (int i = 0; i < count; i++) total += sellUnit(l, f + i / cap, rep);
 		removeItems(player, item, count);
-		state.put(hub.id(), l.item().toString(), s + count, now);
+		state.setFill(hub.id(), l.item().toString(), f + count / cap, now);
+		EconomySim.recordTrade(server, player, hub, l.item(), count);
 		Economy.pay(player, total);
 		repForVolume(player, hub, total);
 		return Component.translatable("message.starwake.trade.sold", count, new ItemStack(item).getHoverName(), total);
@@ -200,7 +208,7 @@ public final class Markets {
 	private static double saturation(State state, String hub, String category, long now, Industrial.Tuning t) {
 		double[] s = state.stock(hub, "ind:" + category, 0, now);
 		double sold = s[0] * Math.exp(-Math.max(0, now - s[1]) / t.tau());
-		return Math.pow(2, -sold / t.capacity());
+		return Math.pow(2, -sold / (t.capacity() * EconomySim.depth()));
 	}
 
 	private static double soldValue(State state, String hub, String category, long now, Industrial.Tuning t) {
@@ -250,16 +258,29 @@ public final class Markets {
 		long total = 0;
 		for (int i = 0; i < count; i++) {
 			double fair = appraisal.value() * demand;
-			total += (long) Math.floor(fair * Math.pow(2, -sold / t.capacity()) * (1 - t.spread()) / rep * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.SELL_PRICES));
+			total += (long) Math.floor(fair * Math.pow(2, -sold / (t.capacity() * EconomySim.depth())) * (1 - t.spread()) / rep * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.SELL_PRICES));
 			sold += fair;
 		}
 		if (total <= 0) return Component.translatable("message.starwake.trade.not_traded");
 		stack.shrink(count);
 		inv.setChanged();
 		state.put(hub.id(), "ind:" + appraisal.category(), sold, now);
+		EconomySim.recordIndustrial(server, player, hub, total);
 		Economy.pay(player, total);
 		repForVolume(player, hub, total);
 		return Component.translatable("message.starwake.trade.sold", count, name, total);
+	}
+
+	/** M9: goods delivered to a hub outside the market (contracts) add to its stock if it trades them. */
+	public static void deliver(ServerPlayer player, TradeHubs.Hub hub, Identifier item, int count) {
+		MinecraftServer server = player.level().getServer();
+		Listing l = find(server, hub, item);
+		if (l == null) return;
+		State state = state(server);
+		long now = server.overworld().getGameTime();
+		double cap = capacity(server, hub, l);
+		state.setFill(hub.id(), item.toString(), Math.min(MAX_FILL, fill(state, hub.id(), l) + count / cap), now);
+		EconomySim.recordTrade(server, player, hub, item, count);
 	}
 
 	/** A little reputation for business: +1 per 400 credits traded. */
@@ -304,13 +325,25 @@ public final class Markets {
 			return v == null || v.size() < 2 ? new double[] {initial, now} : new double[] {v.get(0), v.get(1)};
 		}
 
+		/** M9: an item's fill level; entries written before M9 hold an absolute stock (2 values) and are converted. */
+		double fill(String hub, String item, double initial, double legacyCapacity) {
+			List<Double> v = stocks.getOrDefault(hub, Map.of()).get(item);
+			if (v == null || v.size() < 2) return initial;
+			return v.size() >= 3 ? v.get(0) : v.get(0) / Math.max(1, legacyCapacity);
+		}
+
+		void setFill(String hub, String item, double fill, long now) {
+			stocks.computeIfAbsent(hub, k -> new HashMap<>()).put(item, List.of(fill, (double) now, 1.0));
+			setDirty();
+		}
+
 		void put(String hub, String item, double stock, long now) {
 			stocks.computeIfAbsent(hub, k -> new HashMap<>()).put(item, List.of(stock, (double) now));
 			setDirty();
 		}
 	}
 
-	private static State state(MinecraftServer server) {
+	static State state(MinecraftServer server) {
 		return server.getDataStorage().computeIfAbsent(State.TYPE);
 	}
 }

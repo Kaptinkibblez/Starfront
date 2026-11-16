@@ -31,5 +31,8 @@
    "stock": 96
   }
  ],
+ "inputs": [
+  "food"
+ ],
  "outfitter": "starwake:science"
 }

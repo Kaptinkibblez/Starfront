@@ -14,7 +14,8 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /** Server -> client (M7): a hub's Contract Board: today's offers and your contracts you can hand in here. */
 public record ContractBoardPayload(String hub, Component title, String faction, long credits, List<Contract> offers,
-		List<Contract> completable) implements CustomPacketPayload {
+		List<Contract> completable, List<Contract> mine, java.util.Map<String, net.minecraft.world.item.ItemStack> goods, int pickups)
+		implements CustomPacketPayload {
 	public static final Type<ContractBoardPayload> TYPE = new Type<>(StarwakeMod.id("contract_board"));
 
 	private static final Codec<ContractBoardPayload> CODEC_ALL = RecordCodecBuilder.create(i -> i.group(
@@ -23,7 +24,10 @@ public record ContractBoardPayload(String hub, Component title, String faction, 
 			Codec.STRING.fieldOf("faction").forGetter(ContractBoardPayload::faction),
 			Codec.LONG.fieldOf("credits").forGetter(ContractBoardPayload::credits),
 			Contract.CODEC.listOf().fieldOf("offers").forGetter(ContractBoardPayload::offers),
-			Contract.CODEC.listOf().fieldOf("completable").forGetter(ContractBoardPayload::completable)
+			Contract.CODEC.listOf().fieldOf("completable").forGetter(ContractBoardPayload::completable),
+			Contract.CODEC.listOf().fieldOf("mine").forGetter(ContractBoardPayload::mine),
+			Codec.unboundedMap(Codec.STRING, net.minecraft.world.item.ItemStack.CODEC).fieldOf("goods").forGetter(ContractBoardPayload::goods),
+			Codec.INT.fieldOf("pickups").forGetter(ContractBoardPayload::pickups)
 	).apply(i, ContractBoardPayload::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ContractBoardPayload> CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC_ALL);

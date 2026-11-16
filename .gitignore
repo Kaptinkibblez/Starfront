@@ -21,3 +21,4 @@ Thumbs.db
 src/main/generated/.cache/
 run2/
 /logs/
+__pycache__/

@@ -116,9 +116,32 @@ def main():
         "trading_post": ("Trading Post", [trade("food", 1.0, 256), trade("supplies", 1.0, 192), trade("fuel", 1.0, 192)],
                          [trade("raw_minerals", 1.15, 256), trade("samples", 1.15, 96)], "basic"),
     }
+    # M9 economy: the bought groups a hub's production runs on (empty = it produces from local resources).
+    inputs = {"trade_port": ["food", "fuel"], "refinery": ["raw_minerals", "fuel"], "research_station": ["samples"],
+              "settlement": ["fuel", "supplies"], "mining_camp": ["food", "fuel", "supplies"], "research_post": ["food"],
+              "trading_post": []}
     for eid, (name, sells, buys, shop) in economies.items():
         write(f"hub_economy/{eid}.json", {"name": {"translate": f"hub_economy.starwake.{eid}"}, "sells": sells, "buys": buys,
-                                          "outfitter": f"starwake:{shop}"})
+                                          "inputs": inputs[eid], "outfitter": f"starwake:{shop}"})
+    # M9 background simulation (trade/EconomySim). Fills are fractions of a listing's capacity; a step is 30 s.
+    write("economy/default.json", {
+        "step_ticks": 600,
+        "produce": 0.02,          # producer fill gained per step at full supply (~25 min empty to full)
+        "consume": 0.012,         # consumer fill used per step
+        "haul": 0.03,             # fill a virtual hauler run moves per item per step, before backing off for players
+        "haul_gap": 0.2,          # minimum fill difference (producer minus consumer) worth a run
+        "player_backoff": 2.0,    # how strongly recent player hauling of an item displaces virtual haulers
+        "player_tau": 72000,      # ticks for player-hauling memory to fade (1 hour)
+        "trader_window": 144000,  # ticks a trading player counts as active (2 hours)
+        "depth_per_trader": 1.0,  # market depth = sqrt(1 + depth_per_trader x (active traders - 1))
+        "tier_capacity": [1.0, 1.6, 2.5],
+        "tier_rate": [1.0, 1.3, 1.6],
+        "health_ema": 0.02,
+        "grow_points": 240,       # steps of good health (>= grow_health) to rise a tier (2 hours)
+        "decline_points": 480,    # steps of poor health (<= decline_health) to drop a tier (4 hours)
+        "grow_health": 0.7,
+        "decline_health": 0.3,
+    })
 
     def item(i, p, count=1, rep=-100):
         return {"item": i, "price": p, "count": count, "rep": rep}

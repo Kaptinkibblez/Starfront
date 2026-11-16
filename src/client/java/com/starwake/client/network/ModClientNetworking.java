@@ -13,6 +13,10 @@ public final class ModClientNetworking {
 	public static void init() {
 		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.ConfigSyncPayload.TYPE,
 				(payload, context) -> com.starwake.config.StarwakeConfig.applySync(payload.orbitSpeed()));
+		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.TradeIntelPayload.TYPE,
+				(payload, context) -> com.starwake.client.wristcom.apps.TradeApp.receive(payload));
+		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.KioskPayload.TYPE,
+				(payload, context) -> com.starwake.client.trade.KioskScreen.receive(payload));
 		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.CargoPayload.TYPE,
 				(payload, context) -> com.starwake.client.wristcom.apps.CargoApp.receive(payload));
 		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.CommsMessagePayload.TYPE,

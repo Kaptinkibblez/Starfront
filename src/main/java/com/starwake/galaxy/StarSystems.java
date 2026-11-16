@@ -231,6 +231,11 @@ public final class StarSystems {
 
 	// ---------------------------------------------------------------------------------------
 
+	/** The systems opened in this world (besides Solace). */
+	public static java.util.Set<String> opened(net.minecraft.server.MinecraftServer server) {
+		return java.util.Set.copyOf(server.getDataStorage().computeIfAbsent(State.TYPE).systems);
+	}
+
 	/** Which systems have been opened in this world. */
 	public static final class State extends SavedData {
 		public static final Codec<State> CODEC = Codec.STRING.listOf().xmap(list -> {

@@ -41,5 +41,9 @@
    "stock": 128
   }
  ],
+ "inputs": [
+  "raw_minerals",
+  "fuel"
+ ],
  "outfitter": "starwake:industrial"
 }

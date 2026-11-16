@@ -31,14 +31,15 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class TradeData {
 	/** A hub layout. Layers bottom first; ' ' leaves the world, '.' forces air. */
 	public record Template(Optional<Component> name, Map<String, String> palette, List<List<String>> layers, List<List<Integer>> pressurized,
-			List<Integer> beacon, int ground) {
+			List<Integer> beacon, int ground, List<List<Integer>> lights) {
 		public static final Codec<Template> CODEC = RecordCodecBuilder.create(i -> i.group(
 				ComponentSerialization.CODEC.optionalFieldOf("name").forGetter(Template::name),
 				Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("palette").forGetter(Template::palette),
 				Codec.STRING.listOf().listOf().fieldOf("layers").forGetter(Template::layers),
 				Codec.INT.listOf().listOf().optionalFieldOf("pressurized", List.of()).forGetter(Template::pressurized),
 				Codec.INT.listOf().optionalFieldOf("beacon", List.of(0, 0, 0)).forGetter(Template::beacon),
-				Codec.INT.optionalFieldOf("ground", 0).forGetter(Template::ground)
+				Codec.INT.optionalFieldOf("ground", 0).forGetter(Template::ground),
+				Codec.INT.listOf().listOf().optionalFieldOf("lights", List.of()).forGetter(Template::lights)
 		).apply(i, Template::new));
 
 		public int sizeX() {
@@ -70,13 +71,15 @@ public final class TradeData {
 	 * @param name      suffix for hub names ("Mining Camp")
 	 * @param sells     groups it produces (well stocked, cheap)
 	 * @param buys      groups it consumes (scarce, pays well)
+	 * @param inputs    (M9) bought groups its production runs on; empty = local resources
 	 * @param outfitter its outfitter shop id
 	 */
-	public record Economy(Component name, List<Trade> sells, List<Trade> buys, Optional<Identifier> outfitter) {
+	public record Economy(Component name, List<Trade> sells, List<Trade> buys, List<String> inputs, Optional<Identifier> outfitter) {
 		public static final Codec<Economy> CODEC = RecordCodecBuilder.create(i -> i.group(
 				ComponentSerialization.CODEC.fieldOf("name").forGetter(Economy::name),
 				Trade.CODEC.listOf().optionalFieldOf("sells", List.of()).forGetter(Economy::sells),
 				Trade.CODEC.listOf().optionalFieldOf("buys", List.of()).forGetter(Economy::buys),
+				Codec.STRING.listOf().optionalFieldOf("inputs", List.of()).forGetter(Economy::inputs),
 				Identifier.CODEC.optionalFieldOf("outfitter").forGetter(Economy::outfitter)
 		).apply(i, Economy::new));
 	}
@@ -118,6 +121,7 @@ public final class TradeData {
 		listen("commodity", Commodities.CODEC, m -> commodities = m);
 		listen("shop", Shop.CODEC, m -> shops = m);
 		listen("industrial", Industrial.Tuning.CODEC, Industrial::set);
+		listen("economy", EconomySim.Tuning.CODEC, EconomySim::set);
 	}
 
 	private static <T> void listen(String folder, Codec<T> codec, java.util.function.Consumer<Map<Identifier, T>> sink) {

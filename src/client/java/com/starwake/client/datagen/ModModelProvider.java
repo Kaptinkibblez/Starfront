@@ -76,7 +76,7 @@ public final class ModModelProvider extends FabricModelProvider {
 			generators.createTrivialCube(block);
 		}
 		for (Block block : new Block[] {com.starwake.registry.ModHubBlocks.COMMODITY_TERMINAL, com.starwake.registry.ModHubBlocks.OUTFITTER_TERMINAL,
-				com.starwake.registry.ModHubBlocks.CONTRACT_BOARD}) {
+				com.starwake.registry.ModHubBlocks.CONTRACT_BOARD, com.starwake.registry.ModHubBlocks.TRADE_KIOSK}) {
 			generators.createHorizontallyRotatedBlock(block, TexturedModel.ORIENTABLE_ONLY_TOP.updateTexture(t -> t
 					.put(TextureSlot.FRONT, TextureMapping.getBlockTexture(block, "_front"))
 					.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side"))

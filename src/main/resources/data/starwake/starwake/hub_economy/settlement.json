@@ -31,5 +31,9 @@
    "stock": 128
   }
  ],
+ "inputs": [
+  "fuel",
+  "supplies"
+ ],
  "outfitter": "starwake:basic"
 }

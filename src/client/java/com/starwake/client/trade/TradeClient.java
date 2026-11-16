@@ -82,6 +82,7 @@ public final class TradeClient {
 	}
 
 	public static Component factionName(String id) {
+		if (id.startsWith("player:")) return Component.translatable("contract.starwake.posted_by", id.substring(7));
 		Faction f = faction(id);
 		return f == null ? Component.literal(id) : f.name();
 	}
@@ -97,6 +98,7 @@ public final class TradeClient {
 
 	/** "Meridian Mining Collective · Friendly (230)". */
 	public static Component standing(String faction) {
+		if (faction.isEmpty()) return Component.empty();
 		int r = rep.getOrDefault(faction, 0);
 		return Component.empty().append(factionName(faction)).append(" · ").append(rankName(r)).append(" (" + r + ")");
 	}

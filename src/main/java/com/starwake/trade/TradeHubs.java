@@ -85,6 +85,7 @@ public final class TradeHubs {
 		ServerLifecycleEvents.SERVER_STARTED.register(TradeHubs::refreshZones);
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (server.getTickCount() % 40 == 0) tickBuild(server);
+			if (server.getTickCount() % 100 == 50) tickExpansions(server);
 		});
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> sync(handler.getPlayer()));
 		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, from, to) -> sync(player));
@@ -250,10 +251,110 @@ public final class TradeHubs {
 		}
 	}
 
-	/** Places a hub (idempotent per hub: the origin is saved). */
+	/** M9: the economy moved a hub to a new tier (EconomySim). The blocks follow in {@link #tickExpansions}. */
+	static void onTier(MinecraftServer server, Hub hub, int tier, boolean up) {
+		StarwakeMod.LOGGER.info("Hub {} ({}) {} to tier {}", hub.id(), hub.name(), up ? "grew" : "declined", tier + 1);
+	}
+
+	// ---------------------------------------------------------------------------------------
+	// Expansions (M9): tier 2 and 3 add modules (<template>_t2, _t3) on the same origin. They're placed, dimmed
+	// (decline: lights become unlit lamps, nothing is removed) or relit only while no player is within
+	// EXPANSION_REACH of the hub, so nobody sees a station appear around them.
+	// ---------------------------------------------------------------------------------------
+
+	static final double EXPANSION_REACH = 128;
+
+	/** The expansion template for tier index 1 or 2 (tier 2 / tier 3). */
+	static Optional<TradeData.Template> expansion(Hub hub, int tier) {
+		return TradeData.template(hub.template() + "_t" + (tier + 1));
+	}
+
+	/** Highest expansion placed (0 = only the base). */
+	public static int placedTier(MinecraftServer server, Hub hub) {
+		return state(server).placed.getOrDefault(hub.id(), 0);
+	}
+
+	/** Highest expansion whose lights are on. */
+	public static int litTier(MinecraftServer server, Hub hub) {
+		State st = state(server);
+		return st.lit.getOrDefault(hub.id(), st.placed.getOrDefault(hub.id(), 0));
+	}
+
+	private static void tickExpansions(MinecraftServer server) {
+		State st = state(server);
+		for (var e : List.copyOf(st.origins.entrySet())) {
+			Hub hub = hub(server, e.getKey()).orElse(null);
+			if (hub == null) continue;
+			int want = EconomySim.tier(server, hub);
+			if (placedTier(server, hub) >= want && litTier(server, hub) == want) continue;
+			ServerLevel level = server.getLevel(hub.dimension());
+			var base = TradeData.template(hub.template()).orElse(null);
+			if (level == null || base == null || playerNear(level, e.getValue(), base)) continue;
+			applyTier(level, hub, e.getValue(), want);
+		}
+	}
+
+	private static boolean playerNear(ServerLevel level, BlockPos origin, TradeData.Template t) {
+		AABB box = new AABB(origin.getX(), origin.getY(), origin.getZ(), origin.getX() + t.sizeX(), origin.getY() + t.sizeY(),
+				origin.getZ() + t.sizeZ()).inflate(EXPANSION_REACH);
+		for (ServerPlayer p : level.players()) if (box.contains(p.position())) return true;
+		return false;
+	}
+
+	/** Brings a built hub's modules to a tier now: places missing expansions, dims or relights the others. */
+	public static void applyTier(ServerLevel level, Hub hub, BlockPos origin, int want) {
+		MinecraftServer server = level.getServer();
+		State st = state(server);
+		int placed = placedTier(server, hub), lit = litTier(server, hub);
+		for (int tier = placed + 1; tier <= want; tier++) {
+			int k = tier;
+			expansion(hub, tier).ifPresent(t -> place(level, hub.template() + "_t" + (k + 1), t, origin));
+		}
+		// Newly placed modules come lit; older ones switch to match the tier.
+		for (int tier = 1; tier <= placed; tier++) {
+			boolean on = tier <= want, was = tier <= lit;
+			if (on == was) continue;
+			int k = tier;
+			expansion(hub, tier).ifPresent(t -> setLights(level, hub.template() + "_t" + (k + 1), t, origin, on));
+		}
+		placed = Math.max(placed, want);
+		st.placed.put(hub.id(), placed);
+		st.lit.put(hub.id(), want);
+		st.setDirty();
+		refreshZones(server);
+		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			if (SolarSystem.systemOf(p.level()).equals(hub.system())) sync(p);
+		}
+		StarwakeMod.LOGGER.info("Hub {} '{}': modules at tier {} ({} placed)", hub.id(), hub.name(), want + 1, placed + 1);
+	}
+
+	/** Dims (unlit redstone lamps for full blocks, air for small fixtures) or restores an expansion's lights. */
+	private static void setLights(ServerLevel level, String id, TradeData.Template t, BlockPos origin, boolean on) {
+		BlockState dark = Blocks.REDSTONE_LAMP.defaultBlockState();
+		Map<Character, BlockState> palette = on ? palette(level, id, t) : Map.of();
+		for (List<Integer> p : t.lights()) {
+			if (p.size() != 3) continue;
+			BlockPos pos = origin.offset(p.get(0), p.get(1), p.get(2));
+			if (on) {
+				String row = t.layers().get(p.get(1)).get(p.get(2));
+				BlockState s = palette.get(row.charAt(p.get(0)));
+				if (s != null) level.setBlock(pos, s, Block.UPDATE_CLIENTS);
+			} else {
+				BlockState cur = level.getBlockState(pos);
+				if (cur.isAir()) continue;
+				level.setBlock(pos, cur.isCollisionShapeFullBlock(level, pos) ? dark : Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+		}
+	}
+
 	public static void build(ServerLevel level, Hub hub, TradeData.Template t) {
-		BlockPos origin = hub.anchor();
-		if (!hub.station()) {
+		build(level, hub, t, null);
+	}
+
+	/** Places a hub at a fixed origin (admin rebuild keeps the old one), or finds the ground under its anchor. */
+	public static void build(ServerLevel level, Hub hub, TradeData.Template t, @Nullable BlockPos at) {
+		BlockPos origin = at != null ? at : hub.anchor();
+		if (!hub.station() && at == null) {
 			int cx = hub.anchor().getX() + t.sizeX() / 2, cz = hub.anchor().getZ() + t.sizeZ() / 2;
 			level.getChunk(cx >> 4, cz >> 4); // generate the site
 			int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, cx, cz);
@@ -263,7 +364,12 @@ public final class TradeHubs {
 		place(level, hub.template(), t, origin);
 		State state = state(level.getServer());
 		state.origins.put(hub.id(), origin);
+		state.placed.put(hub.id(), 0);
+		state.lit.put(hub.id(), 0);
 		state.setDirty();
+		// A hub that grew before anyone came near is built with its expansions at once.
+		int tier = EconomySim.tier(level.getServer(), hub);
+		if (tier > 0) applyTier(level, hub, origin, tier);
 		refreshZones(level.getServer());
 		for (ServerPlayer p : level.getServer().getPlayerList().getPlayers()) {
 			if (SolarSystem.systemOf(p.level()).equals(hub.system())) sync(p);
@@ -276,7 +382,7 @@ public final class TradeHubs {
 	 * runs a shape-update pass over everything placed so panes, bars, walls and stairs connect (the
 	 * first pass sets each block without looking at neighbours placed after it).
 	 */
-	public static void place(ServerLevel level, String id, TradeData.Template t, BlockPos origin) {
+	private static Map<Character, BlockState> palette(ServerLevel level, String id, TradeData.Template t) {
 		HolderLookup<Block> blocks = level.holderLookup(Registries.BLOCK);
 		Map<Character, BlockState> palette = new HashMap<>();
 		for (var e : t.palette().entrySet()) {
@@ -287,6 +393,11 @@ public final class TradeHubs {
 				StarwakeMod.LOGGER.warn("Hub template {}: bad block '{}'", id, e.getValue());
 			}
 		}
+		return palette;
+	}
+
+	public static void place(ServerLevel level, String id, TradeData.Template t, BlockPos origin) {
+		Map<Character, BlockState> palette = palette(level, id, t);
 		BlockState air = Blocks.AIR.defaultBlockState();
 		List<BlockPos> placed = new ArrayList<>();
 		for (int y = 0; y < t.layers().size(); y++) {
@@ -304,6 +415,7 @@ public final class TradeHubs {
 				}
 			}
 		}
+		if (t.ground() > 0) underpin(level, t, origin);
 		for (BlockPos pos : placed) {
 			BlockState state = level.getBlockState(pos);
 			BlockState shaped = Block.updateFromNeighbourShapes(state, level, pos);
@@ -311,10 +423,42 @@ public final class TradeHubs {
 		}
 	}
 
+	/**
+	 * Surface hubs (M9): a column whose lowest block sits at or below the template's ground line but over air (a slope
+	 * falling away, a cliff edge) gets a tuff-brick footing down to solid ground (up to 40 blocks), so posts, pads and
+	 * towers stand on something wherever the site lands.
+	 */
+	private static void underpin(ServerLevel level, TradeData.Template t, BlockPos origin) {
+		BlockState footing = Blocks.TUFF_BRICKS.defaultBlockState();
+		int sx = t.sizeX(), sz = t.sizeZ();
+		for (int z = 0; z < sz; z++) {
+			for (int x = 0; x < sx; x++) {
+				int lowest = -1;
+				for (int y = 0; y <= t.ground() && y < t.layers().size(); y++) {
+					String row = t.layers().get(y).get(z);
+					char c = x < row.length() ? row.charAt(x) : ' ';
+					if (c != ' ' && c != '.') {
+						lowest = y;
+						break;
+					}
+				}
+				if (lowest < 0) continue;
+				for (int d = 1; d <= 40; d++) {
+					BlockPos pos = origin.offset(x, lowest - d, z);
+					BlockState below = level.getBlockState(pos);
+					if (!below.canBeReplaced() && below.getFluidState().isEmpty()) break;
+					level.setBlock(pos, footing, Block.UPDATE_CLIENTS);
+				}
+			}
+		}
+	}
+
 	/** Forgets where a hub was built (admin rebuild). */
 	public static void forget(MinecraftServer server, Hub hub) {
 		State state = state(server);
 		state.origins.remove(hub.id());
+		state.placed.remove(hub.id());
+		state.lit.remove(hub.id());
 		state.setDirty();
 	}
 
@@ -350,12 +494,20 @@ public final class TradeHubs {
 		return out;
 	}
 
+	/** The base template's zones plus those of every placed expansion. */
+	public static List<AABB> allZones(MinecraftServer server, Hub hub, BlockPos origin) {
+		List<AABB> out = new ArrayList<>();
+		TradeData.template(hub.template()).ifPresent(t -> out.addAll(zones(hub, t, origin)));
+		for (int tier = 1; tier <= placedTier(server, hub); tier++) expansion(hub, tier).ifPresent(t -> out.addAll(zones(hub, t, origin)));
+		return out;
+	}
+
 	private static void refreshZones(MinecraftServer server) {
 		Map<ResourceKey<Level>, List<AABB>> zones = new HashMap<>();
 		State state = state(server);
 		for (var e : state.origins.entrySet()) {
-			hub(server, e.getKey()).ifPresent(hub -> TradeData.template(hub.template()).ifPresent(t ->
-					zones.computeIfAbsent(hub.dimension(), k -> new ArrayList<>()).addAll(zones(hub, t, e.getValue()))));
+			hub(server, e.getKey()).ifPresent(hub -> zones.computeIfAbsent(hub.dimension(), k -> new ArrayList<>())
+					.addAll(allZones(server, hub, e.getValue())));
 		}
 		HubZones.set(false, zones);
 	}
@@ -376,7 +528,7 @@ public final class TradeHubs {
 			BlockPos base = o == null ? hub.anchor() : o;
 			Vec3 beacon = new Vec3(base.getX() + t.beacon().get(0) + 0.5, base.getY() + t.beacon().get(1), base.getZ() + t.beacon().get(2) + 0.5);
 			views.add(new HubListPayload.HubView(hub.id(), hub.name(), hub.faction(), hub.kind(), hub.dimension(), beacon, hub.planet(),
-					o == null ? List.of() : zones(hub, t, o)));
+					o == null ? List.of() : allZones(server, hub, o)));
 		}
 		ServerPlayNetworking.send(player, new HubListPayload(views));
 	}
@@ -386,11 +538,26 @@ public final class TradeHubs {
 	/** Where each built hub was placed. */
 	public static final class State extends SavedData {
 		final Map<String, BlockPos> origins = new HashMap<>();
-		static final Codec<State> CODEC = Codec.unboundedMap(Codec.STRING, BlockPos.CODEC).xmap(map -> {
+		/** Highest expansion tier placed and the highest lit, per hub (M9). */
+		final Map<String, Integer> placed = new HashMap<>(), lit = new HashMap<>();
+
+		private record Data(Map<String, BlockPos> origins, Map<String, Integer> placed, Map<String, Integer> lit) {}
+
+		/** Old saves were a bare origin map: that reads too. */
+		static final Codec<State> CODEC = Codec.withAlternative(
+				com.mojang.serialization.codecs.RecordCodecBuilder.<Data>create(i -> i.group(
+						Codec.unboundedMap(Codec.STRING, BlockPos.CODEC).fieldOf("origins").forGetter(Data::origins),
+						Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("placed", Map.of()).forGetter(Data::placed),
+						Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("lit", Map.of()).forGetter(Data::lit)
+				).apply(i, Data::new)),
+				Codec.unboundedMap(Codec.STRING, BlockPos.CODEC).xmap(m -> new Data(m, Map.of(), Map.of()), Data::origins)
+		).xmap(d -> {
 			State s = new State();
-			s.origins.putAll(map);
+			s.origins.putAll(d.origins());
+			s.placed.putAll(d.placed());
+			s.lit.putAll(d.lit());
 			return s;
-		}, s -> s.origins);
+		}, s -> new Data(s.origins, s.placed, s.lit));
 		static final SavedDataType<State> TYPE = new SavedDataType<>(StarwakeMod.id("hubs"), State::new, CODEC,
 				DataFixTypes.SAVED_DATA_COMMAND_STORAGE);
 	}

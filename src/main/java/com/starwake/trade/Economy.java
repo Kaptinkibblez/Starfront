@@ -122,6 +122,15 @@ public final class Economy {
 		changed(player);
 	}
 
+	/** M9: pays a player who may be offline (player shops, refunds); synced if they're online. */
+	public static void payTo(MinecraftServer server, UUID player, long amount) {
+		State state = state(server);
+		state.accounts.computeIfAbsent(player, u -> new Account()).credits += Math.max(0, amount);
+		state.setDirty();
+		ServerPlayer online = server.getPlayerList().getPlayer(player);
+		if (online != null) sync(online);
+	}
+
 	public static int rep(ServerPlayer player, String faction) {
 		return account(player).rep.getOrDefault(faction, 0);
 	}

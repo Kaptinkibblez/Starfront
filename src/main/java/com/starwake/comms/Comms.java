@@ -51,6 +51,7 @@ public final class Comms {
 						? Component.translatable("comms.starwake.hub.distance", String.format("%.1f", Math.sqrt(player.blockPosition().distSqr(at)) / 1000.0))
 						: Component.translatable(hub.station() ? "comms.starwake.hub.orbit" : "comms.starwake.hub.on", hub.planet());
 				int rep = Economy.rep(player, hub.faction());
+				com.starwake.trade.Markets.quote(player, hub, name); // a hail also reads the hub's prices (Trade app)
 				send(player, channel, name, Component.translatable("comms.starwake.hub.greeting", name,
 						TradeHubs.factionName(server, hub.faction())), "hub");
 				send(player, channel, name, Component.translatable("comms.starwake.hub.where", where, at.getX(), at.getY(), at.getZ()), "hub");

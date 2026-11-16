@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "starwake:block/trade_kiosk",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "starwake:block/trade_kiosk"
+    },
+    "facing=south": {
+      "model": "starwake:block/trade_kiosk",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "starwake:block/trade_kiosk",
+      "y": 270
+    }
+  }
+}

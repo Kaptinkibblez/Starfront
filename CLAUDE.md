@@ -572,6 +572,23 @@ commit. **Don't start the next milestone until the user confirms the current one
       Port the Industrial tab lists the carried products and selling 8 plates paid 88 cr; Cargo shows the Kestrel's fuel/fusion
       and hold; Alice's Comms message reached Bob (inbox + action bar); hailing the Trade Port and Veyra Mining Camp returned
       location, standing, docking and services.)* Details in "How trade, Comms, Cargo and config work after M9".
+  - **M9 economy (decisions 2026-11-16).** User: "more like Star Citizen's dynamic but also somewhat player driven; fun with 1 or
+    1000 people on", and **no NPCs or NPC-flown ships out and about**: everything is simulated in the background. Choices:
+    **production chains** (hubs need inputs to produce), **simulated haulers** (virtual, no entities), **hub growth/decline**
+    (**physical growth, soft decline**: three tiers; reaching one builds designed expansion modules; declining never removes
+    blocks, the modules' lights go dark; building and dimming happen **only while no player is near**); **player shops**
+    (Trade Kiosk), **player-posted contracts**, **supplying hubs** (deliveries fill their stock); **NPC fill-in + deeper
+    markets** with more traders; market info is **what you've seen** (prices remembered with their age, plus history). Hub
+    look overhauled in the **Star Citizen industrial** style (stations: core, spoked arms to enclosed lit hangars, hab ring,
+    solar trusses; outposts: modular habs on tubes, raised pads, mast, cargo yard, signature facility).
+    - [x] **Economy pass (2026-11-16).** *(Verified: singleplayer: the new Overworld Trade Port at tier 1 (core, east/west
+      hangars, roof solar), `/starwake hub tier "solace/station" 3 now` added the hab ring, north/south hangars, solar trusses and
+      comms; set back to tier 1 it kept tier 3 lit while the player was near (`modules 3 (lit 3)`) and dimmed once they were 600
+      blocks away (`lit 1`), the dimmed north arm dark inside; outpost tiers 1-3 placed together (hall, crew hab, processing
+      hall, silos, two pads, watchtower). Dedicated server with two clients: Bob bought 8 diamonds from Alice's kiosk (Alice paid
+      200 cr offline-safe); Alice posted "Supply 16 Emerald" (300 cr escrowed), Bob accepted, handed in and was paid, Alice
+      collected 16 emeralds at the board; the Trade app's Prices tab listed what Alice saw at the terminal "just now"; an
+      outpost placed on a slope stood all 14 perimeter posts on footings.)* Details in "How the economy works after M9".
 
 ---
 
@@ -1296,6 +1313,55 @@ normal gravity.
   online players, the system's hubs, ships within 2 km (not your own). Messages go to any online player; a hub hail answers
   with where it is (distance, orbit of / on a planet, beacon), your standing, docking instructions and services; a ship hail (or
   text) goes to its pilot and owner. Inbox per contact on the client (40 lines), unread dots, action-bar notice.
+
+## How the economy works after M9
+
+- **Simulation** (`trade/EconomySim`, tuning `starwake/economy/default.json` from `tools/trade_data.py`; SavedData
+  `starwake:economy_sim`): every `step_ticks` (600) over the home system's hubs and every opened system's:
+  - *Fill:* market entries are now fill levels (0..1.5 of capacity; `Markets.State` [fill, time, 1]; old [stock, time] entries
+    convert). Capacity = listing stock x `tier_capacity[tier]` x **depth**; depth = sqrt(1 + `depth_per_trader` x (active
+    traders - 1)), traders = players who traded within `trader_window`, so one player sees normal markets and a busy server
+    deep ones.
+  - *Production chains:* producer fill += `produce` x supply x `tier_rate[tier]` (capped at 1), supply = average saturation of
+    the economy's `inputs` groups (hub_economy JSON: trade port needs food + fuel, refinery raw minerals + fuel, mining camp
+    food + fuel + supplies...); consumers drain by `consume` x rate.
+  - *Virtual haulers:* per item, the fullest producer ships `haul` to the emptiest consumer when the gap exceeds `haul_gap`,
+    backing off by recent player trade in that item ("played", decaying with `player_tau`) so players who haul matter.
+  - *Health and tiers* (0..2 = tier 1..3): health = EMA of consumer saturation; `grow_points` steps at >= `grow_health` rises a
+    tier, `decline_points` at <= `decline_health` falls one (`TradeHubs.onTier` logs). Every 10 steps a price sample per
+    item (48 kept) feeds the history graph.
+  - Deliveries to hub contracts and supply requests fill the hub (`Markets.deliver`).
+- **Physical tiers** (`TradeHubs` "Expansions"): templates `<template>_t2/_t3` hold only what each tier adds on the same origin
+  and list their `lights`. `tickExpansions` (every 5 s) brings each built hub to its tier only while no player is within 128
+  blocks of its box: missing expansions are placed (lit), declined ones dim (full-block lights -> unlit redstone lamps, small
+  fixtures removed; nothing else changes), regrowth relights them from the template. Saved per hub: `placed`, `lit` (State is
+  now a record; old bare-origin saves still load). A hub that grew before anyone came near is built with its expansions.
+  Pressurized zones include placed expansions (`allZones`). Surface templates get tuff-brick footings under every column that
+  would hang over air (`underpin`, up to 40 blocks). Admin: `/starwake hub econ` (depth; tier, health, points, modules placed and
+  lit), `hub tier "<id>" <1-3> [now]` (now = build immediately even with players near), `hub simulate <steps>`, `hub rebuild`
+  (keeps the old origin).
+- **Designs** (`tools/hub_designs.py`, run it; it imports the helpers in `tools/hub_templates.py`, whose `Grid` tags each cell
+  with `g.tier` and whose `write_tiers` writes the three files): signed-distance solids (`Solid`: tubes `seg_sdf`, rounded halls
+  `rbox_sdf`, cylinders, tori) built shells first then interiors, so later tubes open earlier walls. Station (121x62x121): core
+  cylinder (reactor column, concourse deck 22 with terminals on the diagonals, control deck 32, crown, keel), arms to 24x27
+  hangars with open lit mouths, pads, catwalks, containers; port T1 east/west + roof solar, T2 hab ring on four spokes + north
+  hangar, T3 south hangar + solar trusses + comms; refinery T2 north hangar + spherical tanks, T3 south hangar + radiator fins +
+  tank farm. Outposts (64x32x64, ground 4): T1 trade hall (airlock, five terminals), raised pad, mast, generator, containers,
+  perimeter lights; T2 crew/workshop hab on a tube, second pad, solar; T3 settlement greenhouse dome, mining processing hall +
+  headframe + silos, or research observatory + dish, and a watchtower.
+- **Player shops** (`trade/kiosk/TradeKioskBlock` + `TradeKioskBlockEntity`, block `starwake:trade_kiosk`): owner set on placement;
+  owner sneak-use opens a 9-slot chest menu, use opens `KioskScreen` (owner: price per slot; others: Buy 1/8/64). Buyers pay
+  through `Economy.spend`, owners are paid with `Economy.payTo` (works offline); hoppers can insert, never extract; non-owners
+  can't break it. Works aboard ships (shipyard position resolved).
+- **Player contracts** (`trade/PlayerContracts`, SavedData `starwake:player_contracts`, ids `p-...`): at a Contract Board, hold
+  the item, enter count + reward, Post: the reward is escrowed, the request (exact item + components) shows on every board in the
+  system for 3 days (max 5 per poster). One taker accepts (counts as an active contract), hands in at that hub and is paid; the
+  goods wait as pickups for the poster ("Collect (n)" on any board). Cancel refunds an untaken request; expiry refunds the
+  poster and drops it from the taker.
+- **Market info** (`TradeIntelPayload`, Wristcom Trade app "Prices" tab): every terminal visit or hub hail remembers that player's
+  quotes per hub with the time; the tab lists known hubs (age, tier), their items (buy / sell / stock as seen), a price history
+  sparkline for the picked item, and the best known sale and cheapest known purchase across hubs. It re-asks every 3 s while
+  open.
 
 ## How metallurgy works (Milestone 8a)
 

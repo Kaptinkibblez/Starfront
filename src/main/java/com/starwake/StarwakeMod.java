@@ -82,6 +82,7 @@ public final class StarwakeMod implements ModInitializer {
 		com.starwake.trade.TradeData.init();
 		com.starwake.trade.Economy.init();
 		com.starwake.trade.TradeHubs.init();
+		com.starwake.trade.EconomySim.init();
 		com.starwake.trade.HubCommands.init();
 		com.starwake.trade.Contracts.init();
 		PlanetGravity.init();

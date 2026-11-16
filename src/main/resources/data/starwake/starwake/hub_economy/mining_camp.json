@@ -32,5 +32,10 @@
    "stock": 128
   }
  ],
+ "inputs": [
+  "food",
+  "fuel",
+  "supplies"
+ ],
  "outfitter": "starwake:industrial"
 }

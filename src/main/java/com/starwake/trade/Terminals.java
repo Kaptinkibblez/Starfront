@@ -93,6 +93,26 @@ public final class Terminals {
 				result = buyFromShop(player, hub, p.count());
 				refresh = TerminalBlock.Kind.OUTFITTER;
 			}
+			case "post" -> {
+				String[] terms = p.arg().split(":");
+				int count = 0;
+				long reward = 0;
+				try {
+					count = Integer.parseInt(terms[0]);
+					reward = Long.parseLong(terms[1]);
+				} catch (RuntimeException ignored) {
+				}
+				result = PlayerContracts.post(player, hub, count, reward);
+				refresh = TerminalBlock.Kind.CONTRACTS;
+			}
+			case "cancel" -> {
+				result = PlayerContracts.cancel(player, p.arg());
+				refresh = TerminalBlock.Kind.CONTRACTS;
+			}
+			case "collect" -> {
+				result = PlayerContracts.collect(player);
+				refresh = TerminalBlock.Kind.CONTRACTS;
+			}
 			case "accept" -> {
 				result = Contracts.accept(player, hub, p.arg());
 				refresh = TerminalBlock.Kind.CONTRACTS;

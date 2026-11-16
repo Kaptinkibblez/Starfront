@@ -1,0 +1,26 @@
+{
+ "step_ticks": 600,
+ "produce": 0.02,
+ "consume": 0.012,
+ "haul": 0.03,
+ "haul_gap": 0.2,
+ "player_backoff": 2.0,
+ "player_tau": 72000,
+ "trader_window": 144000,
+ "depth_per_trader": 1.0,
+ "tier_capacity": [
+  1.0,
+  1.6,
+  2.5
+ ],
+ "tier_rate": [
+  1.0,
+  1.3,
+  1.6
+ ],
+ "health_ema": 0.02,
+ "grow_points": 240,
+ "decline_points": 480,
+ "grow_health": 0.7,
+ "decline_health": 0.3
+}

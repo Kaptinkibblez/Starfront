@@ -51,5 +51,9 @@
    "stock": 64
   }
  ],
+ "inputs": [
+  "food",
+  "fuel"
+ ],
  "outfitter": "starwake:port"
 }

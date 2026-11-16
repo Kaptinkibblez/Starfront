@@ -7,6 +7,8 @@ import com.starwake.network.ContractBoardPayload;
 import com.starwake.registry.ModHubBlocks;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.component.DataComponents;
@@ -47,6 +49,7 @@ public final class Contracts {
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (server.getTickCount() % 200 != 0) return;
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) expire(p);
+			PlayerContracts.expire(server);
 		});
 	}
 
@@ -137,10 +140,25 @@ public final class Contracts {
 			offers.add(c);
 		}
 		List<Contract> completable = active.stream().filter(c -> c.target().equals(hub.id())).toList();
-		return new ContractBoardPayload(hub.id(), Component.literal(hub.name()), hub.faction(), Economy.credits(player), offers, completable);
+		// M9: player-posted requests in this system, the exact goods each wants, and your own posts.
+		Map<String, ItemStack> goods = new HashMap<>();
+		for (PlayerContracts.Entry e : PlayerContracts.open(server, hub.system())) {
+			if (e.poster().equals(player.getUUID())) continue;
+			offers.add(e.contract());
+			goods.put(e.contract().id(), e.template());
+		}
+		for (Contract c : completable) PlayerContracts.get(server, c.id()).ifPresent(e -> goods.put(c.id(), e.template()));
+		List<Contract> mine = new ArrayList<>();
+		for (PlayerContracts.Entry e : PlayerContracts.postedBy(server, player.getUUID())) {
+			mine.add(e.contract());
+			goods.put(e.contract().id(), e.template());
+		}
+		return new ContractBoardPayload(hub.id(), Component.literal(hub.name()), hub.faction(), Economy.credits(player), offers, completable,
+				mine, goods, PlayerContracts.pickups(server, player.getUUID()));
 	}
 
 	public static Component accept(ServerPlayer player, TradeHubs.Hub hub, String id) {
+		if (PlayerContracts.isPlayer(id)) return PlayerContracts.accept(player, id);
 		var account = Economy.account(player);
 		if (account.contracts().size() >= Economy.MAX_CONTRACTS) return Component.translatable("message.starwake.contract.too_many");
 		Contract offer = offers(player.level().getServer(), hub).stream().filter(c -> c.id().equals(id)).findFirst().orElse(null);
@@ -160,6 +178,7 @@ public final class Contracts {
 	}
 
 	public static Component complete(ServerPlayer player, TradeHubs.Hub hub, String id) {
+		if (PlayerContracts.isPlayer(id)) return PlayerContracts.complete(player, hub, id);
 		Contract c = Economy.account(player).contracts().stream().filter(x -> x.id().equals(id)).findFirst().orElse(null);
 		if (c == null || !c.target().equals(hub.id())) return Component.translatable("message.starwake.contract.not_here");
 		switch (c.type()) {
@@ -174,6 +193,7 @@ public final class Contracts {
 					return Component.translatable("message.starwake.contract.need", c.count(), new ItemStack(item).getHoverName());
 				}
 				Markets.removeItems(player, item, c.count());
+				Markets.deliver(player, hub, c.item(), c.count()); // M9: deliveries stock the hub
 			}
 			default -> {
 				return Component.translatable("message.starwake.contract.not_here");
@@ -187,6 +207,10 @@ public final class Contracts {
 		Contract c = Economy.account(player).contracts().stream().filter(x -> x.id().equals(id)).findFirst().orElse(null);
 		if (c == null) return Component.translatable("message.starwake.contract.gone");
 		Economy.removeContract(player, id);
+		if (PlayerContracts.isPlayer(id)) {
+			PlayerContracts.release(player.level().getServer(), id);
+			return Component.translatable("message.starwake.contract.abandoned");
+		}
 		Economy.markDone(player, id);
 		Economy.addRep(player, c.faction(), -5);
 		return Component.translatable("message.starwake.contract.abandoned");
@@ -225,6 +249,7 @@ public final class Contracts {
 		for (Contract c : List.copyOf(Economy.account(player).contracts())) {
 			if (now < c.expires()) continue;
 			Economy.removeContract(player, c.id());
+			if (PlayerContracts.isPlayer(c.id())) continue; // its poster gets the refund (PlayerContracts.expire)
 			Economy.markDone(player, c.id());
 			Economy.addRep(player, c.faction(), -5);
 			player.sendSystemMessage(Component.translatable("message.starwake.contract.expired", describe(c)));
@@ -239,6 +264,7 @@ public final class Contracts {
 			case "mining" -> Component.translatable("contract.starwake.mining", c.count(), item, c.targetName());
 			case "courier" -> Component.translatable("contract.starwake.courier", c.targetName());
 			case "exploration" -> Component.translatable("contract.starwake.exploration", c.targetName());
+			case "player" -> Component.translatable("contract.starwake.player", c.count(), item, c.targetName());
 			default -> Component.literal(c.type());
 		};
 	}

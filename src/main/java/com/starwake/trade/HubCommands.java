@@ -32,6 +32,15 @@ public final class HubCommands {
 						.then(Commands.literal("list").executes(HubCommands::list))
 						.then(Commands.literal("appraise").executes(HubCommands::appraise))
 						.then(Commands.literal("rebuild").executes(HubCommands::rebuild))
+						.then(Commands.literal("econ").executes(HubCommands::econ))
+						.then(Commands.literal("simulate")
+								.then(Commands.argument("steps", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 10000))
+										.executes(HubCommands::simulate)))
+						.then(Commands.literal("tier")
+								.then(Commands.argument("hub", StringArgumentType.string())
+										.then(Commands.argument("tier", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 3))
+												.executes(ctx -> tier(ctx, false))
+												.then(Commands.literal("now").executes(ctx -> tier(ctx, true))))))
 						.then(Commands.literal("place")
 								.then(Commands.argument("template", StringArgumentType.word())
 										.executes(HubCommands::place))))));
@@ -83,6 +92,46 @@ public final class HubCommands {
 		return 1;
 	}
 
+	/** Economy state of every hub in this system: tier, health, growth points, modules placed and lit. */
+	private static int econ(CommandContext<CommandSourceStack> ctx) {
+		var server = ctx.getSource().getServer();
+		var hubs = TradeHubs.plan(server, com.starwake.galaxy.SolarSystem.systemOf(ctx.getSource().getLevel()));
+		ctx.getSource().sendSuccess(() -> Component.literal(String.format("Market depth %.2f", EconomySim.depth())), false);
+		for (TradeHubs.Hub hub : hubs) {
+			ctx.getSource().sendSuccess(() -> Component.literal(String.format("%s '%s': tier %d, health %.2f, points %d, modules %d (lit %d)%s",
+					hub.id(), hub.name(), EconomySim.tier(server, hub) + 1, EconomySim.health(server, hub), EconomySim.points(server, hub),
+					TradeHubs.placedTier(server, hub) + 1, TradeHubs.litTier(server, hub) + 1,
+					TradeHubs.origin(server, hub) == null ? " (not built)" : "")), false);
+		}
+		return hubs.size();
+	}
+
+	private static int simulate(CommandContext<CommandSourceStack> ctx) {
+		int n = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "steps");
+		for (int i = 0; i < n; i++) EconomySim.step(ctx.getSource().getServer());
+		ctx.getSource().sendSuccess(() -> Component.literal("Ran " + n + " economy steps"), true);
+		return n;
+	}
+
+	/** Sets a hub's tier; "now" also builds/dims its modules immediately, even with players near. */
+	private static int tier(CommandContext<CommandSourceStack> ctx, boolean now) {
+		var server = ctx.getSource().getServer();
+		String id = StringArgumentType.getString(ctx, "hub");
+		int tier = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "tier") - 1;
+		TradeHubs.Hub hub = TradeHubs.hub(server, id).orElse(null);
+		if (hub == null) {
+			ctx.getSource().sendFailure(Component.literal("No hub " + id));
+			return 0;
+		}
+		EconomySim.setTier(server, hub, tier);
+		BlockPos o = TradeHubs.origin(server, hub);
+		ServerLevel level = server.getLevel(hub.dimension());
+		if (now && o != null && level != null) TradeHubs.applyTier(level, hub, o, tier);
+		ctx.getSource().sendSuccess(() -> Component.literal(hub.name() + " set to tier " + (tier + 1)
+				+ (now || o == null ? "" : " (modules change once no player is within 128 blocks)")), true);
+		return 1;
+	}
+
 	private static int rebuild(CommandContext<CommandSourceStack> ctx) {
 		ServerLevel level = ctx.getSource().getLevel();
 		var server = ctx.getSource().getServer();
@@ -95,7 +144,7 @@ public final class HubCommands {
 				if (!level.getBlockState(p).isAir()) level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
 			}
 			TradeHubs.forget(server, hub);
-			TradeHubs.build(level, hub, t);
+			TradeHubs.build(level, hub, t, o);
 			n++;
 		}
 		int built = n;
