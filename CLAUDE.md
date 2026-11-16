@@ -464,7 +464,8 @@ commit. **Don't start the next milestone until the user confirms the current one
         *(Verified 2026-11-12 in the client: the Codex app opens from the Wristcom app bar and lists every entry;
         the world loads with the new blueprints; datagen recipes regenerated.)* **Milestone 8 is complete, awaiting
         the user's playtest.**
-- [ ] **9. Polish.** Performance, multiplayer sync, config, balance.
+- [x] **9. Polish.** Performance, multiplayer sync, config, balance. *(Every system audited and reworked (ships, planets/space/galaxy,
+      industry, trade/UI/config, economy, art); 0.9.0 delivered 2026-11-16; the user moved on to planning 1.0.)*
   - **User notes for M9 (2026-11-12):** conveyors move items the wrong way; ship flight is buggy
     all around (overhaul it); hub NPCs (guards/crew) add little value: **remove them**.
   - **M9 plan (user, 2026-11-12):** go through every system one by one (ships, planets/space/galaxy,
@@ -601,6 +602,26 @@ commit. **Don't start the next milestone until the user confirms the current one
       housings, stepped bells and heat-stained throats; the four hub terminals as consoles with lit screens; component and
       metal-form sprites redrawn.)* Details in "How the art works after M9". Planet rocks/turfs were left as they were (the audit
       found them fine).
+
+- **Road to 1.0 (user, 2026-11-16).** Scope chosen: new systems **combat + ship weapons, alien life, multiblock machines,
+  bases + claims**; revisits **progression + onboarding, flight/quantum overhaul, hull shapes**; release work **recipe viewer
+  support, a save-compatibility promise, a server performance target** (no public listing yet). Shape: **one milestone at a time,
+  each with a jar and a pause for the user's playtest**, then a release candidate. Every milestone still starts with audit -> ask
+  -> fix. Planned order (systems others depend on first):
+  - [ ] **10. Flight, quantum and hulls.** Overhaul the 3a-3g scaffolds (flight model and feel, quantum/jump travel, power and
+        components) now that every core system exists; the hull-shape revisit. Combat builds on this.
+  - [ ] **11. Combat.** Ship weapons (guns, missiles, turrets on power/heat/shields/armour), personal ranged weapons, damage
+        and repair; threats that are simulated or event-based (no roaming NPC ships, per the user's M9 rule).
+  - [ ] **12. Alien life.** Fauna and harvestable flora per archetype, fitted to the conditions; drops that feed the chemistry.
+  - [ ] **13. Bases and claims.** Player-built planetary bases: land claims, base power and life support, beacons as quantum
+        destinations, multiplayer permissions.
+  - [ ] **14. Multiblock machines.** Late-game multiblocks (blast furnace, potline, reactor halls, refinery columns) above the
+        single-block early game.
+  - [ ] **15. Progression and onboarding.** A full survival run from a fresh world, tuned toward the first ship in ~3-5 h, and
+        a guided start (Codex objectives / mission chain) across everything above.
+  - [ ] **16. Release candidate (1.0.0).** Recipe viewer integration (EMI/JEI/REI: reactions, blueprints, machines), Mod Menu +
+        config screen; save compatibility (versioned saved data, frozen ids, migration tests from 0.9); server performance
+        target (profiling, stress test with many players, ships, machines and hubs); final balance and docs.
 
 ---
 
