@@ -17,6 +17,9 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import net.minecraft.core.Direction;
+import org.jspecify.annotations.Nullable;
 import java.util.Optional;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -287,6 +290,33 @@ public class ProcessMachineBlockEntity extends MachineBlockEntity {
 		if (rawOre(stack)) return false;
 		// Metals go anywhere chemistry can use them (aqua regia on platinum sponge, refining, remelting).
 		return material(stack).isPresent();
+	}
+
+	/** Fluxes every pyrometallurgical machine takes in its reagent slots, besides what its reactions draw. */
+	private static final Set<String> FLUXES = Set.of("SiO2", "CaCO3", "CaO", "CaF2");
+
+	/**
+	 * Smart routing (M9): whether an item fed by a hopper, belt or neighbouring machine belongs in the reagent slots:
+	 * its main species is one this machine's reactions draw (coke for the smelter, Mg for the Kroll reactor) or a flux in
+	 * a furnace. Everything else goes to the charge slot, so a mixed belt of ore, coke and limestone sorts itself.
+	 */
+	public boolean reagentFor(ItemStack stack) {
+		if (process.reagents == 0 || rawOre(stack)) return false;
+		var m = material(stack).orElse(null);
+		if (m == null || m.isEmpty()) return false;
+		String main = m.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
+		if (process.pyro() && FLUXES.contains(main)) return true;
+		for (Reactions.Reaction r : Reactions.forMachine(process.machine)) if (r.draw().contains(main)) return true;
+		return false;
+	}
+
+	@Override
+	public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction side) {
+		if (slot == process.catalystSlot()) return false; // never used up: set by hand
+		boolean reagent = reagentFor(stack);
+		if (slot == process.chargeSlot()) return !reagent && acceptsCharge(process, stack);
+		if (slot >= process.firstReagent() && slot < process.firstOutput()) return reagent;
+		return false;
 	}
 
 	@Override

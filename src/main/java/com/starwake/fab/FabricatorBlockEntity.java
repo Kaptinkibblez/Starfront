@@ -71,6 +71,14 @@ public class FabricatorBlockEntity extends MachineBlockEntity {
 		return slot < INPUTS;
 	}
 
+	/** Automation only feeds it items the selected blueprint has an input for. */
+	@Override
+	public boolean canPlaceItemThroughFace(int slot, ItemStack stack, net.minecraft.core.@Nullable Direction side) {
+		if (slot >= INPUTS) return false;
+		var entry = current(blueprints());
+		return entry != null && entry.getValue().inputs().stream().anyMatch(in -> in.kind(stack));
+	}
+
 	private List<Map.Entry<Identifier, Blueprint>> blueprints() {
 		if (level == null) return List.of();
 		return level.registryAccess().lookup(Blueprint.REGISTRY_KEY).map(Blueprint::sorted).orElse(List.of());

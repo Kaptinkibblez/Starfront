@@ -87,8 +87,9 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		// a full solid cube; non-solid blocks added later must opt out here.
 		var motion = builder(BlockTags.BLOCKS_MOTION_NO_LEAVES);
 		// Landing gear isn't a solid cube, so it stays out.
-		var thin = java.util.Set.of(com.starwake.registry.ModMachines.COPPER_CABLE, com.starwake.registry.ModMachines.ALUMINIUM_CABLE,
-				com.starwake.registry.ModMachines.FLUID_PIPE, com.starwake.registry.ModMachines.CONVEYOR, com.starwake.registry.ModMachines.SOLAR_PANEL, ModBlocks.SHIP_LIGHT, ModBlocks.GREEBLE, ModBlocks.HINGE, ModBlocks.ROTOR);
+		var thin = new java.util.HashSet<>(com.starwake.registry.ModMachines.belts());
+		thin.addAll(java.util.Set.of(com.starwake.registry.ModMachines.COPPER_CABLE, com.starwake.registry.ModMachines.ALUMINIUM_CABLE,
+				com.starwake.registry.ModMachines.FLUID_PIPE, com.starwake.registry.ModMachines.CONVEYOR, com.starwake.registry.ModMachines.SOLAR_PANEL, ModBlocks.SHIP_LIGHT, ModBlocks.GREEBLE, ModBlocks.HINGE, ModBlocks.ROTOR));
 		ModBlocks.all().stream().filter(block -> !(block instanceof com.starwake.ship.block.LandingGearBlock) && !thin.contains(block)
 				&& !ModPlanetBlocks.nonSolid().contains(block)).forEach(block -> motion.add(key(block)));
 		builder(BlockTags.SAND).add(key(ModPlanetBlocks.FINE_REGOLITH), key(ModPlanetBlocks.VOLCANIC_ASH), key(ModPlanetBlocks.DARK_REGOLITH),

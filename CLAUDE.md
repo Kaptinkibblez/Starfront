@@ -548,6 +548,18 @@ commit. **Don't start the next milestone until the user confirms the current one
     - *Moving orbits:* **real Kepler period ratios, sped up** (innermost planet a few in-game days, outer ones weeks);
       positions from game time on both sides.
     - Not chosen: gas giants.
+  - **M9 industry (decisions 2026-11-16).** Audit: belt chevrons pointed opposite to the real movement (the "wrong way"
+    report); hoppers and belts dropped items into the first free slot (coke could block a smelter's charge slot); machines
+    never fed each other; tanks didn't show their fluid; no way to see pipe or cable flow; plain screens. Choices: **fix the
+    arrows** plus **items drawn riding on belts**, **splitter + filter belts**, **inclines and an item lift** (the user pointed at
+    Mekanism, MIT, as a design reference: own code); **smart slot routing**; **direct machine chaining**; **tanks show their
+    fluid**, **pipe/cable readout**, **textured machine screens** (the rest of the visuals wait for the art pass).
+    - [x] **Industry pass (2026-11-16).** *(Verified in the client: belts -> incline -> raised belts -> decline -> splitter
+      round-robin into three chests; filter sends cobblestone right, dirt straight; a 3-high lift delivers to a chest at the top;
+      a hopper of coal, quartz and iron sorts itself into the smelter (iron charge, coal + quartz reagents); crusher output chains
+      into a flotation cell; items lie flat on moving belts; tanks fill visibly; pipe readout "1.0 kg/s Water"; cable readout
+      "Grid: 10.0 kW generated, 3.0 kW wanted"; machine screens with the new panel, wells, output slot and arrow.)* Details in
+      "How industry works after M9".
 
 ---
 
@@ -1308,7 +1320,7 @@ normal gravity.
   datagen does blockstates (furnace-style LIT fronts, multipart cables/pipes, rotated conveyor),
   loot, tags (thin blocks stay out of `blocks_motion_no_leaves`), lang and the provisional recipes
   (`ModRecipeProvider`; since 8i tier-1 only, see "How the Codex and recipe ladder work").
-- Known limits: tanks don't render their fluid yet; no aluminium recipe until 8c makes aluminium.
+- Known limits: no aluminium recipe until 8c makes aluminium. (Tanks render their fluid since M9.)
 
 ## How process chemistry works (Milestone 8c-1)
 
@@ -1701,6 +1713,40 @@ normal gravity.
   electronics and isotope machines use `MetalItems.item(PLATE)` for 'I' (any alloy's plate: roll an ingot).
   Tier 3 = blueprints only (`tools/fabrication.py`): gas centrifuge, fission and fusion reactors, particle
   accelerator, Mk II/III ship parts, material gear, suit upgrades.
+
+## How industry works after M9
+
+- **Belts** (`logistics/ConveyorBlock` with a `Kind`, `ConveyorBlockEntity`; blocks `conveyor`, `conveyor_splitter`,
+  `conveyor_filter`, `conveyor_incline`, `conveyor_decline`, `item_lift`, one BE type `starwake:conveyor`): each belt holds up to 4
+  stacks with a progress 0..1 (queued 0.25 apart), moving `rate` b/s (machine spec, sent to clients with the cargo because specs
+  are server data). Both sides advance; only the server hands on: at progress 1 the front stack goes into
+  `ItemStorage.SIDED` of the block ahead (belts expose an insertion-only storage per side, so belts, machines, chests, hoppers
+  and other mods connect the same way). Entry: plain belts take from the back (progress 0), the sides and above (0.5); splitter,
+  filter and ramps from the back; lifts from below and the non-front sides. Splitters pick front/left/right in turn among sides
+  that have a receiver (re-picking when one disappears); filters send items matching their filter item (same item type) right
+  (or left); inclines hand to the block ahead and one up; a belt whose ahead is empty continues into a decline one step down;
+  lifts pass up while there's lift above and the top one hands out toward FACING. Loose item entities touching a flat belt are
+  absorbed; living things are pushed. Every change sends the cargo (`getUpdateTag`); the client keeps the previous positions of
+  items it already drew. `client/logistics/ConveyorRenderer` draws them flat (FIXED context, 0.4 scale) and the filter item
+  above a filter belt. Filter: use with an item = set, empty hand = swap side, sneak + empty hand = clear.
+- Textures: `tools/machine_assets.py` `belt_strip` writes 6-frame animated tops (chevrons point north = FACING and scroll that
+  way; rail colours: grey belt, cyan splitter, orange filter); ramps are a 45-degree rescaled plate.
+- **Smart routing** (`ProcessMachineBlockEntity.reagentFor` + `canPlaceItemThroughFace`): automation (hoppers, belts,
+  neighbouring machines) puts an item in the reagent slots if its main species is drawn by one of the machine's reactions
+  (`draw`) or is a flux (SiO2, CaCO3, CaO, CaF2) in a furnace; everything else goes to the charge slot; catalysts are hand-set.
+  Players placing by hand are unrestricted. The Electric Furnace only accepts smeltables through faces; the Fabricator only
+  inputs the selected blueprint uses.
+- **Chaining** (`MachineBlockEntity.eject`): outputs go into any neighbouring item storage (not upward), machines included,
+  through their routing rules. A machine remembers neighbours that fed it (200 ticks) and never pushes back into them.
+- **Tanks** (`FluidTankBlockEntity`): the update tag carries only `view_fill` and `view_color` (water blue, lava orange,
+  chemicals mixed from their species' colours by mass), sent when the fill moves 1% or the colour changes;
+  `client/logistics/FluidTankRenderer` draws a translucent box (debug quads, shaded by the light at the tank).
+- **Readout** (`LogisticsProbePayload` -> `logistics/LogisticsProbe` -> `LogisticsInfoPayload`; `client/logistics/LogisticsReadout`):
+  while the crosshair is on a cable or pipe, twice a second; cables show generation, demand, delivered, storage, size and the
+  weakest rating; pipes show kg/s per fluid over the last second (`FluidNetworks` now moves fluid by fluid and records it).
+- **Screens:** GUI sprites from `tools/gui_textures.py` (`textures/gui/sprites/machine/`: nine-slice `panel`, `slot`,
+  `slot_output`, nine-slice `gauge`, `arrow`/`arrow_full`, `flame`/`flame_full`); `MachineScreen.bar` draws gauge fills. The
+  Fabricator and furnace side panels use the same panel.
 
 ## 26.3 gotchas (learned the hard way)
 

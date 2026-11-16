@@ -25,6 +25,8 @@ public final class ModNetworking {
 		PayloadTypeRegistry.clientboundPlay().register(SystemInfoPayload.TYPE, SystemInfoPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(SystemInfoRequestPayload.TYPE, SystemInfoRequestPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(JumpTargetPayload.TYPE, JumpTargetPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(LogisticsProbePayload.TYPE, LogisticsProbePayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(LogisticsInfoPayload.TYPE, LogisticsInfoPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(EconomyPayload.TYPE, EconomyPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(MeltStatePayload.TYPE, MeltStatePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(HubListPayload.TYPE, HubListPayload.CODEC);
@@ -96,6 +98,8 @@ public final class ModNetworking {
 			}
 			com.starwake.trade.Terminals.action(context.player(), payload);
 		});
+		ServerPlayNetworking.registerGlobalReceiver(LogisticsProbePayload.TYPE,
+				(payload, context) -> com.starwake.logistics.LogisticsProbe.answer(context.player(), payload.pos()));
 		ServerPlayNetworking.registerGlobalReceiver(JumpTargetPayload.TYPE, (payload, context) -> {
 			var player = context.player();
 			if (player.getVehicle() instanceof com.starwake.ship.ShipEntity ship && ship.pilot() == player) {

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "starwake:block/item_lift",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "starwake:block/item_lift"
+    },
+    "facing=south": {
+      "model": "starwake:block/item_lift",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "starwake:block/item_lift",
+      "y": 270
+    }
+  }
+}

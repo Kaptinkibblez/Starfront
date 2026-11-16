@@ -2,6 +2,8 @@ package com.starwake.registry;
 
 import com.starwake.StarwakeMod;
 import com.starwake.logistics.ConveyorBlock;
+import com.starwake.logistics.ConveyorBlockEntity;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import com.starwake.logistics.FluidPipeBlock;
 import com.starwake.logistics.FluidPipeBlockEntity;
 import com.starwake.logistics.FluidTankBlock;
@@ -51,8 +53,12 @@ public final class ModMachines {
 			p -> new MachineBlock(WaterSourceBlockEntity::new, () -> ModMachines.WATER_SOURCE_BE, p), machine());
 	public static final Block GAS_WELL = ModBlocks.register("gas_well",
 			p -> new MachineBlock(WaterSourceBlockEntity::new, () -> ModMachines.WATER_SOURCE_BE, p), machine());
-	public static final Block CONVEYOR = ModBlocks.register("conveyor", ConveyorBlock::new,
-			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY).strength(1.5f, 4.0f).sound(SoundType.METAL).noOcclusion());
+	public static final Block CONVEYOR = belt("conveyor", ConveyorBlock.Kind.BELT);
+	public static final Block CONVEYOR_SPLITTER = belt("conveyor_splitter", ConveyorBlock.Kind.SPLITTER);
+	public static final Block CONVEYOR_FILTER = belt("conveyor_filter", ConveyorBlock.Kind.FILTER);
+	public static final Block CONVEYOR_INCLINE = belt("conveyor_incline", ConveyorBlock.Kind.INCLINE);
+	public static final Block CONVEYOR_DECLINE = belt("conveyor_decline", ConveyorBlock.Kind.DECLINE);
+	public static final Block ITEM_LIFT = belt("item_lift", ConveyorBlock.Kind.LIFT);
 
 	public static final BlockEntityType<CombustionGeneratorBlockEntity> COMBUSTION_GENERATOR_BE =
 			be("combustion_generator", FabricBlockEntityTypeBuilder.create(CombustionGeneratorBlockEntity::new, COMBUSTION_GENERATOR).build());
@@ -66,6 +72,9 @@ public final class ModMachines {
 			be("fluid_pipe", FabricBlockEntityTypeBuilder.create(FluidPipeBlockEntity::new, FLUID_PIPE).build());
 	public static final BlockEntityType<FluidTankBlockEntity> FLUID_TANK_BE =
 			be("fluid_tank", FabricBlockEntityTypeBuilder.create(FluidTankBlockEntity::new, FLUID_TANK).build());
+
+	public static final BlockEntityType<ConveyorBlockEntity> CONVEYOR_BE = be("conveyor", FabricBlockEntityTypeBuilder.create(ConveyorBlockEntity::new,
+			CONVEYOR, CONVEYOR_SPLITTER, CONVEYOR_FILTER, CONVEYOR_INCLINE, CONVEYOR_DECLINE, ITEM_LIFT).build());
 
 	public static final BlockEntityType<WaterSourceBlockEntity> WATER_SOURCE_BE =
 			be("water_source", FabricBlockEntityTypeBuilder.create(WaterSourceBlockEntity::new, WATER_PUMP, ATMOSPHERIC_CONDENSER, GAS_WELL).build());
@@ -86,15 +95,27 @@ public final class ModMachines {
 	public static void init() {
 		FluidStorage.SIDED.registerForBlockEntity((tank, side) -> tank.storage(), FLUID_TANK_BE);
 		FluidStorage.SIDED.registerForBlockEntity((be, side) -> be.fluidStorage(), WATER_SOURCE_BE);
+		ItemStorage.SIDED.registerForBlockEntity(ConveyorBlockEntity::storage, CONVEYOR_BE);
 	}
 
 	public static List<Block> all() {
-		return List.of(COMBUSTION_GENERATOR, ELECTRIC_FURNACE, SOLAR_PANEL, BATTERY, COPPER_CABLE, ALUMINIUM_CABLE, FLUID_PIPE, FLUID_TANK, CONVEYOR, WATER_PUMP,
+		return List.of(COMBUSTION_GENERATOR, ELECTRIC_FURNACE, SOLAR_PANEL, BATTERY, COPPER_CABLE, ALUMINIUM_CABLE, FLUID_PIPE, FLUID_TANK, CONVEYOR, CONVEYOR_SPLITTER, CONVEYOR_FILTER,
+				CONVEYOR_INCLINE, CONVEYOR_DECLINE, ITEM_LIFT, WATER_PUMP,
 				ATMOSPHERIC_CONDENSER, GAS_WELL);
 	}
 
 	private static BlockBehaviour.Properties machine() {
 		return BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.5f, 6.0f).sound(SoundType.METAL).requiresCorrectToolForDrops();
+	}
+
+	/** Belt pieces (M9): one block class, one block entity. */
+	public static List<Block> belts() {
+		return List.of(CONVEYOR, CONVEYOR_SPLITTER, CONVEYOR_FILTER, CONVEYOR_INCLINE, CONVEYOR_DECLINE, ITEM_LIFT);
+	}
+
+	private static Block belt(String name, ConveyorBlock.Kind kind) {
+		return ModBlocks.register(name, p -> new ConveyorBlock(kind, p),
+				BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY).strength(1.5f, 4.0f).sound(SoundType.METAL).noOcclusion());
 	}
 
 	private static BlockBehaviour.Properties cable() {

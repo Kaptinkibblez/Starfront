@@ -15,12 +15,17 @@ public final class StarwakeClient implements ClientModInitializer {
 		ModClientNetworking.init();
 		ShipClient.init();
 		com.starwake.client.ship.ShapedBlockModels.init();
+		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.starwake.registry.ModMachines.CONVEYOR_BE,
+				com.starwake.client.logistics.ConveyorRenderer::new);
+		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.starwake.registry.ModMachines.FLUID_TANK_BE,
+				com.starwake.client.logistics.FluidTankRenderer::new);
 		com.starwake.client.trade.TradeClient.init();
 		com.starwake.client.galaxy.GalaxyClient.init();
 		com.starwake.client.chem.ChemistryTooltips.init();
 		com.starwake.client.metal.MetalTooltips.init();
 		com.starwake.client.fab.FabTooltips.init();
 		com.starwake.client.process.ProcessTooltips.init();
+		com.starwake.client.logistics.LogisticsReadout.init();
 		com.starwake.client.machine.MachineScreen.register();
 		com.starwake.client.ship.ShipEditingClient.init();
 		com.starwake.client.hud.FlightHud.init();

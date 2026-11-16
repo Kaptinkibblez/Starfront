@@ -72,6 +72,20 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				shaped(RecipeCategory.REDSTONE, ModMachines.CONVEYOR, 6).pattern("KKK").pattern("IRI")
 						.define('K', Items.DRIED_KELP).define('I', Items.IRON_INGOT).define('R', Items.REDSTONE)
 						.unlockedBy("has_iron", has(Items.IRON_INGOT)).save(output);
+				// Belt pieces (M9): built from belts.
+				shaped(RecipeCategory.REDSTONE, ModMachines.CONVEYOR_SPLITTER, 2).pattern(" B ").pattern("BRB")
+						.define('B', ModMachines.CONVEYOR).define('R', Items.REDSTONE).unlockedBy("has_belt", has(ModMachines.CONVEYOR)).save(output);
+				shaped(RecipeCategory.REDSTONE, ModMachines.CONVEYOR_FILTER).pattern("C").pattern("B")
+						.define('B', ModMachines.CONVEYOR).define('C', Items.COMPARATOR).unlockedBy("has_belt", has(ModMachines.CONVEYOR)).save(output);
+				shaped(RecipeCategory.REDSTONE, ModMachines.CONVEYOR_INCLINE, 2).pattern(" B").pattern("BI")
+						.define('B', ModMachines.CONVEYOR).define('I', Items.IRON_INGOT).unlockedBy("has_belt", has(ModMachines.CONVEYOR)).save(output);
+				shapeless(RecipeCategory.REDSTONE, ModMachines.CONVEYOR_DECLINE).requires(ModMachines.CONVEYOR_INCLINE)
+						.unlockedBy("has_belt", has(ModMachines.CONVEYOR)).save(output);
+				shapeless(RecipeCategory.REDSTONE, ModMachines.CONVEYOR_INCLINE).requires(ModMachines.CONVEYOR_DECLINE)
+						.unlockedBy("has_belt", has(ModMachines.CONVEYOR)).save(output, "starwake:conveyor_incline_from_decline");
+				shaped(RecipeCategory.REDSTONE, ModMachines.ITEM_LIFT, 2).pattern("IBI").pattern("IRI").pattern("IBI")
+						.define('B', ModMachines.CONVEYOR).define('I', Items.IRON_INGOT).define('R', Items.REDSTONE)
+						.unlockedBy("has_belt", has(ModMachines.CONVEYOR)).save(output);
 				// Process machines (M8c-1), provisional vanilla-material recipes until 8i.
 				var P = com.starwake.process.ProcessMachineBlockEntity.Process.class;
 				machine(com.starwake.process.ProcessMachineBlockEntity.Process.CRUSHER, "IPI", "ICI", "IRI", Items.PISTON);

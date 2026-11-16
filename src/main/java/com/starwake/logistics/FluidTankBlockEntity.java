@@ -88,6 +88,69 @@ public class FluidTankBlockEntity extends BlockEntity {
 		return capacityDroplets();
 	}
 
+	// --- Client view (M9): fill level and colour, synced when they change visibly ------------------------------
+
+	private float shownFill = -1;
+	private int shownColor;
+	/** On clients: what the renderer draws. */
+	private float clientFill;
+	private int clientColor;
+
+	public float clientFill() {
+		return clientFill;
+	}
+
+	public int clientColor() {
+		return clientColor;
+	}
+
+	/** The colour of the contents: water blue, lava orange, chemicals mixed from their species' colours by mass. */
+	private int contentColor() {
+		build();
+		if (chemicals.total() > 0) {
+			double r = 0, g = 0, b = 0, w = 0;
+			for (var e : chemicals.contents().entrySet()) {
+				int c = "H2O".equals(e.getKey()) ? 0x3F76E4 : com.starwake.process.Species.get(e.getKey()).map(i -> i.color()).orElse(0x9090A0);
+				double m = e.getValue();
+				r += (c >> 16 & 255) * m;
+				g += (c >> 8 & 255) * m;
+				b += (c & 255) * m;
+				w += m;
+			}
+			return (int) (r / w) << 16 | (int) (g / w) << 8 | (int) (b / w);
+		}
+		var fluid = other.getResource().getFluid();
+		if (fluid.isSame(net.minecraft.world.level.material.Fluids.LAVA)) return 0xFF6A10;
+		if (fluid.isSame(net.minecraft.world.level.material.Fluids.WATER)) return 0x3F76E4;
+		return 0xA0A0B0;
+	}
+
+	@Override
+	public void setChanged() {
+		super.setChanged();
+		if (level == null || level.isClientSide() || combined == null) return;
+		float fill = capacity() > 0 ? (float) amount() / capacity() : 0;
+		int color = contentColor();
+		if (Math.abs(fill - shownFill) > 0.01f || (fill > 0 && color != shownColor) || (fill == 0) != (shownFill == 0)) {
+			shownFill = fill;
+			shownColor = color;
+			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+		}
+	}
+
+	@Override
+	public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket() {
+		return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+	}
+
+	@Override
+	public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+		net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+		tag.putFloat("view_fill", capacity() > 0 ? (float) amount() / capacity() : 0);
+		tag.putInt("view_color", contentColor());
+		return tag;
+	}
+
 	/** Breaking a tank of a toxic chemical releases it (M8c hazards). */
 	@Override
 	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
@@ -101,6 +164,9 @@ public class FluidTankBlockEntity extends BlockEntity {
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
 		build();
+		clientFill = input.getFloatOr("view_fill", clientFill);
+		clientColor = input.getIntOr("view_color", clientColor);
+		if (level != null && level.isClientSide()) return; // an update packet: only the view
 		other.readValue(input);
 		chemicals.read(input, "chemicals");
 		// 8b saves kept water and chemicals in the single store: move them into the mixing tank.

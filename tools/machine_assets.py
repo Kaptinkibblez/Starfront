@@ -63,6 +63,34 @@ def save(im, name):
     im.save(os.path.join(TEX, name + ".png"))
 
 
+def belt_strip(name, rail, rail_dark, mark=None):
+    frames = 6
+    im = Image.new("RGBA", (16, 16 * frames))
+    for k in range(frames):
+        for y in range(16):
+            for x in range(16):
+                c = hexrgb("#2b2d31")
+                if x in (0, 1, 14, 15):
+                    c = hexrgb(rail) if x in (1, 14) else hexrgb(rail_dark)
+                elif (y + k - abs(x - 7.5) // 1) % 6 < 2:
+                    c = hexrgb("#e8c84a")
+                im.putpixel((x, y + 16 * k), c + (255,))
+            if mark == "split":
+                # three-way mark: a bar across the middle with posts to each side
+                for x in range(2, 14):
+                    im.putpixel((x, 8 + 16 * k), hexrgb(rail) + (255,))
+            elif mark == "filter":
+                for x in range(5, 11):
+                    for y in (5, 10):
+                        im.putpixel((x, y + 16 * k), hexrgb(rail) + (255,))
+                for y in range(5, 11):
+                    for x in (5, 10):
+                        im.putpixel((x, y + 16 * k), hexrgb(rail) + (255,))
+    save(im, name)
+    with open(os.path.join(TEX, name + ".png.mcmeta"), "w") as f:
+        f.write('{"animation": {"frametime": 1}}\n')
+
+
 def textures():
     casing = "#6d737c"
     # Combustion generator: firebox grille front (glowing when on), vents on the side, exhaust on top.
@@ -148,17 +176,12 @@ def textures():
             else:
                 im.putpixel((x, y), (190, 220, 240, 60))
     save(im, "fluid_tank")
-    # Conveyor: belt top with chevrons pointing north (up in the texture), side rails.
-    im = Image.new("RGBA", (16, 16))
-    for y in range(16):
-        for x in range(16):
-            c = hexrgb("#2b2d31")
-            if x in (0, 1, 14, 15):
-                c = hexrgb("#9aa0a8") if x in (1, 14) else hexrgb("#5e636b")
-            elif (y + abs(x - 7.5) // 1) % 6 < 2:
-                c = hexrgb("#e8c84a")
-            im.putpixel((x, y), c + (255,))
-    save(im, "conveyor_top")
+    # Belts (M9): animated tops whose chevrons point north (up in the texture, = the belt's FACING) and scroll
+    # that way. 6 frames, one pixel per tick, about the belt speed. Rail colours tell the pieces apart.
+    belt_strip("conveyor_top", "#9aa0a8", "#5e636b")
+    belt_strip("conveyor_splitter_top", "#4fc3d9", "#2b7f8f", mark="split")
+    belt_strip("conveyor_filter_top", "#e0803a", "#8f4c1f", mark="filter")
+    belt_strip("item_lift_front", "#9aa0a8", "#5e636b")
     im = panel("#5e636b", 12, rivets=False)
     save(im, "conveyor_side")
 
@@ -583,12 +606,34 @@ def models():
                               {"from": [0, 4, 0], "to": [16, 6, 16], "faces": {"up": {"texture": "#top"}, "down": {"texture": "#side"},
                                                                               "north": {"texture": "#side"}, "south": {"texture": "#side"},
                                                                               "east": {"texture": "#side"}, "west": {"texture": "#side"}}}]})
-    model("conveyor", {"parent": "minecraft:block/block", "textures": {"particle": "starwake:block/conveyor_side",
-                                                                        "top": "starwake:block/conveyor_top", "side": "starwake:block/conveyor_side"},
-                       "elements": [{"from": [0, 0, 0], "to": [16, 3, 16],
-                                     "faces": {"up": {"texture": "#top"}, "down": {"texture": "#side"},
-                                               "north": {"texture": "#side", "uv": [0, 13, 16, 16]}, "south": {"texture": "#side", "uv": [0, 13, 16, 16]},
-                                               "east": {"texture": "#side", "uv": [0, 13, 16, 16]}, "west": {"texture": "#side", "uv": [0, 13, 16, 16]}}}]})
+    rim = {"texture": "#side", "uv": [0, 13, 16, 16]}
+    for name, top in (("conveyor", "conveyor_top"), ("conveyor_splitter", "conveyor_splitter_top"), ("conveyor_filter", "conveyor_filter_top")):
+        model(name, {"parent": "minecraft:block/block", "textures": {"particle": "starwake:block/conveyor_side",
+                                                                      "top": "starwake:block/" + top, "side": "starwake:block/conveyor_side"},
+                     "elements": [{"from": [0, 0, 0], "to": [16, 3, 16],
+                                   "faces": {"up": {"texture": "#top"}, "down": {"texture": "#side"},
+                                             "north": rim, "south": rim, "east": rim, "west": rim}}]})
+    # Ramps: the belt is a plate turned 45 degrees about X (rescaled to span the block corner to corner), over a
+    # stepped frame. Incline rises toward north (FACING), decline falls toward it.
+    for name, angle in (("conveyor_incline", 45), ("conveyor_decline", -45)):
+        model(name, {"parent": "minecraft:block/block", "textures": {"particle": "starwake:block/conveyor_side",
+                                                                      "top": "starwake:block/conveyor_top", "side": "starwake:block/conveyor_side"},
+                     "elements": [
+                         {"from": [0, 6.5, 0], "to": [16, 9.5, 16], "rotation": {"origin": [8, 8, 8], "axis": "x", "angle": angle, "rescale": True},
+                          "faces": {"up": {"texture": "#top"}, "down": {"texture": "#side"}, "east": rim, "west": rim}},
+                         {"from": [0, 0, 0], "to": [1, 4, 16], "faces": {f: {"texture": "#side"} for f in ("north", "south", "east", "west", "down")}},
+                         {"from": [15, 0, 0], "to": [16, 4, 16], "faces": {f: {"texture": "#side"} for f in ("north", "south", "east", "west", "down")}}]})
+    post = {f: {"texture": "#side"} for f in ("north", "south", "east", "west", "up", "down")}
+    model("item_lift", {"parent": "minecraft:block/block", "textures": {"particle": "starwake:block/conveyor_side",
+                                                                        "front": "starwake:block/item_lift_front", "side": "starwake:block/conveyor_side"},
+                        "elements": [
+                            {"from": [2, 0, 2], "to": [4, 16, 4], "faces": post},
+                            {"from": [12, 0, 2], "to": [14, 16, 4], "faces": post},
+                            {"from": [2, 0, 12], "to": [4, 16, 14], "faces": post},
+                            {"from": [12, 0, 12], "to": [14, 16, 14], "faces": post},
+                            {"from": [4, 0, 13], "to": [12, 16, 14], "faces": {"north": {"texture": "#front"}, "south": {"texture": "#side"}}},
+                            {"from": [2, 0, 2], "to": [14, 1, 14], "faces": post},
+                            {"from": [6, 15, 0], "to": [10, 16, 2], "faces": post}]})
     model("fluid_tank", {"parent": "minecraft:block/cube_all", "textures": {"all": "starwake:block/fluid_tank"}})
 
 

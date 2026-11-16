@@ -1,5 +1,6 @@
 package com.starwake.client.machine;
 
+import net.minecraft.client.renderer.RenderPipelines;
 import com.starwake.machine.MachineMenu;
 import com.starwake.registry.ModMachines;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -50,49 +51,65 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partial) {
 		super.extractBackground(g, mouseX, mouseY, partial);
 		int x = leftPos, y = topPos;
-		g.fill(x, y, x + imageWidth, y + imageHeight, PANEL);
-		g.fill(x, y, x + imageWidth, y + 1, EDGE);
-		g.fill(x, y + imageHeight - 1, x + imageWidth, y + imageHeight, EDGE);
-		g.fill(x, y, x + 1, y + imageHeight, EDGE);
-		g.fill(x + imageWidth - 1, y, x + imageWidth, y + imageHeight, EDGE);
+		// Sprites from tools/gui_textures.py (nine-slice panel, slot wells, gauges, progress).
+		g.blitSprite(RenderPipelines.GUI_TEXTURED, PANEL_SPRITE, x, y, imageWidth, imageHeight);
+		java.util.Set<Integer> outputs = new java.util.HashSet<>();
+		for (int o : menu.layout.outputs()) outputs.add(o);
 		for (Slot slot : menu.slots) {
-			int sx = x + slot.x - 1, sy = y + slot.y - 1;
-			g.fill(sx, sy, sx + 18, sy + 18, WELL_EDGE);
-			g.fill(sx + 1, sy + 1, sx + 17, sy + 17, WELL);
+			boolean output = slot.container != playerInventory() && outputs.contains(slot.getContainerSlot());
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, output ? SLOT_OUTPUT : SLOT, x + slot.x - 1, y + slot.y - 1, 18, 18);
 		}
 		// Energy bar (left).
 		int energy = menu.read(MachineMenu.ENERGY), capacity = menu.read(MachineMenu.CAPACITY);
 		int bx = x + 10, by = y + 18, bh = 46;
-		g.fill(bx - 1, by - 1, bx + 9, by + bh + 1, WELL_EDGE);
-		g.fill(bx, by, bx + 8, by + bh, WELL);
+		g.blitSprite(RenderPipelines.GUI_TEXTURED, GAUGE, bx - 1, by - 1, 10, bh + 2);
 		int fill = capacity <= 0 ? 0 : Math.round(bh * Math.min(1f, energy / (float) capacity));
-		g.fill(bx, by + bh - fill, bx + 8, by + bh, ENERGY);
+		bar(g, bx, by + bh - fill, fill, ENERGY);
 		// Progress: arrow between slots for processors, a flame under the fuel slot for burners.
 		int progress = menu.get(MachineMenu.PROGRESS), max = Math.max(1, menu.get(MachineMenu.PROGRESS_MAX));
 		if (menu.layout.arrow() != null) {
-			int ax = x + menu.layout.arrow()[0], ay = y + menu.layout.arrow()[1], w = 24;
-			g.fill(ax, ay, ax + w, ay + 6, WELL_EDGE);
-			g.fill(ax, ay, ax + Math.round(w * progress / (float) max), ay + 6, GOOD);
+			int ax = x + menu.layout.arrow()[0], ay = y + menu.layout.arrow()[1] - 5;
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, ARROW, ax, ay, 24, 16);
+			int w = Math.round(24 * progress / (float) max);
+			if (w > 0) g.blitSprite(RenderPipelines.GUI_TEXTURED, ARROW_FULL, 24, 16, 0, 0, ax, ay, w, 16);
 		} else if (menu.layout.fuel().length > 0) {
 			int[] slot = menu.layout.slots().get(menu.layout.fuel()[0]);
-			int fx = x + slot[0], fy = y + slot[1] - 18, h = Math.round(14 * progress / (float) max);
-			g.fill(fx + 3, fy, fx + 13, fy + 14, WELL_EDGE);
-			g.fill(fx + 3, fy + 14 - h, fx + 13, fy + 14, 0xFFFF8A2A);
+			int fx = x + slot[0] + 1, fy = y + slot[1] - 18, h = Math.round(14 * progress / (float) max);
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, FLAME, fx, fy, 14, 14);
+			if (h > 0) g.blitSprite(RenderPipelines.GUI_TEXTURED, FLAME_FULL, 14, 14, 0, 14 - h, fx, fy + 14 - h, 14, h);
 		}
 		// Tank gauges (inlet, gas outlet, liquid outlet).
 		for (int t = 0; t < 3; t++) {
 			int tx = menu.layout.tanks()[t];
 			if (tx < 0) continue;
 			int gx = x + tx, gy = y + 18, gh = 44;
-			g.fill(gx - 1, gy - 1, gx + 9, gy + gh + 1, WELL_EDGE);
-			g.fill(gx, gy, gx + 8, gy + gh, WELL);
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, GAUGE, gx - 1, gy - 1, 10, gh + 2);
 			int amount = menu.get(MachineMenu.TANKS + 3 * t), tankCap = Math.max(1, menu.get(MachineMenu.TANKS + 3 * t + 1) * 100);
 			int species = menu.get(MachineMenu.TANKS + 3 * t + 2);
 			int color = species < 0 ? 0xFF888888 : 0xFF000000 | com.starwake.process.Species.byIndex(species).color();
 			int h = Math.round(gh * Math.min(1f, amount / (float) tankCap));
-			g.fill(gx, gy + gh - h, gx + 8, gy + gh, color);
+			bar(g, gx, gy + gh - h, h, color);
 			g.fill(gx, gy + gh + 3, gx + 8, gy + gh + 4, t == 0 ? 0xFF55D8FF : t == 1 ? 0xFFE8E0A8 : 0xFF3A6AFF);
 		}
+	}
+
+	private static final net.minecraft.resources.Identifier PANEL_SPRITE = com.starwake.StarwakeMod.id("machine/panel"),
+			SLOT = com.starwake.StarwakeMod.id("machine/slot"), SLOT_OUTPUT = com.starwake.StarwakeMod.id("machine/slot_output"),
+			GAUGE = com.starwake.StarwakeMod.id("machine/gauge"), ARROW = com.starwake.StarwakeMod.id("machine/arrow"),
+			ARROW_FULL = com.starwake.StarwakeMod.id("machine/arrow_full"), FLAME = com.starwake.StarwakeMod.id("machine/flame"),
+			FLAME_FULL = com.starwake.StarwakeMod.id("machine/flame_full");
+
+	/** A gauge fill: the colour with a lighter left edge and faint segment lines every 4 px. */
+	protected static void bar(GuiGraphicsExtractor g, int x, int top, int h, int color) {
+		if (h <= 0) return;
+		g.fill(x, top, x + 8, top + h, color);
+		g.fill(x, top, x + 2, top + h, 0x40FFFFFF);
+		g.fill(x + 6, top, x + 8, top + h, 0x30000000);
+		for (int yy = top + h - 4; yy > top; yy -= 4) g.fill(x, yy, x + 8, yy + 1, 0x38000000);
+	}
+
+	private net.minecraft.world.Container playerInventory() {
+		return minecraft != null && minecraft.player != null ? minecraft.player.getInventory() : null;
 	}
 
 	@Override

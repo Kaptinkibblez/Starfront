@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "starwake:block/conveyor_splitter",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "starwake:block/conveyor_splitter"
+    },
+    "facing=south": {
+      "model": "starwake:block/conveyor_splitter",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "starwake:block/conveyor_splitter",
+      "y": 270
+    }
+  }
+}

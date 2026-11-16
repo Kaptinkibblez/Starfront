@@ -35,6 +35,12 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity {
 		return ModMachines.ELECTRIC_FURNACE_MENU;
 	}
 
+	/** Hoppers, belts and neighbouring machines only feed it things that smelt. */
+	@Override
+	public boolean canPlaceItemThroughFace(int slot, ItemStack stack, net.minecraft.core.@org.jspecify.annotations.Nullable Direction side) {
+		return slot == 0 && level instanceof ServerLevel server && check.getRecipeFor(new SingleRecipeInput(stack), server).isPresent();
+	}
+
 	@Override
 	public Role energyRole() {
 		return Role.CONSUMER;

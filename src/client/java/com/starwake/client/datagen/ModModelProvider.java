@@ -95,10 +95,12 @@ public final class ModModelProvider extends FabricModelProvider {
 		com.starwake.registry.ModProcess.blocks().forEach(b -> generators.createFurnace(b, TexturedModel.ORIENTABLE_ONLY_TOP));
 		simpleModelBlock(generators, com.starwake.registry.ModMachines.SOLAR_PANEL, "solar_panel", "solar_panel");
 		simpleModelBlock(generators, com.starwake.registry.ModMachines.FLUID_TANK, "fluid_tank", "fluid_tank");
-		generators.blockStateOutput.accept(net.minecraft.client.data.models.blockstates.MultiVariantGenerator.dispatch(
-				com.starwake.registry.ModMachines.CONVEYOR, BlockModelGenerators.plainVariant(id("conveyor")))
-				.with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
-		generators.registerSimpleItemModel(com.starwake.registry.ModMachines.CONVEYOR, id("conveyor"));
+		for (Block belt : com.starwake.registry.ModMachines.belts()) {
+			String name = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(belt).getPath();
+			generators.blockStateOutput.accept(net.minecraft.client.data.models.blockstates.MultiVariantGenerator.dispatch(
+					belt, BlockModelGenerators.plainVariant(id(name))).with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
+			generators.registerSimpleItemModel(belt, id(name));
+		}
 		for (String cable : new String[] {"copper_cable", "aluminium_cable"}) {
 			Block block = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath("starwake", cable));
 			var core = BlockModelGenerators.plainVariant(id(cable + "_core"));

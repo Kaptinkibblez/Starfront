@@ -62,11 +62,7 @@ public class MeltFurnaceScreen extends MachineScreen {
 	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partial) {
 		super.extractBackground(g, mouseX, mouseY, partial);
 		int x = leftPos + imageWidth + 4, y = topPos, w = SIDE_W, h = imageHeight;
-		g.fill(x, y, x + w, y + h, PANEL);
-		g.fill(x, y, x + w, y + 1, EDGE);
-		g.fill(x, y + h - 1, x + w, y + h, EDGE);
-		g.fill(x, y, x + 1, y + h, EDGE);
-		g.fill(x + w - 1, y, x + w, y + h, EDGE);
+		g.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, com.starwake.StarwakeMod.id("machine/panel"), x, y, w, h);
 		MeltStatePayload s = state;
 		var font = this.font;
 		int ty = y + 5;

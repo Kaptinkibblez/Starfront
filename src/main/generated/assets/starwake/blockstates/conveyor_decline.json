@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "starwake:block/conveyor_decline",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "starwake:block/conveyor_decline"
+    },
+    "facing=south": {
+      "model": "starwake:block/conveyor_decline",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "starwake:block/conveyor_decline",
+      "y": 270
+    }
+  }
+}

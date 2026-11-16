@@ -42,6 +42,34 @@ public final class FluidNetworks {
 	static final class Network {
 		final Set<BlockPos> pipes = new HashSet<>();
 		final List<Endpoint> endpoints = new ArrayList<>();
+		/** Droplets moved per fluid in the current and the last 20-tick window, for the pipe readout. */
+		Map<FluidVariant, Long> flowNow = new HashMap<>(), flowLast = new HashMap<>();
+		long window;
+
+		void record(long time, FluidVariant variant, long droplets) {
+			roll(time);
+			flowNow.merge(variant, droplets, Long::sum);
+		}
+
+		void roll(long time) {
+			long w = time / 20;
+			if (w == window) return;
+			flowLast = w == window + 1 ? flowNow : new HashMap<>();
+			flowNow = new HashMap<>();
+			window = w;
+		}
+	}
+
+	/** A pipe network's readout: kg/s per fluid name over the last second, and its size. */
+	public record Flow(Map<net.minecraft.network.chat.Component, Double> flows, int pipes, int endpoints) {}
+
+	public static Flow flow(ServerLevel level, BlockPos pos) {
+		Network n = network(level, pos);
+		n.roll(level.getGameTime());
+		Map<net.minecraft.network.chat.Component, Double> out = new java.util.LinkedHashMap<>();
+		n.flowLast.entrySet().stream().sorted((a, b) -> Long.compare(b.getValue(), a.getValue())).limit(5).forEach(e ->
+				out.put(net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes.getName(e.getKey()), e.getValue() / (double) com.starwake.process.Chemicals.KG));
+		return new Flow(out, n.pipes.size(), n.endpoints.size());
 	}
 
 	private static final Map<Level, Map<BlockPos, Network>> BY_POS = new WeakHashMap<>();
@@ -109,10 +137,24 @@ public final class FluidNetworks {
 				if (to != null) targets.add(to);
 			}
 			if (targets.isEmpty()) continue;
-			try (Transaction tx = Transaction.openOuter()) {
-				var filter = level.getBlockEntity(pos) instanceof FluidPipeBlockEntity pipe ? pipe : null;
-				long moved = StorageUtil.move(from, new CombinedStorage<>(targets), v -> filter == null || filter.allows(v), amount, tx);
-				if (moved > 0) tx.commit();
+			var filter = level.getBlockEntity(pos) instanceof FluidPipeBlockEntity pipe ? pipe : null;
+			// Move fluid by fluid (so the readout knows what flowed), sharing the pipe's rate.
+			List<FluidVariant> kinds = new ArrayList<>();
+			for (var view : from) {
+				FluidVariant v = view.getResource();
+				if (!v.isBlank() && view.getAmount() > 0 && (filter == null || filter.allows(v)) && !kinds.contains(v)) kinds.add(v);
+			}
+			long left = amount;
+			for (FluidVariant v : kinds) {
+				if (left <= 0) break;
+				try (Transaction tx = Transaction.openOuter()) {
+					long moved = StorageUtil.move(from, new CombinedStorage<>(targets), v::equals, left, tx);
+					if (moved > 0) {
+						tx.commit();
+						left -= moved;
+						network.record(level.getGameTime(), v, moved);
+					}
+				}
 			}
 		}
 	}

@@ -1,11 +1,11 @@
 package com.starwake.machine;
 
-import com.starwake.logistics.ConveyorBlock;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  * Base for grid machines with an inventory and a screen (M8b): an energy buffer, slots with roles
  * from a {@link MachineMenu.Layout} (inputs accept from any side, outputs come out of any side,
  * so hoppers and conveyors just work), synced screen data, and automatic output: every 10 ticks
- * finished items are pushed into neighbouring inventories or onto conveyors leading away.
+ * finished items are pushed into neighbouring inventories, belts leading away, or machines that accept them.
  * Numbers come from {@link MachineSpec}.
  */
 public abstract class MachineBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, EnergyNode {
@@ -146,30 +146,36 @@ public abstract class MachineBlockEntity extends BaseContainerBlockEntity implem
 
 	// --- Output -----------------------------------------------------------------------------------
 
-	/** Pushes output slots into neighbouring inventories, or onto conveyors that lead away. */
+	/** Neighbours (packed positions) that pushed items into this machine, and when: we never push back into them. */
+	private final java.util.Map<Long, Long> feeders = new java.util.HashMap<>();
+	private static final int FEEDER_MEMORY = 200;
+
+	/**
+	 * Pushes output slots into neighbouring inventories: chests, belts that lead away, and (M9) other machines that
+	 * accept the item through their routing rules. A machine never pushes back into a neighbour that recently fed it,
+	 * so two machines that could each use the other's output don't ping-pong items.
+	 */
 	protected void eject(ServerLevel level) {
+		long now = level.getGameTime();
+		if (feeders.size() > 6) feeders.values().removeIf(t -> t < now - FEEDER_MEMORY);
 		for (int slot : layout().outputs()) {
 			ItemStack stack = items.get(slot);
 			if (stack.isEmpty()) continue;
 			for (Direction d : Direction.values()) {
 				if (stack.isEmpty()) break;
+				if (d == Direction.UP) continue; // a hopper above feeds us; don't fill it back
 				BlockPos next = worldPosition.relative(d);
-				BlockState there = level.getBlockState(next);
-				if (there.getBlock() instanceof ConveyorBlock && there.getValue(ConveyorBlock.FACING) == d) {
-					ItemStack out = stack.split(Math.min(stack.getCount(), 8));
-					ItemEntity entity = new ItemEntity(level, next.getX() + 0.5, next.getY() + 0.2, next.getZ() + 0.5, out, 0, 0, 0);
-					entity.setPickUpDelay(20);
-					level.addFreshEntity(entity);
-					continue;
-				}
-				if (d == Direction.UP) continue;
+				BlockEntity there = level.getBlockEntity(next);
+				MachineBlockEntity machine = there instanceof MachineBlockEntity m ? m : null;
+				if (machine != null && feeders.getOrDefault(next.asLong(), Long.MIN_VALUE / 2) > now - FEEDER_MEMORY) continue;
 				var storage = ItemStorage.SIDED.find(level, next, d.getOpposite());
-				if (storage == null || level.getBlockEntity(next) instanceof MachineBlockEntity) continue;
+				if (storage == null) continue;
 				try (Transaction tx = Transaction.openOuter()) {
 					long moved = storage.insert(ItemVariant.of(stack), stack.getCount(), tx);
 					if (moved > 0) {
 						stack.shrink((int) moved);
 						tx.commit();
+						if (machine != null) machine.feeders.put(worldPosition.asLong(), now);
 					}
 				}
 			}
