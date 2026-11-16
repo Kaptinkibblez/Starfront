@@ -1,9 +1,37 @@
 {
   "replace": false,
   "values": [
-    {"id": "starwake:planet/desert_salt_flats", "required": false},
-    {"id": "starwake:planet/desert_dunes", "required": false},
-    {"id": "starwake:planet/desert_mesas", "required": false},
-    {"id": "starwake:planet/desert_canyons", "required": false}
+    {
+      "id": "starwake:planet/desert_salt_flats",
+      "required": false
+    },
+    {
+      "id": "starwake:planet/desert_dunes",
+      "required": false
+    },
+    {
+      "id": "starwake:planet/desert_dunes_ochre",
+      "required": false
+    },
+    {
+      "id": "starwake:planet/desert_dunes_black",
+      "required": false
+    },
+    {
+      "id": "starwake:planet/desert_mesas",
+      "required": false
+    },
+    {
+      "id": "starwake:planet/desert_canyons",
+      "required": false
+    },
+    {
+      "id": "starwake:planet/desert_canyons_ochre",
+      "required": false
+    },
+    {
+      "id": "starwake:planet/desert_canyons_black",
+      "required": false
+    }
   ]
 }

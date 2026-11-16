@@ -1187,6 +1187,26 @@ normal gravity.
   - HUD: SpaceHud labels nearer bodies (and the quantum target) first, drops labels with no free spot
     (`HudLabels.tryPlace`) and only labels moons within 300 km. Verified 2026-11-15: Field C full of S, C, M and icy rocks.
 
+- **Alien pass** (`tools/planet_data.py`, `tools/planet_textures.py`):
+  - *No Earth life where it's lethal:* the toxic world's mycelium fungal forest became **thermophile springs**
+    (`starwake:thermophile_mat`, banded heat-loving microbial mats around acid pools, with sulfur chimneys); the old
+    `toxic_fungal_forest` biome stays registered (`LEGACY`) so saved chunks load. Frozen seas lost kelp and seagrass.
+  - *Terrain features:* `worldgen/SpireFeature` (`starwake:spire`: tapered lumpy cone, optional caprock, lean, base sunk
+    into slopes, radius <= 6): desert **hoodoos** (red sandstone, sandstone cap), barren **crags** (anorthosite), toxic
+    **sulfur chimneys** (tuff cap), frozen **penitentes** (packed ice); vanilla **basalt columns** on volcanic lava and ash
+    plains (`planet/basalt_columns` = `minecraft:large_basalt_columns` on the surface). Canyons were already carved.
+  - *Variety, palettes:* `PlanetArchetype.BiomeOption.palette`; each planet draws one palette (its own random stream) and
+    keeps only biomes with that palette or none. `PALETTES` clones every biome whose surface uses a replaced block: lush
+    and ocean purple / teal (`teal_turf`) / rust (`rust_turf`) mats; desert red / ochre / black (`basalt_sand`, smooth
+    basalt) dunes; frozen water ice / methane frost (`methane_frost`); barren grey / dark (`dark_regolith`) regolith. The
+    first palette keeps the biome's old name (saved chunks still find it). `expand_biome_tags` rewrites the hand-written
+    biome tags (seawater, salt lake, gas field, acid water) with every clone and drops ids that no longer exist.
+  - New blocks (`registry/ModPlanetBlocks`): Teal Turf, Rust Turf, Thermophile Mat, Dark Regolith, Basalt Sand (falling),
+    Methane Frost. 50 planet biomes, 55 features.
+  - Verified 2026-11-16: basalt columns over a volcanic moon's lava; a dark-regolith barren world with pale crags; desert
+    hoodoos; toxic sulfur flats with chimneys and no trees; frozen moon coasts without kelp. (`/locate` didn't find
+    thermophile springs on Thuneth: not in its seeded biome set.)
+
 ## How trading works (Milestone 7)
 
 - **Factions** (`trade/Faction`, synced registry `data/<ns>/starwake/faction/*.json`): name, code,

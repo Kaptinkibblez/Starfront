@@ -78,6 +78,12 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModPlanetBlocks.SELENITE, "Selenite");
 		builder.add(ModPlanetBlocks.SELENITE_CLUSTER, "Selenite Cluster");
 		builder.add(ModPlanetBlocks.MAT_TURF, "Mat Turf");
+		builder.add(ModPlanetBlocks.TEAL_TURF, "Teal Turf");
+		builder.add(ModPlanetBlocks.RUST_TURF, "Rust Turf");
+		builder.add(ModPlanetBlocks.THERMOPHILE_MAT, "Thermophile Mat");
+		builder.add(ModPlanetBlocks.DARK_REGOLITH, "Dark Regolith");
+		builder.add(ModPlanetBlocks.BASALT_SAND, "Basalt Sand");
+		builder.add(ModPlanetBlocks.METHANE_FROST, "Methane Frost");
 		builder.add(ModPlanetBlocks.TUFT_GRASS, "Tuft Grass");
 		builder.add(ModPlanetBlocks.FERNWOOD_LOG, "Fernwood Log");
 		builder.add(ModPlanetBlocks.FERNWOOD_FRONDS, "Fernwood Fronds");

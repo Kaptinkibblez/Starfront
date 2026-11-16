@@ -4,6 +4,12 @@
     "starwake:fine_regolith",
     "starwake:volcanic_ash",
     "starwake:permafrost",
-    "starwake:mat_turf"
+    "starwake:mat_turf",
+    "starwake:dark_regolith",
+    "starwake:basalt_sand",
+    "starwake:methane_frost",
+    "starwake:teal_turf",
+    "starwake:rust_turf",
+    "starwake:thermophile_mat"
   ]
 }

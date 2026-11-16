@@ -1,0 +1,17 @@
+{
+  "type": "starwake:spire",
+  "block": {
+    "id": "minecraft:packed_ice"
+  },
+  "height": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 3,
+    "max_inclusive": 9
+  },
+  "radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 1,
+    "max_inclusive": 1
+  },
+  "lean": 0.25
+}

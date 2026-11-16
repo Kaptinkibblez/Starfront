@@ -52,12 +52,19 @@ public record PlanetArchetype(Component name, double weight, Range orbit, Range 
 			ResourceKey.createRegistryKey(StarwakeMod.id("planet_archetype"));
 
 	/** One biome an archetype can use. {@code required} biomes appear on every planet of the kind. */
-	public record BiomeOption(ResourceKey<Biome> biome, boolean required, Climate.ParameterPoint parameters, MaterialRule surface) {
+	/**
+	 * One biome a planet of this archetype may have. {@code palette} (M9): biomes tagged with a palette only appear on
+	 * planets that drew that palette (one per planet, seeded), so a planet's colours stay consistent (all its turf teal,
+	 * all its dunes black); untagged biomes appear on any.
+	 */
+	public record BiomeOption(ResourceKey<Biome> biome, boolean required, Climate.ParameterPoint parameters, MaterialRule surface,
+			java.util.Optional<String> palette) {
 		public static final Codec<BiomeOption> CODEC = RecordCodecBuilder.create(i -> i.group(
 				ResourceKey.codec(Registries.BIOME).fieldOf("biome").forGetter(BiomeOption::biome),
 				Codec.BOOL.optionalFieldOf("required", false).forGetter(BiomeOption::required),
 				Climate.ParameterPoint.CODEC.fieldOf("parameters").forGetter(BiomeOption::parameters),
-				MaterialRule.CODEC.fieldOf("surface").forGetter(BiomeOption::surface)
+				MaterialRule.CODEC.fieldOf("surface").forGetter(BiomeOption::surface),
+				Codec.STRING.optionalFieldOf("palette").forGetter(BiomeOption::palette)
 		).apply(i, BiomeOption::new));
 	}
 

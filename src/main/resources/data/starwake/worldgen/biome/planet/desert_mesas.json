@@ -18,7 +18,9 @@
   "features": [
     [],
     [],
-    [],
+    [
+      "starwake:planet/spire_hoodoo"
+    ],
     [],
     [],
     [],

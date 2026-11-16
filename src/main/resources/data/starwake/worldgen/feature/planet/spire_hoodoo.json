@@ -1,0 +1,20 @@
+{
+  "type": "starwake:spire",
+  "block": {
+    "id": "minecraft:red_sandstone"
+  },
+  "height": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 8,
+    "max_inclusive": 20
+  },
+  "radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 2,
+    "max_inclusive": 4
+  },
+  "lean": 0.06,
+  "cap": {
+    "id": "minecraft:sandstone"
+  }
+}

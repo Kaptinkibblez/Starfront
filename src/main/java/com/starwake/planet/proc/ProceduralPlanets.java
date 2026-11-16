@@ -315,12 +315,18 @@ public final class ProceduralPlanets {
 				Optional.of(a.name()), system);
 
 		// Biomes: the required ones plus a seeded handful of the optional ones.
+		// Palette (M9): one per planet, from its own random stream so the other picks stay as they were.
+		List<String> palettes = a.biomes().stream().flatMap(o -> o.palette().stream()).distinct().sorted().toList();
+		String palette = palettes.isEmpty() ? null : palettes.get(RandomSource.create(seed ^ 0x5BD1E995L).nextInt(palettes.size()));
 		List<PlanetArchetype.BiomeOption> required = new ArrayList<>(), optional = new ArrayList<>();
-		for (var option : a.biomes()) (option.required() ? required : optional).add(option);
+		for (var option : a.biomes()) {
+			if (option.palette().isPresent() && !option.palette().get().equals(palette)) continue;
+			(option.required() ? required : optional).add(option);
+		}
 		int wanted = Math.max(1, a.biomeCount().pickInt(r));
 		List<PlanetArchetype.BiomeOption> biomes = new ArrayList<>(required);
 		while (biomes.size() < wanted && !optional.isEmpty()) biomes.add(optional.remove(r.nextInt(optional.size())));
-		if (biomes.isEmpty()) biomes.add(a.biomes().getFirst());
+		if (biomes.isEmpty()) biomes.add(required.isEmpty() ? a.biomes().getFirst() : required.getFirst());
 
 		Spec spec = new Spec(pick(r, a.dimensionTypes()), pick(r, a.terrain()), pick(r, a.stone()), pick(r, a.fluid()),
 				a.seaLevel().pickInt(r), List.copyOf(biomes), seed);

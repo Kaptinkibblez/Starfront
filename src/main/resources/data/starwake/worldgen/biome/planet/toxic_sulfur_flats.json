@@ -20,7 +20,9 @@
     [
       "minecraft:sulfur_pool"
     ],
-    [],
+    [
+      "starwake:planet/spire_sulfur"
+    ],
     [],
     [],
     [],

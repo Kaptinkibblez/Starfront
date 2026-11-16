@@ -226,6 +226,34 @@ def main():
     save(f"{BLOCK}/fernwood_log_top.png", log_top(25, ["#6b5240", "#8a6c52", "#5a4535", "#7c6048"]))
     save(f"{BLOCK}/fernwood_fronds.png", *leaves(26, ["#1a0d20", "#2f1838", "#46244f", "#5e3166"]))
 
+    # M9 alien pass: palette variants and new surfaces.
+    def turf(name, seed, top_colors, speck, side_colors=("#4b3a2c", "#5a4635", "#69523e", "#785e48")):
+        top = speckle(stone(seed, list(top_colors), grain=0.8, cell=2), seed, speck, 6)
+        save(f"{BLOCK}/{name}_top.png", top)
+        side = stone(seed + 1, list(side_colors), grain=0.6)
+        rng = random.Random(seed + 1)
+        for x in range(16):
+            depth = 3 + rng.randrange(0, 3)
+            side[:depth, x] = top[:depth, x]
+        save(f"{BLOCK}/{name}_side.png", side)
+
+    turf("teal_turf", 51, ["#103a3c", "#18504f", "#216664", "#2c7d78"], "#6ab8a0")
+    turf("rust_turf", 53, ["#5a1e12", "#74291a", "#8e3622", "#a8452c"], "#d8884a")
+    # Thermophile mat: banded orange/green microbial layers (Grand Prismatic-style colours).
+    mat = stone(55, ["#8a4a12", "#b0621a", "#c8842a", "#d8a43a"], grain=0.7, cell=4)
+    for y in range(16):
+        for x in range(16):
+            if (x * 3 + y * 5) % 11 < 3:
+                mat[y, x] = mat[y, x] * 0.55 + hexrgb("#5a8a2a") * 0.45
+    save(f"{BLOCK}/thermophile_mat_top.png", mat)
+    side = stone(57, ["#5a4a3a", "#6a5644", "#7a634e", "#8a7058"], grain=0.6)
+    side[:3, :] = mat[:3, :]
+    save(f"{BLOCK}/thermophile_mat_side.png", side)
+    save(f"{BLOCK}/dark_regolith.png", speckle(stone(59, ["#2e2d2c", "#3a3938", "#474645", "#545351"], grain=0.9, cell=2), 59, "#7a7874", 9))
+    save(f"{BLOCK}/basalt_sand.png", speckle(stone(61, ["#211f1e", "#2b2928", "#353231", "#403c3a"], grain=0.95, cell=2), 61, "#5a4e48", 10))
+    frost = stone(63, ["#cfdcea", "#dbe6f2", "#e6eef8", "#f2f6fc"], grain=0.5, cell=4)
+    save(f"{BLOCK}/methane_frost.png", speckle(frost, 63, "#e8d8c8", 7))
+
     # Toxic: sulfur-loving fungi.
     save(f"{BLOCK}/fungal_stem.png", log_side(31, ["#b8ad8a", "#cfc49e", "#ddd3b0", "#e8e0c2"]))
     save(f"{BLOCK}/fungal_stem_top.png", log_top(32, ["#e8e0c2", "#c9bd93", "#ddd3b0", "#b8ad8a"]))

@@ -148,6 +148,22 @@ feature(P + "crater_large", 2, {"type": "starwake:crater", "radius": {"type": "m
                                 "depth": 0.2, "rim": 0.08},
         surface_placed(P + "crater_large", rarity=12))
 feature("minecraft:amethyst_geode", 2, None, None)
+# M9 alien pass: tapered spires (hoodoos, crags, sulfur chimneys, ice penitentes) and basalt columns.
+def spire(name, block, height, radius, rarity=None, count=None, cap=None, lean=0.12):
+    f = {"type": "starwake:spire", "block": {"id": block},
+         "height": {"type": "minecraft:uniform", "min_inclusive": height[0], "max_inclusive": height[1]},
+         "radius": {"type": "minecraft:uniform", "min_inclusive": radius[0], "max_inclusive": radius[1]}, "lean": lean}
+    if cap:
+        f["cap"] = {"id": cap}
+    return feature(P + name, 2, f, surface_placed(P + name, count=count, rarity=rarity))
+
+
+spire("spire_hoodoo", "minecraft:red_sandstone", (8, 20), (2, 4), rarity=5, cap="minecraft:sandstone", lean=0.06)
+spire("spire_crag", "starwake:anorthosite", (10, 26), (2, 5), rarity=14, lean=0.15)
+spire("spire_sulfur", "minecraft:sulfur", (4, 11), (1, 2), count=2, cap="minecraft:tuff", lean=0.05)
+spire("penitente", "minecraft:packed_ice", (3, 9), (1, 1), count=5, lean=0.25)
+feature(P + "basalt_columns", 2, None, surface_placed("minecraft:large_basalt_columns", count=2))
+
 feature(P + "selenite_geode", 2, {
     "type": "minecraft:geode",
     "blocks": {
@@ -300,10 +316,10 @@ def archetype(kind, name, weight, orbit, radius, env, terrain, stone, fluid, sea
 
 
 def biome(name, params, surf, features, temperature=0.8, precipitation=False, water="#3f76e4", water_fog="#050533",
-          particles=None, required=False, carvers=True, fog=None):
+          particles=None, required=False, carvers=True, fog=None, palette=None):
     return dict(name=name, params=params, surface=surf, features=features, temperature=temperature,
                 precipitation=precipitation, water=water, water_fog=water_fog, particles=particles, required=required,
-                carvers=carvers, fog=fog)
+                carvers=carvers, fog=fog, palette=palette)
 
 
 ORES = lambda *names: [P + "ore_" + n for n in names]  # noqa: E731
@@ -341,17 +357,16 @@ archetype("frozen", "Frozen world", 1.0, [6.0, 9.5], [2500, 4200],
           dict(surface=["#D8E6F2", "#C4D8EA", "#E8EEF4"], secondary=["#8FA8C4", "#9AB4C8"], atmosphere=["#BFE0FF", "#DDF0FF"]),
           [
               biome("ice_sheet", climate(-0.6, 0.3), surface("minecraft:snow_block", "minecraft:packed_ice", "minecraft:gravel", deep="minecraft:packed_ice"),
-                    ORES("iron", "pentlandite", "cobaltite") + ["minecraft:ice_spike", "minecraft:freeze_top_layer"],
+                    ORES("iron", "pentlandite", "cobaltite") + ["minecraft:ice_spike", P + "penitente", "minecraft:freeze_top_layer"],
                     temperature=-0.7, precipitation=True, required=True),
               biome("tundra", climate(-0.2, -0.4), surface("starwake:permafrost", "starwake:permafrost", "minecraft:gravel", steep="minecraft:stone"),
                     ORES("iron", "copper", "pentlandite", "cobaltite") + ["minecraft:freeze_top_layer"],
                     temperature=-0.5, precipitation=True),
               biome("glacier_peaks", climate(-0.4, 0.0, e=-0.8), surface("minecraft:snow_block", "minecraft:blue_ice", "minecraft:gravel", steep="minecraft:packed_ice"),
-                    ORES("iron", "gold", "cobaltite") + ["minecraft:freeze_top_layer"],
+                    ORES("iron", "gold", "cobaltite") + [P + "penitente", "minecraft:freeze_top_layer"],
                     temperature=-0.9, precipitation=True),
               biome("frozen_sea", climate(-0.4, 0.0, c=OCEAN), surface("minecraft:gravel", "minecraft:gravel", "minecraft:gravel"),
-                    ORES("iron", "pentlandite") + ["minecraft:iceberg_packed", "minecraft:iceberg_blue", "minecraft:kelp_cold",
-                                                   "minecraft:seagrass_cold", "minecraft:freeze_top_layer"],
+                    ORES("iron", "pentlandite") + ["minecraft:iceberg_packed", "minecraft:iceberg_blue", "minecraft:freeze_top_layer"],
                     temperature=-0.6, precipitation=True, required=True, water="#3d57d6"),
           ])
 
@@ -369,7 +384,7 @@ archetype("barren", "Barren world", 1.2, [0.9, 8.0], [1200, 2600],
                     [P + "crater_small"] + ORES("iron", "ilmenite", "chromite", "pentlandite"),
                     temperature=0.5),
               biome("crater_fields", climate(0.5, 0.0, e=-0.5), surface("starwake:fine_regolith", "starwake:fine_regolith", deep="starwake:anorthosite"),
-                    [P + "crater_small", P + "crater_large"] + ORES("ilmenite", "wolframite", "chromite"),
+                    [P + "crater_small", P + "crater_large", P + "spire_crag"] + ORES("ilmenite", "wolframite", "chromite"),
                     temperature=0.5),
           ])
 
@@ -381,10 +396,10 @@ archetype("toxic", "Toxic world", 1.0, [0.9, 1.8], [2800, 4200],
           dict(surface=["#B8B04A", "#9C9A3A", "#C9A94A"], secondary=["#7A6A2A", "#A0A060"], atmosphere=["#E8E07A", "#D8F07A"]),
           [
               biome("sulfur_flats", climate(0.5, -0.4), surface("minecraft:sulfur", "minecraft:tuff", "minecraft:gravel"),
-                    ["minecraft:sulfur_pool"] + ORES("copper", "cinnabar", "sulfur", "cobaltite") + ["minecraft:sulfur_spike_cluster"],
+                    ["minecraft:sulfur_pool", P + "spire_sulfur"] + ORES("copper", "cinnabar", "sulfur", "cobaltite") + ["minecraft:sulfur_spike_cluster"],
                     temperature=1.5, water="#9ad04a", water_fog="#2a4010", required=True),
-              biome("fungal_forest", climate(0.2, 0.6), surface("minecraft:mycelium", "minecraft:dirt", "minecraft:gravel"),
-                    ORES("copper", "cinnabar", "wolframite") + [P + "giant_fungus", P + "puffball"],
+              biome("thermophile_springs", climate(0.2, 0.6), surface("starwake:thermophile_mat", "minecraft:tuff", "minecraft:gravel"),
+                    ["minecraft:sulfur_pool", P + "spire_sulfur"] + ORES("copper", "cinnabar", "wolframite"),
                     temperature=1.2, water="#8ac04a", water_fog="#2a4010"),
               biome("cinnabar_badlands", climate(0.7, 0.0, e=-0.6), surface("minecraft:cinnabar", "minecraft:tuff", "minecraft:gravel", steep="minecraft:tuff"),
                     ORES("copper", "gold", "cinnabar", "wolframite"),
@@ -402,10 +417,10 @@ archetype("volcanic", "Volcanic world", 1.0, [0.8, 2.0], [1800, 3800],
           dict(surface=["#2A2420", "#3A2E28", "#1E1A18"], secondary=["#C8501E", "#E07A2A", "#B8401A"], atmosphere=["#FF8A4A", "#E06A3A"]),
           [
               biome("ash_plains", climate(0.3, -0.3), surface("starwake:volcanic_ash", "starwake:volcanic_ash", "minecraft:blackstone"),
-                    ORES("chromite", "pentlandite", "magma") + ["minecraft:spring_lava"],
+                    [P + "basalt_columns"] + ORES("chromite", "pentlandite", "magma") + ["minecraft:spring_lava"],
                     temperature=2.0, particles={"type": "minecraft:white_ash"}),
               biome("lava_fields", climate(0.7, 0.2), surface("minecraft:basalt", "minecraft:blackstone", "minecraft:magma_block"),
-                    ["minecraft:lake_lava_surface", "minecraft:delta"] + ORES("chromite", "gold", "magma") + ["minecraft:spring_lava"],
+                    ["minecraft:lake_lava_surface", "minecraft:delta", P + "basalt_columns"] + ORES("chromite", "gold", "magma") + ["minecraft:spring_lava"],
                     temperature=2.0, required=True),
               biome("obsidian_coast", climate(0.4, 0.6, e=0.5), surface("minecraft:obsidian", "minecraft:blackstone", "minecraft:magma_block"),
                     ORES("ilmenite", "chromite", "magma"),
@@ -451,9 +466,9 @@ archetype("desert", "Desert world", 1.0, [1.6, 4.5], [2400, 4000],
                     ORES("copper", "bauxite"), temperature=2.0),
               biome("mesas", climate(0.5, 0.0, e=-0.6), seq(cond("minecraft:on_floor", {"type": "minecraft:bandlands"}),
                                                            cond("minecraft:under_floor", {"type": "minecraft:bandlands"})),
-                    ORES("iron", "gold", "cassiterite", "copper"), temperature=2.0),
+                    [P + "spire_hoodoo"] + ORES("iron", "gold", "cassiterite", "copper"), temperature=2.0),
               biome("canyons", climate(0.2, -0.2, e=-0.3), surface("minecraft:sand", "minecraft:sandstone", steep="minecraft:red_sandstone"),
-                    ORES("iron", "copper", "bauxite", "wolframite"), temperature=2.0),
+                    [P + "spire_hoodoo"] + ORES("iron", "copper", "bauxite", "wolframite"), temperature=2.0),
           ])
 
 # Crystal (rare): hydrothermal worlds where mineral-rich water grew giant gypsum crystals.
@@ -482,6 +497,80 @@ archetype("crystal", "Crystal world", 0.35, [1.2, 6.0], [2000, 3500],
 # ------------------------------------------------------------------------------------------
 
 
+# M9 alien pass: palette variants. Each planet draws one palette (Java: PlanetArchetype.BiomeOption.palette); biomes whose
+# surface uses a replaced block are cloned per palette (named <biome>_<palette>), the rest appear on every planet.
+PALETTES = {
+    "lush": {"purple": {}, "teal": {"starwake:mat_turf": "starwake:teal_turf"}, "rust": {"starwake:mat_turf": "starwake:rust_turf"}},
+    "ocean": {"purple": {}, "teal": {"starwake:mat_turf": "starwake:teal_turf"}, "rust": {"starwake:mat_turf": "starwake:rust_turf"}},
+    "desert": {"red": {}, "ochre": {"minecraft:red_sand": "minecraft:sand", "minecraft:red_sandstone": "minecraft:sandstone"},
+               "black": {"minecraft:red_sand": "starwake:basalt_sand", "minecraft:red_sandstone": "minecraft:smooth_basalt"}},
+    "frozen": {"water": {}, "methane": {"minecraft:snow_block": "starwake:methane_frost"}},
+    "barren": {"grey": {}, "dark": {"starwake:fine_regolith": "starwake:dark_regolith"}},
+}
+
+
+CLONES = {}  # "starwake:planet/<kind>_<biome>" -> every palette clone's id (the first palette keeps the original name)
+
+
+def apply_palettes():
+    for kind, palettes in PALETTES.items():
+        a = ARCHETYPES[kind]
+        blocks = {old for repl in palettes.values() for old in repl}
+        out = []
+        for b in a["biomes"]:
+            text = json.dumps(b["surface"])
+            if not any(f'"{old}"' in text for old in blocks):
+                out.append(b)
+                continue
+            base = f"starwake:planet/{kind}_{b['name']}"
+            for i, (name, repl) in enumerate(palettes.items()):
+                t = text
+                for old, new in repl.items():
+                    t = t.replace(f'"{old}"', f'"{new}"')
+                # The default palette keeps the biome's old name, so chunks saved before palettes still find it.
+                clone = b["name"] if i == 0 else f"{b['name']}_{name}"
+                out.append(dict(b, name=clone, surface=json.loads(t), palette=name))
+                CLONES.setdefault(base, []).append(f"starwake:planet/{kind}_{clone}")
+        a["biomes"] = out
+
+
+# Biomes no archetype uses any more, still registered so chunks saved with them load (no "missing content").
+LEGACY = [
+    ("toxic", biome("fungal_forest", climate(0.2, 0.6), surface("minecraft:mycelium", "minecraft:dirt", "minecraft:gravel"),
+                    ORES("copper", "cinnabar", "wolframite"), temperature=1.2, water="#8ac04a", water_fog="#2a4010")),
+]
+
+
+def expand_biome_tags():
+    """Hand-written biome tags (seawater, salt lakes...) name planet biomes; a biome split into palette clones is
+    replaced by its clones (and a clone list is kept up to date)."""
+    bases = CLONES
+    names = {f"starwake:planet/{kind}_{b['name']}" for kind, a in ARCHETYPES.items() for b in a["biomes"]}
+    names |= {f"starwake:planet/{kind}_{b['name']}" for kind, b in LEGACY}
+    folder = os.path.join(ROOT, "tags", "worldgen", "biome")
+    for file in sorted(os.listdir(folder)):
+        path = os.path.join(folder, file)
+        with open(path) as f:
+            tag = json.load(f)
+        values, seen = [], set()
+        for v in tag["values"]:
+            vid = v["id"] if isinstance(v, dict) else v
+            base = next((b for b, clones in bases.items() if vid in clones), None)
+            ids = bases[base] if base else [vid]
+            for i in ids:
+                if i.startswith("starwake:planet/") and i not in names:
+                    continue  # a biome that no longer exists
+                if i in seen:
+                    continue
+                seen.add(i)
+                values.append({"id": i, "required": False} if isinstance(v, dict) else i)
+        if values != tag["values"]:
+            tag["values"] = values
+            with open(path, "w") as f:
+                json.dump(tag, f, indent=2)
+                f.write("\n")
+
+
 def biome_json(kind, b):
     steps = [[] for _ in range(STEPS)]
     for f in sorted(set(b["features"]), key=lambda n: ORDER[n]):
@@ -508,8 +597,11 @@ def range_json(r):
 def archetype_json(kind, a):
     biomes = []
     for b in a["biomes"]:
-        biomes.append({"biome": f"starwake:planet/{kind}_{b['name']}", "required": b["required"], "parameters": b["params"],
-                       "surface": b["surface"]})
+        entry = {"biome": f"starwake:planet/{kind}_{b['name']}", "required": b["required"], "parameters": b["params"],
+                 "surface": b["surface"]}
+        if b.get("palette"):
+            entry["palette"] = b["palette"]
+        biomes.append(entry)
     env = a["env"]
     return {
         "name": {"translate": f"archetype.starwake.{kind}"},
@@ -656,6 +748,7 @@ def main():
 
     with open(os.path.join(ROOT, "timeline", "veyra_day.json")) as f:
         veyra = json.load(f)
+    apply_palettes()
     for kind, a in ARCHETYPES.items():
         write(f"starwake/planet_archetype/{kind}.json", archetype_json(kind, a))
         for b in a["biomes"]:
@@ -666,6 +759,9 @@ def main():
         write(f"world_clock/{kind}.json", {})
         write(f"timeline/{kind}_day.json", timeline_json(kind, s, veyra))
         write(f"tags/timeline/in_{kind}.json", {"values": ["#minecraft:universal", f"starwake:{kind}_day"]})
+    for legacy_kind, legacy in LEGACY:
+        write(f"worldgen/biome/planet/{legacy_kind}_{legacy['name']}.json", biome_json(legacy_kind, legacy))
+    expand_biome_tags()
     placed = {f.split("ore_", 1)[1] for a in ARCHETYPES.values() for b in a["biomes"] for f in b["features"] if "/ore_" in f}
     missing = [m["id"] for m in MINERALS if m["id"] not in placed and m["worldgen"] is not None]  # belt minerals: asteroids
     assert not missing, f"minerals never generated: {missing}"

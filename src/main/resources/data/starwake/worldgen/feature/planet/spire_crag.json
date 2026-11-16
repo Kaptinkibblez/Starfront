@@ -1,0 +1,17 @@
+{
+  "type": "starwake:spire",
+  "block": {
+    "id": "starwake:anorthosite"
+  },
+  "height": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 10,
+    "max_inclusive": 26
+  },
+  "radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 2,
+    "max_inclusive": 5
+  },
+  "lean": 0.15
+}

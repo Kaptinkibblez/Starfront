@@ -52,7 +52,9 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(key(ModPlanetBlocks.ANORTHOSITE), key(ModPlanetBlocks.HALITE),
 				key(ModPlanetBlocks.SELENITE), key(ModPlanetBlocks.SELENITE_CLUSTER));
 		builder(BlockTags.MINEABLE_WITH_SHOVEL).add(key(ModPlanetBlocks.FINE_REGOLITH), key(ModPlanetBlocks.VOLCANIC_ASH),
-				key(ModPlanetBlocks.PERMAFROST), key(ModPlanetBlocks.MAT_TURF));
+				key(ModPlanetBlocks.PERMAFROST), key(ModPlanetBlocks.MAT_TURF), key(ModPlanetBlocks.DARK_REGOLITH),
+				key(ModPlanetBlocks.BASALT_SAND), key(ModPlanetBlocks.METHANE_FROST), key(ModPlanetBlocks.TEAL_TURF),
+				key(ModPlanetBlocks.RUST_TURF), key(ModPlanetBlocks.THERMOPHILE_MAT));
 		builder(BlockTags.MINEABLE_WITH_AXE).add(key(ModPlanetBlocks.FERNWOOD_LOG), key(ModPlanetBlocks.FUNGAL_STEM),
 				key(ModPlanetBlocks.FUNGAL_CAP));
 		builder(BlockTags.MINEABLE_WITH_HOE).add(key(ModPlanetBlocks.FERNWOOD_FRONDS), key(ModPlanetBlocks.FUNGAL_CAP));
@@ -89,7 +91,8 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 				com.starwake.registry.ModMachines.FLUID_PIPE, com.starwake.registry.ModMachines.CONVEYOR, com.starwake.registry.ModMachines.SOLAR_PANEL, ModBlocks.SHIP_LIGHT, ModBlocks.GREEBLE, ModBlocks.HINGE, ModBlocks.ROTOR);
 		ModBlocks.all().stream().filter(block -> !(block instanceof com.starwake.ship.block.LandingGearBlock) && !thin.contains(block)
 				&& !ModPlanetBlocks.nonSolid().contains(block)).forEach(block -> motion.add(key(block)));
-		builder(BlockTags.SAND).add(key(ModPlanetBlocks.FINE_REGOLITH), key(ModPlanetBlocks.VOLCANIC_ASH));
+		builder(BlockTags.SAND).add(key(ModPlanetBlocks.FINE_REGOLITH), key(ModPlanetBlocks.VOLCANIC_ASH), key(ModPlanetBlocks.DARK_REGOLITH),
+				key(ModPlanetBlocks.BASALT_SAND));
 
 		// Vanilla category tags, so vanilla mechanics treat our blocks like their counterparts.
 		builder(BlockTags.SAND).add(key(ModBlocks.RUST_SAND));     // e.g. cactus/dead bush placement

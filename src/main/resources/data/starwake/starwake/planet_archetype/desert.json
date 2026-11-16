@@ -116,7 +116,126 @@
             }
           }
         ]
-      }
+      },
+      "palette": "red"
+    },
+    {
+      "biome": "starwake:planet/desert_dunes_ochre",
+      "required": true,
+      "parameters": {
+        "temperature": 0.6,
+        "humidity": -0.6,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": 0.0,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:sand"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:sandstone"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:sandstone"
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:deep_under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:sandstone"
+            }
+          }
+        ]
+      },
+      "palette": "ochre"
+    },
+    {
+      "biome": "starwake:planet/desert_dunes_black",
+      "required": true,
+      "parameters": {
+        "temperature": 0.6,
+        "humidity": -0.6,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": 0.0,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "starwake:basalt_sand"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:smooth_basalt"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:smooth_basalt"
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:deep_under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:smooth_basalt"
+            }
+          }
+        ]
+      },
+      "palette": "black"
     },
     {
       "biome": "starwake:planet/desert_salt_flats",
@@ -261,7 +380,130 @@
             }
           }
         ]
-      }
+      },
+      "palette": "red"
+    },
+    {
+      "biome": "starwake:planet/desert_canyons_ochre",
+      "required": false,
+      "parameters": {
+        "temperature": 0.2,
+        "humidity": -0.2,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": -0.3,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:steep"
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:sandstone"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:sand"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:sandstone"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:sandstone"
+            }
+          }
+        ]
+      },
+      "palette": "ochre"
+    },
+    {
+      "biome": "starwake:planet/desert_canyons_black",
+      "required": false,
+      "parameters": {
+        "temperature": 0.2,
+        "humidity": -0.2,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": -0.3,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:steep"
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:smooth_basalt"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:sand"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:sandstone"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:sandstone"
+            }
+          }
+        ]
+      },
+      "palette": "black"
     }
   ],
   "colors": {

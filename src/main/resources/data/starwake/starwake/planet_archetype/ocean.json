@@ -223,7 +223,130 @@
             }
           }
         ]
-      }
+      },
+      "palette": "purple"
+    },
+    {
+      "biome": "starwake:planet/ocean_islands_teal",
+      "required": false,
+      "parameters": {
+        "temperature": 0.5,
+        "humidity": 0.4,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": 0.0,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:steep"
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:stone"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "starwake:teal_turf"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:sand"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:dirt"
+            }
+          }
+        ]
+      },
+      "palette": "teal"
+    },
+    {
+      "biome": "starwake:planet/ocean_islands_rust",
+      "required": false,
+      "parameters": {
+        "temperature": 0.5,
+        "humidity": 0.4,
+        "continentalness": [
+          -0.19,
+          1.0
+        ],
+        "erosion": 0.0,
+        "weirdness": 0.0,
+        "depth": 0.0,
+        "offset": 0.0
+      },
+      "surface": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:steep"
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:stone"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": "minecraft:not_underwater",
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "starwake:rust_turf"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:sand"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:dirt"
+            }
+          }
+        ]
+      },
+      "palette": "rust"
     },
     {
       "biome": "starwake:planet/ocean_shoals",

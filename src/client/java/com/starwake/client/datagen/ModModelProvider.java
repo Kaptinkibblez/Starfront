@@ -64,7 +64,8 @@ public final class ModModelProvider extends FabricModelProvider {
 
 		// Planet content (M5)
 		for (Block block : new Block[] {ModPlanetBlocks.ANORTHOSITE, ModPlanetBlocks.FINE_REGOLITH, ModPlanetBlocks.VOLCANIC_ASH,
-				ModPlanetBlocks.PERMAFROST, ModPlanetBlocks.HALITE, ModPlanetBlocks.SELENITE, ModPlanetBlocks.FUNGAL_CAP}) {
+				ModPlanetBlocks.PERMAFROST, ModPlanetBlocks.HALITE, ModPlanetBlocks.SELENITE, ModPlanetBlocks.FUNGAL_CAP,
+				ModPlanetBlocks.DARK_REGOLITH, ModPlanetBlocks.BASALT_SAND, ModPlanetBlocks.METHANE_FROST}) {
 			generators.createTrivialCube(block);
 		}
 		ModPlanetBlocks.ores().forEach(ore -> generators.createTrivialCube(ore.block()));
@@ -125,6 +126,18 @@ public final class ModModelProvider extends FabricModelProvider {
 		generators.createTrivialBlock(ModPlanetBlocks.MAT_TURF, TexturedModel.CUBE_BOTTOM_TOP.updateTexture(t -> t
 				.put(TextureSlot.TOP, TextureMapping.getBlockTexture(ModPlanetBlocks.MAT_TURF, "_top"))
 				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModPlanetBlocks.MAT_TURF, "_side"))
+				.put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(net.minecraft.world.level.block.Blocks.DIRT))));
+		generators.createTrivialBlock(ModPlanetBlocks.TEAL_TURF, TexturedModel.CUBE_BOTTOM_TOP.updateTexture(t -> t
+				.put(TextureSlot.TOP, TextureMapping.getBlockTexture(ModPlanetBlocks.TEAL_TURF, "_top"))
+				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModPlanetBlocks.TEAL_TURF, "_side"))
+				.put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(net.minecraft.world.level.block.Blocks.DIRT))));
+		generators.createTrivialBlock(ModPlanetBlocks.RUST_TURF, TexturedModel.CUBE_BOTTOM_TOP.updateTexture(t -> t
+				.put(TextureSlot.TOP, TextureMapping.getBlockTexture(ModPlanetBlocks.RUST_TURF, "_top"))
+				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModPlanetBlocks.RUST_TURF, "_side"))
+				.put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(net.minecraft.world.level.block.Blocks.DIRT))));
+		generators.createTrivialBlock(ModPlanetBlocks.THERMOPHILE_MAT, TexturedModel.CUBE_BOTTOM_TOP.updateTexture(t -> t
+				.put(TextureSlot.TOP, TextureMapping.getBlockTexture(ModPlanetBlocks.THERMOPHILE_MAT, "_top"))
+				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModPlanetBlocks.THERMOPHILE_MAT, "_side"))
 				.put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(net.minecraft.world.level.block.Blocks.DIRT))));
 		generators.woodProvider(ModPlanetBlocks.FERNWOOD_LOG).log(ModPlanetBlocks.FERNWOOD_LOG);
 		generators.woodProvider(ModPlanetBlocks.FUNGAL_STEM).log(ModPlanetBlocks.FUNGAL_STEM);

@@ -49,6 +49,7 @@ public final class StarwakeMod implements ModInitializer {
 		com.starwake.registry.ModGear.init();
 		com.starwake.worldgen.CraterFeature.init();
 		com.starwake.worldgen.WrapDensity.init();
+		com.starwake.worldgen.SpireFeature.init();
 		com.starwake.registry.ModSounds.init();
 		ModBlockEntities.init();
 		ModEntities.init();

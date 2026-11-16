@@ -2,6 +2,8 @@
   "values": [
     "starwake:fine_regolith",
     "starwake:volcanic_ash",
+    "starwake:dark_regolith",
+    "starwake:basalt_sand",
     "starwake:rust_sand"
   ]
 }

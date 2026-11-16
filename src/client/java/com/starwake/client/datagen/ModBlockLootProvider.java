@@ -51,7 +51,9 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		// Planet content (M5)
 		for (var block : new net.minecraft.world.level.block.Block[] {ModPlanetBlocks.ANORTHOSITE, ModPlanetBlocks.FINE_REGOLITH,
 				ModPlanetBlocks.VOLCANIC_ASH, ModPlanetBlocks.PERMAFROST, ModPlanetBlocks.HALITE, ModPlanetBlocks.SELENITE,
-				ModPlanetBlocks.MAT_TURF, ModPlanetBlocks.FERNWOOD_LOG, ModPlanetBlocks.FUNGAL_STEM, ModPlanetBlocks.FUNGAL_CAP}) {
+				ModPlanetBlocks.MAT_TURF, ModPlanetBlocks.FERNWOOD_LOG, ModPlanetBlocks.FUNGAL_STEM, ModPlanetBlocks.FUNGAL_CAP,
+				ModPlanetBlocks.DARK_REGOLITH, ModPlanetBlocks.BASALT_SAND, ModPlanetBlocks.METHANE_FROST, ModPlanetBlocks.TEAL_TURF,
+				ModPlanetBlocks.RUST_TURF, ModPlanetBlocks.THERMOPHILE_MAT}) {
 			dropSelf(block);
 		}
 		add(ModPlanetBlocks.SELENITE_CLUSTER, createSilkTouchDispatchTable(ModPlanetBlocks.SELENITE_CLUSTER,

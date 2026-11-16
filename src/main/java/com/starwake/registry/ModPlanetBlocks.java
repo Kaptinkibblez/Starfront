@@ -62,11 +62,30 @@ public final class ModPlanetBlocks {
 			BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ).forceSolidOn().noOcclusion().sound(SoundType.CALCITE)
 					.strength(1.0f).lightLevel(s -> 3).pushReaction(PushReaction.POPPED));
 
+	/** Dark Regolith: basalt-rich dust of the dark plains (maria) of airless worlds. */
+	public static final Block DARK_REGOLITH = ModBlocks.register("dark_regolith",
+			p -> new ColoredFallingBlock(new ColorRGBA(0xFF4A4846), p), soil(MapColor.COLOR_GRAY, SoundType.SAND));
+	/** Basalt Sand: dark volcanic dune sand, like the black dunes of Mars. */
+	public static final Block BASALT_SAND = ModBlocks.register("basalt_sand",
+			p -> new ColoredFallingBlock(new ColorRGBA(0xFF34312F), p), soil(MapColor.COLOR_BLACK, SoundType.SAND));
+	/** Methane Frost: methane and nitrogen ice frosting the coldest worlds (like Pluto's plains). */
+	public static final Block METHANE_FROST = ModBlocks.register("methane_frost", Block::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.ICE).strength(0.4f).sound(SoundType.SNOW).friction(0.9f));
+
 	// --- Flora ---------------------------------------------------------------------------
 
 	/** Mat Turf: soil under a dense mat of dark-pigmented photosynthetic microbes. */
 	public static final Block MAT_TURF = ModBlocks.register("mat_turf", Block::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(0.6f).sound(SoundType.MOSS));
+	/** Teal Turf: soil under a blue-green bacteriochlorophyll mat (a cooler, bluer star's light). */
+	public static final Block TEAL_TURF = ModBlocks.register("teal_turf", Block::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_CYAN).strength(0.6f).sound(SoundType.MOSS));
+	/** Rust Turf: soil under a red carotenoid mat (a world whose life shields itself from a harsh young star). */
+	public static final Block RUST_TURF = ModBlocks.register("rust_turf", Block::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).strength(0.6f).sound(SoundType.MOSS));
+	/** Thermophile Mat: layered heat-loving microbial mat around hot acid springs (like Yellowstone's). */
+	public static final Block THERMOPHILE_MAT = ModBlocks.register("thermophile_mat", Block::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(0.5f).sound(SoundType.MOSS));
 	/** Tuft Grass: wiry purple-black ground cover (an anthocyanin-like pigment soaks up a redder sun). */
 	public static final Block TUFT_GRASS = plant("tuft_grass", PlanetPlantBlock::new, plantProperties(MapColor.COLOR_PURPLE, SoundType.GRASS));
 	/** Fernwood: the woody stem of tree-sized fronds (like Earth's Carboniferous tree ferns). */

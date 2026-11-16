@@ -116,7 +116,7 @@
       }
     },
     {
-      "biome": "starwake:planet/toxic_fungal_forest",
+      "biome": "starwake:planet/toxic_thermophile_springs",
       "required": false,
       "parameters": {
         "temperature": 0.2,
@@ -144,7 +144,7 @@
                   "if_true": "minecraft:not_underwater",
                   "then_run": {
                     "type": "minecraft:block",
-                    "result_state": "minecraft:mycelium"
+                    "result_state": "starwake:thermophile_mat"
                   }
                 },
                 {
@@ -159,7 +159,7 @@
             "if_true": "minecraft:under_floor",
             "then_run": {
               "type": "minecraft:block",
-              "result_state": "minecraft:dirt"
+              "result_state": "minecraft:tuff"
             }
           }
         ]
