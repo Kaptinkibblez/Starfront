@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/contract_board"
+    "model": "starwake:block/machine/contract_board"
   }
 }

@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/outfitter_terminal_front",
-    "side": "starwake:block/outfitter_terminal_side",
-    "top": "starwake:block/station_panel"
-  }
-}

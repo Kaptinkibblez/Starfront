@@ -28,7 +28,7 @@ public final class ModHubBlocks {
 	/** Trade Kiosk (M9): a player shop. */
 	public static final Block TRADE_KIOSK = ModBlocks.register("trade_kiosk", com.starwake.trade.kiosk.TradeKioskBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN).strength(3.0f, 1200.0f).sound(SoundType.METAL).lightLevel(s -> 9)
-					.requiresCorrectToolForDrops());
+					.requiresCorrectToolForDrops().noOcclusion());
 	public static final net.minecraft.world.level.block.entity.BlockEntityType<com.starwake.trade.kiosk.TradeKioskBlockEntity> TRADE_KIOSK_BE =
 			net.minecraft.core.Registry.register(net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE, com.starwake.StarwakeMod.id("trade_kiosk"),
 					net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.create(
@@ -46,7 +46,7 @@ public final class ModHubBlocks {
 
 	private static Block terminal(String name, TerminalBlock.Kind kind, MapColor color) {
 		return ModBlocks.register(name, p -> new TerminalBlock(kind, p), BlockBehaviour.Properties.of().mapColor(color)
-				.strength(3.0f, 9.0f).sound(SoundType.METAL).lightLevel(s -> 9).requiresCorrectToolForDrops());
+				.strength(3.0f, 9.0f).sound(SoundType.METAL).lightLevel(s -> 9).requiresCorrectToolForDrops().noOcclusion());
 	}
 
 	public static void init() {}

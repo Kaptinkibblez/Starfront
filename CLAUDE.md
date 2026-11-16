@@ -589,6 +589,18 @@ commit. **Don't start the next milestone until the user confirms the current one
       200 cr offline-safe); Alice posted "Supply 16 Emerald" (300 cr escrowed), Bob accepted, handed in and was paid, Alice
       collected 16 emeralds at the board; the Trade app's Prices tab listed what Alice saw at the terminal "just now"; an
       outpost placed on a slope stood all 14 perimeter posts on footings.)* Details in "How the economy works after M9".
+  - **M9 art pass (decisions 2026-11-16).** Audit: almost every machine was the same grey panel cube with a dark centre square
+    (only the front differed); components and metal forms were flat, mismatched sprites. Choices: **all four areas** (machines,
+    ship parts, items and components, hub/planet blocks), **3D shaped machine models**, **16x SC-industrial textures** (grey/white
+    panels, orange/teal accents, hazard trims), **glow + animation** while running.
+    - [x] **Art pass (2026-11-16).** *(Verified in the client: 39 machines idle and running side by side (running row held with
+      `/tick freeze`, since machines reset LIT on their first tick): glowing furnace windows, taps and plasma, animated screens and
+      fans; user feedback "some models look a little off" -> cylinders rebuilt as non-overlapping stepped circles (no z-fighting,
+      caps spread over the round end), glow panels raised clear of tank tops, a real torus for the fusion reactor, the shaking-table
+      deck seated on its legs, a sturdier wellhead; ship components in Mk I-III with glowing overlays and tier bands; engines with
+      housings, stepped bells and heat-stained throats; the four hub terminals as consoles with lit screens; component and
+      metal-form sprites redrawn.)* Details in "How the art works after M9". Planet rocks/turfs were left as they were (the audit
+      found them fine).
 
 ---
 
@@ -1362,6 +1374,28 @@ normal gravity.
   quotes per hub with the time; the tab lists known hubs (age, tier), their items (buy / sell / stock as seen), a price history
   sparkline for the picked item, and the best known sale and cheapest known purchase across hubs. It re-asks every 3 s while
   open.
+
+## How the art works after M9
+
+- **Machines** (`tools/art_machines.py`, run it): a shared 16x texture kit in `textures/block/art/` (plates with seams/rivets/bevels,
+  plinth with hazard band, stripes, vent, grille, pipes, roll, tanks, brick, copper coil, glass, rubber, gauge, cap; animated
+  `glow_<colour>` (8 frames) with idle `dim_<colour>`, `screen_on`/`screen_off`, `fan_on`/`fan_off`) and a `Model` builder: `box`
+  (per-face textures, `glow=` colour -> emissive `light_emission` when running, `only=` faces, free `rot`), `cyl` (stepped,
+  non-overlapping bands; cap textures spread across the round end by per-face UV), helpers `base`, `stack`, `motor`, `screen`,
+  `window`, `lamp`. One design function per machine (`DESIGNS`) writes `models/block/machine/<id>.json` and `<id>_on.json` (front
+  = north). Datagen `shapedMachine` dispatches LIT x FACING onto them. Every machine block is `noOcclusion` (shapes aren't full
+  cubes; collision stays the full cube). `Model.emit` marks always-lit elements. Hub terminals (`TERMINALS`: commodity, outfitter,
+  contract board, kiosk) are single always-lit models, also noOcclusion.
+- **Ship parts** (`tools/art_ships.py`): textures in `textures/block/ship/`, models `models/block/ship/<part>[_mk2|_mk3].json`.
+  Components (power plant, cooler, shield, quantum, jump, fuel tank) stay full cubes (they seal and cull as hull) with a second,
+  identical element carrying an animated cutout glow overlay (light 12), like vanilla's grass overlay. Engines (main, thruster,
+  maneuvering) are housing + stepped bell + throat, nozzle up, turned by FACING (`createNozzleBlock`), noOcclusion. Tier bands:
+  Mk I orange, Mk II gold, Mk III cyan (two bands, darker frame). Datagen `shipPart`.
+- **Item sprites** (`tools/art_items.py`): components and metal forms are rendered from small signed-distance scenes (ray-marched at
+  64x64, box-averaged to 16x16 with a 50% alpha threshold, posterised shading, dark outline); metal forms stay greyscale for the
+  alloy tint. Add a sprite by adding a scene to `sprites()`.
+- Testing tip: running states can be shown with `/tick freeze` then `setblock ...[lit=true]`; block displays don't render in the
+  headless client.
 
 ## How metallurgy works (Milestone 8a)
 

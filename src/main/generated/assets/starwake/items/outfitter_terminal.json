@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/outfitter_terminal"
+    "model": "starwake:block/machine/outfitter_terminal"
   }
 }

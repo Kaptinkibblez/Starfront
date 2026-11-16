@@ -77,10 +77,11 @@ public final class ModModelProvider extends FabricModelProvider {
 		}
 		for (Block block : new Block[] {com.starwake.registry.ModHubBlocks.COMMODITY_TERMINAL, com.starwake.registry.ModHubBlocks.OUTFITTER_TERMINAL,
 				com.starwake.registry.ModHubBlocks.CONTRACT_BOARD, com.starwake.registry.ModHubBlocks.TRADE_KIOSK}) {
-			generators.createHorizontallyRotatedBlock(block, TexturedModel.ORIENTABLE_ONLY_TOP.updateTexture(t -> t
-					.put(TextureSlot.FRONT, TextureMapping.getBlockTexture(block, "_front"))
-					.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side"))
-					.put(TextureSlot.TOP, TextureMapping.getBlockTexture(com.starwake.registry.ModHubBlocks.STATION_PANEL))));
+			// M9 art pass: shaped consoles from tools/art_machines.py (screen lit), turned by FACING.
+			Identifier model = id("machine/" + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block).getPath());
+			generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(model))
+					.with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
+			generators.registerSimpleItemModel(block, model);
 		}
 		// Power and logistics (M8b). Element models are hand-shaped (tools/machine_assets.py).
 		shapedMachine(generators, com.starwake.registry.ModMachines.COMBUSTION_GENERATOR);

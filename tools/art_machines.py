@@ -891,6 +891,60 @@ def particle_accelerator():
     return m
 
 
+# --- Hub terminals (always lit; single model each) -------------------------------------------------------
+
+def _console(accent_tex, holo=None):
+    m = Model()
+    m.box((2, 0, 2), (14, 1.5, 14), "frame", sides="plinth", top="panel_dark")
+    m.box((5, 1.5, 6), (11, 9, 12), "panel_light", sides=accent_tex)
+    m.box((3, 9, 4), (13, 11, 13), "panel_dark")
+    tilt = {"origin": [8, 11, 5], "x": 22.5, "y": 0, "z": 0}
+    m.box((2.5, 11, 4), (13.5, 16, 5.5), "frame", rot=tilt)
+    m.box((3.25, 11.6, 3.75), (12.75, 15.4, 4), "panel_dark", front="screen", only=("north",), rot=tilt)
+    m.box((3.5, 10, 2.5), (12.5, 11, 4.5), "panel_dark", top="grille")       # keyboard shelf
+    if holo:
+        m.box((6, 11, 9), (10, 11.5, 13), "frame", glow=holo, only=("up",), light=10)
+        m.box((7, 11.5, 10), (9, 15, 12), "glass")
+    return m
+
+
+def commodity_terminal():
+    return _console("stripe_orange")
+
+
+def outfitter_terminal():
+    return _console("stripe_teal", holo="teal")
+
+
+def contract_board():
+    m = Model()
+    m.box((1, 0, 6), (15, 1.5, 11), "frame", sides="plinth")
+    for x in (1.5, 13.5):
+        m.box((x, 1.5, 7.5), (x + 1, 15, 9.5), "pipe_dark")
+    m.box((1, 4, 7), (15, 15.5, 9), "panel_dark", sides="stripe_teal")
+    m.box((2, 5, 6.5), (14, 14.5, 7), "panel_dark", front="screen", only=("north",))
+    m.box((1, 15.5, 6.5), (15, 16, 9.5), "frame", glow="green", only=("up", "north"), light=8)
+    return m
+
+
+def trade_kiosk():
+    m = Model()
+    m.box((1, 0, 3), (15, 8, 13), "panel_light", sides="stripe_teal", top="panel_dark")
+    m.box((0.5, 8, 2.5), (15.5, 9, 13.5), "frame")
+    m.box((2, 8, 1.5), (14, 9, 2.5), "frame", glow="green", only=("north", "up"), light=8)
+    for x in (1.5, 13.5):
+        m.box((x, 9, 11), (x + 1, 16, 12), "pipe_dark")
+    m.box((1, 15, 3), (15, 16, 13), "panel_light", sides="stripe_orange")
+    tilt = {"origin": [8, 9, 9], "x": -15, "y": 0, "z": 0}
+    m.box((5, 9, 8), (11, 13, 9), "frame", rot=tilt)
+    m.box((5.5, 9.5, 7.75), (10.5, 12.5, 8), "panel_dark", front="screen", only=("north",), rot=tilt)
+    return m
+
+
+TERMINALS = {"commodity_terminal": commodity_terminal, "outfitter_terminal": outfitter_terminal,
+             "contract_board": contract_board, "trade_kiosk": trade_kiosk}
+
+
 DESIGNS = {
     "combustion_generator": combustion_generator, "electric_furnace": electric_furnace, "water_pump": water_pump,
     "atmospheric_condenser": atmospheric_condenser, "gas_well": gas_well, "crusher": crusher, "flotation": flotation,
@@ -914,7 +968,10 @@ def main():
         for on in (False, True):
             with open(os.path.join(MODELS, f"{name}{'_on' if on else ''}.json"), "w") as f:
                 json.dump(m.json(on), f, indent=1)
-    print(f"{len(DESIGNS)} machine models, {len(os.listdir(TEX))} art textures")
+    for name, design in TERMINALS.items():
+        with open(os.path.join(MODELS, f"{name}.json"), "w") as f:
+            json.dump(design().json(True), f, indent=1)
+    print(f"{len(DESIGNS)} machine models, {len(TERMINALS)} terminals, {len(os.listdir(TEX))} art textures")
 
 
 if __name__ == "__main__":
