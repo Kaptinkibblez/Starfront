@@ -268,6 +268,55 @@ def textures():
 DIRS = ("north", "south", "east", "west", "up", "down")
 
 
+_AXIS = {"north": (2, 0), "south": (2, 1), "west": (0, 0), "east": (0, 1), "down": (1, 0), "up": (1, 1)}
+
+
+def separate_coplanar(elements, step=0.02):
+    """Z-fighting guard: where two unrotated elements have faces pointing the same way in the same plane and overlapping,
+    the element with the smaller face is pushed out by `step` on that side, so the detail always draws in front.
+    Identical bounds are intentional overlays (left alone). Repeats until clean (bounded)."""
+    for _ in range(6):
+        moved = False
+        faces = []
+        for i, e in enumerate(elements):
+            if "rotation" in e:
+                continue
+            for d in e["faces"]:
+                a, side = _AXIS[d]
+                plane = round(e["to"][a] if side else e["from"][a], 4)
+                o = [k for k in range(3) if k != a]
+                faces.append((i, d, plane, [(e["from"][k], e["to"][k]) for k in o], a, side))
+        seen = set()
+        for x in range(len(faces)):
+            for y in range(x + 1, len(faces)):
+                f1, f2 = faces[x], faces[y]
+                if f1[0] == f2[0] or f1[1] != f2[1] or f1[2] != f2[2]:
+                    continue
+                e1, e2 = elements[f1[0]], elements[f2[0]]
+                if e1["from"] == e2["from"] and e1["to"] == e2["to"]:
+                    continue
+                if not all(min(r1[1], r2[1]) - max(r1[0], r2[0]) > 1e-3 for r1, r2 in zip(f1[3], f2[3])):
+                    continue
+                area = lambda f: (f[3][0][1] - f[3][0][0]) * (f[3][1][1] - f[3][1][0])
+                small = f1 if area(f1) <= area(f2) else f2
+                key = (small[0], small[1])
+                if key in seen:
+                    continue
+                seen.add(key)
+                e = elements[small[0]]
+                a, side = small[4], small[5]
+                if side:
+                    e["to"][a] = round(e["to"][a] + step, 4)
+                else:
+                    e["from"][a] = round(e["from"][a] - step, 4)
+                face = e["faces"].get(small[1])
+                if face is not None:
+                    face.pop("cullface", None)
+                moved = True
+        if not moved:
+            return
+
+
 class Model:
     def __init__(self):
         self.parts = []
@@ -336,7 +385,7 @@ class Model:
                     if d in self.parts[-1][2]:
                         self.parts[-1][2][d] = cap
                 ends = {"north": slice_uv(u0, u1, -v1, -v0), "south": slice_uv(u0, u1, -v1, -v0)}
-            if cap in ("fan", "cap", "screen", "gauge") or glow:
+            if cap != tex or glow:
                 self.parts[-1][7].update({d: uv for d, uv in ends.items() if d in self.parts[-1][2]})
         return self
 
@@ -372,6 +421,7 @@ class Model:
                 el["rotation"] = rot
             elements.append(el)
         textures["particle"] = "starwake:block/art/panel_light"
+        separate_coplanar(elements)
         return {"parent": "minecraft:block/block", "textures": textures, "elements": elements}
 
 

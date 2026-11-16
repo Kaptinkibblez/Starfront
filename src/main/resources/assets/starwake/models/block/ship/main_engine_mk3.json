@@ -70,10 +70,22 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ]
     }
    }
   },
@@ -102,10 +114,22 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ]
     }
    }
   },
@@ -134,10 +158,22 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ]
     }
    }
   },
@@ -166,10 +202,22 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ]
     }
    }
   },
@@ -198,10 +246,22 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ]
     }
    }
   },
@@ -230,10 +290,22 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ]
     }
    }
   },
@@ -262,10 +334,22 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ]
     }
    }
   },
@@ -294,10 +378,22 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ]
     }
    }
   },
@@ -326,10 +422,22 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ]
     }
    }
   },
@@ -358,10 +466,22 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ]
     }
    }
   },
@@ -390,11 +510,23 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame",
+     "texture": "#main_engine_mk3_throat",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ],
      "cullface": "up"
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#main_engine_mk3_throat",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ]
     }
    }
   },
@@ -423,11 +555,23 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame",
+     "texture": "#main_engine_mk3_throat",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ],
      "cullface": "up"
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#main_engine_mk3_throat",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ]
     }
    }
   },
@@ -456,11 +600,23 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame",
+     "texture": "#main_engine_mk3_throat",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ],
      "cullface": "up"
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#main_engine_mk3_throat",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ]
     }
    }
   },
@@ -489,11 +645,23 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame",
+     "texture": "#main_engine_mk3_throat",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ],
      "cullface": "up"
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#main_engine_mk3_throat",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ]
     }
    }
   },
@@ -522,35 +690,23 @@
      "texture": "#main_engine_mk3_bell"
     },
     "up": {
-     "texture": "#frame",
+     "texture": "#main_engine_mk3_throat",
+     "uv": [
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ],
      "cullface": "up"
     },
     "down": {
-     "texture": "#frame"
-    }
-   }
-  },
-  {
-   "from": [
-    1.5999999999999996,
-    15.95,
-    1.5999999999999996
-   ],
-   "to": [
-    14.4,
-    16,
-    14.4
-   ],
-   "faces": {
-    "up": {
      "texture": "#main_engine_mk3_throat",
      "uv": [
-      0,
-      0,
-      16,
-      16
-     ],
-     "cullface": "up"
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ]
     }
    }
   },

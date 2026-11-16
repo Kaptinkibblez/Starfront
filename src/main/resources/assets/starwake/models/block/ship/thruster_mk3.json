@@ -70,10 +70,22 @@
      "texture": "#thruster_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ]
     }
    }
   },
@@ -102,10 +114,22 @@
      "texture": "#thruster_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ]
     }
    }
   },
@@ -134,10 +158,22 @@
      "texture": "#thruster_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ]
     }
    }
   },
@@ -166,10 +202,22 @@
      "texture": "#thruster_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ]
     }
    }
   },
@@ -198,10 +246,22 @@
      "texture": "#thruster_mk3_bell"
     },
     "up": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ]
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#frame",
+     "uv": [
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ]
     }
    }
   },
@@ -230,11 +290,23 @@
      "texture": "#thruster_mk3_bell"
     },
     "up": {
-     "texture": "#frame",
+     "texture": "#thruster_mk3_throat",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ],
      "cullface": "up"
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#thruster_mk3_throat",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ]
     }
    }
   },
@@ -263,11 +335,23 @@
      "texture": "#thruster_mk3_bell"
     },
     "up": {
-     "texture": "#frame",
+     "texture": "#thruster_mk3_throat",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ],
      "cullface": "up"
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#thruster_mk3_throat",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ]
     }
    }
   },
@@ -296,11 +380,23 @@
      "texture": "#thruster_mk3_bell"
     },
     "up": {
-     "texture": "#frame",
+     "texture": "#thruster_mk3_throat",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ],
      "cullface": "up"
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#thruster_mk3_throat",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ]
     }
    }
   },
@@ -329,11 +425,23 @@
      "texture": "#thruster_mk3_bell"
     },
     "up": {
-     "texture": "#frame",
+     "texture": "#thruster_mk3_throat",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ],
      "cullface": "up"
     },
     "down": {
-     "texture": "#frame"
+     "texture": "#thruster_mk3_throat",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ]
     }
    }
   },
@@ -362,35 +470,23 @@
      "texture": "#thruster_mk3_bell"
     },
     "up": {
-     "texture": "#frame",
+     "texture": "#thruster_mk3_throat",
+     "uv": [
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ],
      "cullface": "up"
     },
     "down": {
-     "texture": "#frame"
-    }
-   }
-  },
-  {
-   "from": [
-    3.0999999999999996,
-    15.95,
-    3.0999999999999996
-   ],
-   "to": [
-    12.9,
-    16,
-    12.9
-   ],
-   "faces": {
-    "up": {
      "texture": "#thruster_mk3_throat",
      "uv": [
-      0,
-      0,
-      16,
-      16
-     ],
-     "cullface": "up"
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ]
     }
    }
   },

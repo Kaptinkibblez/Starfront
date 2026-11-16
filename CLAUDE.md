@@ -1394,6 +1394,11 @@ normal gravity.
 - **Item sprites** (`tools/art_items.py`): components and metal forms are rendered from small signed-distance scenes (ray-marched at
   64x64, box-averaged to 16x16 with a 50% alpha threshold, posterised shading, dark outline); metal forms stay greyscale for the
   alloy tint. Add a sprite by adding a scene to `sprites()`.
+- **No z-fighting:** `Model.json` runs `separate_coplanar` (two unrotated elements with same-facing faces in one plane that
+  overlap: the smaller one is pushed out 0.02 px; identical bounds = intentional overlays, kept). Cylinder caps that differ from
+  the side texture are spread across the round end; engine throats are the bell's own top cap (a square throat plate on the
+  bell's top fought it and poked out of the circle). Check every model with `python3 tools/check_models.py
+  src/main/resources/assets/starwake/models/block/{machine,ship}/*.json` (prints overlaps; 0 expected).
 - Testing tip: running states can be shown with `/tick freeze` then `setblock ...[lit=true]`; block displays don't render in the
   headless client.
 

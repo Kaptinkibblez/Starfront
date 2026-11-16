@@ -118,7 +118,7 @@
    ],
    "to": [
     2.5,
-    16,
+    16.02,
     12
    ],
    "faces": {
@@ -135,8 +135,7 @@
      "texture": "#pipe_dark"
     },
     "up": {
-     "texture": "#pipe_dark",
-     "cullface": "up"
+     "texture": "#pipe_dark"
     },
     "down": {
      "texture": "#pipe_dark"
@@ -151,7 +150,7 @@
    ],
    "to": [
     14.5,
-    16,
+    16.02,
     12
    ],
    "faces": {
@@ -168,8 +167,7 @@
      "texture": "#pipe_dark"
     },
     "up": {
-     "texture": "#pipe_dark",
-     "cullface": "up"
+     "texture": "#pipe_dark"
     },
     "down": {
      "texture": "#pipe_dark"

@@ -220,13 +220,9 @@ def engine(part, tier):
         m.box((0, 0, 0), (16, 10, 16), S, top="frame")
         m.box((3, 10, 3), (13, 11, 13), "panel_dark")
         steps = [(11, 13, 2.6), (13, 15, 3.2)]
-    for y0, y1, r in steps:
-        m.cyl("y", (8, 8), r, y0, y1, B, cap="frame")
-    top = steps[-1][1]
-    r = steps[-1][2] - 0.6
-    m.box((8 - r, top - 0.05, 8 - r), (8 + r, top, 8 + r), "frame", only=("up",))
-    m.parts[-1][2]["up"] = T
-    m.parts[-1][7]["up"] = [0, 0, 16, 16]
+    # The bell, stepped outward; its top face is the throat (spread across the round end), so no plate sits on it.
+    for k, (y0, y1, r) in enumerate(steps):
+        m.cyl("y", (8, 8), r, y0, y1, B, cap=T if k == len(steps) - 1 else "frame")
     # Mounting struts at the housing corners.
     hy = steps[0][0]
     for x, z in ((1, 1), (13, 1), (1, 13), (13, 13)):
