@@ -1,0 +1,161 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "particle": "starwake:block/ship/power_plant_side",
+  "power_plant_side": "starwake:block/ship/power_plant_side",
+  "power_plant_top": "starwake:block/ship/power_plant_top",
+  "power_plant_glow_side": "starwake:block/ship/power_plant_glow_side",
+  "power_plant_glow_top": "starwake:block/ship/power_plant_glow_top"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#power_plant_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "north"
+    },
+    "south": {
+     "texture": "#power_plant_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "south"
+    },
+    "east": {
+     "texture": "#power_plant_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "east"
+    },
+    "west": {
+     "texture": "#power_plant_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "west"
+    },
+    "up": {
+     "texture": "#power_plant_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "up"
+    },
+    "down": {
+     "texture": "#power_plant_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "down"
+    }
+   }
+  },
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#power_plant_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "north"
+    },
+    "south": {
+     "texture": "#power_plant_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "south"
+    },
+    "east": {
+     "texture": "#power_plant_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "east"
+    },
+    "west": {
+     "texture": "#power_plant_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "west"
+    },
+    "up": {
+     "texture": "#power_plant_glow_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "up"
+    },
+    "down": {
+     "texture": "#power_plant_glow_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "down"
+    }
+   },
+   "light_emission": 12
+  }
+ ]
+}

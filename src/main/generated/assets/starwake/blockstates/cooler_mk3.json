@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "starwake:block/cooler_mk3"
+      "model": "starwake:block/ship/cooler_mk3"
     }
   }
 }

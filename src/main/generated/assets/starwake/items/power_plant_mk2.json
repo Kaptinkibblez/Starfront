@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/power_plant_mk2"
+    "model": "starwake:block/ship/power_plant_mk2"
   }
 }

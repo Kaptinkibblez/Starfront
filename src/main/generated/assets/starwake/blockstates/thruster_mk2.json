@@ -1,28 +1,28 @@
 {
   "variants": {
     "facing=down": {
-      "model": "starwake:block/thruster_mk2_vertical",
+      "model": "starwake:block/ship/thruster_mk2",
       "x": 180
     },
     "facing=east": {
-      "model": "starwake:block/thruster_mk2_vertical",
+      "model": "starwake:block/ship/thruster_mk2",
       "x": 90,
       "y": 90
     },
     "facing=north": {
-      "model": "starwake:block/thruster_mk2_vertical",
+      "model": "starwake:block/ship/thruster_mk2",
       "x": 90
     },
     "facing=south": {
-      "model": "starwake:block/thruster_mk2_vertical",
+      "model": "starwake:block/ship/thruster_mk2",
       "x": 90,
       "y": 180
     },
     "facing=up": {
-      "model": "starwake:block/thruster_mk2_vertical"
+      "model": "starwake:block/ship/thruster_mk2"
     },
     "facing=west": {
-      "model": "starwake:block/thruster_mk2_vertical",
+      "model": "starwake:block/ship/thruster_mk2",
       "x": 90,
       "y": 270
     }

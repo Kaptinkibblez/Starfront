@@ -1,0 +1,161 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "particle": "starwake:block/ship/cooler_side",
+  "cooler_side": "starwake:block/ship/cooler_side",
+  "cooler_top": "starwake:block/ship/cooler_top",
+  "cooler_glow_side": "starwake:block/ship/cooler_glow_side",
+  "cooler_glow_top": "starwake:block/ship/cooler_glow_top"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#cooler_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "north"
+    },
+    "south": {
+     "texture": "#cooler_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "south"
+    },
+    "east": {
+     "texture": "#cooler_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "east"
+    },
+    "west": {
+     "texture": "#cooler_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "west"
+    },
+    "up": {
+     "texture": "#cooler_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "up"
+    },
+    "down": {
+     "texture": "#cooler_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "down"
+    }
+   }
+  },
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#cooler_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "north"
+    },
+    "south": {
+     "texture": "#cooler_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "south"
+    },
+    "east": {
+     "texture": "#cooler_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "east"
+    },
+    "west": {
+     "texture": "#cooler_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "west"
+    },
+    "up": {
+     "texture": "#cooler_glow_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "up"
+    },
+    "down": {
+     "texture": "#cooler_glow_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "down"
+    }
+   },
+   "light_emission": 12
+  }
+ ]
+}

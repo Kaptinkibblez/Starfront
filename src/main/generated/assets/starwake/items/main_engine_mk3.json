@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/main_engine_mk3_vertical"
+    "model": "starwake:block/ship/main_engine_mk3"
   }
 }

@@ -1,0 +1,84 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "particle": "starwake:block/ship/fuel_tank_mk3_side",
+  "fuel_tank_mk3_side": "starwake:block/ship/fuel_tank_mk3_side",
+  "fuel_tank_mk3_top": "starwake:block/ship/fuel_tank_mk3_top"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#fuel_tank_mk3_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "north"
+    },
+    "south": {
+     "texture": "#fuel_tank_mk3_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "south"
+    },
+    "east": {
+     "texture": "#fuel_tank_mk3_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "east"
+    },
+    "west": {
+     "texture": "#fuel_tank_mk3_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "west"
+    },
+    "up": {
+     "texture": "#fuel_tank_mk3_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "up"
+    },
+    "down": {
+     "texture": "#fuel_tank_mk3_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "down"
+    }
+   }
+  }
+ ]
+}

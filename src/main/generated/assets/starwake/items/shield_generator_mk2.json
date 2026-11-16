@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/shield_generator_mk2"
+    "model": "starwake:block/ship/shield_generator_mk2"
   }
 }

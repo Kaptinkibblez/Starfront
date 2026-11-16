@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/thruster_mk3_vertical"
+    "model": "starwake:block/ship/thruster_mk3"
   }
 }

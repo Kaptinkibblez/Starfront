@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "starwake:block/shield_generator_mk3"
+      "model": "starwake:block/ship/shield_generator_mk3"
     }
   }
 }

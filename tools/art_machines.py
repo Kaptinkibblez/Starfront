@@ -270,7 +270,8 @@ DIRS = ("north", "south", "east", "west", "up", "down")
 
 class Model:
     def __init__(self):
-        self.parts = []   # (from, to, faces-dict tex keys, glow, rot)
+        self.parts = []
+        self.emit = {}    # part index -> light_emission for elements that always glow (overlays)   # (from, to, faces-dict tex keys, glow, rot)
 
     def box(self, f, t, tex, sides=None, top=None, bottom=None, front=None, glow=None, light=15, full=False, rot=None, only=None):
         """tex = texture for every face; sides/top/bottom/front override. glow = colour name: the faces given by `only`
@@ -341,7 +342,7 @@ class Model:
 
     def json(self, on):
         textures, elements = {}, []
-        for f, t, faces, glow, light, full, rot, uvs in self.parts:
+        for index, (f, t, faces, glow, light, full, rot, uvs) in enumerate(self.parts):
             el = {"from": f, "to": t, "faces": {}}
             emits = False
             for d, k in faces.items():
@@ -365,6 +366,8 @@ class Model:
                 el["faces"][d] = face
             if emits:
                 el["light_emission"] = light if glow else 10
+            if index in self.emit:
+                el["light_emission"] = self.emit[index]
             if rot:
                 el["rotation"] = rot
             elements.append(el)

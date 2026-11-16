@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "starwake:block/fuel_tank_mk3"
+      "model": "starwake:block/ship/fuel_tank_mk3"
     }
   }
 }

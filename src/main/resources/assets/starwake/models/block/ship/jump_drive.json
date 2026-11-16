@@ -1,0 +1,161 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "particle": "starwake:block/ship/jump_drive_side",
+  "jump_drive_side": "starwake:block/ship/jump_drive_side",
+  "jump_drive_top": "starwake:block/ship/jump_drive_top",
+  "jump_drive_glow_side": "starwake:block/ship/jump_drive_glow_side",
+  "jump_drive_glow_top": "starwake:block/ship/jump_drive_glow_top"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#jump_drive_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "north"
+    },
+    "south": {
+     "texture": "#jump_drive_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "south"
+    },
+    "east": {
+     "texture": "#jump_drive_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "east"
+    },
+    "west": {
+     "texture": "#jump_drive_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "west"
+    },
+    "up": {
+     "texture": "#jump_drive_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "up"
+    },
+    "down": {
+     "texture": "#jump_drive_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "down"
+    }
+   }
+  },
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#jump_drive_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "north"
+    },
+    "south": {
+     "texture": "#jump_drive_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "south"
+    },
+    "east": {
+     "texture": "#jump_drive_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "east"
+    },
+    "west": {
+     "texture": "#jump_drive_glow_side",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "west"
+    },
+    "up": {
+     "texture": "#jump_drive_glow_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "up"
+    },
+    "down": {
+     "texture": "#jump_drive_glow_top",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "cullface": "down"
+    }
+   },
+   "light_emission": 12
+  }
+ ]
+}

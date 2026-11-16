@@ -1,28 +1,28 @@
 {
   "variants": {
     "facing=down": {
-      "model": "starwake:block/main_engine_vertical",
+      "model": "starwake:block/ship/main_engine",
       "x": 180
     },
     "facing=east": {
-      "model": "starwake:block/main_engine_vertical",
+      "model": "starwake:block/ship/main_engine",
       "x": 90,
       "y": 90
     },
     "facing=north": {
-      "model": "starwake:block/main_engine_vertical",
+      "model": "starwake:block/ship/main_engine",
       "x": 90
     },
     "facing=south": {
-      "model": "starwake:block/main_engine_vertical",
+      "model": "starwake:block/ship/main_engine",
       "x": 90,
       "y": 180
     },
     "facing=up": {
-      "model": "starwake:block/main_engine_vertical"
+      "model": "starwake:block/ship/main_engine"
     },
     "facing=west": {
-      "model": "starwake:block/main_engine_vertical",
+      "model": "starwake:block/ship/main_engine",
       "x": 90,
       "y": 270
     }

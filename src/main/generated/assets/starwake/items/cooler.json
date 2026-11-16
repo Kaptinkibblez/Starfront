@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/cooler"
+    "model": "starwake:block/ship/cooler"
   }
 }

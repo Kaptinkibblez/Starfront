@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/jump_drive_mk3"
+    "model": "starwake:block/ship/jump_drive_mk3"
   }
 }

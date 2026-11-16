@@ -151,22 +151,22 @@ public final class ModModelProvider extends FabricModelProvider {
 
 		// Ship parts
 		generators.createHorizontallyRotatedBlock(ModBlocks.HELM, TexturedModel.ORIENTABLE_ONLY_TOP);
-		generators.createTrivialBlock(ModBlocks.FUEL_TANK, TexturedModel.COLUMN);
+		shipPart(generators, ModBlocks.FUEL_TANK);
 		createNozzleBlock(generators, ModBlocks.THRUSTER);
 		createNozzleBlock(generators, ModBlocks.MAIN_ENGINE);
 		createLandingGear(generators, ModBlocks.LANDING_GEAR);
 		createNozzleBlock(generators, ModBlocks.MANEUVERING_THRUSTER);
 		createSeat(generators, ModBlocks.SEAT);
-		generators.createTrivialBlock(ModBlocks.POWER_PLANT, TexturedModel.COLUMN);
-		generators.createTrivialBlock(ModBlocks.COOLER, TexturedModel.COLUMN);
-		generators.createTrivialBlock(ModBlocks.SHIELD_GENERATOR, TexturedModel.COLUMN);
-		generators.createTrivialBlock(ModBlocks.QUANTUM_DRIVE, TexturedModel.COLUMN);
-		generators.createTrivialBlock(ModBlocks.JUMP_DRIVE, TexturedModel.COLUMN);
+		shipPart(generators, ModBlocks.POWER_PLANT);
+		shipPart(generators, ModBlocks.COOLER);
+		shipPart(generators, ModBlocks.SHIELD_GENERATOR);
+		shipPart(generators, ModBlocks.QUANTUM_DRIVE);
+		shipPart(generators, ModBlocks.JUMP_DRIVE);
 		// Mk II / III parts (M8e-2): same shapes, their own textures (tools/mk_textures.py).
 		for (var block : com.starwake.registry.ModShipParts.upgrades()) {
 			if (block instanceof com.starwake.ship.block.ThrusterBlock) createNozzleBlock(generators, block);
 			else if (block instanceof com.starwake.ship.block.LandingGearBlock) createLandingGear(generators, block);
-			else generators.createTrivialBlock(block, TexturedModel.COLUMN);
+			else shipPart(generators, block);
 		}
 	}
 
@@ -176,10 +176,8 @@ public final class ModModelProvider extends FabricModelProvider {
 	 * Textures: {@code <name>_front} (nozzle) and {@code <name>_side}.
 	 */
 	private static void createNozzleBlock(BlockModelGenerators generators, Block block) {
-		TextureMapping textures = new TextureMapping()
-				.put(TextureSlot.FRONT, TextureMapping.getBlockTexture(block, "_front"))
-				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side"));
-		Identifier modelId = ModelTemplates.CUBE_ORIENTABLE_VERTICAL.create(block, textures, generators.modelOutput);
+		// M9 art pass: shaped engine models from tools/art_ships.py (nozzle up), turned by FACING.
+		Identifier modelId = id("ship/" + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block).getPath());
 		MultiVariant model = BlockModelGenerators.plainVariant(modelId);
 		generators.registerSimpleItemModel(block, modelId); // the item shows the nozzle-up model
 		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(block).with(
@@ -234,6 +232,13 @@ public final class ModModelProvider extends FabricModelProvider {
 				.with(BlockModelGenerators.createBooleanModelDispatch(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, on, off))
 				.with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
 		generators.registerSimpleItemModel(block, id("machine/" + name));
+	}
+
+	/** A ship component with a model from tools/art_ships.py (full cube + emissive overlay). */
+	private static void shipPart(BlockModelGenerators generators, Block block) {
+		Identifier model = id("ship/" + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block).getPath());
+		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(model)));
+		generators.registerSimpleItemModel(block, model);
 	}
 
 	private static net.minecraft.resources.Identifier id(String model) {

@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/quantum_drive"
+    "model": "starwake:block/ship/quantum_drive"
   }
 }
