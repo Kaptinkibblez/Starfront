@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/forging_press_front_on",
-    "side": "starwake:block/forging_press_side",
-    "top": "starwake:block/forging_press_top"
-  }
-}

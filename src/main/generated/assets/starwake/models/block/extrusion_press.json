@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/extrusion_press_front",
-    "side": "starwake:block/extrusion_press_side",
-    "top": "starwake:block/extrusion_press_top"
-  }
-}

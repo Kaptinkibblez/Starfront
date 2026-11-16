@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/leach"
+    "model": "starwake:block/machine/leach"
   }
 }

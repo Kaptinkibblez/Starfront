@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/converter"
+    "model": "starwake:block/machine/converter"
   }
 }

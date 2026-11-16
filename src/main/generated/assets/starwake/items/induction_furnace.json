@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/induction_furnace"
+    "model": "starwake:block/machine/induction_furnace"
   }
 }

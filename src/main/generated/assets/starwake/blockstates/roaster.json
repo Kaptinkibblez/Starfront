@@ -1,33 +1,33 @@
 {
   "variants": {
     "facing=east,lit=false": {
-      "model": "starwake:block/roaster",
+      "model": "starwake:block/machine/roaster",
       "y": 90
     },
     "facing=east,lit=true": {
-      "model": "starwake:block/roaster_on",
+      "model": "starwake:block/machine/roaster_on",
       "y": 90
     },
     "facing=north,lit=false": {
-      "model": "starwake:block/roaster"
+      "model": "starwake:block/machine/roaster"
     },
     "facing=north,lit=true": {
-      "model": "starwake:block/roaster_on"
+      "model": "starwake:block/machine/roaster_on"
     },
     "facing=south,lit=false": {
-      "model": "starwake:block/roaster",
+      "model": "starwake:block/machine/roaster",
       "y": 180
     },
     "facing=south,lit=true": {
-      "model": "starwake:block/roaster_on",
+      "model": "starwake:block/machine/roaster_on",
       "y": 180
     },
     "facing=west,lit=false": {
-      "model": "starwake:block/roaster",
+      "model": "starwake:block/machine/roaster",
       "y": 270
     },
     "facing=west,lit=true": {
-      "model": "starwake:block/roaster_on",
+      "model": "starwake:block/machine/roaster_on",
       "y": 270
     }
   }

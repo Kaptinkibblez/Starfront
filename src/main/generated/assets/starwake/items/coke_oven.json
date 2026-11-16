@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/coke_oven"
+    "model": "starwake:block/machine/coke_oven"
   }
 }

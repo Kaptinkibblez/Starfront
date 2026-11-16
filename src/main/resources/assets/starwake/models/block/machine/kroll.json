@@ -1,0 +1,439 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "plinth": "starwake:block/art/plinth",
+  "panel_dark": "starwake:block/art/panel_dark",
+  "frame": "starwake:block/art/frame",
+  "brick": "starwake:block/art/brick",
+  "tank_steel": "starwake:block/art/tank_steel",
+  "cap": "starwake:block/art/cap",
+  "pipe_dark": "starwake:block/art/pipe_dark",
+  "dim_orange": "starwake:block/art/dim_orange",
+  "pipe": "starwake:block/art/pipe",
+  "particle": "starwake:block/art/panel_light"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    2,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#plinth",
+     "cullface": "north"
+    },
+    "south": {
+     "texture": "#plinth",
+     "cullface": "south"
+    },
+    "east": {
+     "texture": "#plinth",
+     "cullface": "east"
+    },
+    "west": {
+     "texture": "#plinth",
+     "cullface": "west"
+    },
+    "up": {
+     "texture": "#panel_dark"
+    },
+    "down": {
+     "texture": "#frame",
+     "cullface": "down"
+    }
+   }
+  },
+  {
+   "from": [
+    1,
+    2,
+    1
+   ],
+   "to": [
+    15,
+    10,
+    15
+   ],
+   "faces": {
+    "north": {
+     "texture": "#brick"
+    },
+    "south": {
+     "texture": "#brick"
+    },
+    "east": {
+     "texture": "#brick"
+    },
+    "west": {
+     "texture": "#brick"
+    },
+    "up": {
+     "texture": "#panel_dark"
+    },
+    "down": {
+     "texture": "#brick"
+    }
+   }
+  },
+  {
+   "from": [
+    4.5,
+    10,
+    6.425
+   ],
+   "to": [
+    11.5,
+    14,
+    9.575
+   ],
+   "faces": {
+    "north": {
+     "texture": "#tank_steel"
+    },
+    "south": {
+     "texture": "#tank_steel"
+    },
+    "east": {
+     "texture": "#tank_steel"
+    },
+    "west": {
+     "texture": "#tank_steel"
+    },
+    "up": {
+     "texture": "#cap",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ]
+    },
+    "down": {
+     "texture": "#cap",
+     "uv": [
+      0.0,
+      4.4,
+      16.0,
+      11.6
+     ]
+    }
+   }
+  },
+  {
+   "from": [
+    4.92,
+    10,
+    9.575
+   ],
+   "to": [
+    11.08,
+    14,
+    10.8
+   ],
+   "faces": {
+    "north": {
+     "texture": "#tank_steel"
+    },
+    "south": {
+     "texture": "#tank_steel"
+    },
+    "east": {
+     "texture": "#tank_steel"
+    },
+    "west": {
+     "texture": "#tank_steel"
+    },
+    "up": {
+     "texture": "#cap",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ]
+    },
+    "down": {
+     "texture": "#cap",
+     "uv": [
+      0.96,
+      11.6,
+      15.04,
+      14.4
+     ]
+    }
+   }
+  },
+  {
+   "from": [
+    4.92,
+    10,
+    5.199999999999999
+   ],
+   "to": [
+    11.08,
+    14,
+    6.425
+   ],
+   "faces": {
+    "north": {
+     "texture": "#tank_steel"
+    },
+    "south": {
+     "texture": "#tank_steel"
+    },
+    "east": {
+     "texture": "#tank_steel"
+    },
+    "west": {
+     "texture": "#tank_steel"
+    },
+    "up": {
+     "texture": "#cap",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ]
+    },
+    "down": {
+     "texture": "#cap",
+     "uv": [
+      0.96,
+      1.6,
+      15.04,
+      4.4
+     ]
+    }
+   }
+  },
+  {
+   "from": [
+    5.970000000000001,
+    10,
+    10.8
+   ],
+   "to": [
+    10.03,
+    14,
+    11.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#tank_steel"
+    },
+    "south": {
+     "texture": "#tank_steel"
+    },
+    "east": {
+     "texture": "#tank_steel"
+    },
+    "west": {
+     "texture": "#tank_steel"
+    },
+    "up": {
+     "texture": "#cap",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ]
+    },
+    "down": {
+     "texture": "#cap",
+     "uv": [
+      3.36,
+      14.4,
+      12.64,
+      16.0
+     ]
+    }
+   }
+  },
+  {
+   "from": [
+    5.970000000000001,
+    10,
+    4.5
+   ],
+   "to": [
+    10.03,
+    14,
+    5.199999999999999
+   ],
+   "faces": {
+    "north": {
+     "texture": "#tank_steel"
+    },
+    "south": {
+     "texture": "#tank_steel"
+    },
+    "east": {
+     "texture": "#tank_steel"
+    },
+    "west": {
+     "texture": "#tank_steel"
+    },
+    "up": {
+     "texture": "#cap",
+     "uv": [
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ]
+    },
+    "down": {
+     "texture": "#cap",
+     "uv": [
+      3.36,
+      0.0,
+      12.64,
+      1.6
+     ]
+    }
+   }
+  },
+  {
+   "from": [
+    6.5,
+    14,
+    6.5
+   ],
+   "to": [
+    9.5,
+    15.5,
+    9.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#pipe_dark"
+    },
+    "south": {
+     "texture": "#pipe_dark"
+    },
+    "east": {
+     "texture": "#pipe_dark"
+    },
+    "west": {
+     "texture": "#pipe_dark"
+    },
+    "up": {
+     "texture": "#pipe_dark"
+    },
+    "down": {
+     "texture": "#pipe_dark"
+    }
+   }
+  },
+  {
+   "from": [
+    3.5,
+    3.5,
+    0.5
+   ],
+   "to": [
+    12.5,
+    7.5,
+    1
+   ],
+   "faces": {
+    "north": {
+     "texture": "#frame"
+    },
+    "south": {
+     "texture": "#frame"
+    },
+    "east": {
+     "texture": "#frame"
+    },
+    "west": {
+     "texture": "#frame"
+    },
+    "up": {
+     "texture": "#frame"
+    },
+    "down": {
+     "texture": "#frame"
+    }
+   }
+  },
+  {
+   "from": [
+    4,
+    4,
+    0.25
+   ],
+   "to": [
+    12,
+    7,
+    0.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#dim_orange",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    }
+   }
+  },
+  {
+   "from": [
+    12.0,
+    12.0,
+    0
+   ],
+   "to": [
+    14.0,
+    14.0,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#cap",
+     "uv": [
+      0.0,
+      0.0,
+      16.0,
+      16.0
+     ],
+     "cullface": "north"
+    },
+    "south": {
+     "texture": "#cap",
+     "uv": [
+      0.0,
+      0.0,
+      16.0,
+      16.0
+     ],
+     "cullface": "south"
+    },
+    "east": {
+     "texture": "#pipe"
+    },
+    "west": {
+     "texture": "#pipe"
+    },
+    "up": {
+     "texture": "#pipe"
+    },
+    "down": {
+     "texture": "#pipe"
+    }
+   }
+  }
+ ]
+}

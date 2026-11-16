@@ -105,7 +105,8 @@ public final class ModMachines {
 	}
 
 	private static BlockBehaviour.Properties machine() {
-		return BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.5f, 6.0f).sound(SoundType.METAL).requiresCorrectToolForDrops();
+		return BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.5f, 6.0f).sound(SoundType.METAL).requiresCorrectToolForDrops()
+				.noOcclusion(); // shaped models (M9 art pass)
 	}
 
 	/** Belt pieces (M9): one block class, one block entity. */

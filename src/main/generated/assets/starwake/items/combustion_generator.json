@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/combustion_generator"
+    "model": "starwake:block/machine/combustion_generator"
   }
 }

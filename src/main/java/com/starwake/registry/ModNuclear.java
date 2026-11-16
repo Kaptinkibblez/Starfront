@@ -57,7 +57,7 @@ public final class ModNuclear {
 	}
 
 	private static BlockBehaviour.Properties machine(int light) {
-		return BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5f, 12.0f).sound(SoundType.METAL).requiresCorrectToolForDrops()
+		return BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5f, 12.0f).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()
 				.lightLevel(s -> s.getValue(MachineBlock.LIT) ? light : 0);
 	}
 

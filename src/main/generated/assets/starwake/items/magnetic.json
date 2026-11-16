@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/magnetic"
+    "model": "starwake:block/machine/magnetic"
   }
 }

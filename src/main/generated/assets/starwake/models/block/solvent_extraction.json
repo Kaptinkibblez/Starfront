@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/solvent_extraction_front",
-    "side": "starwake:block/solvent_extraction_side",
-    "top": "starwake:block/solvent_extraction_top"
-  }
-}

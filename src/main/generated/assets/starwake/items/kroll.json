@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/kroll"
+    "model": "starwake:block/machine/kroll"
   }
 }

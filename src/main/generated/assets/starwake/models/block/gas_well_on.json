@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/gas_well_front_on",
-    "side": "starwake:block/gas_well_side",
-    "top": "starwake:block/gas_well_top"
-  }
-}

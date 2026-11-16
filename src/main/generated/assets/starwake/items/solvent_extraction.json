@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/solvent_extraction"
+    "model": "starwake:block/machine/solvent_extraction"
   }
 }

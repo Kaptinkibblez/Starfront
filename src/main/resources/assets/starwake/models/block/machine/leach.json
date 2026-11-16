@@ -1,0 +1,303 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "plinth": "starwake:block/art/plinth",
+  "panel_dark": "starwake:block/art/panel_dark",
+  "frame": "starwake:block/art/frame",
+  "tank_steel": "starwake:block/art/tank_steel",
+  "dim_green": "starwake:block/art/dim_green",
+  "roll": "starwake:block/art/roll",
+  "fan_off": "starwake:block/art/fan_off",
+  "particle": "starwake:block/art/panel_light"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    2,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#plinth",
+     "cullface": "north"
+    },
+    "south": {
+     "texture": "#plinth",
+     "cullface": "south"
+    },
+    "east": {
+     "texture": "#plinth",
+     "cullface": "east"
+    },
+    "west": {
+     "texture": "#plinth",
+     "cullface": "west"
+    },
+    "up": {
+     "texture": "#panel_dark"
+    },
+    "down": {
+     "texture": "#frame",
+     "cullface": "down"
+    }
+   }
+  },
+  {
+   "from": [
+    1.5,
+    2,
+    1.5
+   ],
+   "to": [
+    14.5,
+    11,
+    14.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#tank_steel"
+    },
+    "south": {
+     "texture": "#tank_steel"
+    },
+    "east": {
+     "texture": "#tank_steel"
+    },
+    "west": {
+     "texture": "#tank_steel"
+    },
+    "up": {
+     "texture": "#frame"
+    },
+    "down": {
+     "texture": "#tank_steel"
+    }
+   }
+  },
+  {
+   "from": [
+    2.5,
+    11,
+    2.5
+   ],
+   "to": [
+    13.5,
+    11.25,
+    13.5
+   ],
+   "faces": {
+    "up": {
+     "texture": "#dim_green",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    }
+   }
+  },
+  {
+   "from": [
+    1,
+    12,
+    7
+   ],
+   "to": [
+    15,
+    13,
+    9
+   ],
+   "faces": {
+    "north": {
+     "texture": "#panel_dark"
+    },
+    "south": {
+     "texture": "#panel_dark"
+    },
+    "east": {
+     "texture": "#panel_dark"
+    },
+    "west": {
+     "texture": "#panel_dark"
+    },
+    "up": {
+     "texture": "#panel_dark"
+    },
+    "down": {
+     "texture": "#panel_dark"
+    }
+   }
+  },
+  {
+   "from": [
+    7.4,
+    8,
+    7.4
+   ],
+   "to": [
+    8.6,
+    12,
+    8.6
+   ],
+   "faces": {
+    "north": {
+     "texture": "#roll"
+    },
+    "south": {
+     "texture": "#roll"
+    },
+    "east": {
+     "texture": "#roll"
+    },
+    "west": {
+     "texture": "#roll"
+    },
+    "up": {
+     "texture": "#roll"
+    },
+    "down": {
+     "texture": "#roll"
+    }
+   }
+  },
+  {
+   "from": [
+    6.2,
+    13,
+    7.01
+   ],
+   "to": [
+    9.8,
+    15.5,
+    8.99
+   ],
+   "faces": {
+    "north": {
+     "texture": "#panel_dark"
+    },
+    "south": {
+     "texture": "#panel_dark"
+    },
+    "east": {
+     "texture": "#panel_dark"
+    },
+    "west": {
+     "texture": "#panel_dark"
+    },
+    "up": {
+     "texture": "#fan_off",
+     "uv": [
+      0.0,
+      3.6,
+      16.0,
+      12.4
+     ]
+    },
+    "down": {
+     "texture": "#fan_off",
+     "uv": [
+      0.0,
+      3.6,
+      16.0,
+      12.4
+     ]
+    }
+   }
+  },
+  {
+   "from": [
+    6.74,
+    13,
+    8.99
+   ],
+   "to": [
+    9.26,
+    15.5,
+    9.8
+   ],
+   "faces": {
+    "north": {
+     "texture": "#panel_dark"
+    },
+    "south": {
+     "texture": "#panel_dark"
+    },
+    "east": {
+     "texture": "#panel_dark"
+    },
+    "west": {
+     "texture": "#panel_dark"
+    },
+    "up": {
+     "texture": "#fan_off",
+     "uv": [
+      2.4,
+      12.4,
+      13.6,
+      16.0
+     ]
+    },
+    "down": {
+     "texture": "#fan_off",
+     "uv": [
+      2.4,
+      12.4,
+      13.6,
+      16.0
+     ]
+    }
+   }
+  },
+  {
+   "from": [
+    6.74,
+    13,
+    6.2
+   ],
+   "to": [
+    9.26,
+    15.5,
+    7.01
+   ],
+   "faces": {
+    "north": {
+     "texture": "#panel_dark"
+    },
+    "south": {
+     "texture": "#panel_dark"
+    },
+    "east": {
+     "texture": "#panel_dark"
+    },
+    "west": {
+     "texture": "#panel_dark"
+    },
+    "up": {
+     "texture": "#fan_off",
+     "uv": [
+      2.4,
+      0.0,
+      13.6,
+      3.6
+     ]
+    },
+    "down": {
+     "texture": "#fan_off",
+     "uv": [
+      2.4,
+      0.0,
+      13.6,
+      3.6
+     ]
+    }
+   }
+  }
+ ]
+}

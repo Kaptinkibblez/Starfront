@@ -1,33 +1,33 @@
 {
   "variants": {
     "facing=east,lit=false": {
-      "model": "starwake:block/gas_well",
+      "model": "starwake:block/machine/gas_well",
       "y": 90
     },
     "facing=east,lit=true": {
-      "model": "starwake:block/gas_well_on",
+      "model": "starwake:block/machine/gas_well_on",
       "y": 90
     },
     "facing=north,lit=false": {
-      "model": "starwake:block/gas_well"
+      "model": "starwake:block/machine/gas_well"
     },
     "facing=north,lit=true": {
-      "model": "starwake:block/gas_well_on"
+      "model": "starwake:block/machine/gas_well_on"
     },
     "facing=south,lit=false": {
-      "model": "starwake:block/gas_well",
+      "model": "starwake:block/machine/gas_well",
       "y": 180
     },
     "facing=south,lit=true": {
-      "model": "starwake:block/gas_well_on",
+      "model": "starwake:block/machine/gas_well_on",
       "y": 180
     },
     "facing=west,lit=false": {
-      "model": "starwake:block/gas_well",
+      "model": "starwake:block/machine/gas_well",
       "y": 270
     },
     "facing=west,lit=true": {
-      "model": "starwake:block/gas_well_on",
+      "model": "starwake:block/machine/gas_well_on",
       "y": 270
     }
   }

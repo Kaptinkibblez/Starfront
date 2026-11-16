@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/electrolysis"
+    "model": "starwake:block/machine/electrolysis"
   }
 }

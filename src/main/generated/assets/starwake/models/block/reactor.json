@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/reactor_front",
-    "side": "starwake:block/reactor_side",
-    "top": "starwake:block/reactor_top"
-  }
-}

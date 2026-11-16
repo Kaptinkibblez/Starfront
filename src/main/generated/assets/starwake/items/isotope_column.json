@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/isotope_column"
+    "model": "starwake:block/machine/isotope_column"
   }
 }

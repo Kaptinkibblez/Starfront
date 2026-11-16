@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/clean_fab"
+    "model": "starwake:block/machine/clean_fab"
   }
 }

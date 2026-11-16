@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/gas_centrifuge_front_on",
-    "side": "starwake:block/gas_centrifuge_side",
-    "top": "starwake:block/gas_centrifuge_top"
-  }
-}

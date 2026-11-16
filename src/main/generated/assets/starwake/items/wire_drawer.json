@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/wire_drawer"
+    "model": "starwake:block/machine/wire_drawer"
   }
 }

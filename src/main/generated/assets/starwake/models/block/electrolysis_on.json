@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/electrolysis_front_on",
-    "side": "starwake:block/electrolysis_side",
-    "top": "starwake:block/electrolysis_top"
-  }
-}

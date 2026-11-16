@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/rolling_mill_front_on",
-    "side": "starwake:block/rolling_mill_side",
-    "top": "starwake:block/rolling_mill_top"
-  }
-}

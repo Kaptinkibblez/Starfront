@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/isotope_column_front",
-    "side": "starwake:block/isotope_column_side",
-    "top": "starwake:block/isotope_column_top"
-  }
-}

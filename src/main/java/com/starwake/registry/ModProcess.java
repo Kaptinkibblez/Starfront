@@ -39,7 +39,7 @@ public final class ModProcess {
 		for (Process p : Process.values()) {
 			BLOCKS.put(p, ModBlocks.register(p.machine, props -> new MachineBlock(ProcessMachineBlockEntity::new,
 					() -> ModProcess.PROCESS_MACHINE_BE, props), BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.5f, 6.0f)
-					.sound(SoundType.METAL).requiresCorrectToolForDrops().lightLevel(s -> s.getValue(MachineBlock.LIT) ? 9 : 0)));
+					.sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().lightLevel(s -> s.getValue(MachineBlock.LIT) ? 9 : 0)));
 		}
 	}
 

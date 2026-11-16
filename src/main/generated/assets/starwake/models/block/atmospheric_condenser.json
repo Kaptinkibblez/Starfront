@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/atmospheric_condenser_front",
-    "side": "starwake:block/atmospheric_condenser_side",
-    "top": "starwake:block/atmospheric_condenser_top"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/crystal_puller_front_on",
-    "side": "starwake:block/crystal_puller_side",
-    "top": "starwake:block/crystal_puller_top"
-  }
-}

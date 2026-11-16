@@ -1,33 +1,33 @@
 {
   "variants": {
     "facing=east,lit=false": {
-      "model": "starwake:block/electrolysis",
+      "model": "starwake:block/machine/electrolysis",
       "y": 90
     },
     "facing=east,lit=true": {
-      "model": "starwake:block/electrolysis_on",
+      "model": "starwake:block/machine/electrolysis_on",
       "y": 90
     },
     "facing=north,lit=false": {
-      "model": "starwake:block/electrolysis"
+      "model": "starwake:block/machine/electrolysis"
     },
     "facing=north,lit=true": {
-      "model": "starwake:block/electrolysis_on"
+      "model": "starwake:block/machine/electrolysis_on"
     },
     "facing=south,lit=false": {
-      "model": "starwake:block/electrolysis",
+      "model": "starwake:block/machine/electrolysis",
       "y": 180
     },
     "facing=south,lit=true": {
-      "model": "starwake:block/electrolysis_on",
+      "model": "starwake:block/machine/electrolysis_on",
       "y": 180
     },
     "facing=west,lit=false": {
-      "model": "starwake:block/electrolysis",
+      "model": "starwake:block/machine/electrolysis",
       "y": 270
     },
     "facing=west,lit=true": {
-      "model": "starwake:block/electrolysis_on",
+      "model": "starwake:block/machine/electrolysis_on",
       "y": 270
     }
   }

@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/sinter_press"
+    "model": "starwake:block/machine/sinter_press"
   }
 }

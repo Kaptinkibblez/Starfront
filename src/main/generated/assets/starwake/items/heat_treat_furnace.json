@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/heat_treat_furnace"
+    "model": "starwake:block/machine/heat_treat_furnace"
   }
 }

@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/fabricator_front_on",
-    "side": "starwake:block/fabricator_side",
-    "top": "starwake:block/fabricator_top"
-  }
-}

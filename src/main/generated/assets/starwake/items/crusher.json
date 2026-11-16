@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/crusher"
+    "model": "starwake:block/machine/crusher"
   }
 }

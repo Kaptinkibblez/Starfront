@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/gas_centrifuge"
+    "model": "starwake:block/machine/gas_centrifuge"
   }
 }

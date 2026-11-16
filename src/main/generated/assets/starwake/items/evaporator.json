@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/evaporator"
+    "model": "starwake:block/machine/evaporator"
   }
 }

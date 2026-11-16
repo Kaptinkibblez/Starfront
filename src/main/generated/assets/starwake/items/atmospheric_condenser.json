@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/atmospheric_condenser"
+    "model": "starwake:block/machine/atmospheric_condenser"
   }
 }

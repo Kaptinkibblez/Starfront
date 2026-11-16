@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/reactor"
+    "model": "starwake:block/machine/reactor"
   }
 }

@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/fission_reactor_front_on",
-    "side": "starwake:block/fission_reactor_side",
-    "top": "starwake:block/fission_reactor_top"
-  }
-}

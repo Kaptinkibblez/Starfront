@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/crusher_front_on",
-    "side": "starwake:block/crusher_side",
-    "top": "starwake:block/crusher_top"
-  }
-}

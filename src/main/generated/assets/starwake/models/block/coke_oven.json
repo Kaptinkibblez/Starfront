@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "starwake:block/coke_oven_front",
-    "side": "starwake:block/coke_oven_side",
-    "top": "starwake:block/coke_oven_top"
-  }
-}

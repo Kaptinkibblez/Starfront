@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "starwake:block/air_separator"
+    "model": "starwake:block/machine/air_separator"
   }
 }
