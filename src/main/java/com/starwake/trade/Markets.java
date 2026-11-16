@@ -120,11 +120,11 @@ public final class Markets {
 	}
 
 	private static long buyUnit(Listing l, double stock, double rep) {
-		return Math.max(1, (long) Math.ceil(mid(l, stock) * (1 + SPREAD) * rep));
+		return Math.max(1, (long) Math.ceil(mid(l, stock) * (1 + SPREAD) * rep * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.BUY_PRICES)));
 	}
 
 	private static long sellUnit(Listing l, double stock, double rep) {
-		return Math.max(1, (long) Math.floor(mid(l, stock) * (1 - SPREAD) / rep));
+		return Math.max(1, (long) Math.floor(mid(l, stock) * (1 - SPREAD) / rep * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.SELL_PRICES)));
 	}
 
 	/** Prices and stock for the market screen. */
@@ -141,7 +141,7 @@ public final class Markets {
 			quotes.add(new MarketPayload.Quote(l.item(), (int) Math.floor(s), (int) (l.capacity() * MAX_FILL), buyUnit(l, s, rep),
 					sellUnit(l, s, rep), l.producer(), have));
 		}
-		return new MarketPayload(hub.id(), title, hub.faction(), Economy.credits(player), quotes);
+		return new MarketPayload(hub.id(), title, hub.faction(), Economy.credits(player), quotes, industrialOffers(player, hub, rep));
 	}
 
 	/** Buys {@code count} of an item. Returns a message for the player. */
@@ -192,6 +192,74 @@ public final class Markets {
 		Economy.pay(player, total);
 		repForVolume(player, hub, total);
 		return Component.translatable("message.starwake.trade.sold", count, new ItemStack(item).getHoverName(), total);
+	}
+
+	// --- Industrial products (M9) -------------------------------------------------------------
+
+	/** The saturation multiplier for a category at a hub: 2^(-recently sold value / capacity), recovering with tau. */
+	private static double saturation(State state, String hub, String category, long now, Industrial.Tuning t) {
+		double[] s = state.stock(hub, "ind:" + category, 0, now);
+		double sold = s[0] * Math.exp(-Math.max(0, now - s[1]) / t.tau());
+		return Math.pow(2, -sold / t.capacity());
+	}
+
+	private static double soldValue(State state, String hub, String category, long now, Industrial.Tuning t) {
+		double[] s = state.stock(hub, "ind:" + category, 0, now);
+		return s[0] * Math.exp(-Math.max(0, now - s[1]) / t.tau());
+	}
+
+	/** What the hub would pay per item for each industrial product the player carries. */
+	public static List<MarketPayload.Offer> industrialOffers(ServerPlayer player, TradeHubs.Hub hub, double rep) {
+		Industrial.Tuning t = Industrial.tuning().orElse(null);
+		if (t == null) return List.of();
+		MinecraftServer server = player.level().getServer();
+		State state = state(server);
+		long now = server.overworld().getGameTime();
+		List<MarketPayload.Offer> out = new ArrayList<>();
+		var inv = player.getInventory();
+		for (int slot = 0; slot < inv.getContainerSize(); slot++) {
+			ItemStack stack = inv.getItem(slot);
+			var appraisal = Industrial.appraise(stack).orElse(null);
+			if (appraisal == null) continue;
+			double demand = Industrial.demand(hub.economy(), appraisal.category());
+			if (demand <= 0) continue;
+			long unit = (long) Math.floor(appraisal.value() * demand * saturation(state, hub.id(), appraisal.category(), now, t)
+					* (1 - t.spread()) / rep * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.SELL_PRICES));
+			if (unit <= 0) continue;
+			out.add(new MarketPayload.Offer(slot, stack.copy(), unit, appraisal.category()));
+		}
+		return out;
+	}
+
+	/** Sells up to {@code count} items from one inventory slot to the hub's industrial buyers. */
+	public static Component sellIndustrial(ServerPlayer player, TradeHubs.Hub hub, int slot, int count) {
+		Industrial.Tuning t = Industrial.tuning().orElse(null);
+		var inv = player.getInventory();
+		if (t == null || slot < 0 || slot >= inv.getContainerSize() || count <= 0) return Component.translatable("message.starwake.trade.not_traded");
+		ItemStack stack = inv.getItem(slot);
+		var appraisal = Industrial.appraise(stack).orElse(null);
+		double demand = appraisal == null ? 0 : Industrial.demand(hub.economy(), appraisal.category());
+		if (demand <= 0) return Component.translatable("message.starwake.trade.not_traded");
+		MinecraftServer server = player.level().getServer();
+		State state = state(server);
+		long now = server.overworld().getGameTime();
+		double rep = Economy.priceFactor(Economy.rep(player, hub.faction()));
+		double sold = soldValue(state, hub.id(), appraisal.category(), now, t);
+		count = Math.min(count, stack.getCount());
+		Component name = stack.getHoverName();
+		long total = 0;
+		for (int i = 0; i < count; i++) {
+			double fair = appraisal.value() * demand;
+			total += (long) Math.floor(fair * Math.pow(2, -sold / t.capacity()) * (1 - t.spread()) / rep * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.SELL_PRICES));
+			sold += fair;
+		}
+		if (total <= 0) return Component.translatable("message.starwake.trade.not_traded");
+		stack.shrink(count);
+		inv.setChanged();
+		state.put(hub.id(), "ind:" + appraisal.category(), sold, now);
+		Economy.pay(player, total);
+		repForVolume(player, hub, total);
+		return Component.translatable("message.starwake.trade.sold", count, name, total);
 	}
 
 	/** A little reputation for business: +1 per 400 credits traded. */

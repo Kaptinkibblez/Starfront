@@ -141,8 +141,62 @@ def main():
     }
     for sid, items in shops.items():
         write(f"shop/{sid}.json", {"items": items})
+    industrial(elements, price, shops)
     print(f"{sum(len(v) for v in groups.values())} commodities in {len(groups)} groups, {len(economies)} economies, {len(shops)} shops")
     print("sample prices:", {s: price[s] for s in ("Fe", "Cu", "Al", "Ti", "Au", "Pt", "Rh", "Nd", "U", "Li")})
+
+
+# Industrial products (M9): hubs buy anything the industry makes, valued from what it is made of.
+# Categories a hub buys and its multiplier for each (absent = doesn't buy that category).
+INDUSTRIAL_DEMAND = {
+    "trade_port": {"ferrous": 1.0, "light": 1.05, "nickel_cobalt": 1.05, "copper": 1.0, "precious": 1.1, "refractory": 1.05,
+                   "other_metal": 0.95, "component": 1.1, "ship_part": 1.1, "electronics": 1.15},
+    "refinery": {"ore": 1.2, "ferrous": 0.9, "light": 0.9, "nickel_cobalt": 0.9, "copper": 0.9, "precious": 1.05,
+                 "refractory": 0.95, "other_metal": 1.0},
+    "research_station": {"refractory": 1.2, "precious": 1.1, "electronics": 1.25, "other_metal": 1.15},
+    "settlement": {"ferrous": 1.15, "copper": 1.1, "light": 1.05, "component": 1.15},
+    "mining_camp": {"ferrous": 1.1, "component": 1.2, "ship_part": 1.1},
+    "research_post": {"electronics": 1.2, "refractory": 1.1, "other_metal": 1.1},
+    "trading_post": {"ferrous": 1.0, "copper": 1.0, "light": 1.0, "ore": 0.9, "component": 1.0},
+}
+
+
+def industrial(elements, price, shops):
+    per_kg = {}
+    for e in elements:
+        item_kg = 0.001 if e["form"] == "sample" else 1.0
+        per_kg[e["symbol"]] = round(price[e["symbol"]] / item_kg, 2)
+    port = {i["item"]: i["price"] for i in shops["port"]}
+    parts = {"thruster": 400, "main_engine": 2500, "maneuvering_thruster": 250, "power_plant": 2000, "cooler": 700,
+             "shield_generator": 2500, "quantum_drive": 4000, "jump_drive": 12000, "fuel_tank": 600, "landing_gear": 300}
+    items = {}
+    for part, base in parts.items():
+        base = port.get("starwake:" + part, base) * 0.6   # second-hand: 60% of the outfitter price
+        items["starwake:" + part] = {"category": "ship_part", "price": round(base)}
+        items[f"starwake:{part}_mk2"] = {"category": "ship_part", "price": round(base * 2.5)}
+        items[f"starwake:{part}_mk3"] = {"category": "ship_part", "price": round(base * 6)}
+    for comp, value in {"pressure_vessel": 120, "structural_frame": 80, "combustion_chamber": 300, "nozzle": 350, "turbopump": 500,
+                        "heat_exchanger": 250, "magnet_coil": 400, "control_board": 600}.items():
+        items["starwake:" + comp] = {"category": "component", "price": value}
+    items["starwake:microchip"] = {"category": "electronics", "price": 45}
+    items["starwake:silicon_wafer"] = {"category": "electronics", "price": 18}
+    write("industrial/default.json", {
+        "element_price": per_kg,
+        "items": items,
+        "kind": {"GRADE": 1.6, "OFF_SPEC": 1.0, "PURE": 1.0, "ALLOY": 0.9, "UNKNOWN": 0.8},
+        "purity": [[0.9999, 1.5], [0.999, 1.25], [0.99, 1.1]],
+        "form": {"ingot": 1.0, "dust": 0.9, "plate": 1.15, "rod": 1.15, "wire": 1.3, "billet": 1.05, "slab": 1.05,
+                 "casting": 1.05, "forging": 1.1},
+        "temper": {"cracked": 0.5, "as_cast": 1.0, "sintered": 1.0, "annealed": 1.0, "default": 1.1},
+        # Share of the contained elements' value a hub pays for unrefined bulk material, by kind.
+        "bulk": {"crushed_ore": 0.25, "concentrate": 0.4, "calcine": 0.45, "matte": 0.6, "slag": 0.08, "tailings": 0.04,
+                 "flue_dust": 0.3, "coke": 0.5, "residue": 0.2, "crystals": 0.6, "slimes": 0.55},
+        # Rock-forming elements a hub won't pay for in unrefined bulk (they're the gangue).
+        "gangue": ["O", "H", "C", "N", "Si", "Ca", "Mg", "Na", "K", "Cl", "S", "F", "P", "Al"],
+        "demand": INDUSTRIAL_DEMAND,
+        # Credits of one category a hub absorbs before its price halves; recovers with tau ticks.
+        "capacity": 25000, "tau": 12000, "spread": 0.08,
+    })
 
 
 def write(rel, data):

@@ -269,12 +269,12 @@ public final class SpaceTravel {
 		Vec3 arrival = SolarSystem.arrivalPoint(centre, target, from, physics.quantumStandoff());
 		double ticks = 0;
 		for (int pass = 0; pass < 2; pass++) {
-			ticks = SolarSystem.travelTicks(from.distanceTo(arrival), physics.quantumSpeed(), physics.quantumRamp());
+			ticks = SolarSystem.travelTicks(from.distanceTo(arrival), physics.quantumSpeed() * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.QUANTUM_SPEED), physics.quantumRamp());
 			centre = target.at(t + ticks);
 			arrival = SolarSystem.arrivalPoint(centre, target, from, physics.quantumStandoff());
 		}
 		double distance = from.distanceTo(arrival);
-		ticks = SolarSystem.travelTicks(distance, physics.quantumSpeed(), physics.quantumRamp());
+		ticks = SolarSystem.travelTicks(distance, physics.quantumSpeed() * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.QUANTUM_SPEED), physics.quantumRamp());
 		boolean tooClose = from.distanceTo(target.at(t)) - target.body().entryRadius() < physics.quantumMinDistance();
 		var obstruction = SolarSystem.obstruction(ship.level(), from, arrival, target.key(), t).orElse(null);
 		Vec3 physical = SolarSystem.toPhysical(target, arrival, t + ticks);

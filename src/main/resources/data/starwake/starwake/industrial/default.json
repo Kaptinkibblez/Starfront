@@ -1,0 +1,408 @@
+{
+ "element_price": {
+  "H": 3.0,
+  "He": 30.0,
+  "Li": 19.3,
+  "Be": 32.4,
+  "B": 23.0,
+  "C": 11.2,
+  "N": 2.0,
+  "O": 2.0,
+  "F": 20.0,
+  "Ne": 40.0,
+  "Na": 5.0,
+  "Mg": 5.0,
+  "Al": 4.3,
+  "Si": 3.9,
+  "P": 8.0,
+  "S": 9.9,
+  "Cl": 8.0,
+  "Ar": 8.0,
+  "K": 5.0,
+  "Ca": 4.6,
+  "Sc": 18.8,
+  "Ti": 6.0,
+  "V": 12.5,
+  "Cr": 13.0,
+  "Mn": 8.1,
+  "Fe": 4.5,
+  "Co": 18.2,
+  "Ni": 13.6,
+  "Cu": 14.7,
+  "Zn": 14.2,
+  "Ga": 19.5,
+  "Ge": 38.4,
+  "As": 36.5,
+  "Se": 101.3,
+  "Br": 33.8,
+  "Kr": 60.0,
+  "Rb": 13.4,
+  "Sr": 9.8,
+  "Y": 17.0,
+  "Zr": 11.6,
+  "Nb": 19.3,
+  "Mo": 40.9,
+  "Tc": 920000.0,
+  "Ru": 320.7,
+  "Rh": 320.7,
+  "Pd": 144.0,
+  "Ag": 90.0,
+  "Cd": 73.7,
+  "In": 63.6,
+  "Sn": 34.2,
+  "Sb": 67.8,
+  "Te": 320.7,
+  "I": 53.8,
+  "Xe": 120.0,
+  "Cs": 31.8,
+  "Ba": 9.5,
+  "La": 16.3,
+  "Ce": 14.4,
+  "Pr": 23.6,
+  "Nd": 16.1,
+  "Pm": 1640000.0,
+  "Sm": 25.3,
+  "Eu": 35.5,
+  "Gd": 26.1,
+  "Tb": 40.9,
+  "Dy": 27.4,
+  "Ho": 40.0,
+  "Er": 30.5,
+  "Tm": 51.7,
+  "Yb": 31.2,
+  "Lu": 45.8,
+  "Hf": 31.8,
+  "Ta": 35.5,
+  "W": 40.4,
+  "Re": 356.6,
+  "Os": 284.3,
+  "Ir": 320.7,
+  "Pt": 199.1,
+  "Au": 212.6,
+  "Hg": 86.8,
+  "Tl": 45.0,
+  "Pb": 21.1,
+  "Bi": 170.2,
+  "Po": 2560000.0,
+  "At": 2600000.0,
+  "Rn": 2640.0,
+  "Fr": 2680000.0,
+  "Ra": 2720000.0,
+  "Ac": 2760000.0,
+  "Th": 23.3,
+  "Pa": 2840000.0,
+  "U": 32.7,
+  "Np": 2920000.0,
+  "Pu": 2960000.0,
+  "Am": 10000000.0,
+  "Cm": 12000000.0,
+  "Bk": 14000000.0,
+  "Cf": 16000000.0,
+  "Es": 18000000.0,
+  "Fm": 20000000.0,
+  "Md": 22000000.0,
+  "No": 24000000.0,
+  "Lr": 26000000.0,
+  "Rf": 28000000.0,
+  "Db": 30000000.0,
+  "Sg": 32000000.0,
+  "Bh": 34000000.0,
+  "Hs": 36000000.0,
+  "Mt": 38000000.0,
+  "Ds": 40000000.0,
+  "Rg": 42000000.0,
+  "Cn": 44000000.0,
+  "Nh": 46000000.0,
+  "Fl": 48000000.0,
+  "Mc": 50000000.0,
+  "Lv": 52000000.0,
+  "Ts": 54000000.0,
+  "Og": 56000000.0
+ },
+ "items": {
+  "starwake:thruster": {
+   "category": "ship_part",
+   "price": 240
+  },
+  "starwake:thruster_mk2": {
+   "category": "ship_part",
+   "price": 600
+  },
+  "starwake:thruster_mk3": {
+   "category": "ship_part",
+   "price": 1440
+  },
+  "starwake:main_engine": {
+   "category": "ship_part",
+   "price": 1500
+  },
+  "starwake:main_engine_mk2": {
+   "category": "ship_part",
+   "price": 3750
+  },
+  "starwake:main_engine_mk3": {
+   "category": "ship_part",
+   "price": 9000
+  },
+  "starwake:maneuvering_thruster": {
+   "category": "ship_part",
+   "price": 150
+  },
+  "starwake:maneuvering_thruster_mk2": {
+   "category": "ship_part",
+   "price": 375
+  },
+  "starwake:maneuvering_thruster_mk3": {
+   "category": "ship_part",
+   "price": 900
+  },
+  "starwake:power_plant": {
+   "category": "ship_part",
+   "price": 1200
+  },
+  "starwake:power_plant_mk2": {
+   "category": "ship_part",
+   "price": 3000
+  },
+  "starwake:power_plant_mk3": {
+   "category": "ship_part",
+   "price": 7200
+  },
+  "starwake:cooler": {
+   "category": "ship_part",
+   "price": 420
+  },
+  "starwake:cooler_mk2": {
+   "category": "ship_part",
+   "price": 1050
+  },
+  "starwake:cooler_mk3": {
+   "category": "ship_part",
+   "price": 2520
+  },
+  "starwake:shield_generator": {
+   "category": "ship_part",
+   "price": 1500
+  },
+  "starwake:shield_generator_mk2": {
+   "category": "ship_part",
+   "price": 3750
+  },
+  "starwake:shield_generator_mk3": {
+   "category": "ship_part",
+   "price": 9000
+  },
+  "starwake:quantum_drive": {
+   "category": "ship_part",
+   "price": 2400
+  },
+  "starwake:quantum_drive_mk2": {
+   "category": "ship_part",
+   "price": 6000
+  },
+  "starwake:quantum_drive_mk3": {
+   "category": "ship_part",
+   "price": 14400
+  },
+  "starwake:jump_drive": {
+   "category": "ship_part",
+   "price": 7200
+  },
+  "starwake:jump_drive_mk2": {
+   "category": "ship_part",
+   "price": 18000
+  },
+  "starwake:jump_drive_mk3": {
+   "category": "ship_part",
+   "price": 43200
+  },
+  "starwake:fuel_tank": {
+   "category": "ship_part",
+   "price": 360
+  },
+  "starwake:fuel_tank_mk2": {
+   "category": "ship_part",
+   "price": 900
+  },
+  "starwake:fuel_tank_mk3": {
+   "category": "ship_part",
+   "price": 2160
+  },
+  "starwake:landing_gear": {
+   "category": "ship_part",
+   "price": 180
+  },
+  "starwake:landing_gear_mk2": {
+   "category": "ship_part",
+   "price": 450
+  },
+  "starwake:landing_gear_mk3": {
+   "category": "ship_part",
+   "price": 1080
+  },
+  "starwake:pressure_vessel": {
+   "category": "component",
+   "price": 120
+  },
+  "starwake:structural_frame": {
+   "category": "component",
+   "price": 80
+  },
+  "starwake:combustion_chamber": {
+   "category": "component",
+   "price": 300
+  },
+  "starwake:nozzle": {
+   "category": "component",
+   "price": 350
+  },
+  "starwake:turbopump": {
+   "category": "component",
+   "price": 500
+  },
+  "starwake:heat_exchanger": {
+   "category": "component",
+   "price": 250
+  },
+  "starwake:magnet_coil": {
+   "category": "component",
+   "price": 400
+  },
+  "starwake:control_board": {
+   "category": "component",
+   "price": 600
+  },
+  "starwake:microchip": {
+   "category": "electronics",
+   "price": 45
+  },
+  "starwake:silicon_wafer": {
+   "category": "electronics",
+   "price": 18
+  }
+ },
+ "kind": {
+  "GRADE": 1.6,
+  "OFF_SPEC": 1.0,
+  "PURE": 1.0,
+  "ALLOY": 0.9,
+  "UNKNOWN": 0.8
+ },
+ "purity": [
+  [
+   0.9999,
+   1.5
+  ],
+  [
+   0.999,
+   1.25
+  ],
+  [
+   0.99,
+   1.1
+  ]
+ ],
+ "form": {
+  "ingot": 1.0,
+  "dust": 0.9,
+  "plate": 1.15,
+  "rod": 1.15,
+  "wire": 1.3,
+  "billet": 1.05,
+  "slab": 1.05,
+  "casting": 1.05,
+  "forging": 1.1
+ },
+ "temper": {
+  "cracked": 0.5,
+  "as_cast": 1.0,
+  "sintered": 1.0,
+  "annealed": 1.0,
+  "default": 1.1
+ },
+ "bulk": {
+  "crushed_ore": 0.25,
+  "concentrate": 0.4,
+  "calcine": 0.45,
+  "matte": 0.6,
+  "slag": 0.08,
+  "tailings": 0.04,
+  "flue_dust": 0.3,
+  "coke": 0.5,
+  "residue": 0.2,
+  "crystals": 0.6,
+  "slimes": 0.55
+ },
+ "gangue": [
+  "O",
+  "H",
+  "C",
+  "N",
+  "Si",
+  "Ca",
+  "Mg",
+  "Na",
+  "K",
+  "Cl",
+  "S",
+  "F",
+  "P",
+  "Al"
+ ],
+ "demand": {
+  "trade_port": {
+   "ferrous": 1.0,
+   "light": 1.05,
+   "nickel_cobalt": 1.05,
+   "copper": 1.0,
+   "precious": 1.1,
+   "refractory": 1.05,
+   "other_metal": 0.95,
+   "component": 1.1,
+   "ship_part": 1.1,
+   "electronics": 1.15
+  },
+  "refinery": {
+   "ore": 1.2,
+   "ferrous": 0.9,
+   "light": 0.9,
+   "nickel_cobalt": 0.9,
+   "copper": 0.9,
+   "precious": 1.05,
+   "refractory": 0.95,
+   "other_metal": 1.0
+  },
+  "research_station": {
+   "refractory": 1.2,
+   "precious": 1.1,
+   "electronics": 1.25,
+   "other_metal": 1.15
+  },
+  "settlement": {
+   "ferrous": 1.15,
+   "copper": 1.1,
+   "light": 1.05,
+   "component": 1.15
+  },
+  "mining_camp": {
+   "ferrous": 1.1,
+   "component": 1.2,
+   "ship_part": 1.1
+  },
+  "research_post": {
+   "electronics": 1.2,
+   "refractory": 1.1,
+   "other_metal": 1.1
+  },
+  "trading_post": {
+   "ferrous": 1.0,
+   "copper": 1.0,
+   "light": 1.0,
+   "ore": 0.9,
+   "component": 1.0
+  }
+ },
+ "capacity": 25000,
+ "tau": 12000,
+ "spread": 0.08
+}

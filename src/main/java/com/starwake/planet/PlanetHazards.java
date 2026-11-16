@@ -52,7 +52,7 @@ public final class PlanetHazards {
 	}
 
 	private static void tick(MinecraftServer server) {
-		if (server.getTickCount() % INTERVAL != 0) return;
+		if (server.getTickCount() % INTERVAL != 0 || !com.starwake.config.StarwakeConfig.on(com.starwake.config.StarwakeConfig.HAZARDS)) return;
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (player.isCreative() || player.isSpectator() || !player.isAlive()) continue;
 			apply(player, Planets.hazardsOf(player.level().dimension()));
@@ -86,10 +86,10 @@ public final class PlanetHazards {
 		if (airOk || cabin) {
 			if (!suit.isEmpty()) SurveySuitItem.setOxygen(suit, SurveySuitItem.oxygen(suit) + REFILL_PER_SECOND);
 		} else if (!suit.isEmpty() && SurveySuitItem.oxygen(suit) > 0) {
-			SurveySuitItem.setOxygen(suit, SurveySuitItem.oxygen(suit) - INTERVAL);
+			SurveySuitItem.setOxygen(suit, SurveySuitItem.oxygen(suit) - (int) Math.max(1, Math.round(INTERVAL / com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.OXYGEN))));
 		} else {
-			if (!hazards.breathable()) player.hurtServer(level, level.damageSources().source(HYPOXIA), 2.0f);
-			if (hazards.toxic()) player.hurtServer(level, level.damageSources().source(TOXIC_ATMOSPHERE), 1.0f + 3.0f * hazards.toxicity());
+			if (!hazards.breathable()) hurt(player, level, HYPOXIA, 2.0f * (float) com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.HYPOXIA));
+			if (hazards.toxic()) hurt(player, level, TOXIC_ATMOSPHERE, (1.0f + 3.0f * hazards.toxicity()) * (float) com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.TOXICITY));
 		}
 
 		// Temperature.
@@ -100,10 +100,14 @@ public final class PlanetHazards {
 		if (hazards.cold()) {
 			// Keep the player at the vanilla freeze threshold: frost overlay, slowness, freeze damage.
 			player.setTicksFrozen(Math.max(player.getTicksFrozen(), player.getTicksRequiredToFreeze() + 42));
-			if (t < -100) player.hurtServer(level, level.damageSources().source(DamageTypes.FREEZE), 1.0f + (-100 - t) / 80f);
+			if (t < -100) hurt(player, level, DamageTypes.FREEZE, (1.0f + (-100 - t) / 80f) * (float) com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.TEMPERATURE));
 		} else if (hazards.hot()) {
-			player.hurtServer(level, level.damageSources().source(EXTREME_HEAT), 1.0f + (t - Hazards.HEAT_LIMIT) / 60f);
+			hurt(player, level, EXTREME_HEAT, (1.0f + (t - Hazards.HEAT_LIMIT) / 60f) * (float) com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.TEMPERATURE));
 		}
+	}
+
+	private static void hurt(ServerPlayer player, ServerLevel level, ResourceKey<DamageType> type, float amount) {
+		if (amount > 0) player.hurtServer(level, level.damageSources().source(type), amount);
 	}
 
 	/** Client/server: what currently shelters a player from these hazards. */

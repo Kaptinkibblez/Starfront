@@ -52,7 +52,7 @@ public record JumpTuning(double fuelPerLy, double alignDegrees, double planetWel
 	}
 
 	public int ticks(double lightYears) {
-		return (int) Math.min(maxTicks, baseTicks + lightYears * ticksPerLy);
+		return (int) Math.max(20, Math.min(maxTicks, baseTicks + lightYears * ticksPerLy) * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.JUMP_TIME));
 	}
 
 	public static void init() {

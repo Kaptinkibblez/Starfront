@@ -30,10 +30,30 @@ public final class HubCommands {
 				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.literal("hub")
 						.then(Commands.literal("list").executes(HubCommands::list))
+						.then(Commands.literal("appraise").executes(HubCommands::appraise))
 						.then(Commands.literal("rebuild").executes(HubCommands::rebuild))
 						.then(Commands.literal("place")
 								.then(Commands.argument("template", StringArgumentType.word())
 										.executes(HubCommands::place))))));
+	}
+
+	/** What the industrial market makes of the held item, and what each hub kind would pay (before saturation). */
+	private static int appraise(CommandContext<CommandSourceStack> ctx) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+		var player = ctx.getSource().getPlayerOrException();
+		var stack = player.getMainHandItem();
+		var a = Industrial.appraise(stack).orElse(null);
+		if (a == null) {
+			ctx.getSource().sendFailure(Component.literal("Not an industrial product: " + stack.getHoverName().getString()));
+			return 0;
+		}
+		StringBuilder pays = new StringBuilder();
+		Industrial.tuning().ifPresent(t -> t.demand().forEach((economy, cats) -> {
+			Double m = cats.get(a.category());
+			if (m != null) pays.append(String.format(" %s %.1f", economy, a.value() * m * (1 - t.spread())));
+		}));
+		ctx.getSource().sendSuccess(() -> Component.literal(String.format("%s: %s, worth %.2f cr each;%s", stack.getHoverName().getString(),
+				a.category(), a.value(), pays)), false);
+		return 1;
 	}
 
 	private static int list(CommandContext<CommandSourceStack> ctx) {

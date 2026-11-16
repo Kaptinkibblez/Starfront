@@ -216,7 +216,7 @@ public final class SolarSystem {
 	 * {@code /time add} moves the planets along with the day; with the daylight cycle off they stand still.
 	 */
 	public static double time(Level level) {
-		return level.getOverworldClockTime();
+		return level.getOverworldClockTime() * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.ORBIT_SPEED);
 	}
 
 	/**

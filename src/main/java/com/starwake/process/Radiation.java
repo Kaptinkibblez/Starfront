@@ -195,7 +195,7 @@ public final class Radiation {
 
 	private static void update(ServerPlayer player) {
 		State old = player.getAttachedOrElse(STATE, State.NONE);
-		double rate = rate(player);
+		double rate = rate(player) * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.RADIATION);
 		double dose = old.dose() * Math.pow(0.5, 1 / HEAL_HALF_LIFE) + rate / 3600;
 		if (dose < 1e-7) dose = 0;
 		if (rate < 1e-10) rate = 0;

@@ -104,7 +104,7 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 		}
 
 		if (scan.tooBig()) {
-			lines.add(new Line(Status.FAIL, Component.translatable("preflight.starwake.too_big", ShipScanner.MAX_BLOCKS)));
+			lines.add(new Line(Status.FAIL, Component.translatable("preflight.starwake.too_big", com.starwake.config.StarwakeConfig.maxShipBlocks())));
 			canFly = false;
 		} else {
 			lines.add(new Line(Status.INFO, Component.translatable("preflight.starwake.structure", ship.size(), fmt(mass))));

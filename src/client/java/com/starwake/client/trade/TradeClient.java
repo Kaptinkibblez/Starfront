@@ -6,7 +6,6 @@ import com.starwake.network.EconomyPayload;
 import com.starwake.network.HubListPayload;
 import com.starwake.network.MarketPayload;
 import com.starwake.network.ShopPayload;
-import com.starwake.registry.ModEntities;
 import com.starwake.trade.Contract;
 import com.starwake.trade.Contracts;
 import com.starwake.trade.Economy;
@@ -17,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -38,7 +36,6 @@ public final class TradeClient {
 	private TradeClient() {}
 
 	public static void init() {
-		EntityRendererRegistry.register(ModEntities.HUB_NPC, HubNpcRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(EconomyPayload.TYPE, (p, c) -> {
 			credits = p.credits();
 			rep = Map.copyOf(p.rep());

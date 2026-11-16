@@ -85,7 +85,6 @@ public final class TradeHubs {
 		ServerLifecycleEvents.SERVER_STARTED.register(TradeHubs::refreshZones);
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (server.getTickCount() % 40 == 0) tickBuild(server);
-			if (server.getTickCount() % 1200 == 600) HubNpcs.upkeep(server);
 		});
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> sync(handler.getPlayer()));
 		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, from, to) -> sync(player));
@@ -265,7 +264,6 @@ public final class TradeHubs {
 		State state = state(level.getServer());
 		state.origins.put(hub.id(), origin);
 		state.setDirty();
-		HubNpcs.spawnAll(level, hub, t, origin);
 		refreshZones(level.getServer());
 		for (ServerPlayer p : level.getServer().getPlayerList().getPlayers()) {
 			if (SolarSystem.systemOf(p.level()).equals(hub.system())) sync(p);

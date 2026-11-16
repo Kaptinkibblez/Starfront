@@ -24,7 +24,7 @@ import net.minecraft.world.level.saveddata.SavedDataType;
  * kept by the server ({@link State}, SavedData {@code starwake:economy}) and synced to the owner
  * ({@link EconomyPayload}) whenever they change. Credits can't be lost on death.
  *
- * <p>Reputation runs from -1000 to 1000. Ranks: Hostile (< -500: no trade, guards attack),
+ * <p>Reputation runs from -1000 to 1000. Ranks: Hostile (< -500: no trade),
  * Unfriendly (< -100), Neutral, Friendly (>= 200), Trusted (>= 500), Honored (>= 800). Prices move
  * up to 10% with reputation ({@link #priceFactor}).
  */
@@ -35,7 +35,7 @@ public final class Economy {
 
 	/** One player's account. */
 	public static final class Account {
-		long credits = STARTING_CREDITS;
+		long credits = (long) com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.START_CREDITS);
 		final Map<String, Integer> rep = new HashMap<>();
 		final List<Contract> contracts = new ArrayList<>();
 		final List<String> visited = new ArrayList<>(); // systems reached, for exploration contracts
@@ -128,6 +128,7 @@ public final class Economy {
 
 	public static void addRep(ServerPlayer player, String faction, int delta) {
 		Account a = account(player);
+		delta = (int) Math.round(delta * com.starwake.config.StarwakeConfig.get(delta > 0 ? com.starwake.config.StarwakeConfig.REP_GAIN : com.starwake.config.StarwakeConfig.REP_LOSS));
 		a.rep.put(faction, Mth.clamp(a.rep.getOrDefault(faction, 0) + delta, -MAX_REP, MAX_REP));
 		changed(player);
 	}

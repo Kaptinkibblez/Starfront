@@ -56,7 +56,7 @@ public final class GasHazards {
 	/** Releases kg of a species at pos. */
 	public static void vent(ServerLevel level, BlockPos pos, String species, double kg) {
 		Species.Info s = Species.get(species).orElse(null);
-		if (s == null || kg <= 0 || s.toxicity() < 0.2) return;
+		if (s == null || kg <= 0 || s.toxicity() < 0.2 || !com.starwake.config.StarwakeConfig.on(com.starwake.config.StarwakeConfig.GAS_LEAKS)) return;
 		Vec3 at = Vec3.atCenterOf(pos);
 		for (Cloud c : CLOUDS) {
 			if (c.level == level && c.pos.distanceTo(at) < 3 && c.color == s.color()) {

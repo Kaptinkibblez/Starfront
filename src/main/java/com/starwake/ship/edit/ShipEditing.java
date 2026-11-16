@@ -58,7 +58,6 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ShipEditing {
 	/** Same cap as the scanner: ships stay under this many blocks. */
-	public static final int MAX_BLOCKS = com.starwake.ship.scan.ShipScanner.MAX_BLOCKS;
 
 	/** A mining job a player started: which ship and block, and when. */
 	private record Mining(int shipId, BlockPos local, long startTick) {}
@@ -335,8 +334,8 @@ public final class ShipEditing {
 		}
 		BlockPos target = clicked.relative(face);
 		if (structure.get(target) != null) return true;
-		if (structure.entries().size() >= MAX_BLOCKS) {
-			player.sendOverlayMessage(Component.translatable("message.starwake.edit.too_big", MAX_BLOCKS));
+		if (structure.entries().size() >= com.starwake.config.StarwakeConfig.maxShipBlocks()) {
+			player.sendOverlayMessage(Component.translatable("message.starwake.edit.too_big", com.starwake.config.StarwakeConfig.maxShipBlocks()));
 			return true;
 		}
 

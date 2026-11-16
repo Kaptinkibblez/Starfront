@@ -1,6 +1,5 @@
 package com.starwake.client.wristcom;
 
-import com.starwake.client.wristcom.apps.ComingSoonApp;
 import com.starwake.client.wristcom.apps.HomeApp;
 import com.starwake.client.wristcom.apps.ShipApp;
 import com.starwake.client.wristcom.apps.StarmapApp;
@@ -25,8 +24,8 @@ public final class WristcomApps {
 		register(new com.starwake.client.wristcom.apps.TradeApp());
 		register(new com.starwake.client.wristcom.apps.CodexApp());
 		register(new com.starwake.client.wristcom.apps.SettingsApp());
-		register(new ComingSoonApp("cargo", "Ca", 0xFFFF9F6B, 8));
-		register(new ComingSoonApp("comms", "Cm", 0xFFB59CFF, 9));
+		register(new com.starwake.client.wristcom.apps.CargoApp());
+		register(new com.starwake.client.wristcom.apps.CommsApp());
 	}
 
 	/** Adds an app, or replaces one with the same title. */

@@ -80,7 +80,7 @@ public final class Contracts {
 				if (wants.isEmpty()) return null;
 				Markets.Listing want = wants.get(r.nextInt(wants.size()));
 				int count = countFor(want.base(), r, 300, 1400);
-				long reward = Math.round(want.base() * count * 0.7 + 150);
+				long reward = Math.round((Math.round(want.base() * count * 0.7 + 150)) * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.CONTRACT_REWARDS));
 				return new Contract(id, type, hub.faction(), hub.id(), target.id(), target.name(), want.item(), count, reward, 15, expires);
 			}
 			case "mining" -> {
@@ -90,13 +90,13 @@ public final class Contracts {
 				Identifier item = items.get(r.nextInt(items.size()));
 				double base = raw.items().get(item);
 				int count = countFor(base, r, 300, 1600);
-				long reward = Math.round(base * count * 1.6 + 100);
+				long reward = Math.round((Math.round(base * count * 1.6 + 100)) * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.CONTRACT_REWARDS));
 				return new Contract(id, type, hub.faction(), hub.id(), hub.id(), hub.name(), item, count, reward, 12, expires);
 			}
 			case "courier" -> {
 				if (others.isEmpty()) return null;
 				TradeHubs.Hub target = others.get(r.nextInt(others.size()));
-				long reward = 350 + r.nextInt(250) + (target.station() != hub.station() ? 150 : 0);
+				long reward = Math.round((350 + r.nextInt(250) + (target.station() != hub.station() ? 150 : 0)) * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.CONTRACT_REWARDS));
 				return new Contract(id, type, hub.faction(), hub.id(), target.id(), target.name(),
 						BuiltInRegistries.ITEM.getKey(ModHubBlocks.SEALED_CARGO), 1, reward, 20, expires);
 			}
@@ -108,7 +108,7 @@ public final class Contracts {
 				if (near.isEmpty()) return null;
 				Galaxy.Star target = near.get(r.nextInt(near.size()));
 				double ly = target.distanceTo(here);
-				long reward = Math.round(300 + 140 * ly);
+				long reward = Math.round((Math.round(300 + 140 * ly)) * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.CONTRACT_REWARDS));
 				return new Contract(id, type, hub.faction(), hub.id(), target.id(), target.name(), Identifier.withDefaultNamespace("air"), 0,
 						reward, 25, expires);
 			}

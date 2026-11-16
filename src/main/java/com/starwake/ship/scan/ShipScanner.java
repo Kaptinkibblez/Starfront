@@ -42,7 +42,7 @@ public final class ShipScanner {
 				if (blocks.contains(next) || !isShipBlock(level.getBlockState(next))) {
 					continue;
 				}
-				if (blocks.size() >= MAX_BLOCKS) {
+				if (blocks.size() >= com.starwake.config.StarwakeConfig.maxShipBlocks()) {
 					return new ShipScan(helm, blocks, true);
 				}
 				blocks.add(next);

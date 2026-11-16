@@ -1466,7 +1466,7 @@ public class ShipEntity extends Entity {
 			double over = skin - limit;
 			double dose = heatDose.getOrDefault(pos, 0.0);
 			dose = over > 0 ? dose + over * tuning.burnRate() * 0.5 : dose * 0.8;
-			if (dose >= 1) burned.add(pos);
+			if (dose >= 1 && com.starwake.config.StarwakeConfig.on(com.starwake.config.StarwakeConfig.REENTRY)) burned.add(pos);
 			else if (dose > 0.01) heatDose.put(pos, dose);
 			else heatDose.remove(pos);
 		}
@@ -1666,8 +1666,8 @@ public class ShipEntity extends Entity {
 		QuantumJump j = jump;
 		jump = new QuantumJump(j.target(), j.from(), j.to(), j.arrival(), j.elapsed() + 1);
 		double distance = j.distance();
-		double total = com.starwake.galaxy.SolarSystem.travelTicks(distance, physics.quantumSpeed(), physics.quantumRamp());
-		double travelled = com.starwake.galaxy.SolarSystem.travelled(distance, physics.quantumSpeed(), physics.quantumRamp(), jump.elapsed());
+		double total = com.starwake.galaxy.SolarSystem.travelTicks(distance, physics.quantumSpeed() * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.QUANTUM_SPEED), physics.quantumRamp());
+		double travelled = com.starwake.galaxy.SolarSystem.travelled(distance, physics.quantumSpeed() * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.QUANTUM_SPEED), physics.quantumRamp(), jump.elapsed());
 		// The hull holds still; the offset says where it really is now, relative to its own system position.
 		Vec3 offset = j.to().subtract(j.from()).normalize().scale(travelled).add(j.from())
 				.subtract(com.starwake.galaxy.SolarSystem.toSystem(level(), position()));
@@ -2278,7 +2278,7 @@ public class ShipEntity extends Entity {
 
 	/** Doors, seats and storage: everyone, unless the ship is locked. */
 	public boolean canUse(Player player) {
-		return !locked || canPilot(player);
+		return !locked || !com.starwake.config.StarwakeConfig.on(com.starwake.config.StarwakeConfig.LOCKING) || canPilot(player);
 	}
 
 	public void addCrew(Player player) {
@@ -2485,7 +2485,7 @@ public class ShipEntity extends Entity {
 		double lift = dynamics.rawThrust(Direction.UP);
 		double idle = lift <= 0 ? 0 : dynamics.burnPushing(Direction.UP) * Math.min(1, weight / lift) * 0.1;
 		if (fuel() > 0 && lift > 0) {
-			burnFuel(idle);
+			burnFuel(idle * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.IDLE_BURN));
 			double sink = fuel() < idle * HOVER_RESERVE_TICKS && clearance < 64 ? -descentRate() : 0;
 			Vec3 held = velocity.scale(0.8);
 			return new Vec3(held.x, held.y * 0.5 + sink * 0.5, held.z);
@@ -2572,7 +2572,7 @@ public class ShipEntity extends Entity {
 
 	/** Fractional fuel accumulates so small burns still drain the tank over time. */
 	private void burnFuel(double amount) {
-		fuelDebt += amount;
+		fuelDebt += amount * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.FUEL_USE);
 		int whole = (int) fuelDebt;
 		if (whole > 0) {
 			fuelDebt -= whole;
@@ -2606,7 +2606,7 @@ public class ShipEntity extends Entity {
 		double excess = energy - absorbed;
 		serverLevel.playSound(null, BlockPos.containing(position()), net.minecraft.sounds.SoundEvents.ANVIL_LAND,
 				net.minecraft.sounds.SoundSource.BLOCKS, (float) Math.min(1.5, impact), absorbed > 0 ? 1.6f : 0.6f);
-		if (excess <= 0) return;
+		if (excess <= 0 || !com.starwake.config.StarwakeConfig.on(com.starwake.config.StarwakeConfig.IMPACT)) return;
 		excess -= hullImpact(excess, blocked);
 		if (excess <= 1e-6) return;
 		float damage = (float) Math.min(30.0, excess / 4.0);

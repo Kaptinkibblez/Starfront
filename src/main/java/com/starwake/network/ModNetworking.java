@@ -26,6 +26,11 @@ public final class ModNetworking {
 		PayloadTypeRegistry.serverboundPlay().register(SystemInfoRequestPayload.TYPE, SystemInfoRequestPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(JumpTargetPayload.TYPE, JumpTargetPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(LogisticsProbePayload.TYPE, LogisticsProbePayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ConfigSyncPayload.TYPE, ConfigSyncPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(CargoPayload.TYPE, CargoPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(CargoPayload.TYPE, CargoPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(CommsPayload.TYPE, CommsPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(CommsMessagePayload.TYPE, CommsMessagePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(LogisticsInfoPayload.TYPE, LogisticsInfoPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(EconomyPayload.TYPE, EconomyPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(MeltStatePayload.TYPE, MeltStatePayload.CODEC);
@@ -98,6 +103,9 @@ public final class ModNetworking {
 			}
 			com.starwake.trade.Terminals.action(context.player(), payload);
 		});
+		ServerPlayNetworking.registerGlobalReceiver(CargoPayload.TYPE,
+				(payload, context) -> ServerPlayNetworking.send(context.player(), com.starwake.ship.ShipCargo.manifest(context.player(), payload.ship())));
+		ServerPlayNetworking.registerGlobalReceiver(CommsPayload.TYPE, (payload, context) -> com.starwake.comms.Comms.handle(context.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(LogisticsProbePayload.TYPE,
 				(payload, context) -> com.starwake.logistics.LogisticsProbe.answer(context.player(), payload.pos()));
 		ServerPlayNetworking.registerGlobalReceiver(JumpTargetPayload.TYPE, (payload, context) -> {

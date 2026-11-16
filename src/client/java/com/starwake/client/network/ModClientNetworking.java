@@ -11,6 +11,12 @@ public final class ModClientNetworking {
 	private ModClientNetworking() {}
 
 	public static void init() {
+		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.ConfigSyncPayload.TYPE,
+				(payload, context) -> com.starwake.config.StarwakeConfig.applySync(payload.orbitSpeed()));
+		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.CargoPayload.TYPE,
+				(payload, context) -> com.starwake.client.wristcom.apps.CargoApp.receive(payload));
+		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.CommsMessagePayload.TYPE,
+				(payload, context) -> com.starwake.client.wristcom.apps.CommsApp.receive(payload));
 		ClientPlayNetworking.registerGlobalReceiver(com.starwake.network.PlanetListPayload.TYPE,
 				(payload, context) -> com.starwake.planet.proc.ProceduralPlanets.setFromServer(payload.planets()));
 		ClientPlayNetworking.registerGlobalReceiver(ShipConsolePayload.TYPE, (payload, context) -> {

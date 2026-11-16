@@ -1,7 +1,7 @@
 # Starwake
 
 A Fabric overhaul mod for Minecraft, inspired by No Man's Sky: fly between procedurally
-generated planets, live in a walkable starship, trade with faction NPCs, and climb a
+generated planets, live in a walkable starship, trade with factions at their hubs, and climb a
 fuel/upgrade/crafting progression.
 
 > Named **Starwake** (2026-11-10), replacing the working title "Starbound Frontier",
@@ -51,10 +51,11 @@ com.starwake
 ├── ship/                   ship entity, launch sequence, interior pocket dimension
 ├── galaxy/                 galaxy (seeded stars), star systems, SolarSystem bodies, jump targets
 ├── chem/                   periodic table and minerals (bundled data), element items
-├── trade/                  factions, NPCs, price model, trade menus
+├── trade/                  factions, hubs, price model, industrial market, trade menus
 ├── progression/            fuel, upgrades, crafting chains
 ├── network/                custom payloads (C2S/S2C), one record per packet
-└── config/                 server/client config (Milestone 9)
+├── comms/                  Wristcom Comms (messages, hails)
+└── config/                 server config (StarwakeConfig)
 com.starwake.client         (client source set)
 ├── StarwakeClient          client entrypoint
 ├── datagen/                data generators (need client classes for models)
@@ -560,6 +561,17 @@ commit. **Don't start the next milestone until the user confirms the current one
       into a flotation cell; items lie flat on moving belts; tanks fill visibly; pipe readout "1.0 kg/s Water"; cable readout
       "Grid: 10.0 kW generated, 3.0 kW wanted"; machine screens with the new panel, wells, output slot and arrow.)* Details in
       "How industry works after M9".
+  - **M9 trade, UI, multiplayer and config (decisions 2026-11-16).** Audit: hub NPCs still in; markets priced by item id, so
+    nothing M8 makes (alloys, refined metals, concentrates, components, Mk parts; all composition variants of a few ids) could
+    be sold; no server config; "Coming soon" Cargo and Comms apps. Choices: **remove NPCs, nothing replaces them**; **value by
+    composition** (industrial market); a **server config** with **hazards, ships, travel/time and economy** groups plus an op
+    command; **build Cargo and Comms**.
+    - [x] **Trade/UI/config pass (2026-11-16).** *(Verified on a dedicated server with two clients: `/starwake config` lists 24
+      settings, sets numbers and switches, rejects unknown keys and rewrites `config/starwake-server.json`; appraisals: 304 plate
+      12.9 cr, Inconel 718 wire 6.7, C11000 copper ingot 23.5, Mk III main engine 9000, control board 600; at the Overworld Trade
+      Port the Industrial tab lists the carried products and selling 8 plates paid 88 cr; Cargo shows the Kestrel's fuel/fusion
+      and hold; Alice's Comms message reached Bob (inbox + action bar); hailing the Trade Port and Veyra Mining Camp returned
+      location, standing, docking and services.)* Details in "How trade, Comms, Cargo and config work after M9".
 
 ---
 
@@ -589,7 +601,8 @@ normal gravity.
 ## How ships work (Milestone 3)
 
 - `ship/scan/ShipScanner`: flood fill from the Helm. Stops at air, replaceable blocks and
-  `#starwake:ship_excluded` (hand-written tag JSON in `src/main/resources`). Cap 262,144 blocks (M9 pass 3).
+  `#starwake:ship_excluded` (hand-written tag JSON in `src/main/resources`). Cap 262,144 blocks (M9 pass 3; lower it with
+  the `ships.max_blocks` config).
 - `ship/scan/PreflightReport`: every functional condition lives here (lift vs mass x
   gravity, exhaust clearance, fuel, pilot room, sealed cabin via air flood fill).
 - `ship/data/ShipStats`: `data/<ns>/starwake/ship_stats/*.json` has `blocks` (ids/#tags/"*"),
@@ -1231,8 +1244,7 @@ normal gravity.
 - **Hubs** (`trade/TradeHubs`): planned deterministically per system (`plan`, cached). Solace:
   a station 3 km outside the Overworld's atmosphere + up to 3 outposts (Veyra first); other
   systems: 50% station, outposts on ~1/3 of planets by archetype rules. A hub **builds when a
-  player comes near** (station 700 blocks, outpost 160; outposts at the surface height), spawns
-  its NPCs and registers pressurized zones (`trade/HubZones`, also used by `PlanetHazards`).
+  player comes near** (station 700 blocks, outpost 160; outposts at the surface height) and registers pressurized zones (`trade/HubZones`, also used by `PlanetHazards`).
   HUD beacons: `client/hud/HubHud`. `/starwake hub list|place <template>|rebuild`.
 - **Builds** (`tools/hub_templates.py` -> `starwake/hub_template/*.json`): composed procedurally
   from shaped modules (octagonal hulls with ribs and flared lips, domes, capsules, tubes) and
@@ -1253,10 +1265,37 @@ normal gravity.
 - **Terminals** (`trade/block/TerminalBlock`: Commodity Terminal, Outfitter, Contract Board) ->
   `Terminals.open` -> Market/Shop/ContractBoard payloads -> `client/trade/*Screen`; actions come
   back as `TradeActionPayload` and the server checks the player is inside that hub.
-- **NPCs** (`trade/HubNpcEntity`, `HubNpcs`): guards (iron sword, attack monsters and hostile
-  players, and whoever hurts them) and crew; faction uniforms from `tools/npc_skins.py`.
-  Hurting one: -25 rep, killing: -150. Hubs near players are restocked every minute.
+- **NPCs** (M7, removed in M9): hubs had guards and crew; see "How trade, Comms, Cargo and config work after M9".
 - Wristcom: Trade app (credits, standings, the system's hubs), Contracts app (active, abandon).
+
+## How trade, Comms, Cargo and config work after M9
+
+- **NPCs removed:** `HubNpcEntity`, `HubNpcs`, the renderer, skins and the template `npcs` field are gone (saved NPCs are
+  skipped on load). Hostile reputation only locks terminals.
+- **Industrial market** (`trade/Industrial`, data `starwake/industrial/default.json` from `tools/trade_data.py` `industrial()`):
+  `appraise(stack)` -> (category, value per item). Metals (`MetalItem`): element mass x per-kg element price (the commodity
+  prices; samples x1000) x kind (certified grade 1.6, off-spec 1, pure 1 with purity steps 1.1/1.25/1.5, estimated alloy 0.9)
+  x form (wire 1.3, plate/rod 1.15, ...) x temper (cracked 0.5, worked/treated 1.1). Bulk items: non-gangue element value x a
+  share by kind (concentrate 0.4, matte 0.6, slag 0.08...). Components, electronics and Mk I-III parts from a table x quality.
+  Categories: ferrous, light, nickel_cobalt, copper, precious, refractory, other_metal, ore, component, ship_part,
+  electronics; `demand` = what each hub economy buys and its multiplier. Saturation per hub and category in `Markets.State`
+  (key `ind:<category>`): price x 2^(-recently sold value / capacity), recovering with tau 12000 ticks. `MarketPayload` carries
+  `industrial` offers (inventory slot, stack, price); `TradeActionPayload` action `isell` (slot, count). `MarketScreen` has
+  Goods / Industrial tabs in the title row. Admin: `/starwake hub appraise` (held item: category, value, what each hub kind pays).
+- **Server config** (`config/StarwakeConfig`, `config/starwake-server.json`): flat settings in groups hazards (enabled,
+  hypoxia/toxic/temperature damage, radiation, gas leaks, suit oxygen), ships (max blocks, re-entry and impact damage, locking,
+  idle burn, fuel use), travel (quantum speed, jump time, orbit speed: 0 freezes the planets, changing it moves them) and
+  economy (starting credits, buy/sell prices, contract rewards, reputation gain/loss). Read on SERVER_STARTING and rewritten
+  with every key; `/starwake config [key] [value]` (op) changes them live and saves. Clients get the orbit speed in
+  `ConfigSyncPayload` (join and change). `ShipScanner.MAX_BLOCKS` is now the ceiling; the live cap is `maxShipBlocks()`.
+  Not configurable: planet sizes (they shape terrain already generated).
+- **Cargo app** (`client/wristcom/apps/CargoApp`; `CargoPayload` both ways; `ship/ShipCargo.manifest`): the ship you're on, or
+  the nearest you own/crew within 64 blocks; the server sums every container and fluid storage in its shipyard plot, plus fuel
+  and fusion (owner/crew, or anyone on an unlocked ship). Refreshes every 2 s while open.
+- **Comms app** (`client/wristcom/apps/CommsApp`; `CommsPayload` C2S, `CommsMessagePayload` S2C; `comms/Comms`): contacts =
+  online players, the system's hubs, ships within 2 km (not your own). Messages go to any online player; a hub hail answers
+  with where it is (distance, orbit of / on a planet, beacon), your standing, docking instructions and services; a ship hail (or
+  text) goes to its pilot and owner. Inbox per contact on the client (40 lines), unread dots, action-bar notice.
 
 ## How metallurgy works (Milestone 8a)
 

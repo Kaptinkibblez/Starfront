@@ -50,7 +50,7 @@ public final class Terminals {
 		TradeData.economy(hub.economy()).flatMap(TradeData.Economy::outfitter).flatMap(TradeData::shop).ifPresent(shop -> {
 			for (var item : shop.items()) {
 				if (!BuiltInRegistries.ITEM.containsKey(item.item())) continue;
-				lines.add(new ShopPayload.Line(item.item(), item.count(), Math.round(item.price() * factor), item.rep(), rep < item.rep()));
+				lines.add(new ShopPayload.Line(item.item(), item.count(), Math.round(item.price() * factor * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.BUY_PRICES)), item.rep(), rep < item.rep()));
 			}
 		});
 		return new ShopPayload(hub.id(), Component.literal(hub.name()), hub.faction(), Economy.credits(player), lines);
@@ -77,6 +77,16 @@ public final class Terminals {
 			}
 			case "sell" -> {
 				result = Markets.sell(player, hub, net.minecraft.resources.Identifier.parse(p.arg()), p.count());
+				refresh = TerminalBlock.Kind.COMMODITY;
+			}
+			case "isell" -> {
+				int slot;
+				try {
+					slot = Integer.parseInt(p.arg());
+				} catch (NumberFormatException e) {
+					slot = -1;
+				}
+				result = Markets.sellIndustrial(player, hub, slot, p.count());
 				refresh = TerminalBlock.Kind.COMMODITY;
 			}
 			case "shop" -> {

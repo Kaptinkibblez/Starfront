@@ -12,7 +12,6 @@ Format (shared with ship blueprints, plus hub metadata):
   layers bottom first; rows north (z=0) to south; chars west to east.
   ' ' = leave the world as it is, '.' = force air (clears terrain inside outposts).
   pressurized: [[x0,y0,z0,x1,y1,z1], ...] inclusive boxes with breathable air.
-  npcs: [{"pos": [x,y,z], "role": "guard"|"crew"}]
   beacon: [x,y,z] where the HUD marker points (hangar mouth / airlock).
   ground: for outposts, the layer at the surface (the first air layer; layers below replace terrain).
 
@@ -80,11 +79,11 @@ class Grid:
         return palette, layers
 
 
-def write(name, grid, pressurized, npcs, beacon, ground=0):
+def write(name, grid, pressurized, beacon, ground=0):
     os.makedirs(OUT, exist_ok=True)
     palette, layers = grid.encode()
     data = {"name": {"translate": f"hub_template.starwake.{name}"}, "palette": palette, "layers": layers,
-            "pressurized": pressurized, "npcs": npcs, "beacon": beacon, "ground": ground}
+            "pressurized": pressurized, "beacon": beacon, "ground": ground}
     with open(os.path.join(OUT, f"{name}.json"), "w") as f:
         json.dump(data, f, separators=(",", ":"))
     blocks = sum(1 for v in grid.c.values() if v != AIR)
@@ -730,12 +729,7 @@ def station(name, m, variant):
     # --- Metadata -------------------------------------------------------------------------------
     pressurized = [[cx - W, F + 1, HZ0, cx + W, YT, HZ1], [cx - R, D1 + 1, CZ - R, cx + R, ROOF - 1, CZ + R],
                    [cx - 2, D1 + 1, CZ + R + 1, cx + 2, D1 + 4, CZ + R + 2]]
-    npcs = [{"pos": [cx - 4, F + 1, HZ0 + 2], "role": "guard"}, {"pos": [cx + 4, F + 1, HZ0 + 2], "role": "guard"},
-            {"pos": [cx, F + 1, HZ1 - 6], "role": "guard"},
-            {"pos": [cx - 5, D1 + 1, CZ + 3], "role": "crew"}, {"pos": [cx + 5, D1 + 1, CZ - 3], "role": "crew"},
-            {"pos": [cx - 3, D1 + 1, CZ - 9], "role": "crew"}, {"pos": [cx + 8, F + 1, 50], "role": "crew"},
-            {"pos": [cx - 6, D2 + 1, CZ + 10], "role": "crew"}, {"pos": [cx, D2 + 1, CZ - 8], "role": "guard"}]
-    write(name, g, pressurized, npcs, beacon=[cx, F + 8, HZ1])
+    write(name, g, pressurized, beacon=[cx, F + 8, HZ1])
 
 
 # ---------------------------------------------------------------------------------------------
@@ -1020,10 +1014,7 @@ def outpost(name, m, kind):
                         g.set(x, y, z, AIR)
 
     pressurized = [[22, G, 12, 40, G + 8, 30], [15, G, 18, 21, G + 4, 24]] + extra_pressure
-    npcs = [{"pos": [door_x - 2, G, 18], "role": "guard"}, {"pos": [px + 3, G + 1, pz - 3], "role": "guard"},
-            {"pos": [hx - 4, fy, hz + 4], "role": "crew"}, {"pos": [hx + 4, fy, hz - 4], "role": "crew"},
-            {"pos": [hx + 2, fy, hz + 6], "role": "crew"}, {"pos": [31, fy, 5], "role": "crew"}]
-    write(name, g, pressurized, npcs, beacon=[door_x - 1, G + 2, door_z], ground=G)
+    write(name, g, pressurized, beacon=[door_x - 1, G + 2, door_z], ground=G)
 
 
 def terminal_bank_ring(g, m, hx, fy, hz):

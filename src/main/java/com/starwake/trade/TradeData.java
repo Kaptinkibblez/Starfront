@@ -31,13 +31,12 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class TradeData {
 	/** A hub layout. Layers bottom first; ' ' leaves the world, '.' forces air. */
 	public record Template(Optional<Component> name, Map<String, String> palette, List<List<String>> layers, List<List<Integer>> pressurized,
-			List<NpcSpawn> npcs, List<Integer> beacon, int ground) {
+			List<Integer> beacon, int ground) {
 		public static final Codec<Template> CODEC = RecordCodecBuilder.create(i -> i.group(
 				ComponentSerialization.CODEC.optionalFieldOf("name").forGetter(Template::name),
 				Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("palette").forGetter(Template::palette),
 				Codec.STRING.listOf().listOf().fieldOf("layers").forGetter(Template::layers),
 				Codec.INT.listOf().listOf().optionalFieldOf("pressurized", List.of()).forGetter(Template::pressurized),
-				NpcSpawn.CODEC.listOf().optionalFieldOf("npcs", List.of()).forGetter(Template::npcs),
 				Codec.INT.listOf().optionalFieldOf("beacon", List.of(0, 0, 0)).forGetter(Template::beacon),
 				Codec.INT.optionalFieldOf("ground", 0).forGetter(Template::ground)
 		).apply(i, Template::new));
@@ -53,13 +52,6 @@ public final class TradeData {
 		public int sizeZ() {
 			return layers.isEmpty() ? 0 : layers.getFirst().size();
 		}
-	}
-
-	public record NpcSpawn(List<Integer> pos, String role) {
-		public static final Codec<NpcSpawn> CODEC = RecordCodecBuilder.create(i -> i.group(
-				Codec.INT.listOf().fieldOf("pos").forGetter(NpcSpawn::pos),
-				Codec.STRING.fieldOf("role").forGetter(NpcSpawn::role)
-		).apply(i, NpcSpawn::new));
 	}
 
 	/** One commodity group a hub trades, with its price multiplier and stock size. */
@@ -125,6 +117,7 @@ public final class TradeData {
 		listen("hub_economy", Economy.CODEC, m -> economies = m);
 		listen("commodity", Commodities.CODEC, m -> commodities = m);
 		listen("shop", Shop.CODEC, m -> shops = m);
+		listen("industrial", Industrial.Tuning.CODEC, Industrial::set);
 	}
 
 	private static <T> void listen(String folder, Codec<T> codec, java.util.function.Consumer<Map<Identifier, T>> sink) {
