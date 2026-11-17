@@ -31,6 +31,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		// Plain full cube: textures/block/<name>.png on all six faces.
 		generators.family(ModBlocks.HULL_PLATING).stairs(ModBlocks.HULL_PLATING_STAIRS).slab(ModBlocks.HULL_PLATING_SLAB);
 		generators.createTrivialCube(ModBlocks.CANOPY_GLASS);
+		generators.createTrivialBlock(ModBlocks.DRY_DOCK, net.minecraft.client.data.models.model.TexturedModel.COLUMN);
 		// Hull pieces (M9 pass 4): rendered by client/ship/ShapedBlockModels (block-state resolvers); these blockstates only
 		// satisfy validation. Items: stairs for the run pieces, the slab for plates, the plating cube otherwise.
 		net.minecraft.resources.Identifier stairs = net.minecraft.client.data.models.model.ModelLocationUtils.getModelLocation(ModBlocks.HULL_PLATING_STAIRS);

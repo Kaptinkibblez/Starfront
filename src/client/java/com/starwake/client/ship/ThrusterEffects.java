@@ -1,6 +1,5 @@
 package com.starwake.client.ship;
 
-import com.starwake.registry.ModBlocks;
 import com.starwake.ship.ShipEntity;
 import com.starwake.ship.ShipCollisions;
 import com.starwake.ship.ShipStructure;
@@ -46,9 +45,14 @@ public final class ThrusterEffects {
 				// Thrusters on hinged parts (M9 pass 3) fire from where the part has turned to.
 				Vec3 dir = new Vec3(nozzle.getStepX(), nozzle.getStepY(), nozzle.getStepZ());
 				Vec3 out = ship.worldDirection(ship.posedDirection(entry.pos(), dir));
-				Vec3 at = ship.toWorld(ship.posed(entry.pos(), Vec3.atCenterOf(entry.pos()).add(dir.scale(0.6))));
+				// M10: spawn where the nozzle was at the start of this tick. A new particle has no previous position to
+				// interpolate from, so for its first tick it's drawn exactly where it spawned, while the ship is drawn
+				// between last tick and this one: spawning at the end-of-tick position put fast ships' exhaust up to a
+				// tick of travel ahead of the hull (flames in front of the canopy at speed).
+				Vec3 at = ship.toWorld(ship.posed(entry.pos(), Vec3.atCenterOf(entry.pos()).add(dir.scale(0.6)))).subtract(shipVelocity);
 
-				boolean main = state.is(ModBlocks.MAIN_ENGINE), rcs = state.is(ModBlocks.MANEUVERING_THRUSTER);
+				String part = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
+				boolean main = part.startsWith("main_engine"), rcs = part.startsWith("maneuvering_thruster"); // any Mk
 				int puffs = main ? 3 : 1;
 				for (int i = 0; i < puffs; i++) {
 					if (random.nextFloat() > throttle) continue;

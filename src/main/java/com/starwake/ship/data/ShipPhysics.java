@@ -15,38 +15,40 @@ import net.minecraft.util.profiling.ProfilerFiller;
 /**
  * Global flight tuning, from {@code data/starwake/starwake/ship_physics/default.json}.
  *
- * @param thrustToAccel  blocks/tick² of acceleration per unit of thrust per tonne
- * @param gravityToAccel blocks/tick² of downward pull per 1.0g (equal to thrustToAccel, so
- *                       thrust == weight hovers exactly)
- * @param dragAtmosphere velocity multiplier per tick in an atmosphere
- * @param dragSpace      velocity multiplier per tick in space
- * @param maxSpeed       hard cap in blocks/tick in an atmosphere (protects chunk loading and the network)
- * @param maxSpeedSpace  hard cap in blocks/tick in space (sublight flight between quantum jumps)
- * @param turnRateDegrees base turn rate in degrees/second (scaled by the ship's agility)
- * @param boostMultiplier thrust (and fuel burn) multiplier while boosting
- * @param quantumSpeed   quantum cruise speed in blocks/tick (1 block = 1 m)
- * @param quantumRamp    ticks to reach (and to shed) quantum cruise speed
- * @param quantumFuelPerMm fuel units per million blocks (1,000 km) of quantum travel
+ * <p>M10: real units. Thrust is in kN, mass in tonnes, so a thruster's push accelerates the ship by thrust / mass m/s²;
+ * gravity is 9.81 m/s² x the planet's gravity; air drag is 0.5 rho Cd A v². Nothing caps speed: the flight computer
+ * holds the pilot's speed limit in coupled flight (SCM up to {@code scmSpeed}, NAV up to {@code navSpeedSpace} in space
+ * or {@code navSpeedAtmosphere} in an atmosphere, where terrain has to stream in ahead of the ship); decoupled flight
+ * is plain Newtonian motion with drag. Conversions live in {@link com.starwake.ship.physics.Units}.
+ *
+ * @param scmSpeed           SCM (combat) speed limit ceiling, m/s
+ * @param navSpeedAtmosphere NAV speed limit ceiling in an atmosphere, m/s
+ * @param navSpeedSpace      NAV speed limit ceiling in space, m/s
+ * @param coupledBraking     share of uncommanded velocity the flight computer cancels per tick
+ * @param navAgility         turn-rate factor in NAV mode (cruise flight turns lazily)
+ * @param turnRateDegrees    base turn rate in degrees/second
+ * @param boostMultiplier    thrust (and fuel burn) multiplier while boosting; SCM boost also lifts the limit 25%
+ * @param quantumSpeed       quantum cruise speed in blocks/tick (1 block = 1 m)
+ * @param quantumRamp        ticks to reach (and to shed) quantum cruise speed
+ * @param quantumFuelPerMm   fuel units per million blocks (1,000 km) of quantum travel
  * @param quantumMinDistance shortest jump the drive can calibrate for (blocks)
- * @param quantumStandoff  how far outside the target's atmosphere a jump drops out (blocks)
+ * @param quantumStandoff    how far outside the target's atmosphere a jump drops out (blocks)
  * @param quantumAlignDegrees how closely the nose must point at the target to engage
- * @param airDrag        quadratic air drag per block² of cross-section, at air density 1 (M9 pass 2; see
- *                       {@code ShipDynamics.drag})
+ * @param dragCoefficient    Cd of a ship's projected silhouette (blocky hulls are draggy)
  */
-public record ShipPhysics(double thrustToAccel, double gravityToAccel, double dragAtmosphere,
-		double dragSpace, double maxSpeed, double maxSpeedSpace, double turnRateDegrees, double boostMultiplier,
+public record ShipPhysics(double scmSpeed, double navSpeedAtmosphere, double navSpeedSpace, double coupledBraking,
+		double navAgility, double turnRateDegrees, double boostMultiplier,
 		double quantumSpeed, double quantumRamp, double quantumFuelPerMm, double quantumMinDistance,
-		double quantumStandoff, double quantumAlignDegrees, double airDrag) {
-	public static final ShipPhysics DEFAULT = new ShipPhysics(0.05, 0.05, 0.998, 0.998, 5.0, 12.5, 60.0, 1.6,
-			1500, 100, 50, 20_000, 600, 3.0, 0.015);
+		double quantumStandoff, double quantumAlignDegrees, double dragCoefficient) {
+	public static final ShipPhysics DEFAULT = new ShipPhysics(220, 400, 1500, 0.12, 0.6, 60.0, 1.6,
+			1500, 100, 50, 20_000, 600, 3.0, 1.0);
 
 	public static final Codec<ShipPhysics> CODEC = RecordCodecBuilder.create(i -> i.group(
-			Codec.DOUBLE.optionalFieldOf("thrust_to_accel", DEFAULT.thrustToAccel).forGetter(ShipPhysics::thrustToAccel),
-			Codec.DOUBLE.optionalFieldOf("gravity_to_accel", DEFAULT.gravityToAccel).forGetter(ShipPhysics::gravityToAccel),
-			Codec.doubleRange(0, 1).optionalFieldOf("drag_atmosphere", DEFAULT.dragAtmosphere).forGetter(ShipPhysics::dragAtmosphere),
-			Codec.doubleRange(0, 1).optionalFieldOf("drag_space", DEFAULT.dragSpace).forGetter(ShipPhysics::dragSpace),
-			Codec.doubleRange(0.1, 8).optionalFieldOf("max_speed", DEFAULT.maxSpeed).forGetter(ShipPhysics::maxSpeed),
-			Codec.doubleRange(0.1, 16).optionalFieldOf("max_speed_space", DEFAULT.maxSpeedSpace).forGetter(ShipPhysics::maxSpeedSpace),
+			Codec.doubleRange(5, 5000).optionalFieldOf("scm_speed", DEFAULT.scmSpeed).forGetter(ShipPhysics::scmSpeed),
+			Codec.doubleRange(5, 5000).optionalFieldOf("nav_speed_atmosphere", DEFAULT.navSpeedAtmosphere).forGetter(ShipPhysics::navSpeedAtmosphere),
+			Codec.doubleRange(5, 100_000).optionalFieldOf("nav_speed_space", DEFAULT.navSpeedSpace).forGetter(ShipPhysics::navSpeedSpace),
+			Codec.doubleRange(0, 1).optionalFieldOf("coupled_braking", DEFAULT.coupledBraking).forGetter(ShipPhysics::coupledBraking),
+			Codec.doubleRange(0.05, 2).optionalFieldOf("nav_agility", DEFAULT.navAgility).forGetter(ShipPhysics::navAgility),
 			Codec.doubleRange(1, 720).optionalFieldOf("turn_rate", DEFAULT.turnRateDegrees).forGetter(ShipPhysics::turnRateDegrees),
 			Codec.doubleRange(1, 5).optionalFieldOf("boost_multiplier", DEFAULT.boostMultiplier).forGetter(ShipPhysics::boostMultiplier),
 			Codec.doubleRange(10, 1.0e6).optionalFieldOf("quantum_speed", DEFAULT.quantumSpeed).forGetter(ShipPhysics::quantumSpeed),
@@ -55,8 +57,13 @@ public record ShipPhysics(double thrustToAccel, double gravityToAccel, double dr
 			Codec.doubleRange(0, 1.0e7).optionalFieldOf("quantum_min_distance", DEFAULT.quantumMinDistance).forGetter(ShipPhysics::quantumMinDistance),
 			Codec.doubleRange(0, 1.0e6).optionalFieldOf("quantum_standoff", DEFAULT.quantumStandoff).forGetter(ShipPhysics::quantumStandoff),
 			Codec.doubleRange(0.1, 45).optionalFieldOf("quantum_align", DEFAULT.quantumAlignDegrees).forGetter(ShipPhysics::quantumAlignDegrees),
-			Codec.doubleRange(0, 10).optionalFieldOf("air_drag", DEFAULT.airDrag).forGetter(ShipPhysics::airDrag)
+			Codec.doubleRange(0, 10).optionalFieldOf("drag_coefficient", DEFAULT.dragCoefficient).forGetter(ShipPhysics::dragCoefficient)
 	).apply(i, ShipPhysics::new));
+
+	/** The NAV ceiling where the ship is (m/s). */
+	public double navSpeed(boolean space) {
+		return space ? navSpeedSpace : navSpeedAtmosphere;
+	}
 
 	private static ShipPhysics current = DEFAULT;
 

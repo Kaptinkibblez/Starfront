@@ -29,6 +29,9 @@ public final class FlightControls {
 	private static float hudScale = 1.0f, hudOpacity = 1.0f;
 	public static final float HUD_SCALE_MIN = 0.6f, HUD_SCALE_MAX = 1.6f, HUD_OPACITY_MIN = 0.3f;
 	private static float stickX, stickY;
+	/** M10: the speed limiter (m/s) and the flight mode (SCM or NAV). Both are remembered. */
+	private static float speedLimit = com.starwake.ship.ShipFlight.DEFAULT_LIMIT;
+	private static boolean nav;
 
 	private FlightControls() {}
 
@@ -55,6 +58,38 @@ public final class FlightControls {
 		if (r > 1) {
 			stickX /= r;
 			stickY /= r;
+		}
+	}
+
+	public static float speedLimit() {
+		load();
+		return speedLimit;
+	}
+
+	public static boolean nav() {
+		load();
+		return nav;
+	}
+
+	/** One wheel notch: the limit steps by about a tenth of itself (5 m/s at least), within the mode's ceiling. */
+	public static void scrollLimit(Minecraft client, int notches) {
+		load();
+		var physics = com.starwake.ship.data.ShipPhysics.get();
+		boolean space = client.level != null && com.starwake.ship.SpaceTravel.isSpace(client.level);
+		float ceiling = (float) (nav ? physics.navSpeed(space) : physics.scmSpeed());
+		float base = Math.min(speedLimit, ceiling);
+		float step = Math.max(5, Math.round(base * 0.1f / 5) * 5);
+		speedLimit = Math.clamp(base + notches * step, 5, ceiling);
+		save();
+	}
+
+	/** SCM <-> NAV. */
+	public static void toggleNav(Minecraft client) {
+		load();
+		nav = !nav;
+		save();
+		if (client.player != null) {
+			client.gui.hud.setOverlayMessage(Component.translatable(nav ? "message.starwake.mode.nav" : "message.starwake.mode.scm"), false);
 		}
 	}
 
@@ -140,6 +175,8 @@ public final class FlightControls {
 			joystick = "joystick".equals(props.getProperty("steering", "mouse_aim"));
 			hudScale = Math.clamp(Float.parseFloat(props.getProperty("hud_scale", "1.0")), HUD_SCALE_MIN, HUD_SCALE_MAX);
 			hudOpacity = Math.clamp(Float.parseFloat(props.getProperty("hud_opacity", "1.0")), HUD_OPACITY_MIN, 1f);
+			speedLimit = Math.max(5, Float.parseFloat(props.getProperty("speed_limit", Float.toString(speedLimit))));
+			nav = "nav".equals(props.getProperty("flight_mode", "scm"));
 		} catch (IOException | NumberFormatException ignored) {
 			// Defaults stand.
 		}
@@ -157,6 +194,8 @@ public final class FlightControls {
 		props.setProperty("steering", joystick ? "joystick" : "mouse_aim");
 		props.setProperty("hud_scale", Float.toString(hudScale));
 		props.setProperty("hud_opacity", Float.toString(hudOpacity));
+		props.setProperty("speed_limit", Float.toString(speedLimit));
+		props.setProperty("flight_mode", nav ? "nav" : "scm");
 		try (Writer out = Files.newBufferedWriter(FILE)) {
 			props.store(out, "Starwake client settings");
 		} catch (IOException ignored) {

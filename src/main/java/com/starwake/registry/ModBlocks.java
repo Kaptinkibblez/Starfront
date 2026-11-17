@@ -176,6 +176,17 @@ public final class ModBlocks {
 					.isRedstoneConductor(net.minecraft.world.level.block.Blocks::never)
 					.isSuffocating(net.minecraft.world.level.block.Blocks::never));
 
+	/**
+	 * Dry Dock (M10): a steel gantry block for building ships on. It never becomes part of a ship: the scan stops at it
+	 * like terrain, so a hull built on a dock (or a crafted floor of dock blocks) assembles without swallowing it.
+	 */
+	public static final Block DRY_DOCK = register("dry_dock", Block::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.COLOR_YELLOW)
+					.strength(4.0f, 8.0f)
+					.sound(SoundType.METAL)
+					.requiresCorrectToolForDrops());
+
 	/** Landing Gear: deploy/retract with N; soft landings need it down (3j). */
 	public static final Block LANDING_GEAR = register("landing_gear", com.starwake.ship.block.LandingGearBlock::new,
 			BlockBehaviour.Properties.of()

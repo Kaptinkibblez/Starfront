@@ -85,11 +85,11 @@ public class ShipEntity extends Entity {
 	private static final EntityDataAccessor<Integer> FUEL_CAPACITY = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	/** M8f: fusion fuel (D + He-3) units for the quantum and jump drives; capacity is 10 x the propellant capacity. */
 	private static final EntityDataAccessor<Integer> FUSION = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
-	private static final EntityDataAccessor<Float> SHIELD = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	static final EntityDataAccessor<Float> SHIELD = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Float> SHIELD_MAX = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	/** M8e-1: skin temperature of the leading face (C, 0 = not heating) and the weakest heat limit on it. */
-	private static final EntityDataAccessor<Float> SKIN_TEMP = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
-	private static final EntityDataAccessor<Float> HULL_LIMIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	static final EntityDataAccessor<Float> SKIN_TEMP = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	static final EntityDataAccessor<Float> HULL_LIMIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	/** Packed power split percents (0-100 each): engines * 1_000_000 + shields * 1000 + quantum. */
 	private static final EntityDataAccessor<Integer> POWER_SPLIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> ENGINE_FACTOR = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
@@ -134,7 +134,7 @@ public class ShipEntity extends Entity {
 			QT_TOO_CLOSE = 32, QT_NO_TARGET = 64, QT_SPOOLED = 128, QT_NO_DRIVE = 256;
 
 	/** Control bits from {@link com.starwake.network.ShipControlPayload}. */
-	public static final int CONTROL_ROLL_LEFT = 1, CONTROL_ROLL_RIGHT = 2, CONTROL_FREE_LOOK = 4, CONTROL_JOYSTICK = 8;
+	public static final int CONTROL_ROLL_LEFT = 1, CONTROL_ROLL_RIGHT = 2, CONTROL_FREE_LOOK = 4, CONTROL_JOYSTICK = 8, CONTROL_NAV = 16;
 
 	/** Height of the pilot's seat above the Helm block's base (M9: raised so the eye clears the dash). */
 	public static final double HELM_SEAT_HEIGHT = 1.4;
@@ -180,9 +180,9 @@ public class ShipEntity extends Entity {
 	/** Structure entry index of each thruster in {@code dynamics} (for the synced throttles). */
 	private int[] thrusterEntries = new int[0];
 	/** Flight computer output, one per thruster (warm start for the next tick). */
-	private double[] throttles = new double[0];
+	double[] throttles = new double[0];
 	/** Angular velocity in the ship's own frame, radians per tick. */
-	private final Vector3d angularVelocity = new Vector3d();
+	final Vector3d angularVelocity = new Vector3d();
 	private final java.util.Set<BlockPos> seats = new java.util.LinkedHashSet<>();
 	/**
 	 * Collision boxes (local) of blocks with any exposed face: the hull used for terrain
@@ -193,15 +193,13 @@ public class ShipEntity extends Entity {
 	/** Functional parts (anything with ship-system stats: thrusters, plants, coolers, drives, tanks...). M9 pass 3. */
 	private final java.util.Set<BlockPos> components = new java.util.HashSet<>();
 	/** Per block: mass factor, heat limit and armour from its material (M8e-1). */
-	private final Map<BlockPos, ShipMaterials.Rating> ratings = new HashMap<>();
-	/** Re-entry heat soaked by leading-face blocks (a block burns off at 1). */
-	private final Map<BlockPos, Double> heatDose = new HashMap<>();
+	final Map<BlockPos, ShipMaterials.Rating> ratings = new HashMap<>();
 	/** Landing gear blocks aboard (local positions). */
 	private final java.util.Set<BlockPos> gear = new java.util.LinkedHashSet<>();
 
 	/** Server: which seat (local pos) each passenger occupies. The Helm's seat makes you the pilot. */
 	private final Map<UUID, BlockPos> seatOf = new HashMap<>();
-	private int controls;
+	int controls;
 
 	// Per-tick bookkeeping, both sides.
 	private Vec3 lastMove = Vec3.ZERO;
@@ -957,7 +955,7 @@ public class ShipEntity extends Entity {
 	public boolean receivesInputs() { return tickCount - lastInputTick < INPUT_TIMEOUT; }
 
 	/** Joystick steering (M9): the pilot's virtual stick, -1..1 (x = yaw right, y = pitch down). */
-	private float stickX, stickY;
+	float stickX, stickY;
 
 	public void setStick(float x, float y) {
 		stickX = Mth.clamp(x, -1, 1);
@@ -1326,7 +1324,7 @@ public class ShipEntity extends Entity {
 			// Parked (M9 pass 2): a ship at rest on the ground stops simulating until something disturbs it. Stepping
 			// a resting body still pushes its contacts apart a hair every tick, which made parked ships creep.
 			if (getDeltaMovement().lengthSqr() > 1.0e-4 || drift.lengthSqr() > 0 || spin.lengthSqr() > 0) asleep = false;
-			else if (!asleep && (grounded || clearance < 0.05) && angularVelocity.lengthSquared() < 1.0e-5) asleep = true;
+			else if (!asleep && (grounded || flight.clearance() < 0.05) && angularVelocity.lengthSquared() < 1.0e-5) asleep = true;
 			if (asleep) {
 				setDeltaMovement(Vec3.ZERO);
 				angularVelocity.zero();
@@ -1337,7 +1335,7 @@ public class ShipEntity extends Entity {
 			if (drift.lengthSqr() > 0) {
 				velocity = drift;
 			} else {
-				velocity = unpiloted(velocity, physics);
+				velocity = flight.unpiloted(velocity, physics);
 				angularVelocity.mul(0.8);
 				java.util.Arrays.fill(throttles, 0);
 			}
@@ -1351,18 +1349,18 @@ public class ShipEntity extends Entity {
 			while (!inputQueue.isEmpty() && steps < MAX_STEPS_PER_TICK) {
 				applyInput(inputQueue.poll());
 				steps++;
-				velocity = fly(pilot, getDeltaMovement(), physics, pilotInput);
+				velocity = flight.fly(pilot, getDeltaMovement(), physics, pilotInput);
 				publishThrottles();
 				if (moveStep(velocity, physics, pilot)) return true;
 			}
 			if (steps == 0 && tickCount - lastInputTick > INPUT_TIMEOUT) {
-				velocity = fly(pilot, getDeltaMovement(), physics, serverInput(pilot));
+				velocity = flight.fly(pilot, getDeltaMovement(), physics, serverInput(pilot));
 				publishThrottles();
 				if (moveStep(velocity, physics, pilot)) return true;
 			}
 		}
 		tickSystems();
-		tickHull();
+		damage.tick();
 		return false;
 	}
 
@@ -1386,16 +1384,13 @@ public class ShipEntity extends Entity {
 				angularVelocity.mul(0.9);
 			}
 		}
-		measureClearance(); // every step on both sides, so prediction matches
-		double maxSpeed = (SpaceTravel.isSpace(level()) ? physics.maxSpeedSpace() : physics.maxSpeed())
-				* (pilot != null && boosting ? BOOST_SPEED : 1.0);
+		flight.measureClearance(); // every step on both sides, so prediction matches
 		if (tickCount % 10 == 0 && velocity.lengthSqr() > 1.0 && level() instanceof ServerLevel ahead) {
 			// Fast ships: start loading the terrain ~3 s ahead so it's there when they arrive.
 			ahead.getChunkSource().addTicketWithRadius(net.minecraft.server.level.TicketType.PORTAL,
 					net.minecraft.world.level.ChunkPos.containing(BlockPos.containing(position().add(velocity.scale(60)))), 2);
 		}
-		if (velocity.lengthSqr() > maxSpeed * maxSpeed) velocity = velocity.normalize().scale(maxSpeed);
-		setDeltaMovement(velocity);
+		setDeltaMovement(velocity); // M10: no speed caps (the flight computer holds the pilot's limit)
 		// M9: rigid-body motion with contacts (slides, tips, settles, shoves other ships).
 		neighbours = nearbyShips(getBoundingBox().expandTowards(velocity).inflate(1.5));
 		long perfStart = System.nanoTime();
@@ -1410,12 +1405,7 @@ public class ShipEntity extends Entity {
 			}
 		}
 		grounded = result.grounded();
-		if (impactCooldown > 0) impactCooldown--;
-		else {
-			boolean upright = worldDirection(Direction.UP).y > 0.8;
-			double safe = !result.touchdown() ? SAFE_IMPACT : isGearDown() && upright ? SAFE_GEAR_LANDING : SAFE_BELLY_LANDING;
-			if (result.impact() > safe) onImpact(result.impact(), safe, result.blocked());
-		}
+		damage.afterStep(result);
 		return result.moved() && level() instanceof ServerLevel serverLevel && SpaceTravel.checkAltitude(this, serverLevel);
 	}
 
@@ -1434,54 +1424,6 @@ public class ShipEntity extends Entity {
 		Vector3f v = new Vector3f((float) world.x, (float) world.y, (float) world.z);
 		orientation().transformInverse(v);
 		return Direction.getApproximateNearest(v.x, v.y, v.z);
-	}
-
-	/**
-	 * Every half second: the leading face heats to 25 + peak x intensity^n x sqrt(air density) C; blocks
-	 * whose heat limit (alloy service temperature, or ship_stats {@code heat_limit}) is lower soak heat in
-	 * proportion to the excess and burn off at a dose of 1. Cooler blocks shed it again.
-	 */
-	private void tickHull() {
-		if (tickCount % 10 != 0 || structure == null) return;
-		HullTuning tuning = HullTuning.get();
-		// Mid-tick on the server the half-second ring isn't updated yet: use last tick's movement.
-		Vec3 v = lastMove();
-		double intensity = Reentry.intensity(this, v);
-		double density = Reentry.airDensity(this);
-		float skin = intensity < 0.02 || density <= 0 ? 0
-				: (float) (25 + tuning.reentryPeak() * Math.pow(intensity, tuning.reentryExponent()) * Math.sqrt(density));
-		if (skin <= 0) {
-			entityData.set(SKIN_TEMP, 0f);
-			heatDose.replaceAll((k, d) -> d * 0.8);
-			heatDose.values().removeIf(d -> d < 0.01);
-			return;
-		}
-		Direction lead = localDirection(v.lengthSqr() > 1e-6 ? v : worldDirection(Direction.DOWN));
-		double weakest = Double.MAX_VALUE;
-		java.util.Set<BlockPos> burned = new java.util.HashSet<>();
-		for (BlockPos pos : structure.outerFace(lead)) {
-			ShipMaterials.Rating r = ratings.get(pos);
-			double limit = r == null ? ShipStats.get(structure.get(pos)).heatLimit() : r.heatLimit();
-			weakest = Math.min(weakest, limit);
-			double over = skin - limit;
-			double dose = heatDose.getOrDefault(pos, 0.0);
-			dose = over > 0 ? dose + over * tuning.burnRate() * 0.5 : dose * 0.8;
-			if (dose >= 1 && com.starwake.config.StarwakeConfig.on(com.starwake.config.StarwakeConfig.REENTRY)) burned.add(pos);
-			else if (dose > 0.01) heatDose.put(pos, dose);
-			else heatDose.remove(pos);
-		}
-		entityData.set(SKIN_TEMP, skin);
-		entityData.set(HULL_LIMIT, weakest == Double.MAX_VALUE ? 0f : (float) weakest);
-		if (!burned.isEmpty() && level() instanceof ServerLevel server) {
-			burned.forEach(heatDose::remove);
-			for (BlockPos pos : burned) {
-				Vec3 at = blockCenter(pos);
-				server.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME, at.x, at.y, at.z, 12, 0.4, 0.4, 0.4, 0.05);
-			}
-			messageAboard(Component.translatable("message.starwake.hull.burned", burned.size()));
-			com.starwake.StarwakeMod.LOGGER.info("Ship {}: re-entry at {} C burned off {} blocks", getId(), Math.round(skin), burned.size());
-			com.starwake.ship.edit.ShipEditing.destroy(this, burned, false);
-		}
 	}
 
 	/** An action-bar message for the pilot and everyone aboard. */
@@ -1876,89 +1818,8 @@ public class ShipEntity extends Entity {
 		return null;
 	}
 
-	// =========================================================================================
-	// Flight computer (3h): physicalized thrust, Star Citizen IFCS style
-	// =========================================================================================
-	//
-	// The pilot asks for motion (WASD/Space/Ctrl, hover) and rotation (mouse-aim, Z/C roll).
-	// That becomes a wanted force and torque in the ship's frame; ShipDynamics.allocate picks
-	// a throttle for every thruster; the force and torque they actually produce, from where
-	// they actually are, accelerate the ship. Poorly placed thrusters mean less thrust, slow
-	// or missing rotation axes, or drift: the design decides how the ship flies.
-
-	/** Pilot input -> thruster throttles -> new velocity (angular velocity is updated too). */
-	private Vec3 fly(Player pilot, Vec3 velocity, ShipPhysics physics, Input input) {
-		ShipDynamics dynamics = dynamics();
-		double mass = mass();
-		boolean decoupled = isDecoupled();
-		boolean space = SpaceTravel.isSpace(level());
-		// Ships are weightless in space (space's 0.15g is only for people on EVA near the hull).
-		double gravity = space ? 0 : Planets.gravityOf(level());
-		// Power routing and boost scale every thruster; no fuel, no thrust.
-		double scale = fuel() > 0 ? engineFactor() * (input.shift() ? physics.boostMultiplier() : 1.0) : 0;
-		Quaternionfc q = orientation();
-
-		// Wanted push: "as much as you've got" along each commanded axis.
-		Vector3d force = new Vector3d();
-		Direction left = forward.getCounterClockWise();
-		ask(dynamics, force, forward, input.forward(), scale);
-		ask(dynamics, force, forward.getOpposite(), input.backward(), scale);
-		ask(dynamics, force, left, input.left(), scale);
-		ask(dynamics, force, left.getOpposite(), input.right(), scale);
-		ask(dynamics, force, Direction.UP, input.jump(), scale);
-		// Ctrl: coupled = controlled descent (below); decoupled = cut lift and push down.
-		ask(dynamics, force, Direction.DOWN, input.sprint() && (decoupled || gravity <= 0), scale);
-		// Coupled mode (Star Citizen's IFCS): on any axis the pilot isn't commanding, the flight
-		// computer fires the opposite thrusters to null the drift. No retros, no braking.
-		double perVelocity = mass / physics.thrustToAccel() * COUPLED_BRAKING; // force per (block/tick)
-		Vector3f v = q.transformInverse(new Vector3f((float) velocity.x, (float) velocity.y, (float) velocity.z));
-		Direction right = forward.getClockWise();
-		Vector3d fwdAxis = new Vector3d(forward.getStepX(), 0, forward.getStepZ());
-		Vector3d rightAxis = new Vector3d(right.getStepX(), 0, right.getStepZ());
-		Vector3d local = new Vector3d(v.x, v.y, v.z);
-		boolean hovering = !input.jump() && !(input.sprint() && decoupled) && gravity > 0;
-		// Coupled descent (Ctrl): hold a gentle sink rate the landing gear can take.
-		double targetClimb = input.sprint() && !decoupled ? -descentRate() : 0;
-		boosting = input.shift();
-		if (!decoupled) {
-			if (!input.forward() && !input.backward()) force.fma(-local.dot(fwdAxis) * perVelocity, fwdAxis);
-			if (!input.left() && !input.right()) force.fma(-local.dot(rightAxis) * perVelocity, rightAxis);
-			if (!input.sprint() && !input.jump() && !hovering) force.add(0, -local.y * perVelocity, 0);
-		}
-
-		// Hover assist: hold the ship's weight, whatever its attitude (top priority), and null
-		// vertical drift so it holds altitude.
-		Vector3f upLocal = q.transformInverse(new Vector3f(0, 1, 0));
-		// (Decoupled: gravity is still cancelled, but vertical drift is the pilot's problem.)
-		double weight = hovering
-				? Math.max(0, mass * gravity * physics.gravityToAccel() / physics.thrustToAccel()
-						- (decoupled ? 0 : (velocity.y - targetClimb) * perVelocity)) : 0;
-
-		// Wanted torque: steer the angular velocity toward what the pilot asks for.
-		// Landed (M9): the mouse doesn't twist the ship on its gear; steering starts once it lifts off.
-		Vector3d wanted = grounded && !input.jump() ? new Vector3d() : wantedRotation(pilot, physics, space);
-		Vector3d alpha = wanted.sub(angularVelocity).mul(0.35);
-		Vector3d torque = dynamics.inertia().transform(alpha, new Vector3d()).div(physics.thrustToAccel());
-
-		// Air drag (M9 pass 2): by the hull's cross-section and the planet's air density, at the centre of mass.
-		double density = space ? 0 : Planets.airDensityOf(level());
-		Vector3d drag = dynamics.drag(local, density, physics.airDrag());
-
-		double[] th = level().isClientSide() || throttles.length != dynamics.thrusterCount() ? new double[dynamics.thrusterCount()] : throttles;
-		double[] achieved = dynamics.allocate(new Vector3d(upLocal.x, upLocal.y, upLocal.z), hovering, weight, torque, force, scale, th);
-		if (scale > 0 && !level().isClientSide()) burnFuel(dynamics.burn(th) * scale);
-
-		Vector3f f = q.transform(new Vector3f((float) achieved[0], (float) achieved[1], (float) achieved[2]));
-		Vector3f d = q.transform(new Vector3f((float) drag.x, (float) drag.y, (float) drag.z));
-		Vec3 accel = new Vec3(f.x, f.y, f.z).scale(physics.thrustToAccel() / mass).add(d.x, d.y, d.z)
-				.add(0, -gravity * physics.gravityToAccel(), 0);
-		Vector3d spin = dynamics.inverseInertia().transform(new Vector3d(achieved[3], achieved[4], achieved[5]))
-				.mul(physics.thrustToAccel());
-		angularVelocity.add(spin).mul(space ? 0.998 : 0.985); // slight passive damping; the flight computer does the braking
-		double cap = Math.toRadians(physics.turnRateDegrees()) / 20.0 * 1.25;
-		if (angularVelocity.length() > cap) angularVelocity.normalize(cap);
-		return velocity.add(accel).scale(space ? physics.dragSpace() : physics.dragAtmosphere());
-	}
+	/** The flight computer (M10: split out, real units). */
+	public final ShipFlight flight = new ShipFlight(this);
 
 	// =========================================================================================
 	// Prediction (M9): the pilot's client flies its own copy of the ship with the same flight
@@ -1976,6 +1837,8 @@ public class ShipEntity extends Entity {
 		float stickX();
 		float stickY();
 		Vec3 look();
+		/** The pilot's speed limiter, m/s (M10). */
+		float speedLimit();
 		void send(com.starwake.network.ShipInputPayload payload);
 	}
 
@@ -2008,8 +1871,9 @@ public class ShipEntity extends Entity {
 
 	/** Server: the pilot's latest input from ShipInputPayload, its sequence and when it arrived. */
 	private Input pilotInput = Input.EMPTY;
-	private @Nullable Vec3 pilotLook;
-	private int lastInputSeq = -1, lastInputTick = -100;
+	@Nullable Vec3 pilotLook;
+	int lastInputTick = -100;
+	private int lastInputSeq = -1;
 
 	public void setServerDynamics(ShipDynamics dynamics) {
 		this.serverDynamics = dynamics;
@@ -2038,6 +1902,7 @@ public class ShipEntity extends Entity {
 		controls = payload.controls();
 		setStick(payload.stickX(), payload.stickY());
 		pilotLook = new Vec3(payload.lookX(), payload.lookY(), payload.lookZ());
+		flight.setLimiter(payload.speedLimit(), (controls & CONTROL_NAV) != 0);
 		lastInputSeq = payload.seq();
 	}
 
@@ -2088,12 +1953,11 @@ public class ShipEntity extends Entity {
 		int seq = ++predictSeq;
 		Vec3 look = hook.look();
 		hook.send(new com.starwake.network.ShipInputPayload(getId(), seq, input, controls, stickX, stickY,
-				(float) look.x, (float) look.y, (float) look.z));
+				(float) look.x, (float) look.y, (float) look.z, hook.speedLimit()));
+		flight.setLimiter(hook.speedLimit(), (controls & CONTROL_NAV) != 0);
 		ShipPhysics physics = ShipPhysics.get();
-		measureClearance();
-		Vec3 velocity = fly(pilot, getDeltaMovement(), physics, input);
-		double maxSpeed = (SpaceTravel.isSpace(level()) ? physics.maxSpeedSpace() : physics.maxSpeed()) * (boosting ? BOOST_SPEED : 1.0);
-		if (velocity.lengthSqr() > maxSpeed * maxSpeed) velocity = velocity.normalize().scale(maxSpeed);
+		flight.measureClearance();
+		Vec3 velocity = flight.fly(pilot, getDeltaMovement(), physics, input);
 		neighbours = nearbyShips(getBoundingBox().expandTowards(velocity).inflate(1.5));
 		var result = com.starwake.ship.physics.ShipMotion.step(this, velocity, neighbours, false);
 		grounded = result.grounded();
@@ -2418,132 +2282,11 @@ public class ShipEntity extends Entity {
 		}
 	}
 
-	/** Coupled descent (M9): up to 25 m/s high up, easing to 3 m/s in the last 15 m (blocks/tick). */
-	private static final double DESCENT_FAST = 1.25, DESCENT_SLOW = 0.15;
-
-	/** Whether the pilot is holding boost this tick (raises the speed cap). */
-	private boolean boosting;
-
 	private long perfNanos;
 	private int perfSteps;
 
 	/** Parked and not simulating (server, unpiloted only; see the unpiloted branch of the server tick). */
 	private boolean asleep;
-
-	/** Height of the hull's bottom above the ground below the ship's centre (blocks; 64 = nothing in range). */
-	private double clearance = 64;
-
-	private double descentRate() {
-		if (clearance <= 15) return DESCENT_SLOW;
-		double t = Math.min(1, (clearance - 15) / 45.0);
-		return DESCENT_SLOW + (DESCENT_FAST - DESCENT_SLOW) * t;
-	}
-
-	/** Measures {@link #clearance} straight down from the bottom of the bounding box (cheap: one column). */
-	private void measureClearance() {
-		AABB box = getBoundingBox();
-		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
-		int x = Mth.floor(box.getCenter().x), z = Mth.floor(box.getCenter().z);
-		int top = Mth.floor(box.minY);
-		for (int dy = 0; dy < 64; dy++) {
-			p.set(x, top - dy, z);
-			if (!level().getBlockState(p).getCollisionShape(level(), p).isEmpty()) {
-				clearance = Math.max(0, box.minY - (top - dy + 1));
-				return;
-			}
-		}
-		clearance = 64;
-	}
-
-	/** Fraction of uncommanded velocity the flight computer tries to cancel each tick. */
-	private static final double COUPLED_BRAKING = 0.12;
-
-	/** Speed cap multiplier while boosting. */
-	private static final double BOOST_SPEED = 1.25;
-
-	/** Seconds of idle hover kept in reserve: below it an unpiloted ship lands itself if the ground is near. */
-	private static final int HOVER_RESERVE_TICKS = 1200;
-
-	/**
-	 * Unpiloted ships (M9): in space they brake to a stop and hold. On a planet they stay put if resting on
-	 * something; otherwise they hover at an idle burn (a tenth of what holding their weight on thrusters
-	 * costs); with the tank nearly dry they let themselves down gently if the ground is within 64 blocks,
-	 * and with it empty they fall.
-	 */
-	private Vec3 unpiloted(Vec3 velocity, ShipPhysics physics) {
-		double gravity = SpaceTravel.isSpace(level()) ? 0 : Planets.gravityOf(level().dimension());
-		if (gravity <= 0) {
-			velocity = velocity.scale(0.8);
-			return velocity.lengthSqr() < 1.0e-6 ? Vec3.ZERO : velocity;
-		}
-		if (grounded || clearance < 0.05) {
-			// Parked on something (or just assembled standing on it: the hover would hold it a hair off the ground
-			// forever and keep burning): gravity and the contacts keep it there: gravity and the contacts keep it there (it settles and tips like a real object).
-			return velocity.add(0, -gravity * physics.gravityToAccel(), 0).scale(0.9);
-		}
-		double weight = mass * gravity * physics.gravityToAccel() / physics.thrustToAccel();
-		double lift = dynamics.rawThrust(Direction.UP);
-		double idle = lift <= 0 ? 0 : dynamics.burnPushing(Direction.UP) * Math.min(1, weight / lift) * 0.1;
-		if (fuel() > 0 && lift > 0) {
-			burnFuel(idle * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.IDLE_BURN));
-			double sink = fuel() < idle * HOVER_RESERVE_TICKS && clearance < 64 ? -descentRate() : 0;
-			Vec3 held = velocity.scale(0.8);
-			return new Vec3(held.x, held.y * 0.5 + sink * 0.5, held.z);
-		}
-		// Out of fuel: it falls.
-		return velocity.add(0, -gravity * physics.gravityToAccel(), 0).scale(physics.dragAtmosphere());
-	}
-
-	/** Adds an "everything along this local direction" request when the key is held. */
-	private static void ask(ShipDynamics dynamics, Vector3d force, Direction direction, boolean held, double scale) {
-		if (!held) return;
-		double amount = dynamics.rawThrust(direction) * scale;
-		force.add(direction.getStepX() * amount, direction.getStepY() * amount, direction.getStepZ() * amount);
-	}
-
-	/**
-	 * Mouse-aim: the angular velocity (ship frame, rad/tick) that turns the nose toward where the
-	 * pilot looks, eased near the target and capped at {@code turn_rate}; Z/C roll; in an
-	 * atmosphere the ship eases level when not rolling. Free-look holds attitude.
-	 */
-	private Vector3d wantedRotation(Player pilot, ShipPhysics physics, boolean space) {
-		double max = Math.toRadians(physics.turnRateDegrees()) / 20.0;
-		boolean rolling = (controls & (CONTROL_ROLL_LEFT | CONTROL_ROLL_RIGHT)) != 0;
-		boolean freeLook = (controls & CONTROL_FREE_LOOK) != 0;
-		Quaternionfc q = orientation();
-		Vector3d nose = new Vector3d(forward.getStepX(), forward.getStepY(), forward.getStepZ());
-		Vector3d want = new Vector3d();
-		boolean joystick = (controls & CONTROL_JOYSTICK) != 0;
-		if (joystick) {
-			// Joystick mode: the stick sets yaw/pitch rates directly (yaw about the deck's up, pitch about its right).
-			Direction rightDir = forward.getClockWise();
-			want.add(0, -stickX * max, 0);
-			want.add(new Vector3d(rightDir.getStepX(), 0, rightDir.getStepZ()).mul(-stickY * max));
-		} else if (!freeLook) {
-			Vec3 lookWorld = !level().isClientSide() && pilotLook != null && tickCount - lastInputTick < 10 ? pilotLook : pilot.getViewVector(1.0f);
-			Vector3f l = q.transformInverse(new Vector3f((float) lookWorld.x, (float) lookWorld.y, (float) lookWorld.z));
-			Vector3d look = new Vector3d(l.x, l.y, l.z).normalize();
-			double angle = Math.acos(Mth.clamp(nose.dot(look), -1, 1));
-			if (angle > 1.0e-3) {
-				Vector3d axis = nose.cross(look, new Vector3d());
-				if (axis.lengthSquared() < 1.0e-8) axis.set(0, 1, 0); // looking straight back
-				want.add(axis.normalize().mul(Math.min(angle * 0.2, max)));
-			}
-		}
-		if (rolling) {
-			want.add(new Vector3d(nose).mul((controls & CONTROL_ROLL_RIGHT) != 0 ? max : -max));
-		} else if (!space) {
-			// Atmospheric auto-level: ease the ship level unless the pilot is rolling on purpose.
-			Vector3f up = q.transform(new Vector3f(0, 1, 0));
-			Direction right = forward.getClockWise();
-			Vector3f r = q.transform(new Vector3f(right.getStepX(), 0, right.getStepZ()));
-			double bank = Math.atan2(-r.y, up.y);
-			if (Math.abs(bank) > 1.0e-3 && Math.abs(bank) < Math.PI * 0.9) {
-				want.add(new Vector3d(nose).mul(Mth.clamp(-bank * 0.1, -max, max)));
-			}
-		}
-		return want;
-	}
 
 	/** Syncs thruster throttles for exhaust effects: "entryIndex:0-9;" for each firing thruster. */
 	private void publishThrottles() {
@@ -2571,7 +2314,7 @@ public class ShipEntity extends Entity {
 	}
 
 	/** Fractional fuel accumulates so small burns still drain the tank over time. */
-	private void burnFuel(double amount) {
+	void burnFuel(double amount) {
 		fuelDebt += amount * com.starwake.config.StarwakeConfig.get(com.starwake.config.StarwakeConfig.FUEL_USE);
 		int whole = (int) fuelDebt;
 		if (whole > 0) {
@@ -2582,76 +2325,8 @@ public class ShipEntity extends Entity {
 
 	// --- Terrain collision -------------------------------------------------------------------
 
-	/** Ticks before another impact can register: a crash counts once, not once per tick of scraping. */
-	private int impactCooldown;
-
-	/** Touchdown limits (blocks/tick): ~6 m/s on deployed gear, ~1.6 m/s on the belly. */
-	private static final double SAFE_GEAR_LANDING = 0.3, SAFE_BELLY_LANDING = 0.08;
-
-	/** Impact speed (blocks/tick) a ship absorbs without consequence: a firm landing. */
-	private static final double SAFE_IMPACT = 0.35;
-
-	/**
-	 * A crash: shields soak the impact energy first; anything left hurts everyone aboard
-	 * (crew in seats and people walking inside).
-	 */
-	private void onImpact(double impact, double safe, Vec3 blocked) {
-		if (!(level() instanceof ServerLevel serverLevel)) return;
-		impactCooldown = 10;
-		// 1 b/t over the limit = 40 shield HP; scraping in on the belly is five times worse.
-		double energy = (impact - safe) * (safe == SAFE_BELLY_LANDING ? 200.0 : 40.0); // 1 b/t over the limit = 40 shield HP
-		float shield = entityData.get(SHIELD);
-		double absorbed = Math.min(shield, energy);
-		entityData.set(SHIELD, (float) (shield - absorbed));
-		double excess = energy - absorbed;
-		serverLevel.playSound(null, BlockPos.containing(position()), net.minecraft.sounds.SoundEvents.ANVIL_LAND,
-				net.minecraft.sounds.SoundSource.BLOCKS, (float) Math.min(1.5, impact), absorbed > 0 ? 1.6f : 0.6f);
-		if (excess <= 0 || !com.starwake.config.StarwakeConfig.on(com.starwake.config.StarwakeConfig.IMPACT)) return;
-		excess -= hullImpact(excess, blocked);
-		if (excess <= 1e-6) return;
-		float damage = (float) Math.min(30.0, excess / 4.0);
-		AABB inside = getBoundingBox().inflate(1.0);
-		for (Entity entity : serverLevel.getEntities(this, inside, e -> e instanceof LivingEntity)) {
-			if (entity.getVehicle() == this || isSupporting(entity)) {
-				entity.hurtServer(serverLevel, serverLevel.damageSources().flyIntoWall(), damage);
-			}
-		}
-	}
-
-	/**
-	 * Impact armour (M8e-1): the blocks on the face that hit share the energy left after shields. Each
-	 * soaks up to its armour (alloy toughness or ship_stats {@code armor}); a block whose share is more
-	 * than its armour breaks off (dropped). The hull soaks at most {@code crumple} of the energy; the
-	 * rest reaches the crew. Returns the energy absorbed.
-	 */
-	private double hullImpact(double energy, Vec3 blocked) {
-		if (structure == null || blocked.lengthSqr() < 1e-9) return 0;
-		Direction face = localDirection(blocked);
-		List<BlockPos> skin = structure.outerFace(face);
-		if (skin.isEmpty()) return 0;
-		// Only the layer that sticks out furthest toward the impact touched it.
-		int extreme = Integer.MIN_VALUE;
-		for (BlockPos p : skin) extreme = Math.max(extreme, p.get(face.getAxis()) * face.getAxisDirection().getStep());
-		List<BlockPos> contact = new ArrayList<>();
-		for (BlockPos p : skin) if (p.get(face.getAxis()) * face.getAxisDirection().getStep() >= extreme) contact.add(p);
-		double share = energy / contact.size();
-		double absorbed = 0;
-		java.util.Set<BlockPos> broken = new java.util.HashSet<>();
-		for (BlockPos p : contact) {
-			ShipMaterials.Rating r = ratings.get(p);
-			double armor = r == null ? ShipStats.get(structure.get(p)).armor() : r.armor();
-			absorbed += Math.min(share, armor);
-			if (share > armor && !(structure.get(p).getBlock() instanceof HelmBlock)) broken.add(p);
-		}
-		absorbed = Math.min(absorbed, energy * HullTuning.get().crumple());
-		com.starwake.StarwakeMod.LOGGER.info("Ship {}: impact energy {} on {} contact blocks ({} face): hull soaked {}, tore off {}", getId(),
-				Math.round(energy), contact.size(), face, Math.round(absorbed), broken.size());
-		if (!broken.isEmpty()) {
-			messageAboard(Component.translatable("message.starwake.hull.smashed", broken.size()));
-			com.starwake.ship.edit.ShipEditing.destroy(this, broken, true);
-		}
-		return absorbed;
-	}
+	/** Re-entry heating and impact damage (M10: split out; combat damage joins it in M11). */
+	public final ShipDamage damage = new ShipDamage(this);
 
 	private double clip(Direction.Axis axis, double distance) {
 		if (distance == 0 || structure == null) return distance;

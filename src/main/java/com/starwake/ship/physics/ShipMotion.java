@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
 public final class ShipMotion {
 	private static final double FRICTION = 0.7, RESTITUTION = 0.15, RESTITUTION_THRESHOLD = 0.2;
 	private static final double SLOP = 0.004, CORRECTION = 0.8, MAX_STEP = 0.4;
-	private static final int VELOCITY_ITERATIONS = 8, POSITION_ITERATIONS = 4, MAX_SUBSTEPS = 10;
+	private static final int VELOCITY_ITERATIONS = 8, POSITION_ITERATIONS = 4, MAX_SUBSTEPS = 40;
 	/** Most speed (b/t), spin (rad/t) and push-out (blocks, radians per substep) contacts may add. */
 	private static final double MAX_GAIN = 0.3, MAX_SPIN_GAIN = 0.03, MAX_PUSH = 0.25, MAX_TURN = 0.02;
 
@@ -144,6 +144,13 @@ public final class ShipMotion {
 		double speedIn = body.v.length(), spinIn = body.w.length();
 		double travel = body.v.length() + body.w.length() * radius;
 		int substeps = Math.clamp((int) Math.ceil(travel / MAX_STEP), 1, MAX_SUBSTEPS);
+		if (substeps > 1 && others.isEmpty()) {
+			// M10 broad phase: no speed caps any more, so a fast ship in clear air would pay for dozens of substeps of
+			// probe tests. If nothing solid lies anywhere in the swept box this tick, one step does it.
+			AABB swept = ship.getBoundingBox().expandTowards(velocity).inflate(0.5 + body.w.length() * radius);
+			double volume = swept.getXsize() * swept.getYsize() * swept.getZsize();
+			if (volume < 400_000 && level.noBlockCollision(null, swept)) substeps = 1;
+		}
 		double fraction = 1.0 / substeps;
 
 		Vector3d impulseSum = new Vector3d();

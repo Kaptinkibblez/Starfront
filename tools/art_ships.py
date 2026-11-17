@@ -230,6 +230,37 @@ def engine(part, tier):
     return m
 
 
+def dry_dock():
+    """M10: the Dry Dock gantry block (a ship's scan stops at it): open steel lattice with hazard-striped rails."""
+    side = img(DARKER)
+    noise(side, 4, 77)
+    for y in range(16):
+        for x in range(16):
+            rail = y < 3 or y > 12
+            post = x < 2 or x > 13
+            brace = abs(x - y) <= 1 or abs(x + y - 15) <= 1
+            if rail:
+                c = YELLOW if ((x + y) // 3) % 2 == 0 else DARKER
+                side.putpixel((x, y), shade(c, 0.9 if y in (0, 15) else 1.0) + (255,))
+            elif post:
+                side.putpixel((x, y), shade(MID, 1.1 if x in (0, 15) else 0.9) + (255,))
+            elif brace:
+                side.putpixel((x, y), shade(LIGHT, 0.95) + (255,))
+    for x, y in ((3, 4), (12, 4), (3, 11), (12, 11)):
+        side.putpixel((x, y), shade(LIGHT, 1.25) + (255,))
+    top = img(DARK)
+    noise(top, 5, 78)
+    for y in range(16):
+        for x in range(16):
+            if x in (0, 15) or y in (0, 15):
+                top.putpixel((x, y), (YELLOW if ((x + y) // 2) % 2 == 0 else DARKER) + (255,))
+            elif x % 3 == 0 or y % 3 == 0:
+                top.putpixel((x, y), shade(MID, 1.05) + (255,))
+    out = os.path.join(ROOT, "textures", "block")
+    side.save(os.path.join(out, "dry_dock_side.png"))
+    top.save(os.path.join(out, "dry_dock_top.png"))
+
+
 def write(name, m):
     os.makedirs(MODELS, exist_ok=True)
     data = m.json(True)
@@ -260,7 +291,8 @@ def main():
         for part in ("main_engine", "thruster", "maneuvering_thruster"):
             write(part + tier, engine(part, tier))
             n += 1
-    print(f"{n} ship-part models")
+    dry_dock()
+    print(f"{n} ship-part models, dry dock textures")
 
 
 if __name__ == "__main__":

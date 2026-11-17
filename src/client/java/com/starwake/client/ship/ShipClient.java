@@ -82,6 +82,9 @@ public final class ShipClient {
 	/** The galaxy map (M6). */
 	private static final KeyMapping GALAXY_MAP = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.galaxy_map", InputConstants.KEY_M, CATEGORY));
+	/** M10: SCM <-> NAV flight mode. */
+	private static final KeyMapping FLIGHT_MODE = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.flight_mode", InputConstants.KEY_H, CATEGORY));
 	private static int jumpHeld;
 	/** Ticks B must be held to engage (0.75 s). */
 	private static final int QUANTUM_HOLD_TICKS = 15;
@@ -129,7 +132,13 @@ public final class ShipClient {
 			@Override
 			public int controls() {
 				return (ROLL_LEFT.isDown() ? ShipEntity.CONTROL_ROLL_LEFT : 0) | (ROLL_RIGHT.isDown() ? ShipEntity.CONTROL_ROLL_RIGHT : 0)
-						| (FREE_LOOK.isDown() ? ShipEntity.CONTROL_FREE_LOOK : 0) | (FlightControls.joystick() ? ShipEntity.CONTROL_JOYSTICK : 0);
+						| (FREE_LOOK.isDown() ? ShipEntity.CONTROL_FREE_LOOK : 0) | (FlightControls.joystick() ? ShipEntity.CONTROL_JOYSTICK : 0)
+						| (FlightControls.nav() ? ShipEntity.CONTROL_NAV : 0);
+			}
+
+			@Override
+			public float speedLimit() {
+				return FlightControls.speedLimit();
 			}
 
 			@Override
@@ -189,6 +198,9 @@ public final class ShipClient {
 			facePilotForward(client);
 			seatHint(client);
 			while (STEERING.consumeClick()) FlightControls.toggle(client);
+			while (FLIGHT_MODE.consumeClick()) {
+				if (piloting(client)) FlightControls.toggleNav(client);
+			}
 			if (piloting(client)) FlightControls.lockView(client, (ShipEntity) client.player.getVehicle(), FREE_LOOK.isDown());
 			ShipSounds.tick(client);
 			ChaseCamera.tick(client);
@@ -214,7 +226,7 @@ public final class ShipClient {
 		int controls = (ROLL_LEFT.isDown() ? ShipEntity.CONTROL_ROLL_LEFT : 0)
 				| (ROLL_RIGHT.isDown() ? ShipEntity.CONTROL_ROLL_RIGHT : 0)
 				| (FREE_LOOK.isDown() ? ShipEntity.CONTROL_FREE_LOOK : 0)
-				| (stick ? ShipEntity.CONTROL_JOYSTICK : 0);
+				| (stick ? ShipEntity.CONTROL_JOYSTICK : 0) | (FlightControls.nav() ? ShipEntity.CONTROL_NAV : 0);
 		float sx = stick ? FlightControls.sentX() : 0, sy = stick ? FlightControls.sentY() : 0;
 		if (controls != sentControls || Math.abs(sx - sentX) > 0.01f || Math.abs(sy - sentY) > 0.01f) {
 			ClientPlayNetworking.send(new ShipControlPayload(controls, false, sx, sy));
@@ -344,6 +356,8 @@ public final class ShipClient {
 	public static @Nullable ShipHit targetedShipBlock(Minecraft minecraft) {
 		Player player = minecraft.player;
 		if (player == null || player.isSpectator()) return null;
+		// M10: the pilot looks through the canopy, not at it: no outline and no mining from the Helm seat.
+		if (piloting(minecraft)) return null;
 		ShipHit hit = raycastShips(player);
 		if (hit == null) return null;
 		HitResult vanilla = minecraft.hitResult;

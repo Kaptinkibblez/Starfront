@@ -12,6 +12,7 @@
       "id": "#minecraft:nylium",
       "required": false
     },
+    "starwake:dry_dock",
     "minecraft:bedrock",
     "minecraft:gravel",
     "minecraft:clay",

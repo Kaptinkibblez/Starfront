@@ -46,6 +46,10 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 						.define('C', Items.COPPER_INGOT).unlockedBy("has_copper", has(Items.COPPER_INGOT)).save(output);
 				shaped(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.CANOPY_GLASS, 8).pattern("GGG").pattern("GIG").pattern("GGG")
 						.define('G', Items.GLASS).define('I', Items.IRON_INGOT).unlockedBy("has_glass", has(Items.GLASS)).save(output);
+				// Dry Dock (M10): gantry blocks to build ships on; the scan never takes them.
+				shaped(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.DRY_DOCK, 8).pattern("IBI").pattern("BYB").pattern("IBI")
+						.define('I', Items.IRON_INGOT).define('B', Items.IRON_BARS).define('Y', Items.DYE.yellow())
+						.unlockedBy("has_iron", has(Items.IRON_INGOT)).save(output);
 				stairBuilder(com.starwake.registry.ModBlocks.HULL_PLATING_STAIRS, net.minecraft.world.item.crafting.Ingredient.of(com.starwake.registry.ModBlocks.HULL_PLATING))
 						.unlockedBy("has_hull", has(com.starwake.registry.ModBlocks.HULL_PLATING)).save(output);
 				slab(RecipeCategory.BUILDING_BLOCKS, com.starwake.registry.ModBlocks.HULL_PLATING_SLAB, com.starwake.registry.ModBlocks.HULL_PLATING);

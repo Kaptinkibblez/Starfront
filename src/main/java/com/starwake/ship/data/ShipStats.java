@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * <pre>{@code
  * { "blocks": ["#minecraft:wool", "minecraft:white_carpet"],
  *   "mass": 0.2,            // tonnes per block (default 1.0)
- *   "thrust": 40,           // thrusters only: force at full throttle
+ *   "thrust": 800,          // thrusters only: force at full throttle, kN (M10: real units)
  *   "fuel_burn": 0.05,      // thrusters only: fuel units per tick at full throttle
  *   "fuel_capacity": 2000,  // fuel tanks only
  *   "power_output": 40,     // power plants: power generated

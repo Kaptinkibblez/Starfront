@@ -25,7 +25,7 @@ import org.joml.Vector3d;
  * cascaded generalized inverse over the six force/torque axes: O(thrusters) per solve.
  *
  * All vectors are in ship-local block coordinates. Forces are in thrust units (ship_stats
- * "thrust"); {@code ShipPhysics.thrustToAccel} turns force / mass into blocks/tick².
+ * "thrust", kN since M10); force / mass is m/s² (see {@code physics.Units}).
  */
 public final class ShipDynamics {
 	/** A thruster: where it is, which way it pushes (unit), how hard and how thirsty at full throttle. */
@@ -530,8 +530,8 @@ public final class ShipDynamics {
 	}
 
 	/**
-	 * Turning capability about a local axis: angular acceleration (rad/tick² per unit
-	 * thrustToAccel) from every thruster that twists the ship that way (in flight the flight
+	 * Turning capability about a local axis: angular acceleration (rad/s²: kN m of thruster
+	 * torque over t m² of inertia, M10) from every thruster that twists the ship that way (in flight the flight
 	 * computer balances the rest). Used by pre-flight.
 	 */
 	public double angularAuthority(Vector3d axis) {

@@ -1,10 +1,9 @@
 {
-  "thrust_to_accel": 0.05,
-  "gravity_to_accel": 0.05,
-  "drag_atmosphere": 0.998,
-  "drag_space": 0.998,
-  "max_speed": 5.0,
-  "max_speed_space": 12.5,
+  "scm_speed": 220,
+  "nav_speed_atmosphere": 400,
+  "nav_speed_space": 1500,
+  "coupled_braking": 0.12,
+  "nav_agility": 0.6,
   "turn_rate": 60.0,
   "boost_multiplier": 1.6,
   "quantum_speed": 1500,
@@ -13,5 +12,5 @@
   "quantum_min_distance": 20000,
   "quantum_standoff": 600,
   "quantum_align": 3.0,
-  "air_drag": 0.015
+  "drag_coefficient": 1.0
 }

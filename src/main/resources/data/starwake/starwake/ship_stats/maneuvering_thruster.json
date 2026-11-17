@@ -3,7 +3,7 @@
     "starwake:maneuvering_thruster"
   ],
   "mass": 0.5,
-  "thrust": 12,
+  "thrust": 240,
   "fuel_burn": 0.015,
   "power_draw": 1,
   "heat_limit": 1400,

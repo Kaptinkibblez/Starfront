@@ -25,6 +25,7 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 		add(ModBlocks.GREEBLE, stateDrop(ModBlocks.GREEBLE, com.starwake.ship.block.GreebleBlock.SHAPE));
 		add(ModBlocks.SHIP_LIGHT, stateDrop(ModBlocks.SHIP_LIGHT, com.starwake.ship.block.ShipLightBlock.TYPE, com.starwake.ship.block.ShipLightBlock.COLOR));
 		dropSelf(ModBlocks.CANOPY_GLASS);
+		dropSelf(ModBlocks.DRY_DOCK);
 		dropSelf(ModBlocks.HULL_PLATING_STAIRS);
 		add(ModBlocks.HULL_PLATING_SLAB, createSlabItemTable(ModBlocks.HULL_PLATING_SLAB));
 		for (var part : com.starwake.registry.ModShipParts.Part.values()) {

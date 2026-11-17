@@ -25,6 +25,7 @@
     "starwake:main_engine",
     "starwake:maneuvering_thruster",
     "starwake:canopy_glass",
+    "starwake:dry_dock",
     "starwake:fuel_tank",
     "starwake:seat",
     "starwake:power_plant",

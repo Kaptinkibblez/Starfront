@@ -1,5 +1,6 @@
 package com.starwake.ship.scan;
 
+import com.starwake.ship.physics.Units;
 import com.starwake.planet.Planets;
 import com.starwake.ship.articulation.Articulations;
 import com.starwake.registry.ModBlocks;
@@ -152,7 +153,7 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 
 		// Lift, at the default power split, using only thrust that doesn't tip the ship.
 		double gravity = Planets.gravityOf(level.dimension());
-		double weight = mass * gravity;
+		double weight = mass * Units.G * gravity; // kN (M10: real units)
 		double rawLift = dynamics.rawThrust(Direction.UP) * engineFactor;
 		double lift = dynamics.balancedThrust(new Vector3d(0, 1, 0)) * engineFactor;
 		if (thrusters == 0) {
@@ -191,7 +192,7 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 		for (int i = 0; i < axes.length; i++) {
 			Direction d = axes[i];
 			accel[i] = dynamics.balancedThrust(new Vector3d(d.getStepX(), d.getStepY(), d.getStepZ()))
-					* engineFactor * physics.thrustToAccel() / mass * 400;
+					* engineFactor / mass; // kN / t = m/s²
 		}
 		lines.add(new Line(Status.INFO, Component.translatable("preflight.starwake.handling",
 				fmt(accel[0]), fmt(accel[1]), fmt(accel[2]), fmt(accel[3]), fmt(accel[4]), fmt(accel[5]))));
@@ -213,7 +214,7 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 			// The weaker of the two directions (a ship that can pitch up but not down can't pitch).
 			double authority = Math.min(dynamics.angularAuthority(turnAxes[i]),
 					dynamics.angularAuthority(new Vector3d(turnAxes[i]).negate()));
-			turn[i] = Math.toDegrees(authority * engineFactor * physics.thrustToAccel()) * 400;
+			turn[i] = Math.toDegrees(authority * engineFactor); // kN m / t m² = rad/s²
 			if (turn[i] < 5) cantTurn.add(turnNames[i]);
 		}
 		lines.add(new Line(cantTurn.isEmpty() ? Status.INFO : Status.WARN, Component.translatable("preflight.starwake.turning",
@@ -224,14 +225,12 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 
 		// Air drag (M9 pass 2): the top speed full forward thrust reaches in this planet's air (where drag = thrust).
 		double density = Planets.airDensityOf(level.dimension());
-		if (density > 0 && physics.airDrag() > 0) {
-			double thrustAccel = accel[0] / 400; // balanced forward thrust, blocks/tick²
+		if (density > 0 && physics.dragCoefficient() > 0) {
 			double area = forward.getAxis() == net.minecraft.core.Direction.Axis.X ? dynamics.area().x : dynamics.area().z;
-			// Solve thrust = c ρ A v² / m + (1 - linear) v for v (blocks/tick).
-			double a = physics.airDrag() * density * area / dynamics.mass(), b = 1 - physics.dragAtmosphere();
-			double v = a > 0 ? (-b + Math.sqrt(b * b + 4 * a * thrustAccel)) / (2 * a) : physics.maxSpeed();
-			lines.add(new Line(Status.INFO, Component.translatable("preflight.starwake.drag",
-					fmt(area), fmt(Math.min(v, physics.maxSpeed()) * 20), fmt(physics.maxSpeed() * 20))));
+			// Where drag (0.5 rho Cd A v²) equals the balanced forward thrust (kN): v = sqrt(2 F / (rho Cd A)).
+			double force = accel[0] * dynamics.mass() * 1000; // N
+			double v = Math.sqrt(2 * force / (Units.AIR * density * physics.dragCoefficient() * Math.max(area, 0.1)));
+			lines.add(new Line(Status.INFO, Component.translatable("preflight.starwake.drag", fmt(area), fmt(v))));
 		}
 
 		// Landing gear (3j).

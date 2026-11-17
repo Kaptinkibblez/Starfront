@@ -25,7 +25,7 @@
     "M": "starwake:main_engine[facing=down]",
     "X": "starwake:thruster[facing=west]",
     "Y": "starwake:thruster[facing=east]",
-    "R": "starwake:thruster[facing=north]",
+    "R": "starwake:main_engine[facing=north]",
     "u": "starwake:maneuvering_thruster[facing=up]",
     "d": "starwake:maneuvering_thruster[facing=down]",
     "m": "starwake:maneuvering_thruster[facing=down]",

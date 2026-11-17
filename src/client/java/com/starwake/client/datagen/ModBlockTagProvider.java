@@ -24,7 +24,7 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(
 				key(ModBlocks.HULL_PLATING), key(ModBlocks.REGOLITH), key(ModBlocks.FERRITE_ORE));
 		builder(BlockTags.NEEDS_STONE_TOOL).add(key(ModBlocks.HULL_PLATING), key(ModBlocks.FERRITE_ORE));
-		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(key(ModBlocks.HULL_PLATING_STAIRS), key(ModBlocks.HULL_PLATING_SLAB), key(ModBlocks.GREEBLE), key(ModBlocks.SHIP_LIGHT), key(ModBlocks.HINGE), key(ModBlocks.ROTOR));
+		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(key(ModBlocks.HULL_PLATING_STAIRS), key(ModBlocks.HULL_PLATING_SLAB), key(ModBlocks.GREEBLE), key(ModBlocks.SHIP_LIGHT), key(ModBlocks.HINGE), key(ModBlocks.ROTOR), key(ModBlocks.DRY_DOCK));
 		builder(BlockTags.NEEDS_STONE_TOOL).add(key(ModBlocks.HULL_PLATING_STAIRS), key(ModBlocks.HULL_PLATING_SLAB));
 		ModBlocks.hullPieces().forEach(b -> {
 			builder(BlockTags.MINEABLE_WITH_PICKAXE).add(key(b));

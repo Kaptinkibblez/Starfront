@@ -3,7 +3,7 @@
     "starwake:thruster"
   ],
   "mass": 2.0,
-  "thrust": 40,
+  "thrust": 800,
   "fuel_burn": 0.05,
   "power_draw": 4,
   "heat_limit": 1400,

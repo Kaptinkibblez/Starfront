@@ -3,7 +3,7 @@
     "starwake:maneuvering_thruster_mk2"
   ],
   "mass": 0.425,
-  "thrust": 18.0,
+  "thrust": 360.0,
   "fuel_burn": 0.0127,
   "power_draw": 0.85,
   "heat_limit": 1610,

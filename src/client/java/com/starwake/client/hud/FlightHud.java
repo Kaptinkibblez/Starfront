@@ -318,17 +318,24 @@ public final class FlightHud {
 	}
 
 	private static void speedTape(GuiGraphicsExtractor g, Font font, int x, int cy, int half, double speed, ShipEntity ship, boolean space) {
+		// M10: no speed caps. The tape's full scale is the current mode's ceiling (SCM or NAV); the caret is the pilot's
+		// speed limit (mouse wheel), which the flight computer holds in coupled flight.
 		ShipPhysics physics = ShipPhysics.get();
-		double max = (space ? physics.maxSpeedSpace() : physics.maxSpeed()) * 20;
+		boolean nav = com.starwake.client.ship.FlightControls.nav();
+		boolean decoupled = ship.isDecoupled();
+		double ceiling = nav ? physics.navSpeed(space) : physics.scmSpeed();
+		double limit = Math.min(com.starwake.client.ship.FlightControls.speedLimit(), ceiling);
 		int top = cy - half, bottom = cy + half;
-		tape(g, x, top, bottom, speed / max, HOLO);
-		g.fill(x - 6, top, x + 1, top + 1, WARN); // top speed
+		tape(g, x, top, bottom, Math.min(1, speed / ceiling), speed > limit * 1.02 && !decoupled ? WARN : HOLO);
+		int caret = bottom - (int) Math.round((bottom - top) * Math.min(1, limit / ceiling));
+		g.fill(x - 7, caret, x + 2, caret + 1, decoupled ? HOLO_DIM : WHITE);
+		g.fill(x - 9, caret - 2, x - 7, caret + 3, decoupled ? HOLO_DIM : WHITE);
 		String value = String.format("%.0f m/s", speed);
 		int boxW = font.width(value) + 8;
 		box(g, x - 8 - boxW, cy - 6, boxW, 12);
 		g.text(font, value, x - 4 - boxW, cy - 4, WHITE, false);
-		rightText(g, font, space ? "NAV" : "SCM", x + 2, top - 11, HOLO);
-		boolean decoupled = ship.isDecoupled();
+		String mode = (nav ? "NAV " : "SCM ") + (decoupled ? "--" : String.format("%.0f", limit));
+		rightText(g, font, mode, x + 2, top - 11, nav ? GOOD : HOLO);
 		rightText(g, font, decoupled ? "DCPL" : "CPLD", x + 2, bottom + 4, decoupled ? WARN : HOLO);
 		if (Minecraft.getInstance().options.keyShift.isDown()) rightText(g, font, "BOOST", x + 2, bottom + 14, WARN);
 	}

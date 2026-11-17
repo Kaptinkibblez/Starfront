@@ -14,9 +14,10 @@ import net.minecraft.world.entity.player.Input;
  *
  * @param controls roll/free-look/joystick bits ({@code ShipEntity.CONTROL_*})
  * @param look     the pilot's view direction (world), for mouse-aim steering
+ * @param speedLimit the pilot's speed limiter (m/s, M10); SCM or NAV is the {@code CONTROL_NAV} bit
  */
 public record ShipInputPayload(int shipId, int seq, Input input, int controls, float stickX, float stickY,
-		float lookX, float lookY, float lookZ) implements CustomPacketPayload {
+		float lookX, float lookY, float lookZ, float speedLimit) implements CustomPacketPayload {
 	public static final Type<ShipInputPayload> TYPE = new Type<>(StarwakeMod.id("ship_input"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ShipInputPayload> CODEC = StreamCodec.of((buf, p) -> {
@@ -26,8 +27,9 @@ public record ShipInputPayload(int shipId, int seq, Input input, int controls, f
 		buf.writeVarInt(p.controls);
 		buf.writeFloat(p.stickX).writeFloat(p.stickY);
 		buf.writeFloat(p.lookX).writeFloat(p.lookY).writeFloat(p.lookZ);
+		buf.writeFloat(p.speedLimit);
 	}, buf -> new ShipInputPayload(buf.readVarInt(), buf.readVarInt(), Input.STREAM_CODEC.decode(buf), buf.readVarInt(),
-			buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat()));
+			buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat()));
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

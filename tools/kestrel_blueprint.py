@@ -77,7 +77,8 @@ for x in (C - 3, C + 3):
 # Strafe/yaw: medium thrusters at the sponson ends, pushing sideways (nozzles out)
 put(C - 5, 1, 8, 'X'); put(C - 5, 1, 14, 'X')
 put(C + 5, 1, 8, 'Y'); put(C + 5, 1, 14, 'Y')
-# Retros: medium thrusters at the sponson fronts, nozzles forward
+# Retros: main engines at the sponson fronts, nozzles forward (M10: with no hidden velocity damping, braking is all
+# thrust, so retros are mains, as on Star Citizen fighters)
 put(C - 4, 1, 7, 'R'); put(C + 4, 1, 7, 'R')
 # Roll: RCS up/down at the sponson tips
 put(C - 4, 2, 9, 'u'); put(C + 4, 2, 9, 'u')
@@ -113,7 +114,7 @@ palette = {
     "Q": "starwake:quantum_drive", "T": "starwake:fuel_tank",
     "E": "starwake:main_engine[facing=south]", "M": "starwake:main_engine[facing=down]",
     "X": "starwake:thruster[facing=west]", "Y": "starwake:thruster[facing=east]",
-    "R": "starwake:thruster[facing=north]",
+    "R": "starwake:main_engine[facing=north]",
     "u": "starwake:maneuvering_thruster[facing=up]", "d": "starwake:maneuvering_thruster[facing=down]",
     "m": "starwake:maneuvering_thruster[facing=down]",
     "L": "starwake:landing_gear[deployed=true]",

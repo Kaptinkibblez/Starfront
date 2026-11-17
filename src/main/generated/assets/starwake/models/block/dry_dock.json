@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "starwake:block/dry_dock_top",
+    "side": "starwake:block/dry_dock_side"
+  }
+}

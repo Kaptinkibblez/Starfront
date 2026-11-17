@@ -610,6 +610,23 @@ commit. **Don't start the next milestone until the user confirms the current one
   -> fix. Planned order (systems others depend on first):
   - [ ] **10. Flight, quantum and hulls.** Overhaul the 3a-3g scaffolds (flight model and feel, quantum/jump travel, power and
         components) now that every core system exists; the hull-shape revisit. Combat builds on this.
+    - **M10 decisions (user, 2026-11-17).** Audit found: ships merge with crafted floors (the scan only stops at terrain),
+      engine flame particles spawn ahead of the canopy at speed (stale positions), the canopy's block outline shows in the
+      pilot view, speed sits on the hard 100 m/s cap, `ShipEntity` is a 3,034-line god class. Choices:
+      - *Flight model:* **real units, SC limits**: thrust in kN, mass in t, acceleration = F/m; no hard speed caps; the flight
+        computer holds a pilot-set speed limit (**SCM** for combat, **NAV** for cruise); **decoupled is fully Newtonian**.
+      - *Drives:* **keep quantum (in-system) and jump (between stars), one flow**: pick a destination on the map, then the same
+        key spools, aligns and engages either drive, with one HUD panel.
+      - *Power and heat:* **SC-style**: heat accumulates and dissipates over time; **power pips** per system (engines, shields,
+        weapons, coolers, quantum); **weapon capacitors**; components **wear** and can be damaged or disabled; overheating hurts.
+      - *Ship edges:* a **Dry Dock** block (gantry/cradle) that never joins a ship; the scan stops at it (natural terrain is
+        still excluded).
+      - *Hulls (all four):* **missing shapes** (compound/diagonal corners where different ratios meet, 45-degree walls in plan,
+        half-height slopes, rounded noses/tapers), **corner joins** (steps, gaps, misaligned inner/outer corners, slope-to-curve
+        joins, run ends), **look** (panel lines, bevels, shading, paint), **placing** (orientation, wrong auto-connect picks, a
+        clunky Hull Tool).
+      - Build order: **10a** split `ShipEntity` + real-unit flight + SCM/NAV + Dry Dock + bug fixes; **10b** power/heat/pips/
+        capacitors/wear; **10c** unified drives; **10d** hull revisit. One jar at the end (0.10.0), then the playtest pause.
   - [ ] **11. Combat.** Ship weapons (guns, missiles, turrets on power/heat/shields/armour), personal ranged weapons, damage
         and repair; threats that are simulated or event-based (no roaming NPC ships, per the user's M9 rule).
   - [ ] **12. Alien life.** Fauna and harvestable flora per archetype, fitted to the conditions; drops that feed the chemistry.

@@ -18,8 +18,8 @@ import net.minecraft.util.profiling.ProfilerFiller;
  *
  * @param referenceDensity  g/cm3 of the alloy a block's JSON mass assumes (mild steel)
  * @param referenceToughness UTS (MPa) x elongation (%, capped at 40) of that steel: armour scales with it
- * @param reentryPeak       skin temperature (C) at full re-entry intensity into Earth-density air
- * @param reentryExponent   skin temperature ~ intensity^exponent
+ * @param reentryPeak       unused since M10 (heating is the real stagnation rise, see {@code Reentry})
+ * @param reentryExponent   unused since M10
  * @param burnRate          per second, per degree over a block's limit: a block burns off at 1
  * @param crumple           share of a crash's energy (after shields) the struck hull can soak up
  */

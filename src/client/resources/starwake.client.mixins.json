@@ -11,7 +11,8 @@
 		"WeatherMixin",
 		"ClientLevelWeatherMixin",
 		"SignEditorMixin",
-		"SkyRendererMixin"
+		"SkyRendererMixin",
+		"MouseHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

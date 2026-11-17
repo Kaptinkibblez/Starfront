@@ -3,7 +3,7 @@
     "starwake:main_engine"
   ],
   "mass": 8.0,
-  "thrust": 200,
+  "thrust": 4000,
   "fuel_burn": 0.15,
   "power_draw": 16,
   "heat_limit": 1400,

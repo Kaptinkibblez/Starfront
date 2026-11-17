@@ -20,6 +20,7 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModCreativeTabs.MAIN_TITLE_KEY, "Starwake");
 		builder.add(ModBlocks.HULL_PLATING, "Hull Plating");
 		builder.add(ModBlocks.CANOPY_GLASS, "Canopy Glass");
+		builder.add(ModBlocks.DRY_DOCK, "Dry Dock");
 		builder.add(ModBlocks.HULL_SLOPE, "Hull Slope 1:1");
 		builder.add(ModBlocks.HULL_SLOPE_2, "Hull Slope 1:2");
 		builder.add(ModBlocks.HULL_SLOPE_4, "Hull Slope 1:4");
@@ -893,8 +894,8 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("preflight.starwake.multiple_helms", "%s Helms found: a ship can only have one");
 		builder.add("preflight.starwake.no_pilot_room", "The Helm needs 2 free blocks above it for the pilot");
 		builder.add("preflight.starwake.no_thrusters", "No thrusters");
-		builder.add("preflight.starwake.lift_low", "Not enough lift: %s vs weight %s at %sg (need %s). Add downward-facing thrusters around the centre of mass, or lose mass");
-		builder.add("preflight.starwake.lift_ok", "Lift %s vs weight %s at %sg (%sx)");
+		builder.add("preflight.starwake.lift_low", "Not enough lift: %s kN vs weight %s kN at %sg (need %s kN). Add downward-facing thrusters around the centre of mass, or lose mass");
+		builder.add("preflight.starwake.lift_ok", "Lift %s kN vs weight %s kN at %sg (%sx)");
 		builder.add("preflight.starwake.blocked_exhaust", "%s thruster(s) have blocked exhaust and won't fire");
 		builder.add("preflight.starwake.handling", "Accel m/s²: fwd %s, back %s, left %s, right %s, up %s, down %s");
 		builder.add("preflight.starwake.centre_of_mass", "Centre of mass: %s, %s, %s");
@@ -902,9 +903,12 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("preflight.starwake.lift_gear_up", "Gear up (hinged parts in cruise pose): lift %s (%sx)");
 		builder.add("preflight.starwake.lift_gear_up_low", "Gear up: only %s balanced lift (%sx weight), so the ship sinks with the gear up. Add lift that doesn't swing, spread around the centre of mass");
 		builder.add("preflight.starwake.lift_wasted", "%s of lift is spent keeping level: lift thrusters are off-centre");
-		builder.add("preflight.starwake.drag", "Air drag: %s m² frontal area; full forward thrust tops out at %s m/s here (cap %s)");
+		builder.add("preflight.starwake.drag", "Air drag: %s m² frontal area; full forward thrust tops out at %s m/s here");
 		builder.add("key.starwake.decouple", "Coupled / Decoupled");
-		builder.add("message.starwake.decoupled", "DECOUPLED: no automatic braking");
+		builder.add("message.starwake.decoupled", "DECOUPLED: Newtonian flight (no braking, no hover, no speed limit)");
+		builder.add("key.starwake.flight_mode", "Flight mode (SCM / NAV)");
+		builder.add("message.starwake.mode.scm", "SCM: combat speeds (mouse wheel sets the limit)");
+		builder.add("message.starwake.mode.nav", "NAV: cruise speeds (mouse wheel sets the limit)");
 		builder.add("message.starwake.coupled", "COUPLED: flight computer brakes drift");
 		builder.add("commands.starwake.ship.blueprint", "Placed %s. Helm at %s");
 		builder.add("preflight.starwake.turning", "Turning °/s²: pitch %s, yaw %s, roll %s");
