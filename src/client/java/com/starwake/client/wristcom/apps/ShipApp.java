@@ -1,7 +1,6 @@
 package com.starwake.client.wristcom.apps;
 
 import com.starwake.client.hud.FlightHud;
-import com.starwake.client.screen.PowerSliders;
 import com.starwake.client.ship.ShipLocalMotion;
 import com.starwake.client.wristcom.ShipReports;
 import com.starwake.client.wristcom.WristcomApp;
@@ -83,10 +82,56 @@ public class ShipApp implements WristcomApp {
 		powerLabelY = -1;
 		if (pilot) {
 			powerLabelY = sy;
-			new PowerSliders(ship.powerPercents()).create(sx, sy + 12, SIDE, screen::add);
+			// M10: power pips per subsystem, - and + on each row (the bars are drawn in render).
+			var subs = com.starwake.ship.systems.ShipSystems.Subsystem.values();
+			for (int i = 0; i < subs.length; i++) {
+				int index = i, ry = sy + 12 + i * PIP_ROW;
+				screen.add(Button.builder(Component.literal("-"), b -> stepPip(index, -1)).bounds(sx, ry, 14, 14).build());
+				screen.add(Button.builder(Component.literal("+"), b -> stepPip(index, 1)).bounds(sx + SIDE - 14, ry, 14, 14).build());
+			}
 			screen.add(Button.builder(Component.translatable("wristcom.ship.toggle_mode"),
 					b -> ClientPlayNetworking.send(new ShipQuantumPayload(ShipQuantumPayload.ACTION_DECOUPLE)))
-					.bounds(sx, sy + 80, SIDE, 18).build());
+					.bounds(sx, sy + 16 + subs.length * PIP_ROW, SIDE, 18).build());
+		}
+	}
+
+	private static final int PIP_ROW = 16;
+	private static final int[] PIP_COLORS = {0xFF6FE3FF, 0xFF6FA8FF, 0xFFFF7A5A, 0xFF7CFFB2, 0xFFC08CFF};
+
+	/** One pip more or less for a subsystem (the server refits the whole set). */
+	private void stepPip(int index, int delta) {
+		ShipEntity ship = ship();
+		if (ship == null) return;
+		int[] pips = ship.pips(), limits = ship.pipLimits();
+		pips[index] = Math.clamp(pips[index] + delta, 0, limits[index]);
+		int total = 0;
+		for (int p : pips) total += p;
+		if (delta > 0 && total > com.starwake.ship.systems.ShipSystems.PIPS) return; // no pips left: take some elsewhere first
+		ClientPlayNetworking.send(new com.starwake.network.ShipPowerPayload(java.util.Arrays.stream(pips).boxed().toList()));
+	}
+
+	/** The pip rows: name, a segment per usable pip (lit = given), and the free pips. */
+	private void renderPips(WristcomScreen screen, GuiGraphicsExtractor g, ShipEntity ship, int x, int y) {
+		var font = screen.font();
+		int[] pips = ship.pips(), limits = ship.pipLimits();
+		int used = 0;
+		for (int p : pips) used += p;
+		String head = Component.translatable("wristcom.ship.power").getString() + "  " + used + "/" + com.starwake.ship.systems.ShipSystems.PIPS;
+		g.text(font, head, x, y + 2, accent(), false);
+		var subs = com.starwake.ship.systems.ShipSystems.Subsystem.values();
+		for (int i = 0; i < subs.length; i++) {
+			int ry = y + 12 + i * PIP_ROW, bx = x + 16, bw = SIDE - 32;
+			g.text(font, subs[i].code.toUpperCase(java.util.Locale.ROOT), bx + 1, ry + 3, WristcomScreen.DIM, false);
+			int lx = bx + 24, lw = bw - 24, n = Math.max(1, limits[i]);
+			if (limits[i] == 0) {
+				g.text(font, "--", lx + 2, ry + 3, WristcomScreen.DIM, false);
+				continue;
+			}
+			float seg = lw / (float) n;
+			for (int k = 0; k < n; k++) {
+				int x0 = lx + Math.round(k * seg), x1 = lx + Math.round((k + 1) * seg) - 1;
+				g.fill(x0, ry + 3, Math.max(x0 + 1, x1), ry + 11, k < pips[i] ? PIP_COLORS[i] : 0x40FFFFFF);
+			}
 		}
 	}
 
@@ -117,7 +162,7 @@ public class ShipApp implements WristcomApp {
 				ly += 11;
 			}
 		}
-		if (powerLabelY >= 0) g.text(font, Component.translatable("wristcom.ship.power"), x + width - SIDE, powerLabelY + 2, accent(), false);
+		if (powerLabelY >= 0 && ship != null) renderPips(screen, g, ship, x + width - SIDE, powerLabelY);
 	}
 
 	/** The server's report, wrapped, with status icons; scrolls with the mouse wheel. */
@@ -163,7 +208,7 @@ public class ShipApp implements WristcomApp {
 				{"Fusion", ship.fusion() + " / " + ship.fusionCapacity()},
 				{"Shields", Math.round(ship.shield()) + " / " + Math.round(ship.shieldMax())},
 				{"Engines", Math.round(ship.engineFactor() * 100) + "% power"},
-				{"Plants", ship.thermalFactor() < 0.999f ? "OVERHEATING " + Math.round(ship.thermalFactor() * 100) + "%" : "nominal"},
+				{"Heat", (ship.heatLevel() >= 1 ? "OVERHEATING " : "") + Math.round(ship.heatLevel() * 100) + "%"},
 				{"Flight", ship.isDecoupled() ? "DECOUPLED" : "Coupled"},
 				{"Speed", String.format("%.0f m/s", ship.recentVelocity().length() * 20)},
 				{"Quantum", ship.isQuantumTravelling() ? "in transit" : ship.quantumProgress() >= 0 ? "armed" : "idle"}};

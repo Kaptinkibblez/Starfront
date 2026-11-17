@@ -8,7 +8,9 @@ import com.starwake.ship.block.FuelTankBlockEntity;
 import com.starwake.ship.block.HelmBlock;
 import com.starwake.ship.block.ThrusterBlock;
 import com.starwake.ship.data.ShipStats;
-import com.starwake.ship.systems.PowerAllocation;
+import com.starwake.ship.ShipPower;
+import com.starwake.ship.systems.PowerPips;
+import com.starwake.ship.systems.ShipSystems.Subsystem;
 import com.starwake.ship.systems.ShipDynamics;
 import com.starwake.ship.systems.ShipSystems;
 import com.starwake.ship.data.ShipPhysics;
@@ -87,8 +89,10 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 			double massFactor = rating.massFactor();
 			mass += stats.mass() * massFactor;
 			boolean clear = !(state.getBlock() instanceof ThrusterBlock) || !ship.contains(pos.relative(state.getValue(ThrusterBlock.FACING)));
-			systems.add(state, clear, rating.stats());
-			dynamics.add(pos, state, clear, massFactor, rating.stats());
+			// M10: worn parts work less well (disabled below 25%).
+			var partStats = com.starwake.ship.data.ShipMaterials.withHealth(rating.stats(), com.starwake.ship.data.ShipMaterials.health(be));
+			systems.add(state, clear, partStats);
+			dynamics.add(pos, state, clear, massFactor, partStats);
 			if (state.is(ModBlocks.HELM)) {
 				helms++;
 			} else if (state.getBlock() instanceof ThrusterBlock) {
@@ -123,25 +127,34 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 		}
 
 		// --- Power and cooling -------------------------------------------------------------
-		PowerAllocation split = PowerAllocation.DEFAULT;
+		// M10: power pips (auto split) and the heat balance at full burn.
+		PowerPips split = PowerPips.AUTO.normalise(systems);
+		double engineFactor = systems.factor(Subsystem.ENGINES, split);
 		if (systems.powerPlants() == 0) {
 			lines.add(new Line(Status.FAIL, Component.translatable("preflight.starwake.no_power")));
 			canFly = false;
 		} else {
-			lines.add(new Line(Status.PASS, Component.translatable("preflight.starwake.power",
-					systems.powerPlants(), fmt(systems.powerOutput()))));
-			if (systems.thermalFactor() < 1.0) {
-				lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.overheating",
-						fmt(systems.heat()), fmt(systems.cooling()), pct(systems.thermalFactor()))));
+			int wanted = 0;
+			for (Subsystem sub : Subsystem.values()) wanted += systems.maxPips(sub);
+			lines.add(new Line(wanted > ShipSystems.PIPS ? Status.WARN : Status.PASS, Component.translatable("preflight.starwake.pips",
+					systems.powerPlants(), fmt(systems.powerOutput()), ShipSystems.PIPS, fmt(systems.pipPower()),
+					systems.maxPips(Subsystem.ENGINES), systems.maxPips(Subsystem.SHIELDS), systems.maxPips(Subsystem.COOLERS),
+					systems.maxPips(Subsystem.QUANTUM), wanted)));
+			double plantHeat = systems.heat() * split.total() / (double) ShipSystems.PIPS;
+			double fullBurn = plantHeat + 0.5 * systems.want(Subsystem.ENGINES) * engineFactor;
+			double cooling = systems.cooling() * systems.factor(Subsystem.COOLERS, split);
+			if (cooling >= fullBurn) {
+				lines.add(new Line(Status.PASS, Component.translatable("preflight.starwake.cooling_ok", fmt(cooling), fmt(fullBurn))));
 			} else {
-				lines.add(new Line(Status.PASS, Component.translatable("preflight.starwake.cooling",
-						fmt(systems.cooling()), fmt(systems.heat()))));
+				double seconds = ShipPower.BUFFER_SECONDS * Math.max(10, systems.heat()) / (fullBurn - cooling);
+				lines.add(new Line(cooling >= plantHeat ? Status.WARN : Status.FAIL, Component.translatable(
+						cooling >= plantHeat ? "preflight.starwake.cooling_burst" : "preflight.starwake.cooling_low",
+						fmt(cooling), fmt(fullBurn), fmt(seconds))));
 			}
-		}
-		double engineFactor = systems.engineFactor(split);
-		if (systems.powerPlants() > 0 && engineFactor < 1.0) {
-			lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.engines_underpowered",
-					fmt(systems.engineDraw()), fmt(systems.availablePower() * split.engines()), pct(engineFactor))));
+			if (engineFactor < 1.0) {
+				lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.engines_underpowered",
+						fmt(systems.engineDraw()), fmt(split.get(Subsystem.ENGINES) * systems.pipPower()), pct(engineFactor))));
+			}
 		}
 
 		// --- Thrust physics (3h): what the flight computer can do with this layout ------------
@@ -257,13 +270,13 @@ public record PreflightReport(List<Line> lines, boolean canFly, boolean spaceCap
 			lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.no_shields")));
 		} else {
 			lines.add(new Line(Status.PASS, Component.translatable("preflight.starwake.shields",
-					fmt(systems.shieldCapacity()), pct(systems.shieldFactor(split)))));
+					fmt(systems.shieldCapacity()), pct(systems.factor(Subsystem.SHIELDS, split)))));
 		}
 		if (!systems.hasQuantumDrive()) {
 			lines.add(new Line(Status.WARN, Component.translatable("preflight.starwake.no_quantum")));
 		} else {
 			lines.add(new Line(Status.PASS, Component.translatable("preflight.starwake.quantum",
-					fmt(systems.quantumSpool() / Math.max(0.01, systems.quantumFactor(split))))));
+					fmt(systems.quantumSpool() / Math.max(0.01, systems.factor(Subsystem.QUANTUM, split))))));
 		}
 
 		// --- Cabin seal (needed to leave the atmosphere) -----------------------------------

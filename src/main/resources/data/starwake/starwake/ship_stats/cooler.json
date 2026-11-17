@@ -3,5 +3,6 @@
     "starwake:cooler"
   ],
   "mass": 1.5,
-  "cooling": 40
+  "cooling": 40,
+  "power_draw": 4
 }

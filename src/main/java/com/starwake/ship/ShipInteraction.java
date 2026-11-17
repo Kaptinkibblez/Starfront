@@ -146,8 +146,24 @@ public final class ShipInteraction {
 			}
 			player.sendOverlayMessage(Component.translatable("message.starwake.fuel_tank.gauge_fusion", ship.fuel(), ship.fuelCapacity(),
 					ship.fusion(), ship.fusionCapacity()));
+		} else if (ship.components().contains(payload.local()) && isPlate(player.getMainHandItem())) {
+			// M10: a metal plate patches a worn part (25% a plate).
+			ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
+			if (ship.power.repair(payload.local())) {
+				if (!player.isCreative()) stack.shrink(1);
+				player.level().playSound(null, BlockPos.containing(ship.blockCenter(payload.local())), net.minecraft.sounds.SoundEvents.ANVIL_USE,
+						net.minecraft.sounds.SoundSource.BLOCKS, 0.6f, 1.4f);
+				player.sendOverlayMessage(Component.translatable("message.starwake.power.repaired", state.getBlock().getName(),
+						Math.round(ship.power.health(payload.local()) * 100)));
+			} else {
+				player.sendOverlayMessage(Component.translatable("message.starwake.power.like_new"));
+			}
 		} else {
 			useInPlot(player, ship, payload);
 		}
+	}
+
+	private static boolean isPlate(ItemStack stack) {
+		return stack.getItem() instanceof com.starwake.metal.MetalItem metal && metal.form() == com.starwake.metal.MetalForm.PLATE;
 	}
 }

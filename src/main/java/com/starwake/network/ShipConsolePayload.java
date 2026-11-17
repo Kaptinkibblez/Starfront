@@ -20,7 +20,7 @@ import net.minecraft.resources.Identifier;
  * @param actionEnabled    whether the main button (Assemble / Disassemble) is usable
  * @param destinations     planets a ship in space can set a course for (empty otherwise)
  * @param destinationNames display names matching {@code destinations}
- * @param power            power split percents [engines, shields, quantum] for an assembled ship (else empty)
+ * @param power            power pips per subsystem (M10) for an assembled ship (else empty)
  */
 public record ShipConsolePayload(BlockPos helm, int shipId, List<Integer> status, List<Component> lines,
 		boolean actionEnabled, List<Identifier> destinations, List<Component> destinationNames, List<Integer> power) implements CustomPacketPayload {

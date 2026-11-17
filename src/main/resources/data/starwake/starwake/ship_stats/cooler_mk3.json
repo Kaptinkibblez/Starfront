@@ -3,5 +3,6 @@
     "starwake:cooler_mk3"
   ],
   "mass": 1.08,
-  "cooling": 88.0
+  "cooling": 88.0,
+  "power_draw": 2.88
 }

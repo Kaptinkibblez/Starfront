@@ -16,7 +16,7 @@ public class HomeApp implements WristcomApp {
 	private static final String[][] CONTROLS = {
 			{"Mouse", "aim the nose"}, {"W/S A/D", "thrust fwd/back, strafe"}, {"Space / Ctrl", "up / down"},
 			{"Z / C", "roll"}, {"Shift", "boost"}, {"Alt", "free look"}, {"V", "coupled / decoupled"},
-			{"B tap / hold", "quantum mode / engage"}, {"R", "ship console"}, {"X", "leave seat"}, {"G", "Wristcom"}};
+			{"Wheel / H", "speed limit / SCM-NAV"}, {"B tap / hold", "quantum mode / engage"}, {"R / X / G", "console / leave / Wristcom"}};
 
 	@Override public Component title() { return Component.translatable("wristcom.app.home"); }
 	@Override public String glyph() { return "H"; }

@@ -84,6 +84,7 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 										.copyComponentsFromBlockEntity(net.minecraft.world.level.storage.loot.parameters.LootContextParams.BLOCK_ENTITY)
 										.include(com.starwake.registry.ModComponents.COMPOSITION)
 										.include(com.starwake.registry.ModComponents.TEMPER)
-										.include(com.starwake.registry.ModComponents.QUALITY))))));
+										.include(com.starwake.registry.ModComponents.QUALITY)
+										.include(com.starwake.registry.ModComponents.HEALTH))))));
 	}
 }

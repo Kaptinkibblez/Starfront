@@ -83,8 +83,7 @@ public final class ModNetworking {
 		ServerPlayNetworking.registerGlobalReceiver(ShipPowerPayload.TYPE, (payload, context) -> {
 			// Only the pilot routes power; the server normalizes whatever it receives.
 			if (context.player().getVehicle() instanceof com.starwake.ship.ShipEntity ship && ship.pilot() == context.player()) {
-				ship.setAllocation(com.starwake.ship.systems.PowerAllocation.fromPercents(
-						payload.engines(), payload.shields(), payload.quantum()));
+				ship.power.setPips(com.starwake.ship.systems.PowerPips.of(payload.pips().stream().mapToInt(Integer::intValue).toArray()));
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(ShipQuantumPayload.TYPE, (payload, context) -> {

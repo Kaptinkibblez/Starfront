@@ -13,7 +13,8 @@
             "include": [
               "starwake:composition",
               "starwake:temper",
-              "starwake:quality"
+              "starwake:quality",
+              "starwake:health"
             ],
             "source": "block_entity"
           },

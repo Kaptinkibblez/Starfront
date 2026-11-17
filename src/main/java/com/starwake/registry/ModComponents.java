@@ -52,6 +52,11 @@ public final class ModComponents {
 			StarwakeMod.id("quality"), DataComponentType.<Float>builder().persistent(com.mojang.serialization.Codec.floatRange(0, 10))
 					.networkSynchronized(ByteBufCodecs.FLOAT).build());
 
+	/** A ship part's condition (M10): 1 = new; wears with overheating and impacts; disabled below 0.25; plates repair it. */
+	public static final DataComponentType<Float> HEALTH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			StarwakeMod.id("health"), DataComponentType.<Float>builder().persistent(com.mojang.serialization.Codec.floatRange(0, 1))
+					.networkSynchronized(ByteBufCodecs.FLOAT).build());
+
 	/** Survey Suit upgrades fitted in the Fabricator (M8h): lead_lining, oxygen_tank, thermal_layer, armor_insert. */
 	public static final DataComponentType<java.util.List<String>> SUIT_UPGRADES = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
 			StarwakeMod.id("suit_upgrades"), DataComponentType.<java.util.List<String>>builder()

@@ -417,21 +417,28 @@ public final class FlightHud {
 		bar(g, font, x + half + 8, y, half - 52, "SHLD", ship.shield(), ship.shieldMax(), 0xFF6EA8FF);
 
 		int row = y + 11;
+		// M10: pips per subsystem as one segmented bar (ENG cyan, SHD blue, WPN red, CLR green, QT violet), then heat.
 		g.text(font, "PWR", x, row, HOLO_DIM, false);
 		int px = x + 26, pw = 48;
-		int[] split = ship.powerPercents();
-		int e = pw * split[0] / 100, sh = pw * split[1] / 100;
-		g.fill(px, row + 1, px + e, row + 7, GOOD);
-		g.fill(px + e, row + 1, px + e + sh, row + 7, 0xFF6EA8FF);
-		g.fill(px + e + sh, row + 1, px + pw, row + 7, 0xFFC27BFF);
+		int[] pips = ship.pips();
+		int[] pipColors = {HOLO, 0xFF6EA8FF, ALERT, GOOD, 0xFFC27BFF};
+		float seg = pw / (float) com.starwake.ship.systems.ShipSystems.PIPS;
+		int k = 0;
+		g.fill(px, row + 1, px + pw, row + 7, HOLO_FAINT);
+		for (int i = 0; i < pips.length; i++) {
+			for (int n = 0; n < pips[i]; n++, k++) {
+				int x0 = px + Math.round(k * seg), x1 = px + Math.round((k + 1) * seg) - 1;
+				g.fill(x0, row + 1, Math.max(x0 + 1, x1), row + 7, pipColors[i]);
+			}
+		}
 
 		java.util.List<String> items = new java.util.ArrayList<>();
 		java.util.List<Integer> colors = new java.util.ArrayList<>();
 		items.add("ENG " + Math.round(ship.engineFactor() * 100) + "%");
 		colors.add(ship.engineFactor() < 0.75 ? WARN : HOLO);
-		float thermal = ship.thermalFactor();
-		items.add(thermal < 0.999f ? "HEAT " + Math.round(thermal * 100) + "%" : "TEMP OK");
-		colors.add(thermal < 0.999f ? ALERT : HOLO_DIM);
+		float heat = ship.heatLevel();
+		items.add("HEAT " + Math.round(heat * 100) + "%");
+		colors.add(heat >= 1 ? ALERT : heat > 0.75f ? WARN : HOLO_DIM);
 		if (ship.gearCount() > 0) {
 			items.add(ship.isGearDown() ? "GEAR DN" : "GEAR UP");
 			colors.add(ship.isGearDown() ? GOOD : HOLO_DIM);
@@ -479,7 +486,7 @@ public final class FlightHud {
 				colors.add(blink ? ALERT : WARN);
 			}
 		}
-		if (ship.thermalFactor() < 0.999f) {
+		if (ship.heatLevel() >= 1) {
 			texts.add(Component.translatable("hud.starwake.overheat"));
 			colors.add(ALERT);
 		}

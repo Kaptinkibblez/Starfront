@@ -48,6 +48,34 @@ public final class ShipMaterials {
 				s.quantumSpool() * down, s.jumpRange() * up, s.jumpSpool() * down, s.heatLimit(), s.armor());
 	}
 
+	/** A part below this health is disabled (M10). */
+	public static final double DISABLED_BELOW = 0.25;
+
+	/** How well a part works at a health (M10): 0 when disabled, else 40% + 60% x health. */
+	public static double effectiveness(double health) {
+		return health < DISABLED_BELOW ? 0 : 0.4 + 0.6 * health;
+	}
+
+	/** A part's output-type stats scaled by its condition (M10 wear); mass, heat limit and armour don't change. */
+	public static ShipStats.BlockStats withHealth(ShipStats.BlockStats s, double health) {
+		if (health >= 0.999) return s;
+		double e = effectiveness(health);
+		return new ShipStats.BlockStats(s.mass(), s.thrust() * e, s.fuelBurn(), s.fuelCapacity(),
+				s.powerOutput() * e, s.heat(), s.cooling() * e, s.powerDraw(), s.shieldCapacity() * e, s.shieldRegen() * e,
+				e <= 0 ? 0 : s.quantumSpool() / e, e <= 0 ? 0 : s.jumpRange() * e, e <= 0 ? 0 : s.jumpSpool() / e, s.heatLimit(), s.armor());
+	}
+
+	/** A placed part's health (M10), 1 when absent. */
+	public static float health(@Nullable BlockEntity be) {
+		Float h = be == null ? null : be.components().get(com.starwake.registry.ModComponents.HEALTH);
+		return h == null ? 1f : h;
+	}
+
+	/** Health read from saved block-entity NBT (assembled ships). */
+	public static float health(Optional<CompoundTag> data) {
+		return data.flatMap(t -> t.getCompound("components")).flatMap(c -> c.getFloat("starwake:health")).orElse(1f);
+	}
+
 	/** Quality stored on any block entity (parts, fuel tanks), 1 when absent. */
 	public static double quality(@Nullable BlockEntity be) {
 		Float q = be == null ? null : be.components().get(com.starwake.registry.ModComponents.QUALITY);

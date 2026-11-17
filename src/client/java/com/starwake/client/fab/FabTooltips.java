@@ -28,6 +28,12 @@ public final class FabTooltips {
 				lines.add(Component.translatable("tooltip.starwake.quality", String.format("%.2f", q), Math.round((q - 1) * 100))
 						.withColor(q > 1.001 ? GOOD : DIM));
 			}
+			Float health = stack.get(ModComponents.HEALTH);
+			if (health != null && health < 0.999f) {
+				// M10: a worn ship part.
+				lines.add(Component.translatable(health < com.starwake.ship.data.ShipMaterials.DISABLED_BELOW
+						? "tooltip.starwake.health.disabled" : "tooltip.starwake.health", Math.round(health * 100)).withColor(0xFFFFB347));
+			}
 		});
 	}
 }

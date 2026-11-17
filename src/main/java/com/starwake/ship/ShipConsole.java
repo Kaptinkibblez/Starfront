@@ -53,11 +53,19 @@ public final class ShipConsole {
 		boolean stationary = ship.getDeltaMovement().lengthSqr() < 1.0e-4;
 		boolean inSpace = SpaceTravel.isSpace(ship.level());
 		var systems = ship.systems();
+		double heat = ship.power.heatLevel();
 		add(status, lines, systems.powerPlants() == 0 ? PreflightReport.Status.FAIL
-						: systems.thermalFactor() < 1 ? PreflightReport.Status.WARN : PreflightReport.Status.PASS,
-				Component.translatable("console.starwake.ship.power", String.format("%.0f", systems.availablePower()),
-						String.format("%.0f/%.0f", systems.cooling(), systems.heat()),
-						Math.round(systems.engineFactor(ship.allocation()) * 100) + "%", String.format("%.0f", ship.shield())));
+						: heat >= 1 ? PreflightReport.Status.WARN : PreflightReport.Status.PASS,
+				Component.translatable("console.starwake.ship.power", String.format("%.0f", systems.powerOutput()),
+						Math.round(heat * 100) + "%",
+						Math.round(ship.power.factor(com.starwake.ship.systems.ShipSystems.Subsystem.ENGINES) * 100) + "%",
+						String.format("%.0f", ship.shield())));
+		for (var worn : ship.power.worn().entrySet()) {
+			var state = ship.structure() == null ? null : ship.structure().get(worn.getKey());
+			if (state == null) continue;
+			add(status, lines, worn.getValue() < com.starwake.ship.data.ShipMaterials.DISABLED_BELOW ? PreflightReport.Status.FAIL : PreflightReport.Status.WARN,
+					Component.translatable("console.starwake.ship.worn", state.getBlock().getName(), Math.round(worn.getValue() * 100)));
+		}
 		add(status, lines, ship.isSealed() ? PreflightReport.Status.PASS : PreflightReport.Status.WARN,
 				Component.translatable(ship.isSealed() ? "console.starwake.ship.sealed" : "console.starwake.ship.unsealed"));
 		List<Identifier> destinations = new ArrayList<>();
@@ -90,7 +98,7 @@ public final class ShipConsole {
 		ServerPlayNetworking.send(player, new ShipConsolePayload(
 				BlockPos.containing(ship.blockCenter(ship.helmLocal())), ship.getId(), status, lines,
 				stationary && !inSpace, destinations, destinationNames,
-				java.util.Arrays.stream(ship.allocation().percents()).boxed().toList()));
+				ship.power.pips().asList()));
 	}
 
 	private static void add(List<Integer> status, List<Component> lines, PreflightReport.Status s, Component line) {

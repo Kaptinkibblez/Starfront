@@ -56,6 +56,26 @@ public final class ShipCommands {
 										.then(Commands.argument("fuel", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
 												.then(Commands.argument("fusion", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
 														.executes(ShipCommands::refuel))))
+								// M10 testing: force the heat level / every part's condition (percent).
+								.then(Commands.literal("heat")
+										.then(Commands.argument("percent", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 200))
+												.executes(ctx -> {
+													ShipEntity ship = nearest(ctx.getSource());
+													if (ship == null) return 0;
+													ship.power.setHeatLevel(com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "percent") / 100.0);
+													ctx.getSource().sendSuccess(() -> Component.literal("Heat set"), false);
+													return 1;
+												})))
+								.then(Commands.literal("condition")
+										.then(Commands.argument("percent", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 100))
+												.executes(ctx -> {
+													ShipEntity ship = nearest(ctx.getSource());
+													if (ship == null) return 0;
+													float h = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "percent") / 100f;
+													ship.power.setAll(h);
+													ctx.getSource().sendSuccess(() -> Component.literal("Condition of " + ship.components().size() + " parts set"), false);
+													return 1;
+												})))
 								.then(Commands.literal("disassemble").executes(ShipCommands::disassemble))
 								.then(Commands.literal("pilot").executes(ShipCommands::pilot))
 								.then(Commands.literal("info")

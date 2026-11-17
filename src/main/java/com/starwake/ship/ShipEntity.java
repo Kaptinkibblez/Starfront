@@ -45,7 +45,6 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import com.starwake.ship.systems.PowerAllocation;
 import com.starwake.ship.systems.ShipDynamics;
 import com.starwake.ship.systems.ShipSystems;
 import org.joml.Quaternionf;
@@ -93,7 +92,10 @@ public class ShipEntity extends Entity {
 	/** Packed power split percents (0-100 each): engines * 1_000_000 + shields * 1000 + quantum. */
 	private static final EntityDataAccessor<Integer> POWER_SPLIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> ENGINE_FACTOR = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	/** M10: heat as a fraction of the buffer (1 = overheating). */
 	private static final EntityDataAccessor<Float> THERMAL = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	/** M10: most pips each subsystem can use (5 bits each), for the pip screen. */
+	private static final EntityDataAccessor<Integer> PIP_MAX = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	/** Quantum spool progress 0..1, or -1 when not spooling. */
 	private static final EntityDataAccessor<Float> QUANTUM = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	/** Orbited planet's dimension id ("" when not in space / unknown). */
@@ -148,7 +150,8 @@ public class ShipEntity extends Entity {
 	private Direction forward = Direction.NORTH;
 	private Vec3 pivot = Vec3.ZERO;
 	private int fuelCapacity;
-	private PowerAllocation allocation = PowerAllocation.DEFAULT;
+	/** Pips, heat, wear and the weapon capacitor (M10). */
+	public final ShipPower power = new ShipPower(this);
 	private ShipSystems systems = new ShipSystems();
 	/** Quantum drive (3g). Mode, target and spool aren't saved; an unfinished jump is resumed. */
 	private boolean quantumMode;
@@ -361,6 +364,13 @@ public class ShipEntity extends Entity {
 		BlockState state = entry.state();
 		BlockPos pos = entry.pos();
 		ShipMaterials.Rating rating = ShipMaterials.rate(state, ShipMaterials.of(entry.blockEntity()), ShipMaterials.quality(entry.blockEntity()));
+		ShipStats.BlockStats base = rating.stats();
+		if (base.thrust() > 0 || base.powerOutput() > 0 || base.cooling() > 0 || base.shieldCapacity() > 0 || base.quantumSpool() > 0
+				|| base.jumpRange() > 0) {
+			// M10: a worn part works less well (and not at all below 25%).
+			float health = power.load(pos, ShipMaterials.health(entry.blockEntity()));
+			rating = new ShipMaterials.Rating(rating.massFactor(), rating.heatLimit(), rating.armor(), ShipMaterials.withHealth(base, health));
+		}
 		ratings.put(pos, rating);
 		model.add(pos, state, exhaustClear(pos, state), rating.massFactor(), rating.stats());
 		if (state.getBlock() instanceof com.starwake.ship.block.LandingGearBlock) gear.add(pos);
@@ -370,7 +380,7 @@ public class ShipEntity extends Entity {
 		} else if (state.getBlock() instanceof SeatBlock) {
 			seats.add(pos);
 		}
-		ShipStats.BlockStats st = rating.stats();
+		ShipStats.BlockStats st = base; // what the part is, worn or not (a disabled part is still a part)
 		if (state.getBlock() instanceof ThrusterBlock || st.powerOutput() > 0 || st.heat() > 0 || st.cooling() > 0 || st.powerDraw() > 0
 				|| st.shieldCapacity() > 0 || st.quantumSpool() > 0 || st.jumpRange() > 0 || st.fuelCapacity() > 0) {
 			components.add(pos);
@@ -436,6 +446,7 @@ public class ShipEntity extends Entity {
 			capacity += stats.fuelCapacity();
 		}
 		componentFuelCapacity = capacity;
+		power.refit();
 		publishSystems();
 	}
 
@@ -535,14 +546,32 @@ public class ShipEntity extends Entity {
 		return dx * dx + dy * dy + dz * dz;
 	}
 
-	private void publishSystems() {
+	/** M10: re-reads some parts (their health changed) without touching anything else. */
+	void refreshParts(java.util.Set<BlockPos> parts) {
+		if (structure == null) return;
+		Map<BlockPos, ShipStructure.@Nullable Entry> changes = new java.util.LinkedHashMap<>();
+		for (BlockPos pos : parts) {
+			ShipStructure.Entry entry = structure.entry(pos);
+			if (entry != null) changes.put(pos, entry);
+		}
+		if (!changes.isEmpty()) applyIncremental(structure, changes);
+	}
+
+	/** Functional parts (local positions). */
+	public java.util.Set<BlockPos> components() {
+		return java.util.Collections.unmodifiableSet(components);
+	}
+
+	void publishSystems() {
 		if (level() == null || level().isClientSide()) return;
 		entityData.set(SHIELD_MAX, (float) systems.shieldCapacity());
 		entityData.set(SHIELD, (float) Math.min(entityData.get(SHIELD), systems.shieldCapacity()));
-		int[] p = allocation.percents();
-		entityData.set(POWER_SPLIT, p[0] * 1_000_000 + p[1] * 1000 + p[2]);
-		entityData.set(ENGINE_FACTOR, (float) systems.engineFactor(allocation));
-		entityData.set(THERMAL, (float) systems.thermalFactor());
+		entityData.set(POWER_SPLIT, power.pips().pack());
+		int max = 0;
+		for (var sub : ShipSystems.Subsystem.values()) max |= Math.min(31, systems.maxPips(sub)) << (5 * sub.ordinal());
+		entityData.set(PIP_MAX, max);
+		entityData.set(ENGINE_FACTOR, (float) power.factor(ShipSystems.Subsystem.ENGINES));
+		entityData.set(THERMAL, (float) power.heatLevel());
 		entityData.set(ORBIT, orbiting == null ? "" : orbiting.identifier().toString());
 	}
 
@@ -831,9 +860,10 @@ public class ShipEntity extends Entity {
 		builder.define(SHIELD_MAX, 0f);
 		builder.define(SKIN_TEMP, 0f);
 		builder.define(HULL_LIMIT, 0f);
-		builder.define(POWER_SPLIT, 60_020_020);
+		builder.define(POWER_SPLIT, 0);
+		builder.define(PIP_MAX, 0);
 		builder.define(ENGINE_FACTOR, 1f);
-		builder.define(THERMAL, 1f);
+		builder.define(THERMAL, 0f);
 		builder.define(QUANTUM, -1f);
 		builder.define(ORBIT, "");
 		builder.define(QT_STATE, 0);
@@ -860,7 +890,8 @@ public class ShipEntity extends Entity {
 	public float shield() { return entityData.get(SHIELD); }
 	public float shieldMax() { return entityData.get(SHIELD_MAX); }
 	public float engineFactor() { return entityData.get(ENGINE_FACTOR); }
-	public float thermalFactor() { return entityData.get(THERMAL); }
+	/** Heat as a fraction of the buffer (M10; 1 = overheating). */
+	public float heatLevel() { return entityData.get(THERMAL); }
 	/** Quantum spool 0..1, or -1 when the drive isn't in quantum mode. */
 	public float quantumProgress() { return entityData.get(QUANTUM); }
 	public int quantumState() { return entityData.get(QT_STATE); }
@@ -905,18 +936,16 @@ public class ShipEntity extends Entity {
 		return new Vec3(v.x, v.y, v.z);
 	}
 	public String orbitId() { return entityData.get(ORBIT); }
-	public int[] powerPercents() {
-		int packed = entityData.get(POWER_SPLIT);
-		return new int[] {packed / 1_000_000, packed / 1000 % 1000, packed % 1000};
+	/** Synced pips per subsystem (ShipSystems.Subsystem order). */
+	public int[] pips() {
+		return com.starwake.ship.systems.PowerPips.unpack(entityData.get(POWER_SPLIT));
+	}
+
+	/** Synced most pips each subsystem can use. */
+	public int[] pipLimits() {
+		return com.starwake.ship.systems.PowerPips.unpack(entityData.get(PIP_MAX));
 	}
 	public ShipSystems systems() { return systems; }
-	public PowerAllocation allocation() { return allocation; }
-
-	/** Server: the pilot re-routes power. */
-	public void setAllocation(PowerAllocation allocation) {
-		this.allocation = allocation;
-		publishSystems();
-	}
 	public BlockPos helmLocal() { return helmLocal; }
 	public Direction forward() { return forward; }
 	public double mass() { return level().isClientSide() && serverDynamics != null ? serverDynamics.mass() : mass; }
@@ -1439,11 +1468,18 @@ public class ShipEntity extends Entity {
 	private void tickSystems() {
 		float shield = entityData.get(SHIELD);
 		if (shield < systems.shieldCapacity()) {
-			double regen = systems.shieldRegen() * systems.shieldFactor(allocation);
+			double regen = systems.shieldRegen() * power.factor(ShipSystems.Subsystem.SHIELDS);
 			entityData.set(SHIELD, (float) Math.min(systems.shieldCapacity(), shield + regen));
 		}
 		tickQuantum();
 		tickJumpMode();
+		// M10: heat in and out, wear from overheating.
+		double load = 0;
+		for (double t : throttles) load += t;
+		load = throttles.length == 0 ? 0 : load / throttles.length;
+		boolean spooling = entityData.get(QUANTUM) >= 0 && entityData.get(QUANTUM) < 1 || jumpMode && jumpSpool < 1;
+		power.tick(load, entityData.get(SHIELD) < systems.shieldCapacity(), spooling);
+		if (tickCount % 10 == 0) entityData.set(THERMAL, (float) power.heatLevel());
 		if (tickCount % 20 == 0) entityData.set(JD_REACH, (float) systems.jumpRange());
 		if (SpaceTravel.isSpace(level()) && tickCount % 20 == 0) {
 			// "Orbiting" = the nearest planet, for the HUD and as the fallback home.
@@ -1543,7 +1579,7 @@ public class ShipEntity extends Entity {
 			}
 		}
 
-		double rate = systems.quantumFactor(allocation) / Math.max(1.0, systems.quantumSpool() * 20.0);
+		double rate = power.factor(ShipSystems.Subsystem.QUANTUM) / Math.max(1.0, systems.quantumSpool() * 20.0);
 		boolean wasSpooled = quantumSpool >= 1;
 		quantumSpool = Math.min(1.0, quantumSpool + rate);
 		if (!wasSpooled && quantumSpool >= 1 && level() instanceof ServerLevel serverLevel) {
@@ -1695,7 +1731,7 @@ public class ShipEntity extends Entity {
 			return;
 		}
 		var tuning = com.starwake.ship.data.JumpTuning.get();
-		double rate = systems.quantumFactor(allocation) / Math.max(1.0, systems.jumpSpool() * 20.0);
+		double rate = power.factor(ShipSystems.Subsystem.QUANTUM) / Math.max(1.0, systems.jumpSpool() * 20.0);
 		boolean wasSpooled = jumpSpool >= 1;
 		jumpSpool = Math.min(1.0, jumpSpool + rate);
 		if (!wasSpooled && jumpSpool >= 1 && level() instanceof ServerLevel serverLevel) {
@@ -2611,7 +2647,7 @@ public class ShipEntity extends Entity {
 	protected void readAdditionalSaveData(ValueInput input) {
 		fuelCapacity = input.getIntOr("fuel_capacity", 0);
 		entityData.set(FUEL_CAPACITY, fuelCapacity);
-		allocation = input.read("power", PowerAllocation.CODEC).orElse(PowerAllocation.DEFAULT);
+		power.read(input);
 		entityData.set(SHIELD, (float) input.getDoubleOr("shield", 0));
 		entityData.set(FUEL, input.getIntOr("fuel", 0));
 		entityData.set(FUSION, input.getIntOr("fusion", 0));
@@ -2670,7 +2706,7 @@ public class ShipEntity extends Entity {
 		if (!propellantBuffer.isEmpty()) output.store("propellants", com.mojang.serialization.Codec.unboundedMap(com.mojang.serialization.Codec.STRING,
 				com.mojang.serialization.Codec.DOUBLE), propellantBuffer);
 		output.putInt("fuel_capacity", fuelCapacity);
-		output.store("power", PowerAllocation.CODEC, allocation);
+		power.write(output);
 		output.putDouble("shield", entityData.get(SHIELD));
 		output.store("orientation", ExtraCodecs.QUATERNIONF, orientation());
 		output.putBoolean("decoupled", decoupled);

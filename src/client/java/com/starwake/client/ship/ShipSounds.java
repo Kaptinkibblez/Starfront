@@ -121,7 +121,7 @@ public final class ShipSounds {
 		ShipEntity ship = FlightHud.pilotedShip();
 		if (ship == null) return;
 		boolean lowFuel = ship.fuelCapacity() > 0 && ship.fuel() < ship.fuelCapacity() * 0.15;
-		boolean overheat = ship.thermalFactor() < 0.999f;
+		boolean overheat = ship.heatLevel() >= 0.95f;
 		boolean shieldsDown = ship.shieldMax() > 0 && ship.shield() < 1;
 		boolean gearWarning = false;
 		if (ship.gearCount() > 0 && !ship.isGearDown() && !SpaceTravel.isSpace(ship.level())) {

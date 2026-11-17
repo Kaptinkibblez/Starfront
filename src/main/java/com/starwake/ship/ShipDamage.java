@@ -148,7 +148,10 @@ public final class ShipDamage {
 			double armor = r == null ? ShipStats.get(ship.structure().get(p)).armor() : r.armor();
 			absorbed += Math.min(share, armor);
 			if (share > armor && !(ship.structure().get(p).getBlock() instanceof HelmBlock)) broken.add(p);
+			// M10: parts that take a hit and hold together are worn by it.
+			else if (ship.components().contains(p)) ship.power.wear(p, (float) Math.min(0.5, 0.5 * share / Math.max(1, armor)));
 		}
+		ship.power.flush();
 		absorbed = Math.min(absorbed, energy * HullTuning.get().crumple());
 		com.starwake.StarwakeMod.LOGGER.info("Ship {}: impact energy {} on {} contact blocks ({} face): hull soaked {}, tore off {}", ship.getId(),
 				Math.round(energy), contact.size(), face, Math.round(absorbed), broken.size());
