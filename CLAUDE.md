@@ -627,6 +627,15 @@ commit. **Don't start the next milestone until the user confirms the current one
         clunky Hull Tool).
       - Build order: **10a** split `ShipEntity` + real-unit flight + SCM/NAV + Dry Dock + bug fixes; **10b** power/heat/pips/
         capacitors/wear; **10c** unified drives; **10d** hull revisit. One jar at the end (0.10.0), then the playtest pause.
+    - [x] **10a-10d built (2026-11-17), 0.10.0 delivered, awaiting the user's playtest.** *(Verified in the client: Kestrel
+      pre-flight in kN (lift 3.29x, fwd/back 17.2 m/s², drag-limited 564 m/s); SCM limit held at 150 m/s, wheel stepped it to 80 and
+      220, H switched SCM/NAV, decoupled fell under 9.81 m/s²; retro mains stop 78 m/s in ~6 s; Kestrel assembled on a Dry Dock
+      floor without taking it; pre-flight pips "20 pips of 12 kW" and "full thrust overheats after ~360 s"; forced 140% heat wore
+      parts (engines 93%, shields 91) with the OVERHEAT alert; 20% condition disabled everything and the ship dropped; B armed
+      quantum, B disarmed, a galaxy pick armed the jump drive in the same panel, holding B engaged (or said why not); hull test bed:
+      painted pieces red/blue, mixed slope/curve corners, the new diagonal/taper/half slopes; a dedicated server boots. Not
+      covered: a full quantum/jump trip after the split, plate repair, paint aboard an assembled ship, multiplayer.)* Details in
+      "How flight, power, drives and hulls work after M10".
   - [ ] **11. Combat.** Ship weapons (guns, missiles, turrets on power/heat/shields/armour), personal ranged weapons, damage
         and repair; threats that are simulated or event-based (no roaming NPC ships, per the user's M9 rule).
   - [ ] **12. Alien life.** Fauna and harvestable flora per archetype, fitted to the conditions; drops that feed the chemistry.
@@ -1047,6 +1056,63 @@ normal gravity.
 - Known limits: assembly and the first load of a 200k ship still take seconds; lights aboard ships glow but don't light
   the world around the ship (no moving light sources yet); radiation from machines aboard isn't counted for nearby players; block entities aboard only tick
   chest lids on the client (no bell swing or campfire smoke yet); contacts beyond entity tracking range aren't shown.
+
+## How flight, power, drives and hulls work after M10
+
+- **Split:** `ShipEntity` (3,034 -> ~2,380 lines) keeps the entity, structure, sync, prediction, seats and ownership;
+  `ShipFlight` (flight computer, unpiloted rules, clearance), `ShipDamage` (re-entry, impacts), `ShipPower` (pips, heat, wear,
+  capacitor) and `ShipDrives` (quantum + jump) are per-ship objects (`ship.flight`, `.damage`, `.power`, `.drives`) in the
+  same package (package-private fields where they share state).
+- **Real units** (`ship/physics/Units`; `ship_physics/default.json` = `ShipPhysics`): thrust in kN (ship_stats `thrust`, Mk I
+  x20 of the old numbers so handling feels the same), mass in t, a = F/m, gravity 9.81 m/s² x planet g, drag 0.5 rho Cd A v²
+  (Cd `drag_coefficient`, A = the hull's projected silhouette), torque kN m over inertia t m². No speed caps anywhere.
+  Coupled flight holds the pilot's **speed limit** (`ShipFlight.limit`): each commanded axis asks only for what reaches the
+  limit this tick (a brake past it), the overall speed sheds any excess, SCM boost lifts it 25%. Ceilings: `scm_speed` 220,
+  `nav_speed_atmosphere` 400, `nav_speed_space` 1500 m/s; NAV turns at `nav_agility` (0.6). **Decoupled** = Newtonian: no hover,
+  no braking, no limit (gravity and drag still act). Client: `FlightControls` (wheel = limit via `MouseHandlerMixin`, H = SCM/NAV,
+  remembered); the limit rides in `ShipInputPayload.speedLimit` and the `CONTROL_NAV` bit, so prediction matches. HUD speed tape
+  = mode ceiling with a caret at the limit. Debug: `-Dstarwake.flightDebug=true` logs requests vs achieved thrust.
+- **Contacts:** `ShipMotion` checks the swept box first; with nothing solid in it one step is enough (fast flight in clear air),
+  otherwise up to 40 substeps.
+- **Re-entry** (`Reentry.heating`): the skin's stagnation rise 0.9 v²/(2 x 1005) x sqrt(air density): 150 m/s ~10 C, 600 m/s
+  ~160 C, 1,500 m/s ~1,000 C (past steel's 800). Effects intensity ramps from 120 to 900 C of rise.
+- **Power** (`ShipSystems`, `PowerPips`, `ShipPower`): plant output = 20 pips; subsystems ENGINES, SHIELDS, WEAPONS, COOLERS,
+  QUANTUM want their parts' `power_draw` (coolers draw now); factor = pips x pip kW / want (max 1); `maxPips` caps each.
+  Auto split fills COOLERS > ENGINES > SHIELDS > QUANTUM > WEAPONS; the pilot's +/- (Wristcom Ship app) is refit by the server.
+  Heat (kJ): + plant heat x pips/20 + half the power used (thrusters by mean throttle, shields while charging, drives while
+  spooling) - cooling x cooler factor, per tick; buffer = 60 s of full plant heat; >100% wears every part (0.5%/s per 10% over),
+  >150% burns the crew (extreme_heat). Synced: `POWER_SPLIT` (packed pips), `PIP_MAX`, `THERMAL` (= heat level now).
+  Weapon capacitor: charged by weapon pips, capacity from weapons (none until M11).
+- **Wear:** component `starwake:health` (part BE, item, loot); `ShipMaterials.withHealth`: output stats x (0.4 + 0.6 h), 0 below
+  0.25 (disabled, still a part). Overheating and impacts (`ShipDamage.hullImpact`: surviving contact parts) wear parts;
+  `ShipPower.flush` writes health to the plot's BE and re-rates the parts (`ShipEntity.refreshParts`). A metal plate used on a
+  part aboard repairs 25%. Pre-flight and the console read it; tooltips show "Condition". Admin: `/starwake ship heat <%>`,
+  `/starwake ship condition <%>`.
+- **Drives** (`ShipDrives`): one flow. A Starmap/console pick arms quantum toward a planet (`enterQuantumMode(target)`), a galaxy
+  pick arms the jump drive (`setJumpTarget`); `toggle()` (B tap; quick taps are counted from `consumeClick`) arms the drive the
+  last pick needs or stands down the armed one (no pick: quantum auto-targets off the nose); `engage()` (B held) fires whichever is
+  armed. One HUD panel (jump panel in the quantum panel's place). The J key is gone.
+- **Dry Dock** (`starwake:dry_dock`, in `#starwake:ship_excluded`): build ships on it; the scan never takes it.
+- **Fixes:** exhaust spawns at the nozzle's start-of-tick position (it was drawn up to a tick ahead of fast ships); no ship-block
+  targeting/outline from the Helm seat; every Mk of engine gets flames; the cabin seal is computed on clients too and the body's
+  cell counts for shelter (the raised pilot eye sits in the canopy cell).
+- **Hulls** (10d):
+  - Mixed corners: 1:1 slope/curve/cove pieces join each other (`ProfileHullBlock.joins`); state `second` = the other run's
+    profile; `ProfileShape(profile, n, conn, partA, partB, mirror, second, lo, hi)`.
+  - New: `hull_slope_half` (`ProfileHullBlock.Half`, `top` = upper half; lo/hi band), `hull_diagonal`, `hull_taper`, `hull_nose`
+    (`HullPieceBlock.Fixed` + `HullPartShapes.Diagonal/Taper/Nose`).
+  - Placing (`PanelGeometry.placementUpright`): upright, low side toward you; upper half of a side or an underside = upside
+    down; sneak = mount on the clicked face (`placement`). Pointed pieces: `placementPointing` (tip out of the clicked face).
+  - Hull Tool: use turns; sneak-use on a profile's side cycles a locked corner (straight, outer, outer mirrored, inner, inner
+    mirrored, then auto; state `locked`), on its top/bottom flips it; on a half slope it swaps halves.
+  - Look: every "hull" face (pieces, greebles, and plain Hull Plating, now resolver-rendered as a cube) uses the near-white
+    bevelled `hull_panel` texture with tint index 0. `ShapedBlockModels.HullTint`: the block's `starwake:paint` (a dye paints it,
+    a water bucket strips it; `MaterialBlockEntity.setPaint`, update tag = full components, clients re-mesh on change) or bare
+    steel `BARE`; aboard ships it reads the paint from the structure entry's BE data (`ShipBlockRenderState.paint`).
+  - Known limits: faceted curves still shade per facet (vanilla shades quads by their nearest axis); 1:2/1:4 pieces only corner
+    with their own kind; hull stairs/slabs aren't paintable.
+  - Test bed: `/starwake ship blueprint starwake:hull_testbed <pos>` (generated by a scratch script; rings, mixed corners, run
+    ends, the new pieces).
 
 ## How ship editing works (Milestone 4)
 
