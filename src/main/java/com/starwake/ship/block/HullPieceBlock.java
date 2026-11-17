@@ -52,6 +52,52 @@ public abstract class HullPieceBlock extends HullPlatingBlock implements ShapedB
 		return true;
 	}
 
+	/**
+	 * M10: a piece with one fixed shape, oriented on placement: Hull Diagonal (upright, stairs-style), Hull Taper and Hull
+	 * Nose (the point sticks out of the clicked face). The Hull Tool turns them like any shaped block.
+	 */
+	public static class Fixed extends HullPieceBlock {
+		private final PanelGeometry.Shape shape;
+		private final boolean pointing;
+
+		public Fixed(PanelGeometry.Shape shape, boolean pointing, Properties properties) {
+			super(properties);
+			this.shape = shape;
+			this.pointing = pointing;
+			registerDefaultState(defaultBlockState().setValue(ORIENT, PanelGeometry.orient(Direction.UP, Direction.NORTH)));
+		}
+
+		@Override
+		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+			builder.add(ORIENT);
+		}
+
+		@Override
+		public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
+			return defaultBlockState().setValue(ORIENT, pointing ? PanelGeometry.placementPointing(context) : PanelGeometry.placementUpright(context));
+		}
+
+		@Override
+		public PanelGeometry.Shape shapeOf(BlockState state) {
+			return shape;
+		}
+
+		@Override
+		public int orientOf(BlockState state) {
+			return state.getValue(ORIENT);
+		}
+
+		@Override
+		protected BlockState rotate(BlockState state, Rotation rotation) {
+			return state.setValue(ORIENT, PanelGeometry.rotated(state.getValue(ORIENT), rotation));
+		}
+
+		@Override
+		protected BlockState mirror(BlockState state, Mirror mirror) {
+			return rotate(state, mirror.getRotation(PanelGeometry.front(state.getValue(ORIENT))));
+		}
+	}
+
 	/** A plate on the clicked face. */
 	public static class Plate extends HullPieceBlock {
 		private final HullPartShapes.Plate shape;

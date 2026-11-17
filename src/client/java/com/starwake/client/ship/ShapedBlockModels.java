@@ -43,12 +43,42 @@ public final class ShapedBlockModels {
 	private record Spec(Function<BlockState, PanelGeometry.Shape> shape, ToIntFunction<BlockState> orient,
 			BiFunction<BlockState, String, Identifier> texture, BiPredicate<BlockState, String> emissive) {}
 
-	/** Registers every {@link ShapedBlock}: hull pieces, greebles, lights, hinges and rotors. */
+	/** Registers every {@link ShapedBlock}: hull pieces, greebles, lights, hinges and rotors; and (M10) Hull Plating as a cube. */
 	public static void init() {
+		java.util.List<Block> tinted = new ArrayList<>();
 		for (Block block : ModBlocks.all()) {
 			if (!(block instanceof ShapedBlock shaped)) continue;
 			register(block, new Spec(shaped::shapeOf, shaped::orientOf, (s, key) -> Identifier.parse("starwake:" + shaped.texture(s, key)),
 					shaped::emissive));
+			tinted.add(block);
+		}
+		// M10: plain Hull Plating uses the same paintable panel, so painted hulls match block to block.
+		PanelGeometry.Shape cube = () -> java.util.List.of(PanelGeometry.box(0, 0, 0, 1, 1, 1, "hull"));
+		register(ModBlocks.HULL_PLATING, new Spec(s -> cube, s -> PanelGeometry.orient(Direction.UP, Direction.NORTH),
+				(s, key) -> StarwakeMod.id("block/hull_panel"), (s, key) -> false));
+		tinted.add(ModBlocks.HULL_PLATING);
+		net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry.register(java.util.List.of(new HullTint()), tinted.toArray(Block[]::new));
+	}
+
+	/** Bare metal colour of the hull panel (the texture is near white so paint shows true). */
+	public static final int BARE = 0xFF7E858F;
+
+	/**
+	 * M10 paint: "hull" faces are tinted with the block's paint (component {@code starwake:paint} on its block entity; aboard
+	 * a ship, from the block-entity data the ship carries), or bare metal grey.
+	 */
+	private static final class HullTint implements net.minecraft.client.color.block.BlockTintSource {
+		@Override
+		public int color(BlockState state) {
+			return BARE;
+		}
+
+		@Override
+		public int colorInWorld(BlockState state, net.minecraft.client.renderer.block.BlockAndTintGetter level, net.minecraft.core.BlockPos pos) {
+			int paint = -1;
+			if (level instanceof ShipBlockRenderState ship) paint = ship.paint();
+			else if (level.getBlockEntity(pos) instanceof com.starwake.fab.MaterialBlockEntity be) paint = be.paint();
+			return paint < 0 ? BARE : 0xFF000000 | paint;
 		}
 	}
 
@@ -89,7 +119,7 @@ public final class ShapedBlockModels {
 					k -> baker.materials().get(new Material(spec.texture().apply(state, k)), () -> "starwake:shaped/" + k));
 			if (particle == null) particle = material;
 			BakedQuad.MaterialInfo info = infos.computeIfAbsent(key, k -> baker.interner().materialInfo(BakedQuad.MaterialInfo.of(material,
-					material.sprite().transparency(), -1, null, spec.emissive().test(state, k) ? 15 : 0)));
+					material.sprite().transparency(), k.equals("hull") ? 0 : -1, null, spec.emissive().test(state, k) ? 15 : 0)));
 			double[][] face = f.v();
 			var sprite = material.sprite();
 			// UVs project the model-space face onto its dominant axis plane (the texture follows the shape).

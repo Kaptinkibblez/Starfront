@@ -32,11 +32,39 @@ import org.jspecify.annotations.Nullable;
  *   long run is one smooth ramp;</li>
  *   <li>a wedge ends in a point where its ridge stops.</li>
  * </ul>
- * Placing: up = out of the clicked face, the run rising away from you. Keeps its alloy (mass x how full it is).
+ * Placing (M10): stairs-style, upright with the low side toward you (upside down off a block's underside or the upper
+ * half of a side face); sneak to mount it on the clicked face instead. Keeps its alloy (mass x how full it is).
+ *
+ * M10: 1:1 slopes, curves and coves connect with each other (a corner keeps each run's own profile, {@code second});
+ * half-height slopes ({@link Half}) rise over the lower or upper half of their block; the Hull Tool can force a
+ * piece's corner type, which {@code locked} keeps from auto-connecting.
  */
 public abstract class ProfileHullBlock extends HullPlatingBlock implements ShapedBlock {
 	public static final EnumProperty<Conn> CONN = EnumProperty.create("conn", Conn.class);
 	public static final BooleanProperty MIRROR = BooleanProperty.create("mirror");
+	/** M10: the corner type was set by hand (Hull Tool); auto-connect leaves it alone. */
+	public static final BooleanProperty LOCKED = BooleanProperty.create("locked");
+	/** M10: a 1:1 corner's second run, when it's another profile. */
+	public static final EnumProperty<Second> SECOND = EnumProperty.create("second", Second.class);
+
+	/** The other run's profile at a mixed corner. */
+	public enum Second implements net.minecraft.util.StringRepresentable {
+		SAME, SLOPE, CURVE, COVE;
+
+		@Override
+		public String getSerializedName() {
+			return name().toLowerCase(java.util.Locale.ROOT);
+		}
+
+		static Second of(ProfileShape.Profile p) {
+			return switch (p) {
+				case SLOPE -> SLOPE;
+				case CURVE -> CURVE;
+				case COVE -> COVE;
+				case RIDGE -> SAME;
+			};
+		}
+	}
 	public static final IntegerProperty PART_A2 = IntegerProperty.create("part", 0, 1), PART_A4 = IntegerProperty.create("part", 0, 3);
 	public static final IntegerProperty PART_B2 = IntegerProperty.create("part2", 0, 1), PART_B4 = IntegerProperty.create("part2", 0, 3);
 	/** Longest run counted when finding a piece's section (the pattern repeats every N). */
@@ -48,7 +76,7 @@ public abstract class ProfileHullBlock extends HullPlatingBlock implements Shape
 		super(properties);
 		this.profile = profile;
 		registerDefaultState(defaultBlockState().setValue(ORIENT, PanelGeometry.orient(Direction.UP, Direction.NORTH))
-				.setValue(CONN, Conn.STRAIGHT).setValue(MIRROR, false));
+				.setValue(CONN, Conn.STRAIGHT).setValue(MIRROR, false).setValue(LOCKED, false));
 	}
 
 	/** Run length in blocks (1, 2 or 4). */
@@ -72,9 +100,39 @@ public abstract class ProfileHullBlock extends HullPlatingBlock implements Shape
 		return p == null ? 0 : state.getValue(p);
 	}
 
+	public ProfileShape.Profile profile() {
+		return profile;
+	}
+
+	/** The rise band (lo, hi) of this block's profile: the whole block, or half for half-height slopes. */
+	protected double lo(BlockState state) {
+		return 0;
+	}
+
+	protected double hi(BlockState state) {
+		return 1;
+	}
+
 	@Override
 	public PanelGeometry.Shape shapeOf(BlockState state) {
-		return new ProfileShape(profile, run(), state.getValue(CONN), partA(state), partB(state), state.getValue(MIRROR));
+		ProfileShape.Profile second = profile;
+		if (state.hasProperty(SECOND)) {
+			second = switch (state.getValue(SECOND)) {
+				case SAME -> profile;
+				case SLOPE -> ProfileShape.Profile.SLOPE;
+				case CURVE -> ProfileShape.Profile.CURVE;
+				case COVE -> ProfileShape.Profile.COVE;
+			};
+		}
+		return new ProfileShape(profile, run(), state.getValue(CONN), partA(state), partB(state), state.getValue(MIRROR), second,
+				lo(state), hi(state));
+	}
+
+	/** Whether a neighbour counts as part of the same surface for corners (M10: any 1:1 slope/curve/cove for 1:1 pieces). */
+	protected boolean joins(BlockState other) {
+		if (other.is(this)) return true;
+		return run() == 1 && profile != ProfileShape.Profile.RIDGE && other.hasProperty(SECOND)
+				&& other.getBlock() instanceof ProfileHullBlock p && p.run() == 1 && p.profile != ProfileShape.Profile.RIDGE;
 	}
 
 	@Override
@@ -84,7 +142,7 @@ public abstract class ProfileHullBlock extends HullPlatingBlock implements Shape
 
 	@Override
 	public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
-		return connect(defaultBlockState().setValue(ORIENT, PanelGeometry.placement(context)), context.getLevel(), context.getClickedPos());
+		return connect(defaultBlockState().setValue(ORIENT, PanelGeometry.placementUpright(context)), context.getLevel(), context.getClickedPos());
 	}
 
 	@Override
@@ -104,7 +162,9 @@ public abstract class ProfileHullBlock extends HullPlatingBlock implements Shape
 
 	/** Works out corner, mirror and run sections from the neighbours (the stairs rule, generalised to any up). */
 	public BlockState connect(BlockState state, BlockGetter level, BlockPos pos) {
+		if (state.getValue(LOCKED)) return state;
 		Direction up = up(state), back = back(state), front = back.getOpposite();
+		ProfileShape.Profile other = profile;
 		Conn conn = Conn.STRAIGHT;
 		Direction second = null;
 		int pb = 0;
@@ -113,22 +173,24 @@ public abstract class ProfileHullBlock extends HullPlatingBlock implements Shape
 			conn = ahead.is(this) && ahead.getValue(ORIENT).equals(state.getValue(ORIENT)) ? Conn.STRAIGHT : Conn.END;
 		} else {
 			BlockState behind = level.getBlockState(pos.relative(back));
-			if (behind.is(this) && up(behind) == up) {
+			if (joins(behind) && up(behind) == up) {
 				Direction b2 = back(behind);
 				if (b2.getAxis() != back.getAxis() && canTake(level, pos, b2.getOpposite(), up, back)) {
 					conn = Conn.OUTER;
 					second = b2;
 					pb = partA(behind);
+					other = ((ProfileHullBlock) behind.getBlock()).profile;
 				}
 			}
 			if (conn == Conn.STRAIGHT) {
 				BlockState ahead = level.getBlockState(pos.relative(front));
-				if (ahead.is(this) && up(ahead) == up) {
+				if (joins(ahead) && up(ahead) == up) {
 					Direction b3 = back(ahead);
 					if (b3.getAxis() != back.getAxis() && canTake(level, pos, b3, up, back)) {
 						conn = Conn.INNER;
 						second = b3;
 						pb = partA(ahead);
+						other = ((ProfileHullBlock) ahead.getBlock()).profile;
 					}
 				}
 			}
@@ -149,6 +211,7 @@ public abstract class ProfileHullBlock extends HullPlatingBlock implements Shape
 			mirror = modelX != second;
 		}
 		BlockState out = state.setValue(CONN, conn).setValue(MIRROR, mirror);
+		if (out.hasProperty(SECOND)) out = out.setValue(SECOND, other == profile ? Second.SAME : Second.of(other));
 		if (partA() != null) out = out.setValue(partA(), below % run());
 		if (partB() != null) out = out.setValue(partB(), pb % run());
 		return out;
@@ -157,7 +220,7 @@ public abstract class ProfileHullBlock extends HullPlatingBlock implements Shape
 	/** Stairs' rule: a corner only forms if the cell beside it isn't already a straight continuation. */
 	private boolean canTake(BlockGetter level, BlockPos pos, Direction dir, Direction up, Direction back) {
 		BlockState s = level.getBlockState(pos.relative(dir));
-		return !(s.is(this) && up(s) == up && back(s) == back);
+		return !(joins(s) && up(s) == up && back(s) == back);
 	}
 
 	@Override
@@ -203,7 +266,42 @@ public abstract class ProfileHullBlock extends HullPlatingBlock implements Shape
 
 		@Override
 		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-			builder.add(ORIENT, CONN, MIRROR);
+			builder.add(ORIENT, CONN, MIRROR, LOCKED, SECOND);
+		}
+	}
+
+	/** M10: a half-height 1:1 slope: rises over the lower (bottom) or upper (top, on a half-block base) half of its block. */
+	public static class Half extends ProfileHullBlock {
+		public static final BooleanProperty TOP = BooleanProperty.create("top");
+
+		public Half(Properties properties) {
+			super(ProfileShape.Profile.SLOPE, properties);
+			registerDefaultState(defaultBlockState().setValue(TOP, false));
+		}
+
+		@Override
+		public int run() {
+			return 1;
+		}
+
+		@Override
+		protected double lo(BlockState state) {
+			return state.getValue(TOP) ? 0.5 : 0;
+		}
+
+		@Override
+		protected double hi(BlockState state) {
+			return state.getValue(TOP) ? 1 : 0.5;
+		}
+
+		@Override
+		protected boolean joins(BlockState other) {
+			return other.is(this);
+		}
+
+		@Override
+		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+			builder.add(ORIENT, CONN, MIRROR, LOCKED, TOP);
 		}
 	}
 
@@ -230,7 +328,7 @@ public abstract class ProfileHullBlock extends HullPlatingBlock implements Shape
 
 		@Override
 		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-			builder.add(ORIENT, CONN, MIRROR, PART_A2, PART_B2);
+			builder.add(ORIENT, CONN, MIRROR, LOCKED, PART_A2, PART_B2);
 		}
 	}
 
@@ -257,7 +355,7 @@ public abstract class ProfileHullBlock extends HullPlatingBlock implements Shape
 
 		@Override
 		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-			builder.add(ORIENT, CONN, MIRROR, PART_A4, PART_B4);
+			builder.add(ORIENT, CONN, MIRROR, LOCKED, PART_A4, PART_B4);
 		}
 	}
 }

@@ -12,8 +12,21 @@ import net.minecraft.util.StringRepresentable;
  * long run line up exactly. Corners combine two runs: outer corners take the lower of the two (a convex corner; curves
  * round it off spherically), inner corners the higher (a valley). Ridges (wedges) are a peaked roof along Z that ends
  * in a point where the run stops.
+ *
+ * M10: a corner's second run may have another profile ({@code second}: a slope meeting a curve keeps each side's own
+ * surface, so they meet without a step), and the rise can be limited to a band of the block ({@code lo}..{@code hi}:
+ * half-height slopes).
  */
-public record ProfileShape(Profile profile, int n, Conn conn, int partA, int partB, boolean mirror) implements PanelGeometry.Shape {
+public record ProfileShape(Profile profile, int n, Conn conn, int partA, int partB, boolean mirror, Profile second, double lo, double hi)
+		implements PanelGeometry.Shape {
+	public ProfileShape(Profile profile, int n, Conn conn, int partA, int partB, boolean mirror) {
+		this(profile, n, conn, partA, partB, mirror, profile, 0, 1);
+	}
+
+	private double band(double rise) {
+		return lo + (hi - lo) * rise;
+	}
+
 	/** The run's rise across t in 0..1. */
 	public enum Profile {
 		SLOPE, CURVE, COVE, RIDGE;
@@ -45,18 +58,19 @@ public record ProfileShape(Profile profile, int n, Conn conn, int partA, int par
 			return conn == Conn.END ? Math.min(roof, z) : roof;
 		}
 		double tA = (partA + z) / n, tB = (partB + (mirror ? 1 - x : x)) / n;
+		double a = band(profile.rise(tA));
 		return switch (conn) {
-			case STRAIGHT, END -> profile.rise(tA);
-			case OUTER -> profile == Profile.CURVE
-					? profile.rise(1 - Math.hypot(1 - Math.min(1, tA), 1 - Math.min(1, tB)))
-					: Math.min(profile.rise(tA), profile.rise(tB));
-			case INNER -> Math.max(profile.rise(tA), profile.rise(tB));
+			case STRAIGHT, END -> a;
+			case OUTER -> profile == Profile.CURVE && second == Profile.CURVE
+					? band(profile.rise(1 - Math.hypot(1 - Math.min(1, tA), 1 - Math.min(1, tB))))
+					: Math.min(a, band(second.rise(tB)));
+			case INNER -> Math.max(a, band(second.rise(tB)));
 		};
 	}
 
 	/** Facets per edge: flat slopes are exact with a few, curves need more; a ridge needs its peak sampled. */
 	private int grid() {
-		if (profile == Profile.CURVE || profile == Profile.COVE) return 8;
+		if (profile == Profile.CURVE || profile == Profile.COVE || second == Profile.CURVE || second == Profile.COVE) return 8;
 		if (profile == Profile.RIDGE) return conn == Conn.END ? 4 : 2;
 		return conn == Conn.STRAIGHT ? 1 : 4;
 	}

@@ -30,6 +30,46 @@ public class MaterialBlockEntity extends BlockEntity {
 		return t == null ? Tempers.Temper.REFERENCE : t;
 	}
 
+	/** Hull paint (M10), or -1 for bare metal. */
+	public int paint() {
+		Integer p = components().get(ModComponents.PAINT);
+		return p == null ? -1 : p;
+	}
+
+	/** Sets or clears the paint and tells clients (and a ship whose plot this is). */
+	public void setPaint(int rgb) {
+		var next = net.minecraft.core.component.DataComponentMap.builder().addAll(components());
+		if (rgb < 0) next.set(ModComponents.PAINT, null);
+		else next.set(ModComponents.PAINT, rgb);
+		setComponents(next.build());
+		setChanged();
+		if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+	}
+
+	// M10: clients see the components (paint), and repaint the block when they change.
+	private int seenPaint = -2;
+
+	@Override
+	public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+		return saveWithoutMetadata(registries);
+	}
+
+	@Override
+	public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket() {
+		return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+	}
+
+	@Override
+	protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+		super.loadAdditional(input);
+		int paint = input.read("components", net.minecraft.core.component.DataComponentMap.CODEC)
+				.map(c -> c.get(ModComponents.PAINT)).map(Integer::intValue).orElse(-1);
+		if (level != null && level.isClientSide() && seenPaint != -2 && paint != seenPaint) {
+			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 8); // re-mesh with the new tint
+		}
+		seenPaint = paint;
+	}
+
 	public float quality() {
 		Float q = components().get(ModComponents.QUALITY);
 		return q == null ? 1f : q;

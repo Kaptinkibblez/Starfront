@@ -77,11 +77,19 @@ public final class ModBlocks {
 	public static final Block HULL_HALF_PLATE = hull("hull_half_plate", p -> new com.starwake.ship.block.HullPieceBlock.Plate(8, p));
 	public static final Block HULL_PILLAR = hull("hull_pillar", com.starwake.ship.block.HullPieceBlock.Pillar::new);
 	public static final Block HULL_FRAME = hull("hull_frame", com.starwake.ship.block.HullPieceBlock.Frame::new);
+	/** M10: half-height slope, 45-degree diagonal wall, square taper and rounded nose cone. */
+	public static final Block HULL_SLOPE_HALF = hull("hull_slope_half", com.starwake.ship.block.ProfileHullBlock.Half::new);
+	public static final Block HULL_DIAGONAL = hull("hull_diagonal",
+			p -> new com.starwake.ship.block.HullPieceBlock.Fixed(new com.starwake.ship.panel.HullPartShapes.Diagonal(), false, p));
+	public static final Block HULL_TAPER = hull("hull_taper",
+			p -> new com.starwake.ship.block.HullPieceBlock.Fixed(new com.starwake.ship.panel.HullPartShapes.Taper(0.5), true, p));
+	public static final Block HULL_NOSE = hull("hull_nose",
+			p -> new com.starwake.ship.block.HullPieceBlock.Fixed(new com.starwake.ship.panel.HullPartShapes.Nose(), true, p));
 
 	/** Every hull piece (alloy-keeping, shaped): for datagen, the block entity type and recipes. */
 	public static List<Block> hullPieces() {
 		return List.of(HULL_SLOPE, HULL_SLOPE_2, HULL_SLOPE_4, HULL_CURVE, HULL_CURVE_2, HULL_CURVE_4, HULL_COVE, HULL_COVE_2, HULL_COVE_4,
-				HULL_WEDGE, HULL_PLATE, HULL_HALF_PLATE, HULL_PILLAR, HULL_FRAME);
+				HULL_WEDGE, HULL_PLATE, HULL_HALF_PLATE, HULL_PILLAR, HULL_FRAME, HULL_SLOPE_HALF, HULL_DIAGONAL, HULL_TAPER, HULL_NOSE);
 	}
 
 	/** Greeble (M9 pass 3): surface detail for hulls and interiors (shape cycled with the Hull Tool). */

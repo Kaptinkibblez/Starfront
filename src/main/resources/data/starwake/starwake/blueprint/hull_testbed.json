@@ -1,0 +1,66 @@
+{
+ "name": {
+  "text": "Hull test bed"
+ },
+ "palette": {
+  "F": "starwake:dry_dock",
+  "H": "starwake:hull_plating",
+  "a": "starwake:hull_slope[orient=4]",
+  "b": "starwake:hull_slope[orient=7]",
+  "c": "starwake:hull_slope[orient=6]",
+  "d": "starwake:hull_slope[orient=5]",
+  "e": "starwake:hull_curve[orient=4]",
+  "f": "starwake:hull_curve[orient=7]",
+  "g": "starwake:hull_curve[orient=6]",
+  "h": "starwake:hull_curve[orient=5]",
+  "i": "starwake:hull_cove[orient=4]",
+  "j": "starwake:hull_cove[orient=7]",
+  "k": "starwake:hull_cove[orient=6]",
+  "l": "starwake:hull_cove[orient=5]",
+  "m": "starwake:hull_slope_2[orient=4]",
+  "n": "starwake:hull_slope_2[orient=7]",
+  "o": "starwake:hull_slope_2[orient=6]",
+  "p": "starwake:hull_slope_2[orient=5]",
+  "q": "starwake:hull_curve_2[orient=4]",
+  "r": "starwake:hull_curve_2[orient=7]",
+  "s": "starwake:hull_curve_2[orient=6]",
+  "t": "starwake:hull_curve_2[orient=5]",
+  "u": "starwake:hull_wedge[orient=4]",
+  "v": "starwake:hull_slope_4[orient=6]",
+  "\u00c0": "starwake:hull_diagonal[orient=4]",
+  "\u00c1": "starwake:hull_taper[orient=4]",
+  "\u00c2": "starwake:hull_nose[orient=4]",
+  "\u00c3": "starwake:hull_slope_half[orient=4,top=false]",
+  "\u00c4": "starwake:hull_slope_half[orient=4,top=true]"
+ },
+ "layers": [
+  [
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+  ],
+  [
+   "................................................................................................",
+   ".aaaa...eeee...iiii...mmmmmm...qqqqqq...aaaa...aaaa....Hdd..bH.u..v.............................",
+   ".bHHd...fHHh...jHHl...mmmmmm...qqqqqq...fHHh...jHHd....Haa..bH.u..v.............................",
+   ".bHHd...fHHh...jHHl...nnHHpp...rrHHtt...fHHh...jHHd....HHH..bH.u..v.............................",
+   ".cccc...gggg...kkkk...nnHHpp...rrHHtt...cccc...gggg...............v.............................",
+   "......................oooooo...ssssss...........................................................",
+   "......................oooooo...ssssss...........................................................",
+   "................................................................................................",
+   "..\u00c0..\u00c1..\u00c2..\u00c3..\u00c4.................................................................................",
+   "................................................................................................",
+   "................................................................................................",
+   "................................................................................................"
+  ]
+ ]
+}

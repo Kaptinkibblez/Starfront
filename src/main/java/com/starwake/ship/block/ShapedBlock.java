@@ -27,8 +27,8 @@ public interface ShapedBlock {
 		return false;
 	}
 
-	/** Texture of a solid's texture key ("hull" = hull plating; others = block/greeble_<key>). */
+	/** Texture of a solid's texture key ("hull" = the paintable hull panel, M10; others = block/greeble_<key>). */
 	default String texture(BlockState state, String key) {
-		return key.equals("hull") ? "block/hull_plating" : "block/greeble_" + key;
+		return key.equals("hull") ? "block/hull_panel" : "block/greeble_" + key;
 	}
 }

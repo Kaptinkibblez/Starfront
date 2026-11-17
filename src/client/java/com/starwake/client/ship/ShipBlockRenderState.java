@@ -40,6 +40,13 @@ final class ShipBlockRenderState extends MovingBlockRenderState {
 		return state == null ? Blocks.AIR.defaultBlockState() : state;
 	}
 
+	/** M10: the paint carried in this block's saved block-entity data (-1 = bare metal). */
+	int paint() {
+		var entry = structure.entry(local);
+		if (entry == null) return -1;
+		return entry.blockEntity().flatMap(t -> t.getCompound("components")).flatMap(c -> c.getInt("starwake:paint")).orElse(-1);
+	}
+
 	@Override
 	public int getMinY() {
 		return blockPos.getY() - local.getY() + structure.min().getY() - 1;

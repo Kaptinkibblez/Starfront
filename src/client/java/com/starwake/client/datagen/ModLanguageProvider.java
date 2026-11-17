@@ -35,6 +35,10 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModBlocks.HULL_HALF_PLATE, "Hull Half Plate");
 		builder.add(ModBlocks.HULL_PILLAR, "Hull Pillar");
 		builder.add(ModBlocks.HULL_FRAME, "Hull Frame");
+		builder.add(ModBlocks.HULL_SLOPE_HALF, "Hull Half Slope");
+		builder.add(ModBlocks.HULL_DIAGONAL, "Hull Diagonal");
+		builder.add(ModBlocks.HULL_TAPER, "Hull Taper");
+		builder.add(ModBlocks.HULL_NOSE, "Hull Nose");
 		builder.add(ModBlocks.GREEBLE, "Greeble");
 		builder.add(ModBlocks.HINGE, "Hinge");
 		builder.add(ModBlocks.ROTOR, "Rotor");
@@ -42,6 +46,14 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("message.starwake.rotor", "Rotor: %s rpm");
 		builder.add(ModBlocks.SHIP_LIGHT, "Ship Light");
 		builder.add("message.starwake.hull_tool.color", "Light: %s");
+		builder.add("message.starwake.hull_tool.upper_half", "Half slope: upper half");
+		builder.add("message.starwake.hull_tool.lower_half", "Half slope: lower half");
+		builder.add("message.starwake.hull_tool.corner.auto", "Corner: auto (connects to its neighbours)");
+		builder.add("message.starwake.hull_tool.corner.straight", "Corner: straight (locked)");
+		builder.add("message.starwake.hull_tool.corner.outer", "Corner: outer (locked)");
+		builder.add("message.starwake.hull_tool.corner.outer_mirrored", "Corner: outer, mirrored (locked)");
+		builder.add("message.starwake.hull_tool.corner.inner", "Corner: inner (locked)");
+		builder.add("message.starwake.hull_tool.corner.inner_mirrored", "Corner: inner, mirrored (locked)");
 		builder.add("greeble.starwake.vent", "Vent");
 		builder.add("greeble.starwake.pipe", "Pipe");
 		builder.add("greeble.starwake.pipe_pair", "Twin Pipes");

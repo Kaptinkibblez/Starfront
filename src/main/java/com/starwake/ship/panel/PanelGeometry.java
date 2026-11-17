@@ -87,6 +87,27 @@ public final class PanelGeometry {
 		return orient(up, front);
 	}
 
+	/**
+	 * M10: stairs-style placement for hull profiles: upright (up = +Y), the low side toward the player; upside down when
+	 * clicking a block's underside or the upper half of a side face. Sneaking mounts on the clicked face instead
+	 * ({@link #placement}), for slopes on walls and ceilings.
+	 */
+	public static int placementUpright(net.minecraft.world.item.context.BlockPlaceContext context) {
+		if (context.getPlayer() != null && context.getPlayer().isSecondaryUseActive()) return placement(context);
+		Direction face = context.getClickedFace();
+		double hitY = context.getClickLocation().y - context.getClickedPos().getY();
+		boolean flipped = face == Direction.DOWN || face.getAxis() != Direction.Axis.Y && hitY > 0.5;
+		Direction front = context.getHorizontalDirection().getOpposite();
+		return orient(flipped ? Direction.DOWN : Direction.UP, front);
+	}
+
+	/** M10: placement for pointed pieces (nose, taper): the point sticks out of the clicked face. */
+	public static int placementPointing(net.minecraft.world.item.context.BlockPlaceContext context) {
+		Direction tip = context.getClickedFace();
+		Direction up = tip.getAxis() == Direction.Axis.Y ? context.getHorizontalDirection() : Direction.UP;
+		return orient(up, tip);
+	}
+
 	/** The orientation turned by a block rotation (structure rotation, ship disassembly). */
 	public static int rotated(int orient, net.minecraft.world.level.block.Rotation rotation) {
 		return orient(rotation.rotate(UP[orient]), rotation.rotate(FRONT[orient]));

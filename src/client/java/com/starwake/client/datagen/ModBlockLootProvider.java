@@ -85,6 +85,7 @@ public final class ModBlockLootProvider extends FabricBlockLootSubProvider {
 										.include(com.starwake.registry.ModComponents.COMPOSITION)
 										.include(com.starwake.registry.ModComponents.TEMPER)
 										.include(com.starwake.registry.ModComponents.QUALITY)
-										.include(com.starwake.registry.ModComponents.HEALTH))))));
+										.include(com.starwake.registry.ModComponents.HEALTH)
+										.include(com.starwake.registry.ModComponents.PAINT))))));
 	}
 }

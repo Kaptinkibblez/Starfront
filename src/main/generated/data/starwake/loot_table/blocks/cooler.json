@@ -14,7 +14,8 @@
               "starwake:composition",
               "starwake:temper",
               "starwake:quality",
-              "starwake:health"
+              "starwake:health",
+              "starwake:paint"
             ],
             "source": "block_entity"
           },

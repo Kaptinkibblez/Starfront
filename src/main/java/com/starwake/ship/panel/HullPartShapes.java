@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 /**
  * Geometry of the simpler hull pieces (M9 pass 4): plates (a slab of a given thickness on the mounting face), pillars
  * (a round column) and frames (a truss node with lattice arms toward each connected neighbour; on its own, an open cube).
+ * M10: the diagonal wall (a 45-degree wall in plan), the taper (a square frustum) and the nose (a rounded cone).
  */
 public final class HullPartShapes {
 	private HullPartShapes() {}
@@ -63,6 +64,72 @@ public final class HullPartShapes {
 				}
 			}
 			return s;
+		}
+	}
+
+	/** M10: a full-height wall cut on the diagonal in plan (the back-right half of the cell; the cut faces front-left). */
+	public record Diagonal() implements PanelGeometry.Shape {
+		@Override
+		public List<PanelGeometry.Solid> solids() {
+			return List.of(extrude(1, 0, 1, PanelGeometry.poly(1, 0, 1, 1, 0, 1), "hull"));
+		}
+	}
+
+	/** M10: a square frustum along the model's Z: full 1x1 at the back (z = 1), {@code front} wide at the front, centred. */
+	public record Taper(double front) implements PanelGeometry.Shape {
+		private double half(double z) {
+			return 0.5 * (front + (1 - front) * z);
+		}
+
+		@Override
+		public List<PanelGeometry.Solid> solids() {
+			double f = half(0), b = half(1);
+			double[][] fr = {{0.5 - f, 0.5 - f, 0}, {0.5 + f, 0.5 - f, 0}, {0.5 + f, 0.5 + f, 0}, {0.5 - f, 0.5 + f, 0}};
+			double[][] bk = {{0.5 - b, 0.5 - b, 1}, {0.5 + b, 0.5 - b, 1}, {0.5 + b, 0.5 + b, 1}, {0.5 - b, 0.5 + b, 1}};
+			List<double[][]> faces = new ArrayList<>(List.of(fr, bk));
+			for (int i = 0; i < 4; i++) {
+				int j = (i + 1) % 4;
+				faces.add(new double[][] {fr[i], fr[j], bk[j], bk[i]});
+			}
+			return List.of(PanelGeometry.faceted((x, y, z) -> {
+				double h = half(Math.max(0, Math.min(1, z))) + 1e-9;
+				return Math.abs(x - 0.5) <= h && Math.abs(y - 0.5) <= h;
+			}, faces, "hull"));
+		}
+	}
+
+	/**
+	 * M10: a rounded nose cone along the model's Z: radius 0.5 at the back (z = 1, matching a pillar), closing to a blunt
+	 * point at the front (an ogive, r = 0.5 sqrt(z)).
+	 */
+	public record Nose() implements PanelGeometry.Shape {
+		private static final int SEGMENTS = 16, RINGS = 8;
+
+		private static double radius(double z) {
+			return 0.5 * Math.sqrt(Math.max(0, Math.min(1, z)));
+		}
+
+		@Override
+		public List<PanelGeometry.Solid> solids() {
+			List<double[][]> faces = new ArrayList<>();
+			double[][][] ring = new double[RINGS + 1][SEGMENTS][];
+			for (int k = 0; k <= RINGS; k++) {
+				double z = (double) k / RINGS * (double) k / RINGS; // denser near the tip, where it curves most
+				double r = radius(z);
+				for (int i = 0; i < SEGMENTS; i++) {
+					double a = 2 * Math.PI * i / SEGMENTS;
+					ring[k][i] = new double[] {0.5 + r * Math.cos(a), 0.5 + r * Math.sin(a), z};
+				}
+			}
+			for (int k = 0; k < RINGS; k++) {
+				for (int i = 0; i < SEGMENTS; i++) {
+					int j = (i + 1) % SEGMENTS;
+					if (k == 0) faces.add(new double[][] {ring[0][i], ring[1][i], ring[1][j]});
+					else faces.add(new double[][] {ring[k][i], ring[k + 1][i], ring[k + 1][j], ring[k][j]});
+				}
+			}
+			faces.add(ring[RINGS]);
+			return List.of(PanelGeometry.faceted((x, y, z) -> Math.hypot(x - 0.5, y - 0.5) <= radius(z) + 1e-9, faces, "hull"));
 		}
 	}
 }

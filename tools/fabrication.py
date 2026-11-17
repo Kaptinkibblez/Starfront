@@ -59,7 +59,8 @@ BLUEPRINTS = {
     **{piece: {"output": f"starwake:{piece}", "count": 8 if piece in ("hull_plate",) else 4, "order": 1, "energy": 400,
                "inputs": [form("plate", 2, main=True, mn={"yield": 100})]}
        for piece in ("hull_slope", "hull_slope_2", "hull_slope_4", "hull_curve", "hull_curve_2", "hull_curve_4", "hull_cove",
-                     "hull_cove_2", "hull_cove_4", "hull_wedge", "hull_plate", "hull_half_plate", "hull_pillar", "hull_frame")},
+                     "hull_cove_2", "hull_cove_4", "hull_wedge", "hull_plate", "hull_half_plate", "hull_pillar", "hull_frame",
+                     "hull_slope_half", "hull_diagonal", "hull_taper", "hull_nose")},
     "structural_frame": {"output": "starwake:structural_frame", "order": 10, "energy": 600,
                          "inputs": [form("rod", 4, main=True, mn={"yield": 250})]},
     "pressure_vessel": {"output": "starwake:pressure_vessel", "order": 11, "energy": 1200,

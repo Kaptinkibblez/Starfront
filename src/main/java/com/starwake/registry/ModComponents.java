@@ -52,6 +52,11 @@ public final class ModComponents {
 			StarwakeMod.id("quality"), DataComponentType.<Float>builder().persistent(com.mojang.serialization.Codec.floatRange(0, 10))
 					.networkSynchronized(ByteBufCodecs.FLOAT).build());
 
+	/** Hull paint (M10): RGB a hull block is painted with (dyes paint, a water bucket strips it). */
+	public static final DataComponentType<Integer> PAINT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			StarwakeMod.id("paint"), DataComponentType.<Integer>builder().persistent(com.mojang.serialization.Codec.INT)
+					.networkSynchronized(ByteBufCodecs.INT).build());
+
 	/** A ship part's condition (M10): 1 = new; wears with overheating and impacts; disabled below 0.25; plates repair it. */
 	public static final DataComponentType<Float> HEALTH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
 			StarwakeMod.id("health"), DataComponentType.<Float>builder().persistent(com.mojang.serialization.Codec.floatRange(0, 1))
