@@ -64,7 +64,9 @@ public final class PlanetHazards {
 		// Trade hub interiors and station hangars are pressurized too (M7).
 		if (com.starwake.trade.HubZones.isPressurized(player.level(), player.getEyePosition())) return true;
 		for (ShipEntity ship : ShipCollisions.shipsIn(player.level())) {
-			if (ship.getBoundingBox().inflate(2).contains(player.getEyePosition()) && ship.isInPressurizedCabin(player.getEyePosition())) {
+			if (!ship.getBoundingBox().inflate(2).contains(player.getEyePosition())) continue;
+			// M10: also the body's cell: a seated pilot's eye (raised to clear the dash) can sit in the canopy's cell.
+			if (ship.isInPressurizedCabin(player.getEyePosition()) || ship.isInPressurizedCabin(player.position().add(0, 0.5, 0))) {
 				return true;
 			}
 		}

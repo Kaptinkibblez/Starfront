@@ -115,11 +115,13 @@ public final class SpaceHud {
 				graphics.fill(n[0], n[1] + 4, n[0] + 1, n[1] + 10, c);
 			}
 		}
-		if (quantumMode || travelling) quantumPanel(graphics, font, ship, eye, w);
+		// M10: one drive panel in the same place, for whichever drive is armed (they're exclusive).
 		boolean jumpMode = (ship.jumpState() & (ShipEntity.JD_MODE | ShipEntity.JD_TRAVEL)) != 0;
 		if (jumpMode) {
 			jumpTargetMarker(graphics, font, ship, mvp, forward, w, h);
-			jumpPanel(graphics, font, ship, quantumMode || travelling);
+			jumpPanel(graphics, font, ship, false);
+		} else if (quantumMode || travelling) {
+			quantumPanel(graphics, font, ship, eye, w);
 		}
 	}
 

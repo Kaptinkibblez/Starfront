@@ -592,7 +592,6 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 				{"white_dwarf", "White dwarf (D)"}, {"neutron_star", "Neutron star"}}) {
 			builder.add("star_class.starwake." + c[0], c[1]);
 		}
-		builder.add("key.starwake.jump", "Jump drive (tap: arm, hold: jump)");
 		builder.add("key.starwake.galaxy_map", "Galaxy map");
 		builder.add("screen.starwake.galaxy", "Galaxy Map");
 		builder.add("screen.starwake.galaxy.here", "You are at %s");
@@ -615,7 +614,7 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("hud.starwake.jump.no_fuel", "Not enough fuel");
 		builder.add("hud.starwake.jump.spooling", "Spooling...");
 		builder.add("hud.starwake.jump.align", "Align with the target star");
-		builder.add("hud.starwake.jump.ready", "READY: hold J");
+		builder.add("hud.starwake.jump.ready", "READY: hold B");
 		builder.add("message.starwake.jump.no_drive", "This ship has no Jump Drive");
 		builder.add("message.starwake.jump.unknown", "Unknown star system");
 		builder.add("message.starwake.jump.here", "You're already in that system");
@@ -824,7 +823,8 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("hud.starwake.qt.spooling", "Spooling...");
 		builder.add("hud.starwake.qt.align", "Align nose with marker");
 		builder.add("hud.starwake.qt.ready", "READY: hold B");
-		builder.add("key.starwake.quantum", "Quantum Drive (tap: mode, hold: engage)");
+		builder.add("key.starwake.quantum", "Drive: quantum or jump (tap: arm, hold: engage)");
+		builder.add("message.starwake.drive.not_armed", "No drive armed: tap B first (pick a destination on the Starmap or galaxy map)");
 		builder.add("star.starwake.solace", "Solace");
 		builder.add("message.starwake.quantum.on", "Quantum mode: aim at a marker, then hold B");
 		builder.add("message.starwake.quantum.off", "Quantum mode off");

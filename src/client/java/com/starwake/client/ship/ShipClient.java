@@ -61,7 +61,7 @@ public final class ShipClient {
 	public static boolean piloting(Minecraft client) {
 		return client.player != null && client.player.getVehicle() instanceof ShipEntity ship && ship.pilot() == client.player;
 	}
-	/** Star Citizen's quantum key: tap to toggle quantum mode, hold to engage. */
+	/** Star Citizen's quantum key, for both drives since M10: tap to arm/disarm, hold to engage. */
 	private static final KeyMapping QUANTUM = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.quantum", InputConstants.KEY_B, CATEGORY));
 	/** Cockpit / chase camera. */
@@ -76,16 +76,12 @@ public final class ShipClient {
 	/** Star Citizen's coupled/decoupled toggle. */
 	private static final KeyMapping DECOUPLE = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.decouple", InputConstants.KEY_V, CATEGORY));
-	/** Jump drive (M6): tap to arm, hold to jump. */
-	private static final KeyMapping JUMP = KeyMappingHelper.registerKeyMapping(
-			new KeyMapping("key.starwake.jump", InputConstants.KEY_J, CATEGORY));
 	/** The galaxy map (M6). */
 	private static final KeyMapping GALAXY_MAP = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.galaxy_map", InputConstants.KEY_M, CATEGORY));
 	/** M10: SCM <-> NAV flight mode. */
 	private static final KeyMapping FLIGHT_MODE = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.flight_mode", InputConstants.KEY_H, CATEGORY));
-	private static int jumpHeld;
 	/** Ticks B must be held to engage (0.75 s). */
 	private static final int QUANTUM_HOLD_TICKS = 15;
 	private static int quantumHeld;
@@ -185,7 +181,6 @@ public final class ShipClient {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			sendControls(client);
 			quantumKey(client);
-			jumpKey(client);
 			while (GALAXY_MAP.consumeClick()) {
 				if (client.player != null && client.gui.screen() == null) client.gui.setScreen(new com.starwake.client.galaxy.GalaxyMapScreen());
 			}
@@ -297,29 +292,19 @@ public final class ShipClient {
 	}
 
 	/** J: a tap arms/disarms the jump drive; holding past {@link #QUANTUM_HOLD_TICKS} jumps once. */
-	private static void jumpKey(Minecraft client) {
-		while (JUMP.consumeClick()) { /* edge presses are handled through isDown below */ }
-		boolean piloting = client.player != null && client.player.getVehicle() instanceof ShipEntity ship && ship.pilot() == client.player;
-		if (!piloting) {
-			jumpHeld = 0;
-			return;
-		}
-		if (JUMP.isDown()) {
-			jumpHeld++;
-			if (jumpHeld == QUANTUM_HOLD_TICKS) ClientPlayNetworking.send(new ShipQuantumPayload(ShipQuantumPayload.ACTION_JUMP_ENGAGE));
-		} else {
-			if (jumpHeld > 0 && jumpHeld < QUANTUM_HOLD_TICKS) ClientPlayNetworking.send(new ShipQuantumPayload(ShipQuantumPayload.ACTION_JUMP_TOGGLE));
-			jumpHeld = 0;
-		}
-	}
-
-	/** B: a tap toggles quantum mode; holding past {@link #QUANTUM_HOLD_TICKS} engages once. */
+	/** B, the drive key (M10: both drives): a tap arms or disarms; holding past {@link #QUANTUM_HOLD_TICKS} engages once. */
 	private static void quantumKey(Minecraft client) {
-		while (QUANTUM.consumeClick()) { /* edge presses are handled through isDown below */ }
+		// M10: count presses too: a quick tap (down and up within one client tick) never shows as isDown.
+		int presses = 0;
+		while (QUANTUM.consumeClick()) presses++;
 		boolean piloting = client.player != null && client.player.getVehicle() instanceof ShipEntity ship
 				&& ship.pilot() == client.player;
 		if (!piloting) {
 			quantumHeld = 0;
+			return;
+		}
+		if (presses > 0 && !QUANTUM.isDown() && quantumHeld == 0) {
+			ClientPlayNetworking.send(new ShipQuantumPayload(ShipQuantumPayload.ACTION_QUANTUM_TOGGLE));
 			return;
 		}
 		if (QUANTUM.isDown()) {

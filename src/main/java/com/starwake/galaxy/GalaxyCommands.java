@@ -136,7 +136,7 @@ public final class GalaxyCommands {
 			return 0;
 		}
 		var ship = ships.stream().min(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(source.getPosition()))).orElseThrow();
-		Component error = ship.setJumpTarget(id);
+		Component error = ship.drives.setJumpTarget(id);
 		if (error != null) source.sendFailure(error);
 		else source.sendSuccess(() -> Component.literal("Jump target set: " + id), false);
 		return error == null ? 1 : 0;

@@ -297,7 +297,7 @@ public final class SpaceTravel {
 		if (!isSpace(ship.level())) return Component.translatable("message.starwake.course.not_in_space");
 		var entry = SolarSystem.get(ship.level().registryAccess(), target).orElse(null);
 		if (entry == null || !entry.enterable()) return Component.translatable("message.starwake.course.unknown");
-		return ship.enterQuantumMode(target);
+		return ship.drives.enterQuantumMode(target);
 	}
 
 	public static Component planetName(Level level, @Nullable ResourceKey<Level> dimension) {

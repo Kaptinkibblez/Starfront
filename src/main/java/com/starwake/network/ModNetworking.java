@@ -89,12 +89,10 @@ public final class ModNetworking {
 		ServerPlayNetworking.registerGlobalReceiver(ShipQuantumPayload.TYPE, (payload, context) -> {
 			if (context.player().getVehicle() instanceof com.starwake.ship.ShipEntity ship && ship.pilot() == context.player()) {
 				switch (payload.action()) {
-					case ShipQuantumPayload.ACTION_QUANTUM_ENGAGE -> ship.engageQuantum();
-					case ShipQuantumPayload.ACTION_QUANTUM_TOGGLE -> ship.toggleQuantumMode();
+					case ShipQuantumPayload.ACTION_QUANTUM_ENGAGE, ShipQuantumPayload.ACTION_JUMP_ENGAGE -> ship.drives.engage();
+					case ShipQuantumPayload.ACTION_QUANTUM_TOGGLE, ShipQuantumPayload.ACTION_JUMP_TOGGLE -> ship.drives.toggle();
 					case ShipQuantumPayload.ACTION_DECOUPLE -> ship.toggleDecoupled();
 					case ShipQuantumPayload.ACTION_GEAR -> ship.toggleGear();
-					case ShipQuantumPayload.ACTION_JUMP_TOGGLE -> ship.toggleJumpMode();
-					case ShipQuantumPayload.ACTION_JUMP_ENGAGE -> ship.engageJump();
 					default -> { }
 				}
 			}
@@ -118,7 +116,7 @@ public final class ModNetworking {
 		ServerPlayNetworking.registerGlobalReceiver(JumpTargetPayload.TYPE, (payload, context) -> {
 			var player = context.player();
 			if (player.getVehicle() instanceof com.starwake.ship.ShipEntity ship && ship.pilot() == player) {
-				var error = ship.setJumpTarget(payload.system());
+				var error = ship.drives.setJumpTarget(payload.system());
 				player.sendOverlayMessage(error != null ? error : net.minecraft.network.chat.Component.translatable(
 						"message.starwake.jump.target", com.starwake.galaxy.Galaxy.star(payload.system())
 								.map(com.starwake.galaxy.Galaxy.Star::name).orElse(payload.system())));
