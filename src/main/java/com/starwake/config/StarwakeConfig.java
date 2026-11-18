@@ -50,7 +50,6 @@ public final class StarwakeConfig {
 	public static final String OXYGEN = number("hazards.suit_oxygen", "hazards", 1, 0.1, 100, "Survey Suit oxygen duration multiplier");
 	// Ships
 	public static final String MAX_BLOCKS = number("ships.max_blocks", "ships", 262_144, 64, 262_144, "Largest ship in blocks");
-	public static final String REENTRY = flag("ships.reentry_damage", "ships", true, "Re-entry heating burns off under-rated hull blocks");
 	public static final String IMPACT = flag("ships.impact_damage", "ships", true, "Hard impacts break hull blocks and hurt the crew");
 	public static final String LOCKING = flag("ships.locking", "ships", true, "Owners may lock ships against strangers");
 	public static final String IDLE_BURN = number("ships.idle_burn", "ships", 1, 0, 10, "Fuel burnt by unpiloted hovering ships (0 = free)");

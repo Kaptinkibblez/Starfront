@@ -490,13 +490,10 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("screen.starwake.semiconductor.doses", "Dopant: %s doses");
 		builder.add("screen.starwake.semiconductor.metal", "Metal: %s wafers");
 		builder.add("screen.starwake.semiconductor.argon", "Argon inlet ->");
-		builder.add("hud.starwake.hull_temp", "SKIN %s C / %s");
-		builder.add("hud.starwake.hull_burning", "HULL BURNING %s C > %s");
 		builder.add("console.starwake.ship.fusion", "Fusion fuel (D + He-3): %s / %s units (0.1 mg each)");
 		builder.add("message.starwake.fuel_tank.gauge_fusion", "Fuel %s / %s · Fusion %s / %s");
 		builder.add("screen.starwake.machine.tank.isotope_column.inlet", "Water in");
 		builder.add("screen.starwake.machine.tank.isotope_column.liquid", "Heavy water out");
-		builder.add("message.starwake.hull.burned", "Re-entry heat burned off %s hull blocks!");
 		builder.add("message.starwake.hull.smashed", "Impact tore off %s hull blocks!");
 		builder.add("screen.starwake.forming.hot", "Mode: HOT");
 		builder.add("screen.starwake.forming.cold", "Mode: COLD");
@@ -727,7 +724,6 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add("subtitles.starwake.ship.quantum_exit", "Ship drops out of quantum");
 		builder.add("subtitles.starwake.ship.alarm", "Cockpit alarm");
 		builder.add("subtitles.starwake.ship.gear", "Landing gear moves");
-		builder.add("subtitles.starwake.ship.reentry_loop", "Re-entry roars");
 		builder.add("hud.starwake.gear_up", "GEAR UP");
 		builder.add("key.starwake.gear", "Landing Gear");
 		builder.add("message.starwake.gear.down", "Landing gear down");

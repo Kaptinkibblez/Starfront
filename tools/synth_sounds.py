@@ -106,6 +106,5 @@ write("gear", 0.5 * servo + 1.2 * clunk)
 
 # Re-entry: roaring plasma and wind (2 s loop).
 x = t(2.0)
-write("reentry_loop", noise(2.0, 40, 1200, -0.8) * (0.8 + 0.2 * np.sin(2 * np.pi * 3 * x)) + 0.4 * noise(2.0, 2000, 7000))
 
 print("wrote", sorted(os.listdir(out_dir)))

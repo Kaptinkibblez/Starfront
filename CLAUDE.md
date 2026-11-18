@@ -608,7 +608,7 @@ commit. **Don't start the next milestone until the user confirms the current one
   support, a save-compatibility promise, a server performance target** (no public listing yet). Shape: **one milestone at a time,
   each with a jar and a pause for the user's playtest**, then a release candidate. Every milestone still starts with audit -> ask
   -> fix. Planned order (systems others depend on first):
-  - [ ] **10. Flight, quantum and hulls.** Overhaul the 3a-3g scaffolds (flight model and feel, quantum/jump travel, power and
+  - [x] **10. Flight, quantum and hulls.** Overhaul the 3a-3g scaffolds (flight model and feel, quantum/jump travel, power and
         components) now that every core system exists; the hull-shape revisit. Combat builds on this.
     - **M10 decisions (user, 2026-11-17).** Audit found: ships merge with crafted floors (the scan only stops at terrain),
       engine flame particles spawn ahead of the canopy at speed (stale positions), the canopy's block outline shows in the
@@ -635,7 +635,8 @@ commit. **Don't start the next milestone until the user confirms the current one
       quantum, B disarmed, a galaxy pick armed the jump drive in the same panel, holding B engaged (or said why not); hull test bed:
       painted pieces red/blue, mixed slope/curve corners, the new diagonal/taper/half slopes; a dedicated server boots. Not
       covered: a full quantum/jump trip after the split, plate repair, paint aboard an assembled ship, multiplayer.)* Details in
-      "How flight, power, drives and hulls work after M10".
+      "How flight, power, drives and hulls work after M10". Re-entry heating was then removed at the user's request (0.10.1,
+      2026-11-18); the user moved on to M11.
   - [ ] **11. Combat.** Ship weapons (guns, missiles, turrets on power/heat/shields/armour), personal ranged weapons, damage
         and repair; threats that are simulated or event-based (no roaming NPC ships, per the user's M9 rule).
   - [ ] **12. Alien life.** Fauna and harvestable flora per archetype, fitted to the conditions; drops that feed the chemistry.
@@ -1074,8 +1075,9 @@ normal gravity.
   = mode ceiling with a caret at the limit. Debug: `-Dstarwake.flightDebug=true` logs requests vs achieved thrust.
 - **Contacts:** `ShipMotion` checks the swept box first; with nothing solid in it one step is enough (fast flight in clear air),
   otherwise up to 40 substeps.
-- **Re-entry** (`Reentry.heating`): the skin's stagnation rise 0.9 v²/(2 x 1005) x sqrt(air density): 150 m/s ~10 C, 600 m/s
-  ~160 C, 1,500 m/s ~1,000 C (past steel's 800). Effects intensity ramps from 120 to 900 C of rise.
+- **Re-entry removed** (user, 2026-11-18: "get rid of the re-entry mechanic"): no hull heating or burn-off, no plasma/haze/shake
+  effects, no re-entry sound, no skin-temperature alert, no `ships.reentry_damage` config. Ships enter and leave atmospheres
+  freely; ship_stats `heat_limit` and a rating's `heatLimit` are now unused data.
 - **Power** (`ShipSystems`, `PowerPips`, `ShipPower`): plant output = 20 pips; subsystems ENGINES, SHIELDS, WEAPONS, COOLERS,
   QUANTUM want their parts' `power_draw` (coolers draw now); factor = pips x pip kW / want (max 1); `maxPips` caps each.
   Auto split fills COOLERS > ENGINES > SHIELDS > QUANTUM > WEAPONS; the pilot's +/- (Wristcom Ship app) is refit by the server.

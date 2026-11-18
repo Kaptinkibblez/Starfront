@@ -199,7 +199,6 @@ public final class ShipClient {
 			if (piloting(client)) FlightControls.lockView(client, (ShipEntity) client.player.getVehicle(), FREE_LOOK.isDown());
 			ShipSounds.tick(client);
 			ChaseCamera.tick(client);
-			ReentryEffects.tick(client);
 			while (CHASE.consumeClick()) ChaseCamera.toggle(client);
 			while (SHIP_CONSOLE.consumeClick()) {
 				if (client.player != null && client.player.getVehicle() instanceof ShipEntity ship) {

@@ -19,13 +19,11 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Damage to a ship's hull (M10: split out of {@link ShipEntity}; combat damage joins it in M11): re-entry heating of
- * the leading face (M8e-1), crash and landing impacts soaked by shields, then by the hull's armour, then by the crew.
+ * Damage to a ship's hull (M10: split out of {@link ShipEntity}; combat damage joins it in M11): crash and landing
+ * impacts (re-entry heating was removed in M10 at the user's request) soaked by shields, then by the hull's armour, then by the crew.
  */
 public final class ShipDamage {
 	private final ShipEntity ship;
-	/** Re-entry heat soaked by leading-face blocks (a block burns off at 1). */
-	private final Map<BlockPos, Double> heatDose = new HashMap<>();
 
 	ShipDamage(ShipEntity ship) {
 		this.ship = ship;
@@ -40,52 +38,6 @@ public final class ShipDamage {
 		boolean upright = ship.worldDirection(Direction.UP).y > 0.8;
 		double safe = !result.touchdown() ? SAFE_IMPACT : ship.isGearDown() && upright ? SAFE_GEAR_LANDING : SAFE_BELLY_LANDING;
 		if (result.impact() > safe) onImpact(result.impact(), safe, result.blocked());
-	}
-
-	/**
-	 * Every half second: the leading face heats to 25 C + the stagnation rise ({@link Reentry#heating}); blocks
-	 * whose heat limit (alloy service temperature, or ship_stats {@code heat_limit}) is lower soak heat in
-	 * proportion to the excess and burn off at a dose of 1. Cooler blocks shed it again.
-	 */
-	void tick() {
-		if (ship.tickCount % 10 != 0 || ship.structure() == null) return;
-		HullTuning tuning = HullTuning.get();
-		// Mid-tick on the server the half-second ring isn't updated yet: use last tick's movement.
-		Vec3 v = ship.lastMove();
-		double rise = Reentry.heating(ship, v);
-		float skin = rise < 20 ? 0 : (float) (25 + rise);
-		if (skin <= 0) {
-			ship.getEntityData().set(ShipEntity.SKIN_TEMP, 0f);
-			heatDose.replaceAll((k, d) -> d * 0.8);
-			heatDose.values().removeIf(d -> d < 0.01);
-			return;
-		}
-		Direction lead = ship.localDirection(v.lengthSqr() > 1e-6 ? v : ship.worldDirection(Direction.DOWN));
-		double weakest = Double.MAX_VALUE;
-		java.util.Set<BlockPos> burned = new java.util.HashSet<>();
-		for (BlockPos pos : ship.structure().outerFace(lead)) {
-			ShipMaterials.Rating r = ship.ratings.get(pos);
-			double limit = r == null ? ShipStats.get(ship.structure().get(pos)).heatLimit() : r.heatLimit();
-			weakest = Math.min(weakest, limit);
-			double over = skin - limit;
-			double dose = heatDose.getOrDefault(pos, 0.0);
-			dose = over > 0 ? dose + over * tuning.burnRate() * 0.5 : dose * 0.8;
-			if (dose >= 1 && com.starwake.config.StarwakeConfig.on(com.starwake.config.StarwakeConfig.REENTRY)) burned.add(pos);
-			else if (dose > 0.01) heatDose.put(pos, dose);
-			else heatDose.remove(pos);
-		}
-		ship.getEntityData().set(ShipEntity.SKIN_TEMP, skin);
-		ship.getEntityData().set(ShipEntity.HULL_LIMIT, weakest == Double.MAX_VALUE ? 0f : (float) weakest);
-		if (!burned.isEmpty() && ship.level() instanceof ServerLevel server) {
-			burned.forEach(heatDose::remove);
-			for (BlockPos pos : burned) {
-				Vec3 at = ship.blockCenter(pos);
-				server.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME, at.x, at.y, at.z, 12, 0.4, 0.4, 0.4, 0.05);
-			}
-			ship.messageAboard(Component.translatable("message.starwake.hull.burned", burned.size()));
-			com.starwake.StarwakeMod.LOGGER.info("Ship {}: re-entry at {} C burned off {} blocks", ship.getId(), Math.round(skin), burned.size());
-			com.starwake.ship.edit.ShipEditing.destroy(ship, burned, false);
-		}
 	}
 
 	/** Ticks before another impact can register: a crash counts once, not once per tick of scraping. */

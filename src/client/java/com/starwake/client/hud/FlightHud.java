@@ -117,7 +117,6 @@ public final class FlightHud {
 	private static void cockpit(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, Minecraft minecraft, ShipEntity piloted, int w, int h) {
 		Font font = minecraft.font;
 		int cx = w / 2, cy = h / 2;
-		heatHaze(graphics, w, h, com.starwake.client.ship.ReentryEffects.intensity(deltaTracker.getGameTimeDeltaPartialTick(true)));
 		Camera camera = minecraft.gameRenderer.mainCamera();
 		Matrix4f mvp = camera.getViewRotationProjectionMatrix(new Matrix4f());
 		Vector3f look = new Vector3f(camera.forwardVector());
@@ -175,20 +174,6 @@ public final class FlightHud {
 	}
 
 	/** Re-entry: an orange glow creeping in from the screen edges. */
-	private static void heatHaze(GuiGraphicsExtractor g, int w, int h, float intensity) {
-		if (intensity < 0.03f) return;
-		int bands = 8;
-		for (int i = 0; i < bands; i++) {
-			int inset = i * Math.max(4, Math.min(w, h) / 40);
-			int alpha = (int) (intensity * 70 * (1 - i / (float) bands));
-			int color = (alpha << 24) | 0xFF6A1E;
-			g.fill(inset, inset, w - inset, inset + 6, color);
-			g.fill(inset, h - inset - 6, w - inset, h - inset, color);
-			g.fill(inset, inset + 6, inset + 6, h - inset - 6, color);
-			g.fill(w - inset - 6, inset + 6, w - inset, h - inset - 6, color);
-		}
-	}
-
 	// --- centre -------------------------------------------------------------------------------
 
 	private static void reticle(GuiGraphicsExtractor g, int cx, int cy) {
@@ -489,14 +474,6 @@ public final class FlightHud {
 		if (ship.heatLevel() >= 1) {
 			texts.add(Component.translatable("hud.starwake.overheat"));
 			colors.add(ALERT);
-		}
-		if (ship.skinTemperature() > 0 && ship.skinTemperature() > ship.hullHeatLimit() * 0.5f) {
-			// Re-entry (M8e-1): skin temperature against the weakest block on the leading face (from half the limit,
-			// M9 pass 2: a mild warm-up isn't worth an alert).
-			float skin = ship.skinTemperature(), limit = ship.hullHeatLimit();
-			boolean over = limit > 0 && skin > limit;
-			texts.add(Component.translatable(over ? "hud.starwake.hull_burning" : "hud.starwake.hull_temp", Math.round(skin), Math.round(limit)));
-			colors.add(over ? (blink ? ALERT : WARN) : skin > limit * 0.8f ? WARN : 0xFFE6F2FF);
 		}
 		if (ship.shieldMax() > 0 && ship.shield() < 1) {
 			texts.add(Component.translatable("hud.starwake.shields_down"));

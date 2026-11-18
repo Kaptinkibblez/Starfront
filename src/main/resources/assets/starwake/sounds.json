@@ -70,13 +70,5 @@
         "name": "starwake:ship/gear"
       }
     ]
-  },
-  "ship.reentry_loop": {
-    "subtitle": "subtitles.starwake.ship.reentry_loop",
-    "sounds": [
-      {
-        "name": "starwake:ship/reentry_loop"
-      }
-    ]
   }
 }

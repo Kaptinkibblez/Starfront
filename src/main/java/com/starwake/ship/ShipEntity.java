@@ -86,9 +86,6 @@ public class ShipEntity extends Entity {
 	private static final EntityDataAccessor<Integer> FUSION = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	static final EntityDataAccessor<Float> SHIELD = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Float> SHIELD_MAX = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
-	/** M8e-1: skin temperature of the leading face (C, 0 = not heating) and the weakest heat limit on it. */
-	static final EntityDataAccessor<Float> SKIN_TEMP = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
-	static final EntityDataAccessor<Float> HULL_LIMIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	/** Packed power split percents (0-100 each): engines * 1_000_000 + shields * 1000 + quantum. */
 	private static final EntityDataAccessor<Integer> POWER_SPLIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> ENGINE_FACTOR = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
@@ -849,8 +846,6 @@ public class ShipEntity extends Entity {
 		builder.define(FUSION, 0);
 		builder.define(SHIELD, 0f);
 		builder.define(SHIELD_MAX, 0f);
-		builder.define(SKIN_TEMP, 0f);
-		builder.define(HULL_LIMIT, 0f);
 		builder.define(POWER_SPLIT, 0);
 		builder.define(PIP_MAX, 0);
 		builder.define(ENGINE_FACTOR, 1f);
@@ -1380,7 +1375,6 @@ public class ShipEntity extends Entity {
 			}
 		}
 		tickSystems();
-		damage.tick();
 		return false;
 	}
 
@@ -1427,16 +1421,6 @@ public class ShipEntity extends Entity {
 		grounded = result.grounded();
 		damage.afterStep(result);
 		return result.moved() && level() instanceof ServerLevel serverLevel && SpaceTravel.checkAltitude(this, serverLevel);
-	}
-
-	// --- Hull: re-entry heating (M8e-1) ------------------------------------------------------------
-
-	public float skinTemperature() {
-		return entityData.get(SKIN_TEMP);
-	}
-
-	public float hullHeatLimit() {
-		return entityData.get(HULL_LIMIT);
 	}
 
 	/** The local direction closest to a world direction. */

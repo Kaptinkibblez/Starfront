@@ -19,7 +19,6 @@ public final class ModSounds {
 	public static final SoundEvent QUANTUM_EXIT = register("ship.quantum_exit");
 	public static final SoundEvent ALARM = register("ship.alarm");
 	public static final SoundEvent GEAR = register("ship.gear");
-	public static final SoundEvent REENTRY_LOOP = register("ship.reentry_loop");
 
 	private ModSounds() {}
 
