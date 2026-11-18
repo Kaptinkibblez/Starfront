@@ -55,6 +55,7 @@ public final class ShipEditingClient {
 
 	/** Left-click pressed. Returns true if it hit a ship block (vanilla then does nothing). */
 	public static boolean startAttack(Minecraft minecraft) {
+		if (ShipClient.piloting(minecraft)) return true; // M11: at the Helm the attack key fires the guns (sent with the input)
 		LocalPlayer player = minecraft.player;
 		if (player == null || minecraft.missTime > 0 || player.isHandsBusy()) return false;
 		ShipClient.ShipHit hit = ShipClient.targetedShipBlock(minecraft);
@@ -72,6 +73,7 @@ public final class ShipEditingClient {
 
 	/** Every tick while the attack key is (or was) held. Returns true if a ship block took it. */
 	public static boolean continueAttack(Minecraft minecraft, boolean down) {
+		if (ShipClient.piloting(minecraft)) return true;
 		if (delay > 0) delay--;
 		LocalPlayer player = minecraft.player;
 		if (!down || player == null || player.isUsingItem()) {

@@ -33,6 +33,8 @@ public final class ModItems {
 
 	/** Hull Tool (M9 pass 3): cycles a Hull Panel's shape, turns it, switches shape family. */
 	public static final Item HULL_TOOL = register("hull_tool", com.starwake.ship.item.HullToolItem::new, new Item.Properties().stacksTo(1));
+	/** M11: a linked belt of 50 autocannon rounds; right-click a Ballistic Cannon aboard to load the ship's magazine. */
+	public static final Item AUTOCANNON_ROUNDS = register("autocannon_rounds", Item::new, new Item.Properties().stacksTo(16));
 
 	private ModItems() {}
 

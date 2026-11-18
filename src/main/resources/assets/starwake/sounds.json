@@ -70,5 +70,37 @@
         "name": "starwake:ship/gear"
       }
     ]
+  },
+  "ship.cannon_fire": {
+    "subtitle": "subtitles.starwake.ship.cannon_fire",
+    "sounds": [
+      {
+        "name": "starwake:ship/cannon_fire"
+      }
+    ]
+  },
+  "ship.laser_fire": {
+    "subtitle": "subtitles.starwake.ship.laser_fire",
+    "sounds": [
+      {
+        "name": "starwake:ship/laser_fire"
+      }
+    ]
+  },
+  "ship.weapon_impact": {
+    "subtitle": "subtitles.starwake.ship.weapon_impact",
+    "sounds": [
+      {
+        "name": "starwake:ship/weapon_impact"
+      }
+    ]
+  },
+  "ship.shield_hit": {
+    "subtitle": "subtitles.starwake.ship.shield_hit",
+    "sounds": [
+      {
+        "name": "starwake:ship/shield_hit"
+      }
+    ]
   }
 }

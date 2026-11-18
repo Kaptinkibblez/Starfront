@@ -80,6 +80,47 @@ public final class ShipClient {
 	private static final KeyMapping GALAXY_MAP = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.galaxy_map", InputConstants.KEY_M, CATEGORY));
 	/** M10: SCM <-> NAV flight mode. */
+	/** M11: lock the target nearest the crosshair (again: the next one; nothing near: clear). */
+	private static final KeyMapping TARGET = KeyMappingHelper.registerKeyMapping(
+			new KeyMapping("key.starwake.target", InputConstants.KEY_Y, CATEGORY));
+
+	/** M11: for the HUD. */
+	public static boolean firingNow() {
+		return firing();
+	}
+
+	/** M11: the pilot holds the attack key with no screen open. */
+	static boolean firing() {
+		Minecraft client = Minecraft.getInstance();
+		return client.gui.screen() == null && piloting(client) && client.options.keyAttack.isDown();
+	}
+
+	/** M11: cycles the locked target among ships and living things near the pilot's line of sight. */
+	private static void cycleTarget(Minecraft client) {
+		if (!piloting(client) || !(client.player.getVehicle() instanceof ShipEntity ship) || client.level == null) return;
+		Vec3 eye = client.gameRenderer.mainCamera().position();
+		Vec3 look = new Vec3(client.gameRenderer.mainCamera().forwardVector());
+		java.util.List<net.minecraft.world.entity.Entity> candidates = new java.util.ArrayList<>();
+		for (net.minecraft.world.entity.Entity e : client.level.entitiesForRendering()) {
+			if (e == ship || e == client.player || !(e instanceof ShipEntity || e instanceof net.minecraft.world.entity.LivingEntity) || !e.isAlive()) continue;
+			if (e.getVehicle() == ship || ship.isSupporting(e)) continue;
+			Vec3 to = (e instanceof ShipEntity s ? s.position() : e.getBoundingBox().getCenter()).subtract(eye);
+			double d = to.length();
+			if (d < 1 || d > 3000 || to.normalize().dot(look) < Math.cos(Math.toRadians(20))) continue;
+			candidates.add(e);
+		}
+		candidates.sort(java.util.Comparator.comparingDouble(e -> -(e instanceof ShipEntity s ? s.position() : e.getBoundingBox().getCenter())
+				.subtract(eye).normalize().dot(look)));
+		int current = ship.targetId(), next = -1;
+		if (!candidates.isEmpty()) {
+			int at = -1;
+			for (int i = 0; i < candidates.size(); i++) if (candidates.get(i).getId() == current) at = i;
+			next = candidates.get((at + 1) % candidates.size()).getId();
+			if (at >= 0 && candidates.size() == 1) next = -1; // the only one again: unlock
+		}
+		ClientPlayNetworking.send(new com.starwake.network.ShipTargetPayload(next));
+	}
+
 	private static final KeyMapping FLIGHT_MODE = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.starwake.flight_mode", InputConstants.KEY_H, CATEGORY));
 	/** Ticks B must be held to engage (0.75 s). */
@@ -129,7 +170,8 @@ public final class ShipClient {
 			public int controls() {
 				return (ROLL_LEFT.isDown() ? ShipEntity.CONTROL_ROLL_LEFT : 0) | (ROLL_RIGHT.isDown() ? ShipEntity.CONTROL_ROLL_RIGHT : 0)
 						| (FREE_LOOK.isDown() ? ShipEntity.CONTROL_FREE_LOOK : 0) | (FlightControls.joystick() ? ShipEntity.CONTROL_JOYSTICK : 0)
-						| (FlightControls.nav() ? ShipEntity.CONTROL_NAV : 0);
+						| (FlightControls.nav() ? ShipEntity.CONTROL_NAV : 0)
+						| (firing() ? ShipEntity.CONTROL_FIRE : 0);
 			}
 
 			@Override
@@ -200,6 +242,7 @@ public final class ShipClient {
 			ShipSounds.tick(client);
 			ChaseCamera.tick(client);
 			while (CHASE.consumeClick()) ChaseCamera.toggle(client);
+			while (TARGET.consumeClick()) cycleTarget(client);
 			while (SHIP_CONSOLE.consumeClick()) {
 				if (client.player != null && client.player.getVehicle() instanceof ShipEntity ship) {
 					ClientPlayNetworking.send(new ShipConsoleActionPayload(BlockPos.ZERO, ship.getId(),

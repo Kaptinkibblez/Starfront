@@ -1,0 +1,9 @@
+{
+  "blocks": [
+    "starwake:ballistic_cannon_mk3"
+  ],
+  "mass": 1.8,
+  "power_draw": 1.44,
+  "heat_limit": 1560,
+  "armor": 26.4
+}

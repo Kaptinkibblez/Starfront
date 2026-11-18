@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * with the part through disassembly and as an item). Overheating and hull impacts wear parts; a part works at
  * {@link ShipMaterials#effectiveness} and is disabled below 25%. A metal plate used on a part repairs 25%.
  *
- * <h2>Capacitor</h2> Weapon pips charge the weapon capacitor (weapons arrive in M11; until then it has no capacity).
+ * <h2>Capacitor</h2> Weapon pips charge the weapon capacitor (sized by the guns aboard, M11); energy guns draw on it.
  */
 public final class ShipPower {
 	/** Seconds of the plants' full heat the buffer holds before overheating. */
@@ -214,6 +214,11 @@ public final class ShipPower {
 			}
 		}
 		ship.refreshParts(changed);
+	}
+
+	/** Adds heat (kJ), e.g. a gun firing (M11). */
+	public void addHeat(double kJ) {
+		heat = Math.clamp(heat + kJ, 0, 2 * buffer());
 	}
 
 	/** Admin/testing: sets the heat level (fraction of the buffer). */

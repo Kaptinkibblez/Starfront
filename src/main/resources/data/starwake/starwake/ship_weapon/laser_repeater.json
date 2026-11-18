@@ -1,0 +1,15 @@
+{
+  "kind": "energy",
+  "damage": 12.0,
+  "speed": 1800.0,
+  "rate": 5.0,
+  "range": 1500.0,
+  "spread": 0.3,
+  "gimbal_cone": 25,
+  "gimbal_factor": 0.8,
+  "energy": 2.0,
+  "heat": 1.5,
+  "capacitor": 30.0,
+  "shield_factor": 1.0,
+  "break_damage": 150
+}

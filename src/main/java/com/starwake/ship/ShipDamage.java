@@ -19,14 +19,92 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Damage to a ship's hull (M10: split out of {@link ShipEntity}; combat damage joins it in M11): crash and landing
- * impacts (re-entry heating was removed in M10 at the user's request) soaked by shields, then by the hull's armour, then by the crew.
+ * Damage to a ship's hull (M10: split out of {@link ShipEntity}): crash and landing impacts (re-entry heating was removed in
+ * M10 at the user's request) soaked by shields, then by the hull's armour, then by the crew.
+ *
+ * <h2>Weapon hits (M11, hybrid damage)</h2> Shields take their share of a hit first (ballistic rounds partly pass them) and
+ * pause regenerating for {@link #SHIELD_PAUSE} ticks. The rest comes off the hull point pool (the sum of block armour) and
+ * wears the parts next to the impact. Blocks only break when a single hit is heavy (at least the weapon's break damage:
+ * torpedoes, later) or once the pool is empty; then the hit carves out the cells nearest the impact.
  */
 public final class ShipDamage {
 	private final ShipEntity ship;
 
 	ShipDamage(ShipEntity ship) {
 		this.ship = ship;
+	}
+
+	/** Ticks shields wait after a hit before regenerating (Star Citizen style). */
+	static final int SHIELD_PAUSE = 50;
+	/** Ticks left before shields regenerate again. */
+	int shieldPause;
+	private boolean warnedBreach;
+
+	/**
+	 * Server: a weapon hit on cell {@code local} at world point {@code at}. {@code shieldFactor} is the share shields can
+	 * take; a hit of at least {@code breakDamage} after shields breaks blocks even with hull points left.
+	 */
+	public void takeHit(BlockPos local, Vec3 at, double damage, double shieldFactor, double breakDamage) {
+		if (!(ship.level() instanceof ServerLevel level) || ship.structure() == null || damage <= 0) return;
+		float shield = ship.getEntityData().get(ShipEntity.SHIELD);
+		double absorbed = Math.min(shield, damage * shieldFactor);
+		if (absorbed > 0) {
+			ship.getEntityData().set(ShipEntity.SHIELD, (float) (shield - absorbed));
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, true, true, at.x, at.y, at.z, 8, 0.4, 0.4, 0.4, 0.2);
+			level.playSound(null, BlockPos.containing(at), com.starwake.registry.ModSounds.SHIELD_HIT, net.minecraft.sounds.SoundSource.NEUTRAL,
+					1.0f, 0.9f + level.getRandom().nextFloat() * 0.2f);
+		}
+		shieldPause = SHIELD_PAUSE;
+		double rest = damage - absorbed;
+		if (rest <= 1e-6) return;
+		level.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA, true, true, at.x, at.y, at.z, 2, 0.1, 0.1, 0.1, 0);
+		level.sendParticles(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE, true, true, at.x, at.y, at.z, 3, 0.2, 0.2, 0.2, 0.02);
+		level.playSound(null, BlockPos.containing(at), com.starwake.registry.ModSounds.WEAPON_IMPACT, net.minecraft.sounds.SoundSource.NEUTRAL,
+				1.2f, 0.85f + level.getRandom().nextFloat() * 0.3f);
+		float hull = Math.max(0, ship.getEntityData().get(ShipEntity.HULL) - (float) rest);
+		ship.getEntityData().set(ShipEntity.HULL, hull);
+		// Parts next to the impact take wear (a 40-point hit wears an adjacent part 10%).
+		for (BlockPos p : BlockPos.betweenClosed(local.offset(-1, -1, -1), local.offset(1, 1, 1))) {
+			if (ship.components().contains(p)) ship.power.wear(p.immutable(), (float) Math.min(0.5, rest / 400.0));
+		}
+		ship.power.flush();
+		boolean heavy = rest >= breakDamage;
+		if (hull <= 0 && !warnedBreach) {
+			ship.messageAboard(Component.translatable("message.starwake.hull.breached"));
+			warnedBreach = true;
+		} else if (hull > 0) {
+			warnedBreach = false;
+		}
+		if (!(heavy || hull <= 0) || !com.starwake.config.StarwakeConfig.on(com.starwake.config.StarwakeConfig.WEAPON_BLOCK_DAMAGE)) return;
+		int count = heavy ? 1 + (int) (rest / breakDamage) * 3 : 1 + (int) (rest / 30);
+		java.util.Set<BlockPos> cells = nearestCells(local, Math.min(27, count));
+		if (!cells.isEmpty()) com.starwake.ship.edit.ShipEditing.destroy(ship, cells, true);
+		if (ship.structure() != null && ship.structure().entries().size() <= 1) wreck(level);
+	}
+
+	/** Shot down to the Helm alone: the ship is destroyed. The Helm drops as an item and the entity (and its plot) goes. */
+	private void wreck(ServerLevel level) {
+		ship.messageAboard(Component.translatable("message.starwake.hull.destroyed"));
+		Vec3 at = ship.position();
+		level.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER, true, true, at.x, at.y, at.z, 1, 0, 0, 0, 0);
+		level.playSound(null, ship.blockPosition(), net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(), net.minecraft.sounds.SoundSource.NEUTRAL, 3f, 0.8f);
+		for (var entry : ship.structure().entries()) {
+			level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y, at.z,
+					new net.minecraft.world.item.ItemStack(entry.state().getBlock())));
+		}
+		ship.ejectPassengers();
+		ship.discard();
+	}
+
+	/** Up to {@code count} ship cells nearest to {@code local} (within 2 blocks), never the Helm. */
+	private java.util.Set<BlockPos> nearestCells(BlockPos local, int count) {
+		List<BlockPos> near = new ArrayList<>();
+		for (BlockPos p : BlockPos.betweenClosed(local.offset(-2, -2, -2), local.offset(2, 2, 2))) {
+			var state = ship.structure().get(p);
+			if (state != null && !(state.getBlock() instanceof HelmBlock)) near.add(p.immutable());
+		}
+		near.sort(java.util.Comparator.comparingDouble(p -> p.distSqr(local)));
+		return new java.util.LinkedHashSet<>(near.subList(0, Math.min(count, near.size())));
 	}
 
 	/** After every physics step: touchdowns and crashes. */

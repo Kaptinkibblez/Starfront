@@ -39,6 +39,15 @@ public class HullToolItem extends Item {
 		Level level = context.getLevel();
 		BlockPos pos = context.getClickedPos();
 		BlockState state = level.getBlockState(pos);
+		if (state.getBlock() instanceof com.starwake.ship.block.ShipWeaponBlock) {
+			// M11: the tool switches a gun between a gimballed and a fixed mount.
+			if (level.isClientSide()) return InteractionResult.SUCCESS;
+			BlockState toggled = state.cycle(com.starwake.ship.block.ShipWeaponBlock.GIMBAL);
+			level.setBlock(pos, toggled, net.minecraft.world.level.block.Block.UPDATE_ALL);
+			if (context.getPlayer() != null) context.getPlayer().sendOverlayMessage(Component.translatable(
+					toggled.getValue(com.starwake.ship.block.ShipWeaponBlock.GIMBAL) ? "message.starwake.weapon.gimbal" : "message.starwake.weapon.fixed"));
+			return InteractionResult.SUCCESS;
+		}
 		if (!(state.getBlock() instanceof ShapedBlock)) return InteractionResult.PASS;
 		if (level.isClientSide()) return InteractionResult.SUCCESS;
 		Player player = context.getPlayer();

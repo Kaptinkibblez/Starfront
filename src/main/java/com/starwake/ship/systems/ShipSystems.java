@@ -44,7 +44,7 @@ public final class ShipSystems {
 	private double quantumSpool; // best (shortest) drive spool time; 0 = no quantum drive
 	private int powerPlants, coolers, shieldGenerators, quantumDrives;
 	private double jumpRange, jumpSpool; // jump drives (M6): best range, shortest spool
-	private int jumpDrives;
+	private int jumpDrives, weapons;
 
 	/** Adds one block. {@code clearExhaust} only matters for thrusters. */
 	public void add(BlockState state, boolean clearExhaust) {
@@ -62,6 +62,12 @@ public final class ShipSystems {
 			cooling += stats.cooling();
 			draw[Subsystem.COOLERS.ordinal()] += stats.powerDraw();
 			coolers++;
+		} else if (state.getBlock() instanceof com.starwake.ship.block.ShipWeaponBlock) {
+			// M11: guns draw on the weapon pips and bring their capacitor.
+			draw[Subsystem.WEAPONS.ordinal()] += stats.powerDraw();
+			var spec = com.starwake.ship.weapon.WeaponSpec.of(state.getBlock());
+			if (spec != null) capacitor += spec.capacitor();
+			weapons++;
 		} else if (state.getBlock() instanceof ThrusterBlock) {
 			if (clearExhaust) draw[Subsystem.ENGINES.ordinal()] += stats.powerDraw();
 		} else if (stats.shieldCapacity() > 0) {
@@ -120,7 +126,7 @@ public final class ShipSystems {
 	public double engineDraw() { return want(Subsystem.ENGINES); }
 	public double shieldCapacity() { return shieldCapacity; }
 	public double shieldRegen() { return shieldRegen; }
-	/** Weapon capacitor capacity (kJ); weapons add it in M11. */
+	/** Weapon capacitor capacity (kJ), from the guns aboard (M11). */
 	public double capacitor() { return capacitor; }
 	public double quantumSpool() { return quantumSpool; }
 	public int powerPlants() { return powerPlants; }
@@ -132,4 +138,5 @@ public final class ShipSystems {
 	public double jumpRange() { return jumpRange; }
 	public double jumpSpool() { return jumpSpool; }
 	public int jumpDrives() { return jumpDrives; }
+	public int weapons() { return weapons; }
 }

@@ -1,0 +1,15 @@
+{
+  "kind": "ballistic",
+  "damage": 40.0,
+  "speed": 1440.0,
+  "rate": 4.8,
+  "range": 2600.0,
+  "spread": 0.5,
+  "gimbal_cone": 20,
+  "gimbal_factor": 0.8,
+  "heat": 0.6,
+  "ammo": "starwake:autocannon_rounds",
+  "rounds_per_item": 50,
+  "shield_factor": 0.6,
+  "break_damage": 150
+}

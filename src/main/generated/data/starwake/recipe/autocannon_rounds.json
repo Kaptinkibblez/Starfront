@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "starwake:metal_plate",
+    "minecraft:gunpowder",
+    "minecraft:gunpowder",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "count": 2,
+    "id": "starwake:autocannon_rounds"
+  }
+}

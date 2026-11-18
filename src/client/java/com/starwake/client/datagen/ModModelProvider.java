@@ -158,6 +158,8 @@ public final class ModModelProvider extends FabricModelProvider {
 		createNozzleBlock(generators, ModBlocks.MAIN_ENGINE);
 		createLandingGear(generators, ModBlocks.LANDING_GEAR);
 		createNozzleBlock(generators, ModBlocks.MANEUVERING_THRUSTER);
+		createWeapon(generators, ModBlocks.BALLISTIC_CANNON);
+		createWeapon(generators, ModBlocks.LASER_REPEATER);
 		createSeat(generators, ModBlocks.SEAT);
 		shipPart(generators, ModBlocks.POWER_PLANT);
 		shipPart(generators, ModBlocks.COOLER);
@@ -168,6 +170,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		for (var block : com.starwake.registry.ModShipParts.upgrades()) {
 			if (block instanceof com.starwake.ship.block.ThrusterBlock) createNozzleBlock(generators, block);
 			else if (block instanceof com.starwake.ship.block.LandingGearBlock) createLandingGear(generators, block);
+			else if (block instanceof com.starwake.ship.block.ShipWeaponBlock) createWeapon(generators, block);
 			else shipPart(generators, block);
 		}
 	}
@@ -190,6 +193,26 @@ public final class ModModelProvider extends FabricModelProvider {
 						.select(Direction.SOUTH, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_180))
 						.select(Direction.WEST, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_270))
 						.select(Direction.EAST, model.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_90))));
+	}
+
+	/** M11 guns: barrel-up models from tools/art_ships.py (gimballed and fixed), turned by FACING like engines. */
+	private static void createWeapon(BlockModelGenerators generators, Block block) {
+		String path = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block).getPath();
+		MultiVariant gimbal = BlockModelGenerators.plainVariant(id("ship/" + path));
+		MultiVariant fixed = BlockModelGenerators.plainVariant(id("ship/" + path + "_fixed"));
+		generators.registerSimpleItemModel(block, id("ship/" + path));
+		generators.blockStateOutput.accept(MultiVariantGenerator.dispatch(block).with(
+				PropertyDispatch.initial(BlockStateProperties.FACING, com.starwake.ship.block.ShipWeaponBlock.GIMBAL).generate((d, g) -> {
+					MultiVariant m = g ? gimbal : fixed;
+					return switch (d) {
+						case UP -> m;
+						case DOWN -> m.with(BlockModelGenerators.X_ROT_180);
+						case NORTH -> m.with(BlockModelGenerators.X_ROT_90);
+						case SOUTH -> m.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_180);
+						case WEST -> m.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_270);
+						case EAST -> m.with(BlockModelGenerators.X_ROT_90).with(BlockModelGenerators.Y_ROT_90);
+					};
+				})));
 	}
 
 	/**
@@ -273,6 +296,7 @@ public final class ModModelProvider extends FabricModelProvider {
 		ModPlanetBlocks.ores().forEach(ore -> generators.generateFlatItem(ore.raw(), ModelTemplates.FLAT_ITEM));
 		generators.generateFlatItem(ModItems.SURVEY_SUIT, ModelTemplates.FLAT_ITEM);
 		generators.generateFlatItem(ModItems.HULL_TOOL, ModelTemplates.FLAT_HANDHELD_ITEM);
+		generators.generateFlatItem(ModItems.AUTOCANNON_ROUNDS, ModelTemplates.FLAT_ITEM);
 		generators.generateFlatItem(com.starwake.registry.ModHubBlocks.SEALED_CARGO, ModelTemplates.FLAT_ITEM);
 		generators.generateFlatItem(com.starwake.registry.ModProcess.GAS_CYLINDER, ModelTemplates.FLAT_ITEM);
 		com.starwake.registry.ModMetalworks.moulds().forEach(m -> generators.generateFlatItem(m, ModelTemplates.FLAT_ITEM));

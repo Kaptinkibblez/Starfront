@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "D": "minecraft:dispenser",
+    "I": "minecraft:iron_ingot",
+    "P": "starwake:metal_plate",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    " P ",
+    "PDP",
+    "IRI"
+  ],
+  "result": {
+    "id": "starwake:ballistic_cannon"
+  }
+}

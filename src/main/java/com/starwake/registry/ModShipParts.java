@@ -22,7 +22,8 @@ public final class ModShipParts {
 	public enum Part {
 		THRUSTER("thruster"), MAIN_ENGINE("main_engine"), MANEUVERING_THRUSTER("maneuvering_thruster"), POWER_PLANT("power_plant"),
 		COOLER("cooler"), SHIELD_GENERATOR("shield_generator"), QUANTUM_DRIVE("quantum_drive"), JUMP_DRIVE("jump_drive"),
-		FUEL_TANK("fuel_tank"), LANDING_GEAR("landing_gear");
+		FUEL_TANK("fuel_tank"), LANDING_GEAR("landing_gear"),
+		BALLISTIC_CANNON("ballistic_cannon"), LASER_REPEATER("laser_repeater");
 
 		public final String id;
 
@@ -44,6 +45,8 @@ public final class ModShipParts {
 		tiers(Part.JUMP_DRIVE, ModBlocks.JUMP_DRIVE, ShipComponentBlock::new);
 		tiers(Part.FUEL_TANK, ModBlocks.FUEL_TANK, FuelTankBlock::new);
 		tiers(Part.LANDING_GEAR, ModBlocks.LANDING_GEAR, LandingGearBlock::new);
+		tiers(Part.BALLISTIC_CANNON, ModBlocks.BALLISTIC_CANNON, com.starwake.ship.block.ShipWeaponBlock::new);
+		tiers(Part.LASER_REPEATER, ModBlocks.LASER_REPEATER, com.starwake.ship.block.ShipWeaponBlock::new);
 	}
 
 	private ModShipParts() {}

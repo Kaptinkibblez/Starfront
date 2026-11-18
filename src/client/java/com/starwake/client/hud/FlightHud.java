@@ -146,10 +146,12 @@ public final class FlightHud {
 			if (v != null) velocityMarker(graphics, v[0], v[1]);
 		}
 		contacts(graphics, font, mvp, look, camera.position(), piloted, w, h);
+		target(graphics, font, mvp, look, camera.position(), piloted, w, h);
 		headingTape(graphics, font, cx, 4, heading, Math.min(80, Math.round(w * 0.18f)));
 		speedTape(graphics, font, cx - tapeOffset, cy, tapeHalf, speed, piloted, space);
 		altitudeTape(graphics, font, cx + tapeOffset, cy, tapeHalf, piloted, velocity.y, space);
 		systemsStrip(graphics, font, cx, h - 26, Math.min(w - 16, 300), piloted, space);
+		weaponsPanel(graphics, font, cx, h - 52, Math.min(w - 16, 300), piloted);
 		alerts(graphics, font, cx, 34, piloted);
 	}
 
@@ -173,7 +175,6 @@ public final class FlightHud {
 		g.fill(x - 2, y - 2, x + 3, y + 3, live ? WHITE : HOLO_DIM);
 	}
 
-	/** Re-entry: an orange glow creeping in from the screen edges. */
 	// --- centre -------------------------------------------------------------------------------
 
 	private static void reticle(GuiGraphicsExtractor g, int cx, int cy) {
@@ -217,6 +218,94 @@ public final class FlightHud {
 			g.text(font, name, x + r + 3, y - r, color, false);
 			g.text(font, label, x + r + 3, y - r + 9, HOLO_DIM, false);
 			g.text(font, rate, x + r + 3, y - r + 18, color, false);
+		}
+	}
+
+	/**
+	 * M11: the locked target: a red diamond with its range, closing speed and (for ships) shield and hull bars, plus a lead pip
+	 * for each gun speed aboard: where to aim so the shots meet the target.
+	 */
+	private static void target(GuiGraphicsExtractor g, Font font, Matrix4f mvp, Vector3f look, Vec3 eye, ShipEntity own, int w, int h) {
+		net.minecraft.world.entity.Entity t = com.starwake.ship.ShipWeapons.targetOf(own);
+		if (t == null) return;
+		Vec3 centre = t instanceof ShipEntity s ? s.position() : t.getBoundingBox().getCenter();
+		Vec3 rel = centre.subtract(eye);
+		double range = rel.length();
+		int[] p = HudProjection.project(mvp, look, rel, w, h);
+		if (p != null) {
+			int x = p[0], y = p[1], r = 9;
+			for (int i = 0; i <= r; i++) {
+				g.fill(x - r + i, y - i, x - r + i + 1, y - i + 1, ALERT);
+				g.fill(x + r - i, y - i, x + r - i + 1, y - i + 1, ALERT);
+				g.fill(x - r + i, y + i, x - r + i + 1, y + i + 1, ALERT);
+				g.fill(x + r - i, y + i, x + r - i + 1, y + i + 1, ALERT);
+			}
+			String label = range >= 1000 ? String.format("%.1f km", range / 1000) : Math.round(range) + " m";
+			double closing = -com.starwake.ship.ShipWeapons.velocityOf(t).subtract(own.lastMove()).dot(rel.scale(1 / Math.max(range, 1))) * 20;
+			g.text(font, "TGT " + label, x - r, y + r + 3, ALERT, false);
+			g.text(font, (closing >= 0 ? "+" : "") + Math.round(closing) + " m/s", x - r, y + r + 12, HOLO_DIM, false);
+			if (t instanceof ShipEntity ts) {
+				int bw = 34;
+				g.fill(x - r, y - r - 9, x - r + bw, y - r - 7, HOLO_FAINT);
+				if (ts.shieldMax() > 0) g.fill(x - r, y - r - 9, x - r + Math.round(bw * ts.shield() / ts.shieldMax()), y - r - 7, 0xFF6EA8FF);
+				g.fill(x - r, y - r - 5, x - r + bw, y - r - 3, HOLO_FAINT);
+				if (ts.hullMax() > 0) g.fill(x - r, y - r - 5, x - r + Math.round(bw * ts.hull() / ts.hullMax()), y - r - 3,
+						ts.hull() < ts.hullMax() * 0.3f ? ALERT : GOOD);
+			}
+		} else {
+			// Off screen: an arrow at the edge toward it.
+			Vec3 dir = rel.normalize();
+			Vec3 right = new Vec3(new Vector3f(look).cross(0, 1, 0)).normalize();
+			double ax = dir.dot(right), ay = -dir.y;
+			double len = Math.max(1e-6, Math.hypot(ax, ay));
+			int ex = w / 2 + (int) (ax / len * (h * 0.35)), ey = h / 2 + (int) (ay / len * (h * 0.35));
+			g.fill(ex - 2, ey - 2, ex + 3, ey + 3, ALERT);
+			g.text(font, "TGT", ex + 5, ey - 4, ALERT, false);
+		}
+		// Lead pips, one per gun speed.
+		java.util.Set<Integer> speeds = new java.util.TreeSet<>();
+		for (String group : own.weaponSummary().split(";")) {
+			String[] f = group.split(",");
+			if (f.length >= 3) speeds.add(Integer.parseInt(f[2]));
+		}
+		for (int speed : speeds) {
+			Vec3 aim = com.starwake.ship.ShipWeapons.lead(own.position(), own.lastMove(), t, speed / 20.0);
+			if (aim.distanceTo(own.position()) > 3000) continue;
+			int[] q = HudProjection.project(mvp, look, aim.subtract(eye), w, h);
+			if (q == null) continue;
+			g.outline(q[0] - 3, q[1] - 3, 7, 7, WARN);
+			g.fill(q[0], q[1], q[0] + 1, q[1] + 1, WARN);
+		}
+	}
+
+	/** M11: hull points, weapon capacitor and each gun type (count, gimballed share, rounds left) above the systems strip. */
+	private static void weaponsPanel(GuiGraphicsExtractor g, Font font, int cx, int y, int width, ShipEntity ship) {
+		String summary = ship.weaponSummary();
+		if (summary.isEmpty() && ship.hull() >= ship.hullMax()) return;
+		int x = cx - width / 2;
+		g.fill(x - 4, y - 4, x + width + 4, y + 21, PANEL);
+		corners(g, x - 4, y - 4, width + 8, 25, HOLO_DIM);
+		int half = (width - 8) / 2;
+		bar(g, font, x, y, half - 52, "HULL", ship.hull(), ship.hullMax(), ship.hull() < ship.hullMax() * 0.3f ? ALERT : GOOD);
+		if (ship.capacitorMax() > 0) bar(g, font, x + half + 8, y, half - 52, "CAP", ship.capacitorCharge(), ship.capacitorMax(), ALERT);
+		int ix = x, row = y + 11;
+		if (summary.isEmpty()) {
+			g.text(font, "NO WEAPONS", ix, row, HOLO_DIM, false);
+			return;
+		}
+		boolean firing = com.starwake.client.ship.ShipClient.firingNow();
+		for (String group : summary.split(";")) {
+			String[] f = group.split(",");
+			if (f.length < 5) continue;
+			String name = f[0].replace("ballistic_cannon", "CANNON").replace("laser_repeater", "LASER").replace("_mk2", " II").replace("_mk3", " III")
+					.toUpperCase(java.util.Locale.ROOT);
+			int rounds = Integer.parseInt(f[3]);
+			String text = name + " x" + f[1] + (Integer.parseInt(f[4]) > 0 ? " G" : " F") + (rounds >= 0 ? " " + rounds : "");
+			int color = rounds == 0 ? ALERT : firing ? WHITE : HOLO;
+			int tw = font.width(text);
+			if (ix + tw > x + width) break;
+			g.text(font, text, ix, row, color, false);
+			ix += tw + 12;
 		}
 	}
 

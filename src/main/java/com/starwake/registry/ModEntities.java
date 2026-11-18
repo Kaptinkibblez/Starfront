@@ -14,17 +14,32 @@ public final class ModEntities {
 	public static final ResourceKey<EntityType<?>> SHIP_KEY = ResourceKey.create(Registries.ENTITY_TYPE, StarwakeMod.id("ship"));
 
 	/**
-	 * Assembled ships. Tracked from 10 chunks away (ships are big) and synced every tick so
+	 * Assembled ships. Tracked as far as the server's view distance allows (M11: combat; was 10 chunks) and synced every tick so
 	 * riders see smooth motion. The hitbox comes from the structure, not these dimensions.
 	 */
 	public static final EntityType<ShipEntity> SHIP = Registry.register(BuiltInRegistries.ENTITY_TYPE, SHIP_KEY,
 			EntityType.Builder.<ShipEntity>of(ShipEntity::new, MobCategory.MISC)
 					.sized(1.0f, 1.0f)
-					.clientTrackingRange(10)
+					.clientTrackingRange(32)
 					.updateInterval(1)
 					.noSummon()
 					.fireImmune()
 					.build(SHIP_KEY));
+
+	public static final ResourceKey<EntityType<?>> SHIP_PROJECTILE_KEY = ResourceKey.create(Registries.ENTITY_TYPE, StarwakeMod.id("ship_projectile"));
+
+	/**
+	 * Ship-gun shots (M11). They fly in straight lines, so clients move them from their synced velocity; position updates
+	 * are rare. Tracked as far as ships are, so a fight is visible.
+	 */
+	public static final EntityType<com.starwake.ship.weapon.ShipProjectile> SHIP_PROJECTILE = Registry.register(BuiltInRegistries.ENTITY_TYPE,
+			SHIP_PROJECTILE_KEY, EntityType.Builder.<com.starwake.ship.weapon.ShipProjectile>of(com.starwake.ship.weapon.ShipProjectile::new, MobCategory.MISC)
+					.sized(0.25f, 0.25f)
+					.clientTrackingRange(32)
+					.updateInterval(20)
+					.noSummon()
+					.fireImmune()
+					.build(SHIP_PROJECTILE_KEY));
 
 	private ModEntities() {}
 

@@ -1,0 +1,24 @@
+{
+ "output": "starwake:ballistic_cannon",
+ "count": 1,
+ "order": 131,
+ "energy": 4000,
+ "inputs": [
+  {
+   "form": "forging",
+   "count": 1,
+   "main": true,
+   "min": {
+    "yield": 300
+   }
+  },
+  {
+   "item": "starwake:structural_frame",
+   "count": 1
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 1
+  }
+ ]
+}

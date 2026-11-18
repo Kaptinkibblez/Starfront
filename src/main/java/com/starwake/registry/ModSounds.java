@@ -19,6 +19,10 @@ public final class ModSounds {
 	public static final SoundEvent QUANTUM_EXIT = register("ship.quantum_exit");
 	public static final SoundEvent ALARM = register("ship.alarm");
 	public static final SoundEvent GEAR = register("ship.gear");
+	public static final SoundEvent CANNON_FIRE = register("ship.cannon_fire");
+	public static final SoundEvent LASER_FIRE = register("ship.laser_fire");
+	public static final SoundEvent WEAPON_IMPACT = register("ship.weapon_impact");
+	public static final SoundEvent SHIELD_HIT = register("ship.shield_hit");
 
 	private ModSounds() {}
 

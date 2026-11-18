@@ -4,12 +4,16 @@ Usage: python3 tools/synth_sounds.py src/main/resources/assets/starwake/sounds/s
 Loops are built from whole cycles and circularly-filtered noise, so they repeat seamlessly.
 Mono 44.1 kHz (Minecraft only positions mono sounds). Needs numpy and ffmpeg (libvorbis).
 """
-import os, subprocess, sys, tempfile, wave
+import os
+import sys, subprocess, sys, tempfile, wave
 import numpy as np
 
 SR = 44100
 rng = np.random.default_rng(1977)
 out_dir = sys.argv[1]
+
+
+ONLY = set(sys.argv[2:])  # names to (re)write after the output folder; all when none
 
 
 def t(seconds):
@@ -35,6 +39,8 @@ def env(seconds, attack, release):
 
 
 def write(name, sig, peak=0.9):
+    if ONLY and name not in ONLY:
+        return
     sig = sig / (np.abs(sig).max() + 1e-9) * peak
     pcm = (sig * 32767).astype(np.int16)
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
@@ -104,7 +110,31 @@ servo = (np.sin(phase) + 0.5 * np.sin(2 * phase)) * (x < 0.95) * env(1.2, 0.05, 
 clunk = noise(1.2, 40, 600, -1.0) * np.exp(-np.maximum(0, x - 0.95) * 25) * (x >= 0.95)
 write("gear", 0.5 * servo + 1.2 * clunk)
 
-# Re-entry: roaring plasma and wind (2 s loop).
-x = t(2.0)
+# M11 weapons.
+# Autocannon: a sharp crack with a low body and a short mechanical rattle.
+x = t(0.35)
+crack = noise(0.35, 800, 9000) * np.exp(-x * 40)
+body = np.sin(2 * np.pi * (90 * np.exp(-x * 6) + 40) * x) * np.exp(-x * 14)
+rattle = noise(0.35, 2000, 6000) * np.exp(-np.maximum(0, x - 0.06) * 30) * (x > 0.06) * 0.3
+write("cannon_fire", crack + 1.2 * body + rattle)
+
+# Laser repeater: a bright descending zap with a ringing tail.
+x = t(0.3)
+freq = 2400 * np.exp(-x * 12) + 300
+phase = 2 * np.pi * np.cumsum(freq) / SR
+zap = (np.sin(phase) + 0.35 * np.sin(3 * phase)) * env(0.3, 0.002, 0.12)
+write("laser_fire", zap + 0.2 * noise(0.3, 3000, 10000) * np.exp(-x * 30), peak=0.7)
+
+# Hull impact: a dull metallic thud with a clang.
+x = t(0.5)
+thud = noise(0.5, 40, 700, -1.0) * np.exp(-x * 18)
+clang = sum(np.sin(2 * np.pi * f * x) for f in (523, 811, 1237)) * np.exp(-x * 9) * 0.25
+write("weapon_impact", 1.3 * thud + clang)
+
+# Shield hit: an electric crackle over a soft hum.
+x = t(0.45)
+crackle = noise(0.45, 1500, 10000) * (np.random.default_rng(7).random(len(x)) > 0.6) * np.exp(-x * 8)
+hum = np.sin(2 * np.pi * 220 * x) * env(0.45, 0.01, 0.3) * 0.5
+write("shield_hit", crackle + hum, peak=0.7)
 
 print("wrote", sorted(os.listdir(out_dir)))

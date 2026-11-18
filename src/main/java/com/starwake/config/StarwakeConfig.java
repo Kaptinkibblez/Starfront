@@ -54,6 +54,11 @@ public final class StarwakeConfig {
 	public static final String LOCKING = flag("ships.locking", "ships", true, "Owners may lock ships against strangers");
 	public static final String IDLE_BURN = number("ships.idle_burn", "ships", 1, 0, 10, "Fuel burnt by unpiloted hovering ships (0 = free)");
 	public static final String FUEL_USE = number("ships.fuel_use", "ships", 1, 0, 10, "Propellant burn multiplier for flight");
+	// Combat (M11)
+	public static final String PVP = flag("combat.pvp", "combat", false, "Players may damage other players and their ships");
+	public static final String SHIP_DAMAGE = number("combat.ship_damage", "combat", 1, 0, 100, "Weapon damage multiplier against ships");
+	public static final String WEAPON_BLOCK_DAMAGE = flag("combat.block_damage", "combat", true,
+			"Heavy hits and hulls at zero break ship blocks (off = ships only lose hull points)");
 	// Travel and time
 	public static final String QUANTUM_SPEED = number("travel.quantum_speed", "travel", 1, 0.1, 100, "Quantum cruise speed multiplier");
 	public static final String JUMP_TIME = number("travel.jump_time", "travel", 1, 0.05, 10, "Jump tunnel duration multiplier");

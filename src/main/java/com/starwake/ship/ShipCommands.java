@@ -56,6 +56,33 @@ public final class ShipCommands {
 										.then(Commands.argument("fuel", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
 												.then(Commands.argument("fusion", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
 														.executes(ShipCommands::refuel))))
+								// M11 testing: fill every magazine and the weapon capacitor; show hull and weapons.
+								.then(Commands.literal("arm").executes(ctx -> {
+									ShipEntity ship = nearest(ctx.getSource());
+									if (ship == null) return 0;
+									ship.weapons.fillForTesting();
+									ctx.getSource().sendSuccess(() -> Component.literal("Armed: " + ship.weaponSummary() + "  hull " + Math.round(ship.hull()) + "/"
+											+ Math.round(ship.hullMax()) + "  shield " + Math.round(ship.shield())), false);
+									return 1;
+								}))
+								.then(Commands.literal("fire")
+										.then(Commands.argument("ticks", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 2000))
+												.executes(ctx -> {
+													ShipEntity ship = nearest(ctx.getSource());
+													if (ship == null) return 0;
+													ship.weapons.testFire(com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "ticks"));
+													ctx.getSource().sendSuccess(() -> Component.literal("Firing"), false);
+													return 1;
+												})))
+								.then(Commands.literal("combat").executes(ctx -> {
+									ShipEntity ship = nearest(ctx.getSource());
+									if (ship == null) return 0;
+									ctx.getSource().sendSuccess(() -> Component.literal("Ship " + ship.getId() + ": hull " + Math.round(ship.hull()) + "/"
+											+ Math.round(ship.hullMax()) + "  shield " + Math.round(ship.shield()) + "/" + Math.round(ship.shieldMax()) + "  cap "
+											+ Math.round(ship.capacitorCharge()) + "/" + Math.round(ship.capacitorMax()) + "  target " + ship.targetId() + "  guns "
+											+ ship.weaponSummary() + "  blocks " + (ship.structure() == null ? 0 : ship.structure().entries().size())), false);
+									return 1;
+								}))
 								// M10 testing: force the heat level / every part's condition (percent).
 								.then(Commands.literal("heat")
 										.then(Commands.argument("percent", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 200))

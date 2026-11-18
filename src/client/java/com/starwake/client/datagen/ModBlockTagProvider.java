@@ -36,7 +36,8 @@ public final class ModBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 		builder(BlockTags.IMPERMEABLE).add(key(ModBlocks.CANOPY_GLASS));
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(
 				key(ModBlocks.HELM), key(ModBlocks.THRUSTER), key(ModBlocks.MAIN_ENGINE), key(ModBlocks.MANEUVERING_THRUSTER), key(ModBlocks.LANDING_GEAR), key(ModBlocks.FUEL_TANK), key(ModBlocks.SEAT),
-				key(ModBlocks.POWER_PLANT), key(ModBlocks.COOLER), key(ModBlocks.SHIELD_GENERATOR), key(ModBlocks.QUANTUM_DRIVE), key(ModBlocks.JUMP_DRIVE));
+				key(ModBlocks.POWER_PLANT), key(ModBlocks.COOLER), key(ModBlocks.SHIELD_GENERATOR), key(ModBlocks.QUANTUM_DRIVE), key(ModBlocks.JUMP_DRIVE),
+				key(ModBlocks.BALLISTIC_CANNON), key(ModBlocks.LASER_REPEATER));
 		var upgrades = builder(BlockTags.MINEABLE_WITH_PICKAXE);
 		com.starwake.registry.ModShipParts.upgrades().forEach(block -> upgrades.add(key(block)));
 		builder(BlockTags.MINEABLE_WITH_PICKAXE).add(key(com.starwake.registry.ModHubBlocks.STATION_PANEL),

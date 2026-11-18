@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "starwake:block/ship/ballistic_cannon_mk2"
+  }
+}

@@ -86,6 +86,14 @@ public class ShipEntity extends Entity {
 	private static final EntityDataAccessor<Integer> FUSION = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	static final EntityDataAccessor<Float> SHIELD = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Float> SHIELD_MAX = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	/** M11: the hull point pool (soaks weapon hits after shields) and its size (sum of block armour). */
+	static final EntityDataAccessor<Float> HULL = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	static final EntityDataAccessor<Float> HULL_MAX = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	/** M11: locked target entity id (-1 none), gun summary ({@link ShipWeapons}), weapon capacitor charge and size (kJ). */
+	static final EntityDataAccessor<Integer> TARGET = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
+	static final EntityDataAccessor<String> WEAPONS = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.STRING);
+	static final EntityDataAccessor<Float> CAPACITOR = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
+	static final EntityDataAccessor<Float> CAPACITOR_MAX = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
 	/** Packed power split percents (0-100 each): engines * 1_000_000 + shields * 1000 + quantum. */
 	private static final EntityDataAccessor<Integer> POWER_SPLIT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> ENGINE_FACTOR = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.FLOAT);
@@ -133,7 +141,8 @@ public class ShipEntity extends Entity {
 			QT_TOO_CLOSE = 32, QT_NO_TARGET = 64, QT_SPOOLED = 128, QT_NO_DRIVE = 256;
 
 	/** Control bits from {@link com.starwake.network.ShipControlPayload}. */
-	public static final int CONTROL_ROLL_LEFT = 1, CONTROL_ROLL_RIGHT = 2, CONTROL_FREE_LOOK = 4, CONTROL_JOYSTICK = 8, CONTROL_NAV = 16;
+	public static final int CONTROL_ROLL_LEFT = 1, CONTROL_ROLL_RIGHT = 2, CONTROL_FREE_LOOK = 4, CONTROL_JOYSTICK = 8, CONTROL_NAV = 16,
+			CONTROL_FIRE = 32;
 
 	/** Height of the pilot's seat above the Helm block's base (M9: raised so the eye clears the dash). */
 	public static final double HELM_SEAT_HEIGHT = 1.4;
@@ -152,6 +161,8 @@ public class ShipEntity extends Entity {
 	private ShipSystems systems = new ShipSystems();
 	/** Quantum and jump drives (M10: one flow, split out). */
 	public final ShipDrives drives = new ShipDrives(this);
+	/** M11: guns, magazine, target. */
+	public final ShipWeapons weapons = new ShipWeapons(this);
 	/** Client: travel offset at the previous tick, for interpolation. */
 	private final Vector3f prevQtOffset = new Vector3f();
 	private final Vector3f lastTickQtOffset = new Vector3f();
@@ -293,6 +304,7 @@ public class ShipEntity extends Entity {
 
 	private void recomputeStats() {
 		mass = 0;
+		hullArmor = 0;
 		seats.clear();
 		hull.clear();
 		ratings.clear();
@@ -354,12 +366,14 @@ public class ShipEntity extends Entity {
 		ShipMaterials.Rating rating = ShipMaterials.rate(state, ShipMaterials.of(entry.blockEntity()), ShipMaterials.quality(entry.blockEntity()));
 		ShipStats.BlockStats base = rating.stats();
 		if (base.thrust() > 0 || base.powerOutput() > 0 || base.cooling() > 0 || base.shieldCapacity() > 0 || base.quantumSpool() > 0
-				|| base.jumpRange() > 0) {
+				|| base.jumpRange() > 0 || state.getBlock() instanceof com.starwake.ship.block.ShipWeaponBlock) {
 			// M10: a worn part works less well (and not at all below 25%).
 			float health = power.load(pos, ShipMaterials.health(entry.blockEntity()));
 			rating = new ShipMaterials.Rating(rating.massFactor(), rating.heatLimit(), rating.armor(), ShipMaterials.withHealth(base, health));
 		}
-		ratings.put(pos, rating);
+		ShipMaterials.Rating previous = ratings.put(pos, rating);
+		if (previous != null) hullArmor -= Math.min(previous.armor(), HULL_PER_BLOCK);
+		hullArmor += Math.min(rating.armor(), HULL_PER_BLOCK);
 		model.add(pos, state, exhaustClear(pos, state), rating.massFactor(), rating.stats());
 		if (state.getBlock() instanceof com.starwake.ship.block.LandingGearBlock) gear.add(pos);
 		if (state.getBlock() instanceof HelmBlock) {
@@ -369,7 +383,7 @@ public class ShipEntity extends Entity {
 			seats.add(pos);
 		}
 		ShipStats.BlockStats st = base; // what the part is, worn or not (a disabled part is still a part)
-		if (state.getBlock() instanceof ThrusterBlock || st.powerOutput() > 0 || st.heat() > 0 || st.cooling() > 0 || st.powerDraw() > 0
+		if (state.getBlock() instanceof ThrusterBlock || state.getBlock() instanceof com.starwake.ship.block.ShipWeaponBlock || st.powerOutput() > 0 || st.heat() > 0 || st.cooling() > 0 || st.powerDraw() > 0
 				|| st.shieldCapacity() > 0 || st.quantumSpool() > 0 || st.jumpRange() > 0 || st.fuelCapacity() > 0) {
 			components.add(pos);
 		}
@@ -377,6 +391,7 @@ public class ShipEntity extends Entity {
 
 	private void removeCell(ShipDynamics model, BlockPos pos, BlockState state) {
 		ShipMaterials.Rating rating = ratings.remove(pos);
+		if (rating != null) hullArmor -= Math.min(rating.armor(), HULL_PER_BLOCK);
 		model.remove(pos, state, rating == null ? 1.0 : rating.massFactor());
 		gear.remove(pos);
 		seats.remove(pos);
@@ -434,9 +449,17 @@ public class ShipEntity extends Entity {
 			capacity += stats.fuelCapacity();
 		}
 		componentFuelCapacity = capacity;
+		weapons.rebuild();
 		power.refit();
 		publishSystems();
 	}
+
+	/** M11: hull points a block adds at most (its armour, capped so one block of super-alloy isn't a fortress). */
+	private static final double HULL_PER_BLOCK = 50;
+	/** M11: the hull pool's size, a running sum of block armour. */
+	private double hullArmor;
+	/** M11: true until the hull pool has been filled once (new ship) or read from a save. */
+	private boolean hullUnset = true;
 
 	/** Sum of the fuel tanks' capacity (with quality), kept by {@link #afterModelChange()}. */
 	private int componentFuelCapacity;
@@ -554,6 +577,9 @@ public class ShipEntity extends Entity {
 		if (level() == null || level().isClientSide()) return;
 		entityData.set(SHIELD_MAX, (float) systems.shieldCapacity());
 		entityData.set(SHIELD, (float) Math.min(entityData.get(SHIELD), systems.shieldCapacity()));
+		entityData.set(HULL_MAX, (float) hullArmor);
+		entityData.set(HULL, hullUnset ? (float) hullArmor : (float) Math.min(entityData.get(HULL), hullArmor));
+		if (structure != null) hullUnset = false;
 		entityData.set(POWER_SPLIT, power.pips().pack());
 		int max = 0;
 		for (var sub : ShipSystems.Subsystem.values()) max |= Math.min(31, systems.maxPips(sub)) << (5 * sub.ordinal());
@@ -846,6 +872,12 @@ public class ShipEntity extends Entity {
 		builder.define(FUSION, 0);
 		builder.define(SHIELD, 0f);
 		builder.define(SHIELD_MAX, 0f);
+		builder.define(HULL, 0f);
+		builder.define(HULL_MAX, 0f);
+		builder.define(TARGET, -1);
+		builder.define(WEAPONS, "");
+		builder.define(CAPACITOR, 0f);
+		builder.define(CAPACITOR_MAX, 0f);
 		builder.define(POWER_SPLIT, 0);
 		builder.define(PIP_MAX, 0);
 		builder.define(ENGINE_FACTOR, 1f);
@@ -875,6 +907,15 @@ public class ShipEntity extends Entity {
 	public int fuelCapacity() { return level().isClientSide() ? entityData.get(FUEL_CAPACITY) : fuelCapacity; }
 	public float shield() { return entityData.get(SHIELD); }
 	public float shieldMax() { return entityData.get(SHIELD_MAX); }
+	/** M11: hull points left and the most the hull holds. */
+	public float hull() { return entityData.get(HULL); }
+	public float hullMax() { return entityData.get(HULL_MAX); }
+	/** M11: the locked target's entity id (-1 = none). */
+	public int targetId() { return entityData.get(TARGET); }
+	/** M11: synced gun summary ("id,count,speed,rounds,gimballed;..."). */
+	public String weaponSummary() { return entityData.get(WEAPONS); }
+	public float capacitorCharge() { return entityData.get(CAPACITOR); }
+	public float capacitorMax() { return entityData.get(CAPACITOR_MAX); }
 	public float engineFactor() { return entityData.get(ENGINE_FACTOR); }
 	/** Heat as a fraction of the buffer (M10; 1 = overheating). */
 	public float heatLevel() { return entityData.get(THERMAL); }
@@ -1341,6 +1382,7 @@ public class ShipEntity extends Entity {
 			if (getDeltaMovement().lengthSqr() > 1.0e-4 || drift.lengthSqr() > 0 || spin.lengthSqr() > 0) asleep = false;
 			else if (!asleep && (grounded || flight.clearance() < 0.05) && angularVelocity.lengthSquared() < 1.0e-5) asleep = true;
 			if (asleep) {
+				weapons.tick(); // M11: a parked ship's guns still work (gunners, testing)
 				setDeltaMovement(Vec3.ZERO);
 				angularVelocity.zero();
 				java.util.Arrays.fill(throttles, 0);
@@ -1442,11 +1484,13 @@ public class ShipEntity extends Entity {
 	/** Shield regeneration and quantum spool, scaled by the power routed to each. */
 	private void tickSystems() {
 		float shield = entityData.get(SHIELD);
-		if (shield < systems.shieldCapacity()) {
+		if (damage.shieldPause > 0) damage.shieldPause--;
+		else if (shield < systems.shieldCapacity()) {
 			double regen = systems.shieldRegen() * power.factor(ShipSystems.Subsystem.SHIELDS);
 			entityData.set(SHIELD, (float) Math.min(systems.shieldCapacity(), shield + regen));
 		}
 		drives.tick();
+		weapons.tick(); // M11
 		// M10: heat in and out, wear from overheating.
 		double load = 0;
 		for (double t : throttles) load += t;
@@ -2268,6 +2312,7 @@ public class ShipEntity extends Entity {
 		fuelCapacity = input.getIntOr("fuel_capacity", 0);
 		entityData.set(FUEL_CAPACITY, fuelCapacity);
 		power.read(input);
+		weapons.read(input);
 		entityData.set(SHIELD, (float) input.getDoubleOr("shield", 0));
 		entityData.set(FUEL, input.getIntOr("fuel", 0));
 		entityData.set(FUSION, input.getIntOr("fusion", 0));
@@ -2295,6 +2340,10 @@ public class ShipEntity extends Entity {
 		}
 		lastTickOrientation.set(orientation());
 		prevOrientation.set(orientation());
+		input.read("hull", com.mojang.serialization.Codec.DOUBLE).ifPresent(h -> { // M11; older saves start at full hull
+			entityData.set(HULL, (float) Math.min(h, hullArmor));
+			hullUnset = false;
+		});
 		// A jump-drive tunnel in progress resumes (M6).
 		input.getString("jump_target").ifPresent(target -> {
 			drives.jumpTarget = target;
@@ -2327,7 +2376,9 @@ public class ShipEntity extends Entity {
 				com.mojang.serialization.Codec.DOUBLE), propellantBuffer);
 		output.putInt("fuel_capacity", fuelCapacity);
 		power.write(output);
+		weapons.write(output);
 		output.putDouble("shield", entityData.get(SHIELD));
+		output.putDouble("hull", entityData.get(HULL));
 		output.store("orientation", ExtraCodecs.QUATERNIONF, orientation());
 		output.putBoolean("decoupled", decoupled);
 		if (owner != null) {

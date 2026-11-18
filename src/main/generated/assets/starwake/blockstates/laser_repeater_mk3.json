@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "facing=down,gimbal=false": {
+      "model": "starwake:block/ship/laser_repeater_mk3_fixed",
+      "x": 180
+    },
+    "facing=down,gimbal=true": {
+      "model": "starwake:block/ship/laser_repeater_mk3",
+      "x": 180
+    },
+    "facing=east,gimbal=false": {
+      "model": "starwake:block/ship/laser_repeater_mk3_fixed",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,gimbal=true": {
+      "model": "starwake:block/ship/laser_repeater_mk3",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,gimbal=false": {
+      "model": "starwake:block/ship/laser_repeater_mk3_fixed",
+      "x": 90
+    },
+    "facing=north,gimbal=true": {
+      "model": "starwake:block/ship/laser_repeater_mk3",
+      "x": 90
+    },
+    "facing=south,gimbal=false": {
+      "model": "starwake:block/ship/laser_repeater_mk3_fixed",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,gimbal=true": {
+      "model": "starwake:block/ship/laser_repeater_mk3",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,gimbal=false": {
+      "model": "starwake:block/ship/laser_repeater_mk3_fixed"
+    },
+    "facing=up,gimbal=true": {
+      "model": "starwake:block/ship/laser_repeater_mk3"
+    },
+    "facing=west,gimbal=false": {
+      "model": "starwake:block/ship/laser_repeater_mk3_fixed",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,gimbal=true": {
+      "model": "starwake:block/ship/laser_repeater_mk3",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

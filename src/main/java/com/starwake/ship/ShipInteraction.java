@@ -146,6 +146,24 @@ public final class ShipInteraction {
 			}
 			player.sendOverlayMessage(Component.translatable("message.starwake.fuel_tank.gauge_fusion", ship.fuel(), ship.fuelCapacity(),
 					ship.fusion(), ship.fusionCapacity()));
+		} else if (state.getBlock() instanceof com.starwake.ship.block.ShipWeaponBlock
+				&& player.getMainHandItem().is(com.starwake.registry.ModItems.AUTOCANNON_ROUNDS)) {
+			// M11: rounds go into the ship's magazine (shared by every gun of that calibre).
+			int loaded = ship.weapons.load(payload.local(), player.getMainHandItem());
+			var spec = com.starwake.ship.weapon.WeaponSpec.of(state.getBlock());
+			String ammo = spec == null ? "" : spec.ammo().map(Object::toString).orElse("");
+			player.sendOverlayMessage(loaded > 0
+					? Component.translatable("message.starwake.weapon.loaded", loaded, ship.weapons.rounds(ammo))
+					: Component.translatable("message.starwake.weapon.magazine", ship.weapons.rounds(ammo), ShipWeapons.MAGAZINE));
+		} else if (isPlate(player.getMainHandItem()) && !(ship.components().contains(payload.local())
+				&& ship.power.health(payload.local()) < 0.999f) && ship.hull() < ship.hullMax()) {
+			// M11: a plate on the hull patches the hull point pool (5% of it, at least 20 points, a plate).
+			float next = Math.min(ship.hullMax(), ship.hull() + Math.max(20, ship.hullMax() * 0.05f));
+			ship.getEntityData().set(ShipEntity.HULL, next);
+			if (!player.isCreative()) player.getItemInHand(InteractionHand.MAIN_HAND).shrink(1);
+			player.level().playSound(null, BlockPos.containing(ship.blockCenter(payload.local())), net.minecraft.sounds.SoundEvents.ANVIL_USE,
+					net.minecraft.sounds.SoundSource.BLOCKS, 0.6f, 1.2f);
+			player.sendOverlayMessage(Component.translatable("message.starwake.hull.repaired", Math.round(next), Math.round(ship.hullMax())));
 		} else if (ship.components().contains(payload.local()) && isPlate(player.getMainHandItem())) {
 			// M10: a metal plate patches a worn part (25% a plate).
 			ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);

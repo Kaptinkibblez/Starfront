@@ -1,0 +1,26 @@
+{
+ "output": "starwake:laser_repeater_mk2",
+ "count": 1,
+ "order": 135,
+ "energy": 9000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 3,
+   "min": {
+    "conductivity": 98
+   }
+  },
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 1,
+   "min": {
+    "conductivity": 60
+   }
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 3
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+{
+ "output": "starwake:laser_repeater",
+ "count": 1,
+ "order": 134,
+ "energy": 4000,
+ "inputs": [
+  {
+   "item": "starwake:magnet_coil",
+   "count": 2
+  },
+  {
+   "item": "starwake:heat_exchanger",
+   "count": 1
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 2
+  }
+ ]
+}

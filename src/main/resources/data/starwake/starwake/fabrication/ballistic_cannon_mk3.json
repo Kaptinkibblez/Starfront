@@ -1,0 +1,34 @@
+{
+ "output": "starwake:ballistic_cannon_mk3",
+ "count": 1,
+ "order": 133,
+ "energy": 20000,
+ "inputs": [
+  {
+   "form": "forging",
+   "count": 1,
+   "main": true,
+   "min": {
+    "yield": 1000
+   }
+  },
+  {
+   "item": "starwake:structural_frame",
+   "count": 1,
+   "min": {
+    "yield": 800
+   }
+  },
+  {
+   "item": "starwake:turbopump",
+   "count": 1,
+   "min": {
+    "yield": 800
+   }
+  },
+  {
+   "item": "starwake:control_board",
+   "count": 3
+  }
+ ]
+}

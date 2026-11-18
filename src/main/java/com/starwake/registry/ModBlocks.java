@@ -220,6 +220,23 @@ public final class ModBlocks {
 					.sound(SoundType.METAL)
 					.noOcclusion());
 
+	/** Ballistic Cannon (M11): a ship autocannon firing industry-made rounds; partly ignores shields. */
+	public static final Block BALLISTIC_CANNON = register("ballistic_cannon", com.starwake.ship.block.ShipWeaponBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.COLOR_GRAY)
+					.strength(4.0f, 8.0f)
+					.sound(SoundType.METAL)
+					.requiresCorrectToolForDrops().noOcclusion());
+
+	/** Laser Repeater (M11): a ship energy gun on the weapon capacitor; strong against shields. */
+	public static final Block LASER_REPEATER = register("laser_repeater", com.starwake.ship.block.ShipWeaponBlock::new,
+			BlockBehaviour.Properties.of()
+					.mapColor(MapColor.COLOR_RED)
+					.strength(4.0f, 8.0f)
+					.sound(SoundType.METAL)
+					.lightLevel(state -> 3)
+					.requiresCorrectToolForDrops().noOcclusion());
+
 	// --- Ship components (stats in ship_stats JSON) -------------------------------------
 
 	/** Power Plant: generates power (and heat). Every ship needs at least one. */

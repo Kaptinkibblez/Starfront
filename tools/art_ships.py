@@ -6,12 +6,14 @@ Uses the texture kit and Model builder of tools/art_machines.py. Writes
 Engines face up in the model (the nozzle points +Y); datagen rotates them by FACING. Components stay full cubes (they're
 hull: they seal and cull like any block) with a second, identical element carrying an emissive cutout overlay (the same
 trick as vanilla's grass side overlay), so cores and emitters glow without changing the shape.
-Run: python3 tools/art_ships.py
+Run: python3 tools/art_ships.py (noise seeds come from crc32 of the name, so reruns are stable; textures made before M11 used
+Python's per-run hash() and differ in their noise from what a rerun writes)
 """
 import json
 import math
 import os
 import random
+import zlib
 
 from PIL import Image
 
@@ -76,7 +78,7 @@ def overlay(mask, color, frames=6, seed=0):
 def component(part, tier):
     accent = TIERS[tier]
     name = part + tier
-    seed = hash(name) & 0xffff
+    seed = zlib.crc32(name.encode()) & 0xffff
     side = frame_face(MID if part != "fuel_tank" else WHITE, accent, tier, seed)
     top = frame_face(DARK, accent, tier, seed + 1)
     glow_side, glow_top, color = {}, {}, None
@@ -184,7 +186,7 @@ def component(part, tier):
 def engine(part, tier):
     accent = TIERS[tier]
     name = part + tier
-    seed = hash(name) & 0xffff
+    seed = zlib.crc32(name.encode()) & 0xffff
     side = frame_face(MID, accent, tier, seed)
     save(name + "_side", side)
     bell = img(DARK)
@@ -228,6 +230,68 @@ def engine(part, tier):
     for x, z in ((1, 1), (13, 1), (1, 13), (13, 13)):
         m.box((x, hy, z), (x + 2, hy + 1.5, z + 2), "frame")
     return m
+
+
+def weapon(part, tier, gimbal):
+    """M11 guns, barrel up (+Y; datagen turns them by FACING). The barrel reaches past the block (the cell in front must
+    be clear to fire). Gimballed mounts sit on a ball ring; fixed mounts on a square cradle."""
+    accent = TIERS[tier]
+    name = part + tier
+    seed = zlib.crc32(name.encode()) & 0xffff
+    side = frame_face(MID if part == "ballistic_cannon" else DARK, accent, tier, seed)
+    save(name + "_side", side)
+    barrel = img(DARK)
+    noise(barrel, 4, seed + 5)
+    for y in range(16):
+        for x in (0, 15):
+            barrel.putpixel((x, y), shade(DARKER, 1.0) + (255,))
+        if y % 5 == 0:
+            for x in range(16):
+                barrel.putpixel((x, y), shade(LIGHT, 0.8) + (255,))
+    save(name + "_barrel", barrel)
+    S, Bt = "ship/" + name + "_side", "ship/" + name + "_barrel"
+    m = Model()
+    m.box((0, 0, 0), (16, 5, 16), S, top="frame")
+    if gimbal:
+        m.cyl("y", (8, 8), 6.0, 5, 7, "frame", cap="panel_dark")
+        m.cyl("y", (8, 8), 4.5, 7, 10, S, cap="frame")
+    else:
+        for x, z in ((1, 1), (12, 1), (1, 12), (12, 12)):
+            m.box((x, 5, z), (x + 3, 9, z + 3), "frame")
+        m.box((3, 5, 3), (13, 10, 13), S, top="frame")
+    if part == "ballistic_cannon":
+        m.box((5, 10, 5), (11, 14, 11), "panel_dark", top="frame")
+        m.box((10, 10.5, 6.5), (13, 13, 9.5), "frame")  # ammo feed
+        m.cyl("y", (8, 8), 1.6, 14, 25, Bt, cap="pipe_dark")
+        m.cyl("y", (8, 8), 2.4, 25, 27, "frame", cap="panel_dark")  # muzzle brake
+    else:
+        m.cyl("y", (8, 8), 3.4, 10, 13, "coil", cap="frame")
+        m.cyl("y", (8, 8), 2.6, 13, 15, S, cap="frame")
+        m.cyl("y", (8, 8), 1.4, 15, 23, Bt, cap="pipe")
+        m.cyl("y", (8, 8), 2.2, 18, 19, "coil", cap="coil")
+        m.cyl("y", (8, 8), 2.2, 21, 22, "coil", cap="coil")
+        m.box((7, 23, 7), (9, 23.5, 9), "frame", glow="red", only=("up", "north", "south", "east", "west"))
+    return m
+
+
+def ammo_sprite():
+    """M11: Autocannon Rounds item, a short linked belt of brass cases with steel tips, diagonal."""
+    im = img()
+    brass, brass_d, tip, link = (214, 168, 66), (150, 110, 40), (150, 156, 166), (70, 74, 82)
+    for k in range(4):
+        cx, cy = 3 + k * 3, 12 - k * 3
+        for t in range(-2, 4):  # each round runs up-right from its link
+            for w in (0, 1):
+                x, y = cx + t + w, cy - t
+                if 0 <= x < 16 and 0 <= y < 16:
+                    c = tip if t >= 2 else (brass if w == 0 else brass_d)
+                    im.putpixel((x, y), c + (255,))
+        for x, y in ((cx - 2, cy + 1), (cx - 1, cy + 2), (cx - 3, cy + 2)):
+            if 0 <= x < 16 and 0 <= y < 16:
+                im.putpixel((x, y), link + (255,))
+    out = os.path.join(ROOT, "textures", "item")
+    os.makedirs(out, exist_ok=True)
+    im.save(os.path.join(out, "autocannon_rounds.png"))
 
 
 def dry_dock():
@@ -291,7 +355,12 @@ def main():
         for part in ("main_engine", "thruster", "maneuvering_thruster"):
             write(part + tier, engine(part, tier))
             n += 1
+        for part in ("ballistic_cannon", "laser_repeater"):
+            write(part + tier, weapon(part, tier, True))
+            write(part + tier + "_fixed", weapon(part, tier, False))
+            n += 2
     dry_dock()
+    ammo_sprite()
     print(f"{n} ship-part models, dry dock textures")
 
 

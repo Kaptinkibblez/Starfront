@@ -51,6 +51,7 @@ public final class ModNetworking {
 		PayloadTypeRegistry.serverboundPlay().register(ShipResyncPayload.TYPE, ShipResyncPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipPowerPayload.TYPE, ShipPowerPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipQuantumPayload.TYPE, ShipQuantumPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ShipTargetPayload.TYPE, ShipTargetPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipCrewPayload.TYPE, ShipCrewPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ShipEditPayload.TYPE, ShipEditPayload.CODEC);
 
@@ -95,6 +96,11 @@ public final class ModNetworking {
 					case ShipQuantumPayload.ACTION_GEAR -> ship.toggleGear();
 					default -> { }
 				}
+			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(ShipTargetPayload.TYPE, (payload, context) -> {
+			if (context.player().getVehicle() instanceof com.starwake.ship.ShipEntity ship && ship.pilot() == context.player()) {
+				ship.weapons.setTarget(payload.target());
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(TradeActionPayload.TYPE, (payload, context) -> {

@@ -675,9 +675,32 @@ public final class ModLanguageProvider extends FabricLanguageProvider {
 		builder.add(ModBlocks.SHIELD_GENERATOR, "Shield Generator");
 		builder.add(ModBlocks.QUANTUM_DRIVE, "Quantum Drive");
 		builder.add(ModBlocks.JUMP_DRIVE, "Jump Drive");
-		java.util.Map<String, String> partNames = java.util.Map.of("thruster", "Thruster", "main_engine", "Main Engine",
+		builder.add(ModBlocks.BALLISTIC_CANNON, "Ballistic Cannon");
+		builder.add(ModBlocks.LASER_REPEATER, "Laser Repeater");
+		builder.add(com.starwake.registry.ModItems.AUTOCANNON_ROUNDS, "Autocannon Rounds");
+		// M11 combat
+		builder.add("key.starwake.target", "Lock Target");
+		builder.add("message.starwake.weapon.gimbal", "Gimballed mount: tracks your aim, hits a little softer");
+		builder.add("message.starwake.weapon.fixed", "Fixed mount: fires along the barrel, hits harder");
+		builder.add("message.starwake.weapon.no_ammo", "Guns dry: load rounds into a cannon aboard");
+		builder.add("message.starwake.weapon.loaded", "Loaded %s rounds (%s in the magazine)");
+		builder.add("message.starwake.weapon.magazine", "Magazine: %s / %s rounds");
+		builder.add("message.starwake.hull.breached", "HULL BREACHED: hits are tearing the ship apart");
+		builder.add("message.starwake.hull.repaired", "Hull patched: %s / %s");
+		builder.add("message.starwake.hull.destroyed", "SHIP DESTROYED");
+		builder.add("death.attack.starwake.ship_weapon", "%1$s was shot down");
+		builder.add("death.attack.starwake.ship_weapon.player", "%1$s was shot down by %2$s");
+		builder.add("entity.starwake.ship_projectile", "Ship Gun Shot");
+		builder.add("subtitles.starwake.ship.cannon_fire", "Autocannon fires");
+		builder.add("subtitles.starwake.ship.laser_fire", "Laser fires");
+		builder.add("subtitles.starwake.ship.weapon_impact", "Hull hit");
+		builder.add("subtitles.starwake.ship.shield_hit", "Shield hit");
+		String[] names = {"thruster", "Thruster", "main_engine", "Main Engine",
 				"maneuvering_thruster", "Maneuvering Thruster", "power_plant", "Power Plant", "cooler", "Cooler", "shield_generator",
-				"Shield Generator", "quantum_drive", "Quantum Drive", "jump_drive", "Jump Drive", "fuel_tank", "Fuel Tank", "landing_gear", "Landing Gear");
+				"Shield Generator", "quantum_drive", "Quantum Drive", "jump_drive", "Jump Drive", "fuel_tank", "Fuel Tank", "landing_gear", "Landing Gear",
+				"ballistic_cannon", "Ballistic Cannon", "laser_repeater", "Laser Repeater"};
+		java.util.Map<String, String> partNames = new java.util.HashMap<>();
+		for (int k = 0; k < names.length; k += 2) partNames.put(names[k], names[k + 1]);
 		for (var part : com.starwake.registry.ModShipParts.Part.values()) {
 			builder.add(com.starwake.registry.ModShipParts.get(part, 2), partNames.get(part.id) + " Mk II");
 			builder.add(com.starwake.registry.ModShipParts.get(part, 3), partNames.get(part.id) + " Mk III");

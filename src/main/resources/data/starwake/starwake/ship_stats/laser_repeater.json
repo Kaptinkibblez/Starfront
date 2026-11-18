@@ -1,0 +1,9 @@
+{
+  "blocks": [
+    "starwake:laser_repeater"
+  ],
+  "mass": 1.8,
+  "power_draw": 12,
+  "heat_limit": 1200,
+  "armor": 10
+}

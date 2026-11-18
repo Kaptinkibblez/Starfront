@@ -71,6 +71,16 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 				shaped(RecipeCategory.TOOLS, com.starwake.registry.ModItems.HULL_TOOL).pattern(" IC").pattern(" SI").pattern("S  ")
 						.define('I', Items.IRON_INGOT).define('C', Items.COPPER_INGOT).define('S', Items.STICK)
 						.unlockedBy("has_hull", has(com.starwake.registry.ModBlocks.HULL_PLATING)).save(output);
+				// M11 guns (Mk I; Mk II/III from the Fabricator) and autocannon rounds from rolled plate.
+				shaped(RecipeCategory.COMBAT, com.starwake.registry.ModBlocks.BALLISTIC_CANNON).pattern(" P ").pattern("PDP").pattern("IRI")
+						.define('P', com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE)).define('D', Items.DISPENSER)
+						.define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_dispenser", has(Items.DISPENSER)).save(output);
+				shaped(RecipeCategory.COMBAT, com.starwake.registry.ModBlocks.LASER_REPEATER).pattern(" A ").pattern("PCP").pattern("PRP")
+						.define('P', com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE)).define('A', Items.AMETHYST_SHARD)
+						.define('C', Items.COPPER_BLOCK.weathering().unaffected()).define('R', Items.REDSTONE_BLOCK).unlockedBy("has_amethyst", has(Items.AMETHYST_SHARD)).save(output);
+				shapeless(RecipeCategory.COMBAT, com.starwake.registry.ModItems.AUTOCANNON_ROUNDS, 2)
+						.requires(com.starwake.metal.MetalItems.item(com.starwake.metal.MetalForm.PLATE)).requires(Items.GUNPOWDER, 2).requires(Items.COPPER_INGOT)
+						.unlockedBy("has_gunpowder", has(Items.GUNPOWDER)).save(output);
 				shaped(RecipeCategory.REDSTONE, ModMachines.FLUID_TANK).pattern("IGI").pattern("G G").pattern("IGI")
 						.define('I', Items.IRON_INGOT).define('G', Items.GLASS).unlockedBy("has_glass", has(Items.GLASS)).save(output);
 				shaped(RecipeCategory.REDSTONE, ModMachines.CONVEYOR, 6).pattern("KKK").pattern("IRI")

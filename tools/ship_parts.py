@@ -21,7 +21,7 @@ STATS = os.path.join(ROOT, "ship_stats")
 FAB = os.path.join(ROOT, "fabrication")
 
 PARTS = ["thruster", "main_engine", "maneuvering_thruster", "power_plant", "cooler", "shield_generator", "quantum_drive",
-         "jump_drive", "fuel_tank", "landing_gear"]
+         "jump_drive", "fuel_tank", "landing_gear", "ballistic_cannon", "laser_repeater"]
 # Multipliers per tier: output-type stats up, mass/burn/draw/spool down.
 UP = {"thrust", "power_output", "cooling", "shield_capacity", "shield_regen", "jump_range", "fuel_capacity", "armor", "heat_limit"}
 DOWN = {"mass", "fuel_burn", "power_draw", "heat", "quantum_spool", "jump_spool"}
@@ -102,6 +102,20 @@ RECIPES = {
         1: [item(C + "pressure_vessel", 2)],
         2: [item(C + "pressure_vessel", 2, {"yield": 400}), item(C + "structural_frame")],
         3: [item(C + "pressure_vessel", 2, {"yield": 800}), item(C + "structural_frame", 1, {"yield": 600})],
+    },
+    # M11 guns: a forged barrel (strength), a breech/emitter block and fire control.
+    "ballistic_cannon": {
+        1: [form("forging", 1, {"yield": 300}, main=True), item(C + "structural_frame"), item(C + "control_board")],
+        2: [form("forging", 1, {"yield": 700}, main=True), item(C + "structural_frame", 1, {"yield": 400}), item(C + "turbopump"),
+            item(C + "control_board", 2)],
+        3: [form("forging", 1, {"yield": 1000}, main=True), item(C + "structural_frame", 1, {"yield": 800}),
+            item(C + "turbopump", 1, {"yield": 800}), item(C + "control_board", 3)],
+    },
+    "laser_repeater": {
+        1: [item(C + "magnet_coil", 2), item(C + "heat_exchanger"), item(C + "control_board", 2)],
+        2: [item(C + "magnet_coil", 3, {"conductivity": 98}), item(C + "heat_exchanger", 1, {"conductivity": 60}), item(C + "control_board", 3)],
+        3: [item(C + "magnet_coil", 4, {"conductivity": 100}), item(C + "heat_exchanger", 2, {"conductivity": 90}),
+            item(C + "control_board", 4), item(C + "pressure_vessel", 1, {"service": 600})],
     },
     "landing_gear": {
         1: [item(C + "structural_frame"), form("forging", 1, main=True)],
