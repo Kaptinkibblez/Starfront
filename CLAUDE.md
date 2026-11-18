@@ -639,6 +639,22 @@ commit. **Don't start the next milestone until the user confirms the current one
       2026-11-18); the user moved on to M11.
   - [ ] **11. Combat.** Ship weapons (guns, missiles, turrets on power/heat/shields/armour), personal ranged weapons, damage
         and repair; threats that are simulated or event-based (no roaming NPC ships, per the user's M9 rule).
+    - **M11 decisions (user, 2026-11-18).** Audit: a weapon pip and an empty weapon capacitor exist (M10b); shields and per-block
+      armour only absorb crashes; parts wear; the only weapon is the Fabricator sword; nothing to fight. Choices: **all four weapon
+      families** (ballistic guns with industry-made ammo, energy weapons on the capacitor, missiles/torpedoes with lock-on, crewed or
+      pilot-slaved turrets); **opponents: players (PvP), event encounters (spawned for a contract or signal, despawn after; no roaming
+      NPC ships), static defences (derelicts, turrets on wrecks, minefields) and alien creatures (M12)**; **hybrid damage** (a hull HP
+      pool soaks most hits, only big hits such as torpedoes and crashes break blocks; parts wear); **personal weapons: a small set,
+      modelled in 3D with animations ("2D sprites won't cut it")**. Second round: **SC-style gimbals + lead pip** (gimballed guns
+      track the mouse within a cone, fixed guns are stronger and fire along the nose; the HUD shows the lead indicator); **PvP off by
+      default** (an op turns it on in the server config); encounters start from **combat contracts, interdiction during quantum,
+      distress signals and threats guarding asteroid fields/derelicts**; weapons come **both** ways (Mk I-III blocks, Mk I craftable,
+      Mk II/III fabricated, and sold at Outfitters).
+      - Build order: **11a** combat core (hull HP pool + hybrid block damage, shields vs shots, projectiles, ballistic and energy
+        guns fixed/gimballed, ammo, capacitor, targeting + lead pip, firing controls, PvP config); **11b** missiles/torpedoes with
+        lock-on and countermeasures, turrets with gunner seats; **11c** personal weapons (3D models + animations); **11d**
+        encounters (event-spawned hostile ships with their own flight AI, combat contracts, quantum interdiction, distress signals,
+        guarded fields/derelicts, mines, static turrets); **11e** repair, Outfitter stock, balance, test, jar (0.11.0), pause.
   - [ ] **12. Alien life.** Fauna and harvestable flora per archetype, fitted to the conditions; drops that feed the chemistry.
   - [ ] **13. Bases and claims.** Player-built planetary bases: land claims, base power and life support, beacons as quantum
         destinations, multiplayer permissions.
