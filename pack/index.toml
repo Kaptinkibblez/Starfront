@@ -1,0 +1,777 @@
+hash-format = "sha256"
+
+[[files]]
+file = "config/heracles/group_settings.json"
+hash = "3bc27d62b75b86443abfc9c862bb1195dc18a65d539c99af75814687122af4f0"
+
+[[files]]
+file = "config/heracles/groups.txt"
+hash = "7f8c338a913a9d6955b1f82887ff39b4107d746bd24418564cd581b3393d3799"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_casing.json"
+hash = "920931ce996c9149f1511f8bf9e6329009479fc6abe47c065d0cd245d0a94fb6"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_moon.json"
+hash = "86c9113fb55406d627e87b156c10ce55ee045b50626f5e200c89b1ee0a8aba41"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_moonbase.json"
+hash = "91eddeef566192213e529c348cdd5ccb4c845f4f8cbdd5b4e32a1fc65b237eef"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_orbit.json"
+hash = "123101e41a7ddfff2ca0f382b5442e0f5b8e507a39b88f960a4725a6608685b0"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_rcs.json"
+hash = "df57bb21f53e9d479e8066d095998835cc3f50c95c6da52ec0196f85225a938b"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_sputnik.json"
+hash = "a21e44d5bf7032a3fae833518641a44e3b9075832174388dc723a5255a966d01"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_staging.json"
+hash = "7a3b64c7fe7ef1d284d979639036df7644862a638ac687e7758d5b265333eaa7"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_suit.json"
+hash = "c56916560928f6244b99cdcb8095fcd609cd431046931c97e40fc1d47eeffee8"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_thruster.json"
+hash = "3fbbbf798c96dfba5bc7faa32e8452f43e8d4ed0d77105dded0c62597a4b847c"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_ti_alloy.json"
+hash = "da48531133151ca21f2fe51a2d03463adc0f69b246325b1f35d22caefeb2deab"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_ti_ingot.json"
+hash = "48833b0b5361c3b0891414abf3b8b77b69171b9acf6964bb1e4bccbc69fc2162"
+
+[[files]]
+file = "config/heracles/quests/10tothestars/10tothestars_titanium.json"
+hash = "2bb373ce3f200277efd97d1faaa886000b00a79b3a677f0ac1a81e1ee65ce978"
+
+[[files]]
+file = "config/heracles/quests/11farmersdelight/11farmersdelight_board.json"
+hash = "c501b689033891581c72bb7af0a3dc05fae5c81c4619ca36392848e5d0f31b0b"
+
+[[files]]
+file = "config/heracles/quests/11farmersdelight/11farmersdelight_crops.json"
+hash = "fca114255c66b468a8f0a2f6791ee9464a056ee19e515c8b61d900d5f74ae933"
+
+[[files]]
+file = "config/heracles/quests/11farmersdelight/11farmersdelight_feast.json"
+hash = "470ef68381841e672515a419cd4f76f634224e678f8194999e2ed124f1ae0b35"
+
+[[files]]
+file = "config/heracles/quests/11farmersdelight/11farmersdelight_harvester.json"
+hash = "5d4bf7bb3b8fe9af72cdfaedf61c05e910a63d03db4cba4cb2e163325370159d"
+
+[[files]]
+file = "config/heracles/quests/11farmersdelight/11farmersdelight_knife.json"
+hash = "2c4c9d3ceb0e70414931ff4b471194b691cb3b474b41021edd10976a91e43591"
+
+[[files]]
+file = "config/heracles/quests/11farmersdelight/11farmersdelight_meal.json"
+hash = "8eaf5579073288bad118a91623700df9cf3ae7fd7b8034da30daf5ce56208564"
+
+[[files]]
+file = "config/heracles/quests/11farmersdelight/11farmersdelight_stove.json"
+hash = "cc80e261c1c975dec1afcbdae064d11d4911a4a4a438c923d1f58757d9a18dd5"
+
+[[files]]
+file = "config/heracles/quests/12crewandcolonies/12crewandcolonies_claim.json"
+hash = "ee60414428b23a66980cc456019aafbb6b772114fad2636514cff204e16f163d"
+
+[[files]]
+file = "config/heracles/quests/12crewandcolonies/12crewandcolonies_compass.json"
+hash = "314e72590576edf01686f50548a6162ce4b0653290c481a93673a896cfedb36a"
+
+[[files]]
+file = "config/heracles/quests/12crewandcolonies/12crewandcolonies_end.json"
+hash = "6e0a82f565f3aeed8861b94f5242206ba267b7d3a659067592e4ab0a1e8ba8db"
+
+[[files]]
+file = "config/heracles/quests/12crewandcolonies/12crewandcolonies_nether.json"
+hash = "7dd95de785b1d9f7c1cc7501d520afec72d3cc8e01a74d1564482b68ab128a32"
+
+[[files]]
+file = "config/heracles/quests/12crewandcolonies/12crewandcolonies_party.json"
+hash = "99490192392b44d68b4b933bcdf1fc8fb20f898840ef09d895e07eaf15acb347"
+
+[[files]]
+file = "config/heracles/quests/12crewandcolonies/12crewandcolonies_storage.json"
+hash = "3ac1a7cc867f8ab7a08d1efe3c314ab9121d2bd4a8a9e83e25c636151fabd770"
+
+[[files]]
+file = "config/heracles/quests/12crewandcolonies/12crewandcolonies_voice.json"
+hash = "a4dc714f823aa8f88d0401ebf15881fd454a84bf269e41a291193ff9ff869ba4"
+
+[[files]]
+file = "config/heracles/quests/1planetfall/1planetfall_andesite.json"
+hash = "b4202d5200896b00a1b3adc26a4b35238837be35fd8bac093165de552933adc7"
+
+[[files]]
+file = "config/heracles/quests/1planetfall/1planetfall_backpack.json"
+hash = "be2a0d7e9f2272b24d43a1e63adad17c0539ea6c552b1d83c9823beafdb3de59"
+
+[[files]]
+file = "config/heracles/quests/1planetfall/1planetfall_bed.json"
+hash = "dc83d41b3212b2aada994901432131882b8736bf507e21616f5bf674f50ffd29"
+
+[[files]]
+file = "config/heracles/quests/1planetfall/1planetfall_copper.json"
+hash = "027b062232e93abe280c7c5efbebfe30e3f0e9464706db1a370b41654ad531a4"
+
+[[files]]
+file = "config/heracles/quests/1planetfall/1planetfall_food.json"
+hash = "93e2181aaa7ca058c6241739faa4c331554ae748bb7f4d026c28504dd82e90a4"
+
+[[files]]
+file = "config/heracles/quests/1planetfall/1planetfall_iron.json"
+hash = "28376e444b4840b8fcb0a9a43c4243049279b1af0647c148223ffcf615f208b0"
+
+[[files]]
+file = "config/heracles/quests/1planetfall/1planetfall_stone.json"
+hash = "7446227a0af81cbe5cc2a382cbaee65e10a55b3e26ecf719964912ddb035b064"
+
+[[files]]
+file = "config/heracles/quests/1planetfall/1planetfall_waystone.json"
+hash = "95e7043c1f4c0895911495db926916d8c81c2bfcb95a292d8bd47a9b441695e6"
+
+[[files]]
+file = "config/heracles/quests/1planetfall/1planetfall_welcome.json"
+hash = "1ad0a114921cff896e50de6eb278885449136017a58824d6e6f82bf11d22df20"
+
+[[files]]
+file = "config/heracles/quests/1planetfall/1planetfall_wood.json"
+hash = "9d22ba789f5c6114cb30226ba6da7d9f6fefa8748100046396308c40d585a5c5"
+
+[[files]]
+file = "config/heracles/quests/1planetfall/1planetfall_zinc.json"
+hash = "c67ea24093ff945510c57d60ba51c43e38e684918d0a2c66c8ca6aacba36b3e7"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_alloy.json"
+hash = "55689181f3e41c0743e926a85a20c60b9b85a7dc923f207fe3ddad63e159dad7"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_belt.json"
+hash = "4c9eaede229aa63d99723bf861fa32aea2cae9dcaecdadd098e24c3fb86a21f4"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_casing.json"
+hash = "3285f8d01d6817847271d2a8f9c702a44f69c3508b9fd44951778fe0ec07ef1b"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_contraption.json"
+hash = "9c5ffef9e761974cc152a95733c58b5fc99b1d4b6644923f864655ae24fd2be5"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_crushing.json"
+hash = "6536254e0d59212b8439a7c2214a672e635d23a451ec4ce8821de24e0dc3cacb"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_drill.json"
+hash = "bd94f97e6d5172c2961fcdd4bbe2a4d240405ebf829697a03b552186a27bd41b"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_fan.json"
+hash = "db146531c6955dc155a76472d019ccfed5853a7196dabb2d35b92384cde26e5c"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_fluids.json"
+hash = "d1ae88bcf5bbf3c1375807ad198ba598bf263f1e86079a310eada28a74d49dbe"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_goggles.json"
+hash = "4946a13c9302208669c6816d8abf249d03817d9219a13e96c05de047f4cdcdf7"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_millstone.json"
+hash = "e1af07b6e7d45518d3392070528e8a1d9432af184c09465426b18ebe0502f95c"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_mixer.json"
+hash = "b7bedce6dfdd0bcca4f80bd60802dbac6da2412aec3362b928319edfbecd7288"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_power.json"
+hash = "60d1cdaa6fb2f43ed16578c273e3738a03466245dddb09ad46239aee559fa859"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_press.json"
+hash = "98fa2701f5d788ab594fc8966bdd1e657fa1caead85cb907fdfd72f87fa3eacc"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_shaft.json"
+hash = "e3f9eb997337fcb9218b4d67351101cf9a5966165af28541ad6b0c3b82ba3535"
+
+[[files]]
+file = "config/heracles/quests/2firstrotations/2firstrotations_wrench.json"
+hash = "330b068948519eb19668a2256a0be69c7e33b4408b51762594be4a3cd78afc27"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_arm.json"
+hash = "4ce82eb83b281070d2384ad7b7219f5cb05d331affbe054548409d745777a3e4"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_brass.json"
+hash = "86b899f90cae7a29b179ae6eebfe2c1184eb0d47356793a6bf443180b2f7bc7d"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_brass_casing.json"
+hash = "2cf10ebc2129abb01f3d3a2ef993b22ae8c43ddad6e4ddf688203ccb55a33560"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_burner.json"
+hash = "524ee29542eb63a61c42d27d589c7dd6102a4a5e519fcc37a021dd796be8aa14"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_chunkload.json"
+hash = "008afef8c44412672ad4dfdc3747bcf3deacbd55112b776cfa07bfc6d3fc6814"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_crafter.json"
+hash = "295f3151fe439b29fc75fc12fc7ebfc127a94367cdb10535e1dfa72dd781ad9b"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_enchant.json"
+hash = "667b26d51e28490a0ca9894fbed2e4e15eba2b90839fbbdcbf4b08dcf7755c99"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_logistics.json"
+hash = "bbe078141944b5b89fb7cb57776f75118b52f40f34ab3eaa7e41d906c42893fd"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_packages.json"
+hash = "80d3c6c1bcb7e09c83e94666bbbeee9ee306a0dcc4d13937894e4ce66bc99f40"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_precision.json"
+hash = "4cd7a190fbd04daad5df9d8f581a4fb7108123f7051d42e89ecece170e0e9820"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_rsc.json"
+hash = "b53821c238c0aef261897025fadadae8d6218e24addb4cb44858ef403756856f"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_steam.json"
+hash = "3992bfa7d977c481bda87ef59bae0b28c77836d701483806450a82eeef92efa9"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_tube.json"
+hash = "e84630538569a8f4ef5b8f4f8e6641c03cdeeb571eb38cb630a6f594665a763f"
+
+[[files]]
+file = "config/heracles/quests/3thebrassage/3thebrassage_vault.json"
+hash = "206eaa254c781e6f95dcc4cd0b0b6b25f8f181a5457a62073457d8877e7be529"
+
+[[files]]
+file = "config/heracles/quests/4foundryandmetallurgy/4foundryandmetallurgy_casting.json"
+hash = "df7d38c1975427f428ad749349ce2808f8b2b813f589da0a0dc375c3f1b0a5aa"
+
+[[files]]
+file = "config/heracles/quests/4foundryandmetallurgy/4foundryandmetallurgy_coke.json"
+hash = "3f1595178a2ff1a769c5f530b5913e98990b90e37df7748f888ef7ecc7181637"
+
+[[files]]
+file = "config/heracles/quests/4foundryandmetallurgy/4foundryandmetallurgy_crucible.json"
+hash = "11c6e0575526724b62bba00a1cee9487214b3323d5e18a7b8544fb5cf42f4836"
+
+[[files]]
+file = "config/heracles/quests/4foundryandmetallurgy/4foundryandmetallurgy_dusts.json"
+hash = "e559e36083eed793b23c791966d8323733906b4b19b99116e428b15bc565a181"
+
+[[files]]
+file = "config/heracles/quests/4foundryandmetallurgy/4foundryandmetallurgy_foundry.json"
+hash = "ddb8052e9364d184fd1bf75f9a989422989d18e72d38fdc6636de316e3f3da39"
+
+[[files]]
+file = "config/heracles/quests/4foundryandmetallurgy/4foundryandmetallurgy_graphite.json"
+hash = "abd0088d3985562a7eeff381e303c5fdc2b1f28ce50b5d7ef93b11743cfdd4bc"
+
+[[files]]
+file = "config/heracles/quests/4foundryandmetallurgy/4foundryandmetallurgy_grinder.json"
+hash = "32f63f98c6a6d2434f3bcb878635c73c567d607662f64ba90f0ef63c95a31b61"
+
+[[files]]
+file = "config/heracles/quests/4foundryandmetallurgy/4foundryandmetallurgy_mortar.json"
+hash = "218c87877af1e2ff03ff57eb7500621bf141542b4c65f3d7aae4c8e7e16721ed"
+
+[[files]]
+file = "config/heracles/quests/4foundryandmetallurgy/4foundryandmetallurgy_steel.json"
+hash = "94eda3ff07a45f00ef011620ac8ac072bc963733878c4d05415b45af60123441"
+
+[[files]]
+file = "config/heracles/quests/4foundryandmetallurgy/4foundryandmetallurgy_tungsten.json"
+hash = "a37f24c35223f141a3aca4eab26fa5f083be2b751cce0a921ad57ace2d176716"
+
+[[files]]
+file = "config/heracles/quests/4foundryandmetallurgy/4foundryandmetallurgy_tungsten_ingot.json"
+hash = "7f695bb46c65ee4755e028e15adecc262486ba740cea88449220d57d102f888b"
+
+[[files]]
+file = "config/heracles/quests/5electricity/5electricity_accumulator.json"
+hash = "e3f046005167551560fbde6226e154e2a2421e2d4cc6b34d8f0df09314db1874"
+
+[[files]]
+file = "config/heracles/quests/5electricity/5electricity_alternator.json"
+hash = "632821c39323c979b5234b9f1b1234ca7102a8c4b39ab38f0b78fedfa3484bbd"
+
+[[files]]
+file = "config/heracles/quests/5electricity/5electricity_biofuel.json"
+hash = "245799aa9fa79a24a2d6dcdaedaadceb7046a9b0dfbc490a7350a4e2f1a7f0e7"
+
+[[files]]
+file = "config/heracles/quests/5electricity/5electricity_connector.json"
+hash = "76b5fe46f253cb876c76771d011ed583080313b292628a61b01c21cc9612a44b"
+
+[[files]]
+file = "config/heracles/quests/5electricity/5electricity_motor.json"
+hash = "d8d8cac2534bb29e6b69ee57ff5063af939ca00842bbb889684b8912079548c4"
+
+[[files]]
+file = "config/heracles/quests/5electricity/5electricity_rods.json"
+hash = "c1495f158f6441ce76a5a82825dce3cc155e7b435c4a34b44c3c6a28e178905a"
+
+[[files]]
+file = "config/heracles/quests/5electricity/5electricity_spool.json"
+hash = "2b1869f90965734792bc9a0e98a030374d29decd8c4399a0c942c2b9abcb11c0"
+
+[[files]]
+file = "config/heracles/quests/5electricity/5electricity_tesla.json"
+hash = "7d96148f02a42ac8f84b27507aa9f8ee8eb7c52fc9a3a29b5847cc84a74f8675"
+
+[[files]]
+file = "config/heracles/quests/6railsandlogistics/6railsandlogistics_conductor.json"
+hash = "e77a82ade7f2b94a5762c5d4deb1ff88c3273d2f630ac40b770a5d4ac7caf0c5"
+
+[[files]]
+file = "config/heracles/quests/6railsandlogistics/6railsandlogistics_controls.json"
+hash = "19d4621745844f67d834d64bce217034a2886d0b17e9de4bedc6dd0c92d63c87"
+
+[[files]]
+file = "config/heracles/quests/6railsandlogistics/6railsandlogistics_fuel.json"
+hash = "5c7a56956c61508e36a43f12852f5adb588e494ca030f8ca569c8d7df7c9ffff"
+
+[[files]]
+file = "config/heracles/quests/6railsandlogistics/6railsandlogistics_handcar.json"
+hash = "2c87451bc02add80de3c97ba92ae09e5cbf2054adc55e4d8c94cf805e2b61c82"
+
+[[files]]
+file = "config/heracles/quests/6railsandlogistics/6railsandlogistics_schedule.json"
+hash = "a5b6a16a55b0b0c29e1b97f6725ff27861ccc9e52860422fb4b95729cef71e55"
+
+[[files]]
+file = "config/heracles/quests/6railsandlogistics/6railsandlogistics_signal.json"
+hash = "33a87dbc95dc992daa5d0450d972824c15da70681a909a9bfc51f48a11e38181"
+
+[[files]]
+file = "config/heracles/quests/6railsandlogistics/6railsandlogistics_station.json"
+hash = "c2de3bcf22924f3e94d4a3fc653868e9fe01b782f57d8ca404709e5352fa5fd2"
+
+[[files]]
+file = "config/heracles/quests/6railsandlogistics/6railsandlogistics_track.json"
+hash = "93a396356ef71be7210667e77b778d674e3afbfb86990025fa19e179238af2eb"
+
+[[files]]
+file = "config/heracles/quests/7tradeandcoin/7tradeandcoin_banker.json"
+hash = "095ab95c89833099c78370495f09e60654069e4161675de14f36c9b0f19d04d3"
+
+[[files]]
+file = "config/heracles/quests/7tradeandcoin/7tradeandcoin_card.json"
+hash = "b6c66aa4e252826b84c70455120fb327dd1660c9b3904dd8a52d1d4e79a91912"
+
+[[files]]
+file = "config/heracles/quests/7tradeandcoin/7tradeandcoin_coins.json"
+hash = "2679e1a1e789cd809b8e1f0891dbaf787d4317321781c3d42641dd1bfce674bd"
+
+[[files]]
+file = "config/heracles/quests/7tradeandcoin/7tradeandcoin_depositor.json"
+hash = "725b91afb6222fc4fdafc07dc7a8faba9683516b69481820d42d7447342c79a9"
+
+[[files]]
+file = "config/heracles/quests/7tradeandcoin/7tradeandcoin_rich.json"
+hash = "08632c333694d3ad02fa884d6827e518f3dd01510ee2d4397364bbeb84d49603"
+
+[[files]]
+file = "config/heracles/quests/7tradeandcoin/7tradeandcoin_terminal.json"
+hash = "ba2e5de8b798db590af1a0c15bff7df99254319669e3a4a9a72dfbd22fb9e147"
+
+[[files]]
+file = "config/heracles/quests/7tradeandcoin/7tradeandcoin_vendor.json"
+hash = "baa2c100fa1af7466148795843c8f7c855fba5f9d9af3d894ef163ef4bcea96c"
+
+[[files]]
+file = "config/heracles/quests/8takingflight/8takingflight_assembler.json"
+hash = "52149adef24088fba4b427997c919954f3313e23a41adf68cc033fd0ef2a98c2"
+
+[[files]]
+file = "config/heracles/quests/8takingflight/8takingflight_balloon.json"
+hash = "ec2a81596dfbb2691de625ec3129f39605ecb88bca8125507e481f592fe2b21c"
+
+[[files]]
+file = "config/heracles/quests/8takingflight/8takingflight_dock.json"
+hash = "1353eb8b080f5ac4495efd6eca8c94ba25c2b8706b4d1755cb7967a04b1f56c5"
+
+[[files]]
+file = "config/heracles/quests/8takingflight/8takingflight_engine.json"
+hash = "aab0e870f677f9ff96b8e5656d4ca892ba41c2a8e6e61cb4d9d11c91af903bb7"
+
+[[files]]
+file = "config/heracles/quests/8takingflight/8takingflight_first_flight.json"
+hash = "1a5bd76fc862ca16c2d941839bab1550b0f1710f1b9b11ed5e5a2c4f8b5189b1"
+
+[[files]]
+file = "config/heracles/quests/8takingflight/8takingflight_helm.json"
+hash = "8a283a995839970ea6373f83e0d09a68db15d9db16322517429ed24586fcdbe8"
+
+[[files]]
+file = "config/heracles/quests/8takingflight/8takingflight_levitite.json"
+hash = "bdcb19ccc52be0ce6014dddc536e6ae10450ea9fa503dd1029a89dfad0178f52"
+
+[[files]]
+file = "config/heracles/quests/8takingflight/8takingflight_propeller.json"
+hash = "59f76e0994edcb8a586685259dcb9f1de03415fe5950352e2f5dbe9d0c075aba"
+
+[[files]]
+file = "config/heracles/quests/8takingflight/8takingflight_sensors.json"
+hash = "f0e4d094a5090ef3d2e0151e64cf2b9ba8d5f649613ca1bcfb6600301e05d6be"
+
+[[files]]
+file = "config/heracles/quests/8takingflight/8takingflight_smart_prop.json"
+hash = "9c79d0a35b5ff35fb6b4625faf1e0133896678f9db30362be1ccff323e3dd11a"
+
+[[files]]
+file = "config/heracles/quests/8takingflight/8takingflight_wheels.json"
+hash = "279d72a126bd68877d67205797517042f19b137a55d3124494e1106fc0cc0d70"
+
+[[files]]
+file = "config/heracles/quests/9bigguns/9bigguns_autocannon.json"
+hash = "f7c63e2e26d59e782a6602aa8204c6cf719a956e4595fe87517c24d70f6d5d74"
+
+[[files]]
+file = "config/heracles/quests/9bigguns/9bigguns_barrel.json"
+hash = "103377a3a692be2cbbab00950c200ace636ca3ec6d552ef9e45040030bc3745e"
+
+[[files]]
+file = "config/heracles/quests/9bigguns/9bigguns_cast.json"
+hash = "14f2996fc152c77de7237c2111fe81ea0d8ef67ff9301efac54a3d81d09d3641"
+
+[[files]]
+file = "config/heracles/quests/9bigguns/9bigguns_fire.json"
+hash = "7a7f82aa28e30477ef538ce64222b8bccd16e8647c4b143a0799b5de6dd00d4b"
+
+[[files]]
+file = "config/heracles/quests/9bigguns/9bigguns_loader.json"
+hash = "5720fae4e7083f8d77ffcae9a7663cb86d1670befa32701984d95ea378adf814"
+
+[[files]]
+file = "config/heracles/quests/9bigguns/9bigguns_mount.json"
+hash = "8de475a125f0cbdf244ce2dc10f24585e1c5415842b126f2b135c39187c8c606"
+
+[[files]]
+file = "config/heracles/quests/9bigguns/9bigguns_powder.json"
+hash = "68163b89b68c9380fa93e64bfa507e9d22553fb30f5f72fa40ffb602ec387a48"
+
+[[files]]
+file = "config/heracles/quests/9bigguns/9bigguns_shot.json"
+hash = "1cb4df224e57e75c0462cdd0af10898f64a1fbb285d59af2cbc265f4d27aef58"
+
+[[files]]
+file = "config/heracles/quests/9bigguns/9bigguns_steel_cannon.json"
+hash = "935ed189a2db0e993023f764f65075440e97802f389614107299869761e79650"
+
+[[files]]
+file = "config/heracles/quests/9bigguns/9bigguns_warship.json"
+hash = "bfe546ae3d2cfd77c33c86c14b33bdeec93580735e319584a3648fb6b952a44b"
+
+[[files]]
+file = "kubejs/server_scripts/starwake.js"
+hash = "e1b990d1044aef7a34575cc035690fc627b54ea085aad8e81c0db9bde227d00b"
+
+[[files]]
+file = "mods/appleskin.pw.toml"
+hash = "716d930feff599bf9ce732e05979fbae8025dc8a3c13ccf4f1cb207a70883bc6"
+metafile = true
+
+[[files]]
+file = "mods/balm.pw.toml"
+hash = "fc8954e0d3fa66b917d2c84ee04d07b073a9eb6f719d09e1ff85527c1d61a10e"
+metafile = true
+
+[[files]]
+file = "mods/better-advanced-tooltips.pw.toml"
+hash = "03084ff4f74cedc1b8ac6c85a98842f75956fb4fa811d285d8ca7caa8d54da5d"
+metafile = true
+
+[[files]]
+file = "mods/better-advancements.pw.toml"
+hash = "93c4acd165a291c6d1e69c27b05b2747afc926b38a414712263fbc95f42da323"
+metafile = true
+
+[[files]]
+file = "mods/chunky.pw.toml"
+hash = "1d5cc2b6dcfd1fc3adba4566b1c29b57ff1175316678c1f22e63cbc3e28a5ba0"
+metafile = true
+
+[[files]]
+file = "mods/comforts.pw.toml"
+hash = "36f2f6e74b7dbeccb504572d47006582207544fa234a095093b97adfc7ecd5ac"
+metafile = true
+
+[[files]]
+file = "mods/controlling.pw.toml"
+hash = "65c8086d2ec3d39acc7bd36c7a0306ccc43b602b38fa07d13291bc478ef7dfff"
+metafile = true
+
+[[files]]
+file = "mods/copycats.pw.toml"
+hash = "b6b702e432d0a9089ab5ccbf0c83951f6afe1315822c668659b8b04e4f3b99f7"
+metafile = true
+
+[[files]]
+file = "mods/corpse.pw.toml"
+hash = "50f0fe22bec82ed6336a259931394271a1ebb71bb77e682ee233d96134305ccd"
+metafile = true
+
+[[files]]
+file = "mods/create-aeronautics.pw.toml"
+hash = "19005d189b90d95b5b981784480f1a39bf24022535f71b9afd7175e17216a038"
+metafile = true
+
+[[files]]
+file = "mods/create-big-cannons.pw.toml"
+hash = "a0e9ff95570cd9af3374ca8b44aa095447baf94e565f46ae99819d52a9b48dc1"
+metafile = true
+
+[[files]]
+file = "mods/create-connected.pw.toml"
+hash = "6ac362d60bc8b13e03a5b6b9cdf9c7676f65d3e89e87c66f18514e7ee164cdb0"
+metafile = true
+
+[[files]]
+file = "mods/create-cosmonatics.pw.toml"
+hash = "1f2d7a0dbc88261f7849be33a7418e5f59ac8408580fbce27b972e2021d87596"
+metafile = true
+
+[[files]]
+file = "mods/create-dragons-plus.pw.toml"
+hash = "dcbb37e828a2f915e64a2ef839a742761a553a2e3b923b000ffba95db7503ac3"
+metafile = true
+
+[[files]]
+file = "mods/create-enchantment-industry.pw.toml"
+hash = "5f76bdf0fe120e62cc3ae298e911727fa45c70dd191fd9c2b213029c7601576c"
+metafile = true
+
+[[files]]
+file = "mods/create-metallurgy.pw.toml"
+hash = "12a90beeb5a46b46dfdc7ba2a5510107fbc60915e6cf1af129d365e20b99ce2d"
+metafile = true
+
+[[files]]
+file = "mods/create-power-loader.pw.toml"
+hash = "d1a7402cc94a8a857d380f68bb9a19d8981a2b3223068a53d9054e97232f4167"
+metafile = true
+
+[[files]]
+file = "mods/create-steam-n-rails-1.21.1.pw.toml"
+hash = "80332cead695f1e3c27e99133a48709767d1106f836792bb2fc4d594b88f1a68"
+metafile = true
+
+[[files]]
+file = "mods/create.pw.toml"
+hash = "dcaf5f2e28db0b9a127d0167456832341045ddc9aec058c3d9fcf53f618d2404"
+metafile = true
+
+[[files]]
+file = "mods/createaddition.pw.toml"
+hash = "e5052e0fcba9af1e3c6c0734829b441bc5a23012108bf203ca01825ca12ff6b1"
+metafile = true
+
+[[files]]
+file = "mods/entityculling.pw.toml"
+hash = "d518db51c2502b5b04d6ca4add6a2b3e862a0af15e7a65f0ab83180778adb604"
+metafile = true
+
+[[files]]
+file = "mods/explorers-compass.pw.toml"
+hash = "0670ca65c7208aa8211883fae30c935f53cad38196aac46723b10e7bbc695113"
+metafile = true
+
+[[files]]
+file = "mods/farmers-delight.pw.toml"
+hash = "97347efd9e808841d72fe3599da8a11add8422e97f89ae1c85cdfc0acfa18f96"
+metafile = true
+
+[[files]]
+file = "mods/ferrite-core.pw.toml"
+hash = "73360e397134d238ee8fd21d33fd7f9275e9441f74f8f1b6ed92278877c0b9f1"
+metafile = true
+
+[[files]]
+file = "mods/immediatelyfast.pw.toml"
+hash = "4601b9be31b6e131dca8a148c974d015444bcac7c82fcb66fbd8751a67933a5d"
+metafile = true
+
+[[files]]
+file = "mods/jade.pw.toml"
+hash = "4de3e4a1a49e332c1ad313283e0403c4273b628d634c17a9ff0c9da3d6b67f9a"
+metafile = true
+
+[[files]]
+file = "mods/jei.pw.toml"
+hash = "76b516dbbd798b74314c421a73144ea2b1f21bb52183602310dfc241da00b1ed"
+metafile = true
+
+[[files]]
+file = "mods/just-enough-resources-jer.pw.toml"
+hash = "17823abb92b0fa339dcfaeb73b188eec80fb968ba9f64f47abf8637073c234c6"
+metafile = true
+
+[[files]]
+file = "mods/kubejs-create.pw.toml"
+hash = "531aa276b74eabc24566c57412527767238c74ee16b9c646dff511f56dba990c"
+metafile = true
+
+[[files]]
+file = "mods/kubejs.pw.toml"
+hash = "be9f3f981dd69822b4a3e5ab6fd677ec69a4e01dcf66c62e239b6ef65f31f0fd"
+metafile = true
+
+[[files]]
+file = "mods/lithium.pw.toml"
+hash = "51e129832b04acd57da470fc41725bad5e101b6a6b1d4901fd8ea7a92b14e13d"
+metafile = true
+
+[[files]]
+file = "mods/mezzconfig.pw.toml"
+hash = "f1fecbcbee6806a14efb3bd38ccf10166b48004967fbe72b6c31224e5e9fc5ea"
+metafile = true
+
+[[files]]
+file = "mods/modernfix.pw.toml"
+hash = "ef65836e005bd42a0f40df30a94eba1ad7ee5ed3194b11eafbeadc64edb44252"
+metafile = true
+
+[[files]]
+file = "mods/mouse-tweaks.pw.toml"
+hash = "6bc414cc0f2d4c078fe83f384d786343f701f371d657c5279b5b0df1595804bd"
+metafile = true
+
+[[files]]
+file = "mods/netherportalfix.pw.toml"
+hash = "748bdcbc7788a77881979189827f1baf3f6ef5fdaeb58b00e51e043c2c0abe39"
+metafile = true
+
+[[files]]
+file = "mods/numismatics.pw.toml"
+hash = "840eb517a83c586b9f543ab9781d4c8529b6fedf2d679f411577c7a583e50fe5"
+metafile = true
+
+[[files]]
+file = "mods/odyssey-quests.pw.toml"
+hash = "df20b79b0e4023d872f0cdbc3b144648b590eac66947a110d2d6b0ad1028b9cb"
+metafile = true
+
+[[files]]
+file = "mods/open-parties-and-claims.pw.toml"
+hash = "299ed58980f5c02afbaabcc52d5e573e8b8ab0c2c30fd688d6d7e86e7ac6bf6d"
+metafile = true
+
+[[files]]
+file = "mods/packet-fixer.pw.toml"
+hash = "84cb0dcad9ac46d22adba4fb7924951affa6ac5e46027a3b25fa9a0db8d91b2b"
+metafile = true
+
+[[files]]
+file = "mods/polymorph.pw.toml"
+hash = "d935e4ce118d15c88b10809df85e801f0e9577855f870f3c28e5a0bd5e7fecf6"
+metafile = true
+
+[[files]]
+file = "mods/resourceful-lib.pw.toml"
+hash = "c0b066684294c33972d562e0cb08ea17b2d31bcf86cd1d6c63b8e968f0eac7a2"
+metafile = true
+
+[[files]]
+file = "mods/rhino.pw.toml"
+hash = "e55ca32b338a0e0540f4fec5170675d860566255ae0f45692a00cb4ebf2eb535"
+metafile = true
+
+[[files]]
+file = "mods/rpl.pw.toml"
+hash = "7815e5a589de0c02a62ae83590e1f75f4d0c269e48f2435ce2ac448976ddf49f"
+metafile = true
+
+[[files]]
+file = "mods/sable.pw.toml"
+hash = "fadb5c9cfe145e51992894fe57209fc8f1696ef892ee9702a24c6205f042e9b2"
+metafile = true
+
+[[files]]
+file = "mods/searchables.pw.toml"
+hash = "ce9ddada6ffd55a512149cc474c6a453281a997a5fdf1b7b4a2cc73f875e704a"
+metafile = true
+
+[[files]]
+file = "mods/simple-voice-chat.pw.toml"
+hash = "6f9502735fcac7a35468358e2aa0fd9333b12df885db3325c472d298ce315a72"
+metafile = true
+
+[[files]]
+file = "mods/sodium.pw.toml"
+hash = "2a001cdb3d5ac4970d422914083c27380eba8ebd40dfd435754fe6566ba78beb"
+metafile = true
+
+[[files]]
+file = "mods/sophisticated-backpacks.pw.toml"
+hash = "44fbfa6f8f0cda4f628d2f1488b758f84b27a05bbfde836cdfe6b176eb4e6b81"
+metafile = true
+
+[[files]]
+file = "mods/sophisticated-core.pw.toml"
+hash = "538402dccb562c05a3e126e2db0ee2d0d97e5227776c51c33834aeeb01c192a8"
+metafile = true
+
+[[files]]
+file = "mods/sophisticated-storage.pw.toml"
+hash = "589ce9acb7d0fd2cb2323d871daba07615f5b7b5ed6a06cfa813740a4012c2fa"
+metafile = true
+
+[[files]]
+file = "mods/spark.pw.toml"
+hash = "593fa7b30ab016aa45be07bd6bef3a9f160ed0f24689850d60bf84995d69b843"
+metafile = true
+
+[[files]]
+file = "mods/terralith.pw.toml"
+hash = "da7ee99189ad35aac094919fe33cac647d98533b23c228f10d4811f08989e2b8"
+metafile = true
+
+[[files]]
+file = "mods/trashslot.pw.toml"
+hash = "c1e0c805d5ccd49535a6820aa8a2461a516437f90312fcadd393f928e3ce7bf2"
+metafile = true
+
+[[files]]
+file = "mods/waystones.pw.toml"
+hash = "870219130f6ab3005d0ed77ff73070074bd2780f09ef67f57d5d9a2199b40e9f"
+metafile = true
+
+[[files]]
+file = "mods/xaeros-minimap.pw.toml"
+hash = "e97cb865d7a8c8310905d9140899fa55ea23c3fff2e23a17255ce2c162322ad7"
+metafile = true
+
+[[files]]
+file = "mods/xaeros-world-map.pw.toml"
+hash = "3a8e91aecdb602039ba1f7445bbf6b64cc5a46344339a3ffaf3b2e3eb2f5bcbc"
+metafile = true

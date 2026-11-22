@@ -1,0 +1,74 @@
+{
+  "1. Planetfall": {
+    "icon": "minecraft:oak_sapling",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "2. First Rotations": {
+    "icon": "create:cogwheel",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "3. The Brass Age": {
+    "icon": "create:brass_ingot",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "4. Foundry and Metallurgy": {
+    "icon": "createmetallurgy:steel_ingot",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "5. Electricity": {
+    "icon": "createaddition:electric_motor",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "6. Rails and Logistics": {
+    "icon": "create:track_station",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "7. Trade and Coin": {
+    "icon": "numismatics:crown",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "8. Taking Flight": {
+    "icon": "aeronautics:wooden_propeller",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "9. Big Guns": {
+    "icon": "createbigcannons:cannon_mount",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "10. To the Stars": {
+    "icon": "rocketnautics:rocket_thruster",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "11. Farmer's Delight": {
+    "icon": "farmersdelight:tomato",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "12. Crew and Colonies": {
+    "icon": "minecraft:emerald",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "farmersdelight:cutting_board",
+        "count": 1
+      }
+    },
+    "title": "Cutting Board",
+    "subtitle": "",
+    "description": [
+      "Slice food, logs and more on a cutting board."
+    ],
+    "groups": {
+      "11. Farmer's Delight": {
+        "position": [
+          44,
+          -34
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "11farmersdelight_knife"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "farmersdelight:cutting_board",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:sprocket",
+        "count": 1
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 1
+    }
+  }
+}

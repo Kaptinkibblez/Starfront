@@ -1,0 +1,57 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createmetallurgy:refractory_mortar",
+        "count": 1
+      }
+    },
+    "title": "Refractory Mortar",
+    "subtitle": "",
+    "description": [
+      "Furnace linings must survive molten metal. Mix refractory mortar for the foundry."
+    ],
+    "groups": {
+      "4. Foundry and Metallurgy": {
+        "position": [
+          0,
+          17
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "3thebrassage_brass"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "createmetallurgy:refractory_mortar",
+      "amount": 8,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:sprocket",
+        "count": 2
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 3
+    }
+  }
+}

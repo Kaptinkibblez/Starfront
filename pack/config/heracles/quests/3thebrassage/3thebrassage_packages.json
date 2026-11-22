@@ -1,0 +1,70 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:packager",
+        "count": 1
+      }
+    },
+    "title": "Packages and Frogports",
+    "subtitle": "",
+    "description": [
+      "Create 6 logistics: Packagers box items, Frogports and chain conveyors deliver them, and a Stock Ticker orders from your whole storage network."
+    ],
+    "groups": {
+      "3. The Brass Age": {
+        "position": [
+          176,
+          17
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "3thebrassage_logistics",
+    "3thebrassage_precision"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "create:packager",
+      "amount": 2,
+      "collection": "AUTOMATIC"
+    },
+    "task_1": {
+      "type": "heracles:item",
+      "item": "create:package_frogport",
+      "amount": 2,
+      "collection": "AUTOMATIC"
+    },
+    "task_2": {
+      "type": "heracles:item",
+      "item": "create:stock_ticker",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 4
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 8
+    }
+  }
+}

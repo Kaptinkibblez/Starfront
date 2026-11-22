@@ -1,0 +1,69 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "simulated:altitude_sensor",
+        "count": 1
+      }
+    },
+    "title": "Avionics",
+    "subtitle": "",
+    "description": [
+      "Altitude, velocity and gimbal sensors output redstone for autopilots."
+    ],
+    "groups": {
+      "8. Taking Flight": {
+        "position": [
+          176,
+          0
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "8takingflight_first_flight"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "simulated:altitude_sensor",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    },
+    "task_1": {
+      "type": "heracles:item",
+      "item": "simulated:velocity_sensor",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    },
+    "task_2": {
+      "type": "heracles:item",
+      "item": "simulated:gimbal_sensor",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 4
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 6
+    }
+  }
+}

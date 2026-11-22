@@ -1,0 +1,55 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:oak_sign",
+        "count": 1
+      }
+    },
+    "title": "Stake a Claim",
+    "subtitle": "",
+    "description": [
+      "Claim your base chunks on the map (Open Parties and Claims, or the world map with M) so nobody can grief it. Claims can be shared with your party."
+    ],
+    "groups": {
+      "12. Crew and Colonies": {
+        "position": [
+          44,
+          -34
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "12crewandcolonies_party"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:check",
+      "title": "Done"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 1
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 2
+    }
+  }
+}

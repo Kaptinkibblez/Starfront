@@ -1,0 +1,56 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:tnt",
+        "count": 1
+      }
+    },
+    "title": "Fire!",
+    "subtitle": "",
+    "description": [
+      "Load powder and a shell into the breech (or use a Cannon Loader) and fire with redstone. Click the checkmark when your cannon has fired."
+    ],
+    "groups": {
+      "9. Big Guns": {
+        "position": [
+          132,
+          0
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "9bigguns_mount",
+    "9bigguns_shot"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:check",
+      "title": "Done"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 4
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 8
+    }
+  }
+}

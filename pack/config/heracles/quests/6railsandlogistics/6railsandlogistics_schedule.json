@@ -1,0 +1,57 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:schedule",
+        "count": 1
+      }
+    },
+    "title": "Schedules",
+    "subtitle": "",
+    "description": [
+      "Give a train a schedule and it runs on its own, loading and unloading cargo at stations."
+    ],
+    "groups": {
+      "6. Rails and Logistics": {
+        "position": [
+          132,
+          -34
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "6railsandlogistics_controls"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "create:schedule",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 1
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 4
+    }
+  }
+}

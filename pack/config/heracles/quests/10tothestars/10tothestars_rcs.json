@@ -1,0 +1,63 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "rocketnautics:rcs_thruster",
+        "count": 1
+      }
+    },
+    "title": "Attitude Control",
+    "subtitle": "",
+    "description": [
+      "RCS thrusters and vector thrusters turn the rocket in flight; a Magnetic Stabilizer holds it steady."
+    ],
+    "groups": {
+      "10. To the Stars": {
+        "position": [
+          176,
+          -17
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "10tothestars_thruster"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "rocketnautics:rcs_thruster",
+      "amount": 4,
+      "collection": "AUTOMATIC"
+    },
+    "task_1": {
+      "type": "heracles:item",
+      "item": "rocketnautics:magnetic_stabilizer",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:crown",
+        "count": 1
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 8
+    }
+  }
+}

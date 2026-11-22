@@ -1,0 +1,57 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createbigcannons:powder_charge",
+        "count": 1
+      }
+    },
+    "title": "Powder Charges",
+    "subtitle": "",
+    "description": [
+      "Create Big Cannons fire real shells propelled by powder charges."
+    ],
+    "groups": {
+      "9. Big Guns": {
+        "position": [
+          0,
+          -17
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "4foundryandmetallurgy_casting"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "createbigcannons:powder_charge",
+      "amount": 8,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 1
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 3
+    }
+  }
+}

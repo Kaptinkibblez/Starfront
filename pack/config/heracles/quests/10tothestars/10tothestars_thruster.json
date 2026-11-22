@@ -1,0 +1,70 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "rocketnautics:rocket_thruster",
+        "count": 1
+      }
+    },
+    "title": "Rocket Thruster",
+    "subtitle": "",
+    "description": [
+      "A rocket thruster with a nozzle, fed with fuel through hoses (anchored with Hose Anchors), lifts a ship off the ground."
+    ],
+    "groups": {
+      "10. To the Stars": {
+        "position": [
+          132,
+          -17
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "10tothestars_ti_alloy",
+    "10tothestars_casing"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "rocketnautics:rocket_thruster",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    },
+    "task_1": {
+      "type": "heracles:item",
+      "item": "rocketnautics:engine_nozzle",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    },
+    "task_2": {
+      "type": "heracles:item",
+      "item": "rocketnautics:hose_anchor",
+      "amount": 2,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:crown",
+        "count": 2
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 10
+    }
+  }
+}

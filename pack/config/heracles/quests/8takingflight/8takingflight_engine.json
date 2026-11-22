@@ -1,0 +1,57 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "simulated:white_portable_engine",
+        "count": 1
+      }
+    },
+    "title": "Portable Engine",
+    "subtitle": "",
+    "description": [
+      "Portable engines burn fuel to make rotation aboard a ship."
+    ],
+    "groups": {
+      "8. Taking Flight": {
+        "position": [
+          88,
+          -17
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "8takingflight_propeller"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "simulated:white_portable_engine",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 2
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 4
+    }
+  }
+}

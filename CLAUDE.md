@@ -702,8 +702,34 @@ history (branch `claude/inspiring-faraday-1gb3hq`, commit ff343cc) to port from.
   - planets + galaxy -> add-on to a **space mod** (feeds seeded planets into its planet system);
   - economy -> add-on to **Create: Numismatics** (simulated markets, contracts, hubs using its currency and shops);
   - combat HUD -> add-on to **Create Aeronautics + Create Big Cannons** (target lock, lead pips, cockpit HUD).
-- Not decided yet: the exact mod list, the space mod (Northstar Redux vs Create Cosmonautics vs Ad Astra), industry beyond Create
-  (Mekanism?), quests/recipes tooling (FTB Quests, KubeJS), and how the companion is split (one mod or several).
+- Not decided yet: industry beyond Create (Mekanism?) and how the companion is split (one mod or several).
+
+### The Starwake modpack (pack 1.0.0, 2026-11-22)
+
+User request: "a fully fleshed out mod pack that can be played solo viably or with friends, with a full quest progression
+system and a release on GitHub I can put into Prism Launcher". Built without the companion mod (that comes later, as add-ons).
+
+- **packwiz project in `pack/`** (NeoForge 1.21.1, NeoForge 21.1.267): 56 mod files from Modrinth (`pack/mods/*.pw.toml`, deps
+  pulled by `packwiz modrinth add <slug> -y`), overrides `config/heracles` (quests) and `kubejs/server_scripts/starwake.js`
+  (quest book + bread on first join, quest book recipe). Bump `version` in `pack.toml` and run `packwiz refresh` after any change
+  (CI fails on a stale index). Space mod: **Create Cosmonautics** (namespace `rocketnautics`; builds on Aeronautics/Sable). Quests:
+  **Odyssey Quests = Heracles** (MIT, on Modrinth; FTB Quests isn't on Modrinth). Iris left out (Aeronautics renders wrong with it).
+- **Quests** (`tools/pack_quests.py [registry_items.txt]`): 121 quests in 12 chapters written as Heracles JSON
+  (`config/heracles/quests/<chapter>/<id>.json`, `groups.txt`, `group_settings.json`); positions from dependency depth; chapters
+  gated on earlier key quests; rewards = XP levels + Numismatics coins (`coins(n)` splits a value into sun/crown/cog/sprocket/bevel/spur).
+  Validate ids against the real item registry: lang/model names lie (`railways:conductor_cap` only exists dyed,
+  `createbigcannons:cannon_cast` is block-only). The registry list was dumped from a test server with a temporary KubeJS command
+  (`BuiltInRegistries.ITEM.keySet()`); Heracles silently drops tasks with unknown items (no log line), so verify loads by comparing
+  `QuestHandler.quests()` (tasks, rewards, dependencies) with the files: last check 121/121, 0 differences.
+- Heracles format notes: item task `{"type":"heracles:item","item":"<id or #tag>","amount":n,"collection":"AUTOMATIC"}` (collection
+  is required), `heracles:check` (click to complete), `heracles:changed_dimension` (`to`); icons and item rewards take
+  `{"id","count"}`; xp reward `{"type":"heracles:xp","xptype":"LEVEL","amount":n}`; quests open with **U** (Heracles default).
+- **Server pack** (`tools/pack_server.py <out>`; `--client` = client mods + overrides only): server/both mods with hash checks,
+  overrides, `start.sh`/`start.bat` that install NeoForge and set -Xmx6G. Verified: boots in ~12 s with 48 mods.
+- **CI** (`.github/workflows/pack.yml`): exports `Starwake-<ver>.mrpack`, builds `Starwake-<ver>-server.zip`, boots a real client
+  with every mod via `headlesshq/mc-runtime-test` (joins a world, quits), then publishes release `pack-v<ver>`. Running HeadlessMC
+  in this container was refused by the permission system, so the client test only runs in CI.
+- Harmless log noise: Steam 'n' Rails loot tables for absent wood mods, a Sable physics tag for a Copycats+ block.
 
 ## How planets work (Milestone 2)
 

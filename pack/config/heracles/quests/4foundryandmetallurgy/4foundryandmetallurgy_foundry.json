@@ -1,0 +1,63 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createmetallurgy:foundry_basin",
+        "count": 1
+      }
+    },
+    "title": "The Foundry",
+    "subtitle": "",
+    "description": [
+      "A Foundry Basin with a Foundry Lid over a heated burner melts metals into fluids."
+    ],
+    "groups": {
+      "4. Foundry and Metallurgy": {
+        "position": [
+          44,
+          0
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "4foundryandmetallurgy_mortar"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "createmetallurgy:foundry_basin",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    },
+    "task_1": {
+      "type": "heracles:item",
+      "item": "createmetallurgy:foundry_lid",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 2
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 5
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "heracles:quest_book",
+        "count": 1
+      }
+    },
+    "title": "Welcome to Starwake",
+    "subtitle": "",
+    "description": [
+      "You have crash-landed on an untamed world with nothing but your hands.",
+      "",
+      "Starwake is an engineering pack built on Create: you will go from wooden shafts to brass factories, foundries, electric grids, trains, airships, warships and finally rockets that leave the planet.",
+      "",
+      "Open this book any time with U (or use the Quest Book item). Each chapter is one stage. Finish a quest to unlock the next ones and claim its rewards: experience and Numismatics coins, the currency used by shops and banks.",
+      "",
+      "Playing with friends? Every player has their own progress. Use Open Parties and Claims to team up and protect your base (default key: apostrophe)."
+    ],
+    "groups": {
+      "1. Planetfall": {
+        "position": [
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:check",
+      "title": "Done"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:bread",
+        "count": 8
+      }
+    },
+    "item_1": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:bevel",
+        "count": 1
+      }
+    }
+  }
+}

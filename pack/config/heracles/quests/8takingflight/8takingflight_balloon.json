@@ -1,0 +1,63 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "aeronautics:white_envelope",
+        "count": 1
+      }
+    },
+    "title": "Hot Air",
+    "subtitle": "",
+    "description": [
+      "Hot air envelopes over a Hot Air Burner lift a ship. The burner controls how much."
+    ],
+    "groups": {
+      "8. Taking Flight": {
+        "position": [
+          44,
+          -17
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "8takingflight_assembler"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "aeronautics:white_envelope",
+      "amount": 16,
+      "collection": "AUTOMATIC"
+    },
+    "task_1": {
+      "type": "heracles:item",
+      "item": "aeronautics:adjustable_burner",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 2
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 5
+    }
+  }
+}

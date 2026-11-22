@@ -1,0 +1,57 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:item_vault",
+        "count": 1
+      }
+    },
+    "title": "Item Vaults",
+    "subtitle": "",
+    "description": [
+      "Big, stackable storage that belts and funnels can use."
+    ],
+    "groups": {
+      "3. The Brass Age": {
+        "position": [
+          88,
+          17
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "3thebrassage_brass"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "create:item_vault",
+      "amount": 4,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:sprocket",
+        "count": 2
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 3
+    }
+  }
+}

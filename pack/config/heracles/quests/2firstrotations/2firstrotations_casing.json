@@ -1,0 +1,57 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:andesite_casing",
+        "count": 1
+      }
+    },
+    "title": "Andesite Casing",
+    "subtitle": "",
+    "description": [
+      "Apply andesite alloy to stripped logs to make casings: the frame of many machines."
+    ],
+    "groups": {
+      "2. First Rotations": {
+        "position": [
+          44,
+          17
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "2firstrotations_alloy"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "create:andesite_casing",
+      "amount": 16,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:sprocket",
+        "count": 1
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 2
+    }
+  }
+}

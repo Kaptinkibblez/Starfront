@@ -1,0 +1,63 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createmetallurgy:graphite_ingot_mold",
+        "count": 1
+      }
+    },
+    "title": "Graphite Molds",
+    "subtitle": "",
+    "description": [
+      "Graphite molds shape molten metal into ingots, plates, rods, gears and nuggets."
+    ],
+    "groups": {
+      "4. Foundry and Metallurgy": {
+        "position": [
+          88,
+          -34
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "4foundryandmetallurgy_foundry"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "createmetallurgy:graphite",
+      "amount": 4,
+      "collection": "AUTOMATIC"
+    },
+    "task_1": {
+      "type": "heracles:item",
+      "item": "createmetallurgy:graphite_ingot_mold",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 1
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 3
+    }
+  }
+}

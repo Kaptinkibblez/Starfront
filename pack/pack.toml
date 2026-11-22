@@ -1,0 +1,13 @@
+name = "Starwake"
+author = "kaptinkibblez"
+version = "1.0.0"
+pack-format = "packwiz:1.1.0"
+
+[index]
+file = "index.toml"
+hash-format = "sha256"
+hash = "f5551ac13037184b7a221c2fc7129813abd740c36b2ecf8c4b222f060ad53be6"
+
+[versions]
+minecraft = "1.21.1"
+neoforge = "21.1.267"

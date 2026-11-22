@@ -1,0 +1,63 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:mechanical_drill",
+        "count": 1
+      }
+    },
+    "title": "Drills and Saws",
+    "subtitle": "",
+    "description": [
+      "Drills and saws break blocks in front of them. Put them on pistons or bearings for quarries and tree farms."
+    ],
+    "groups": {
+      "2. First Rotations": {
+        "position": [
+          88,
+          68
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "2firstrotations_casing"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "create:mechanical_drill",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    },
+    "task_1": {
+      "type": "heracles:item",
+      "item": "create:mechanical_saw",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:sprocket",
+        "count": 2
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 3
+    }
+  }
+}

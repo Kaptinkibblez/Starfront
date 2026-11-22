@@ -1,0 +1,63 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createbigcannons:cast_iron_autocannon_barrel",
+        "count": 1
+      }
+    },
+    "title": "Autocannon",
+    "subtitle": "",
+    "description": [
+      "Autocannons fire small rounds quickly: the gun for airships."
+    ],
+    "groups": {
+      "9. Big Guns": {
+        "position": [
+          176,
+          0
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "9bigguns_fire"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "createbigcannons:cast_iron_autocannon_barrel",
+      "amount": 2,
+      "collection": "AUTOMATIC"
+    },
+    "task_1": {
+      "type": "heracles:item",
+      "item": "createbigcannons:autocannon_cartridge",
+      "amount": 16,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 4
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 6
+    }
+  }
+}

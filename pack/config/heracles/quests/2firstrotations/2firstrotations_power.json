@@ -1,0 +1,57 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:water_wheel",
+        "count": 1
+      }
+    },
+    "title": "First Power",
+    "subtitle": "",
+    "description": [
+      "Rotation has to come from somewhere: a Water Wheel in flowing water, a Windmill Bearing with sails, or a Hand Crank in a pinch. Every source gives stress units (SU); every machine uses them."
+    ],
+    "groups": {
+      "2. First Rotations": {
+        "position": [
+          88,
+          -68
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "2firstrotations_shaft"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "create:water_wheel",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:sprocket",
+        "count": 1
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 2
+    }
+  }
+}

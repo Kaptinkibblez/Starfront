@@ -1,0 +1,13 @@
+name = "Odyssey Quests"
+filename = "heracles-neoforge-1.21.1-2.0.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/lo90fZoB/versions/DYaRmc9w/heracles-neoforge-1.21.1-2.0.3.jar"
+hash-format = "sha512"
+hash = "169520d794a26ed2b6cde03bcb50de0c20bb5a3464ae5c3ac36ca789edea65e26ec1e923cbfffaad9ebe4657a85ae876a3297d882b4376da3b42d212d32aff6d"
+
+[update]
+[update.modrinth]
+mod-id = "lo90fZoB"
+version = "DYaRmc9w"

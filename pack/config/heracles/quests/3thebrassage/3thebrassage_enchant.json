@@ -1,0 +1,57 @@
+{
+  "display": {
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create_enchantment_industry:blaze_enchanter",
+        "count": 1
+      }
+    },
+    "title": "Industrial Enchanting",
+    "subtitle": "",
+    "description": [
+      "Create: Enchantment Industry turns liquid experience into enchantments. Drain XP with a Mechanical Grindstone and feed it to a Blaze Enchanter."
+    ],
+    "groups": {
+      "3. The Brass Age": {
+        "position": [
+          176,
+          51
+        ]
+      }
+    }
+  },
+  "settings": {
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false
+  },
+  "dependencies": [
+    "3thebrassage_steam"
+  ],
+  "tasks": {
+    "task_0": {
+      "type": "heracles:item",
+      "item": "create_enchantment_industry:blaze_enchanter",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "item_0": {
+      "type": "heracles:item",
+      "item": {
+        "id": "numismatics:cog",
+        "count": 2
+      }
+    },
+    "xp": {
+      "type": "heracles:xp",
+      "xptype": "LEVEL",
+      "amount": 5
+    }
+  }
+}
