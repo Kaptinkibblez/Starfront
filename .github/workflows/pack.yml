@@ -71,6 +71,9 @@ jobs:
           python3 tools/pack_server.py run --client
           ls run/mods | wc -l
 
+      - name: Refresh apt (the action installs Mesa and xrandr)
+        run: sudo apt-get update -q
+
       - name: Run the client
         uses: headlesshq/mc-runtime-test@5.0.0
         with:
