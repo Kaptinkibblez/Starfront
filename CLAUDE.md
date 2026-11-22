@@ -696,6 +696,12 @@ history (branch `claude/inspiring-faraday-1gb3hq`, commit ff343cc) to port from.
     (+ CoinMarket / Trade Stations).
   - *Ship combat + flight HUD:* weapons from Create Big Cannons (+ Stellar Cannons) on Aeronautics ships; our target lock, lead
     pips and cockpit HUD may become an add-on for Aeronautics ships. Our own flight model, shipyard and guns go.
+- **Starwake = a helper for existing mods only (user, 2026-11-22):** no standalone systems; every kept feature is an
+  add-on that extends an existing mod:
+  - metallurgy -> add-on to **Create: Metallurgy** (composition, grades, properties on its foundry);
+  - planets + galaxy -> add-on to a **space mod** (feeds seeded planets into its planet system);
+  - economy -> add-on to **Create: Numismatics** (simulated markets, contracts, hubs using its currency and shops);
+  - combat HUD -> add-on to **Create Aeronautics + Create Big Cannons** (target lock, lead pips, cockpit HUD).
 - Not decided yet: the exact mod list, the space mod (Northstar Redux vs Create Cosmonautics vs Ad Astra), industry beyond Create
   (Mekanism?), quests/recipes tooling (FTB Quests, KubeJS), and how the companion is split (one mod or several).
 
