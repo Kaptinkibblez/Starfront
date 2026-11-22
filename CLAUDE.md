@@ -637,7 +637,7 @@ commit. **Don't start the next milestone until the user confirms the current one
       covered: a full quantum/jump trip after the split, plate repair, paint aboard an assembled ship, multiplayer.)* Details in
       "How flight, power, drives and hulls work after M10". Re-entry heating was then removed at the user's request (0.10.1,
       2026-11-18); the user moved on to M11.
-  - [ ] **11. Combat.** Ship weapons (guns, missiles, turrets on power/heat/shields/armour), personal ranged weapons, damage
+  - [ ] **11. Combat** *(stopped after 11a on 2026-11-22: see "Pivot to a Create-based modpack").* Ship weapons (guns, missiles, turrets on power/heat/shields/armour), personal ranged weapons, damage
         and repair; threats that are simulated or event-based (no roaming NPC ships, per the user's M9 rule).
     - **M11 decisions (user, 2026-11-18).** Audit: a weapon pip and an empty weapon capacitor exist (M10b); shields and per-block
       armour only absorb crashes; parts wear; the only weapon is the Fabricator sword; nothing to fight. Choices: **all four weapon
@@ -673,6 +673,31 @@ commit. **Don't start the next milestone until the user confirms the current one
         target (profiling, stress test with many players, ships, machines and hubs); final balance and docs.
 
 ---
+
+## Pivot to a Create-based modpack (decided with the user, 2026-11-22)
+
+The user chose to stop building everything in-house: **cut most of Starwake, make a modpack built on existing mods (Create
+first), and keep Starwake as a slim companion mod** for what no existing mod does. Where an existing mod covers a system, build on
+it instead of keeping ours. M11 (combat) stopped after 11a; 11b-11e are cancelled. Everything up to 0.10.1 + 11a stays in git
+history (branch `claude/inspiring-faraday-1gb3hq`, commit ff343cc) to port from.
+
+- **Platform:** NeoForge **1.21.1** (research 2026-11-22: Create 6.0.10, Create Aeronautics + Sable, Create Big Cannons, Northstar
+  Redux / Create Cosmonautics, Create: Metallurgy, Numismatics and Mekanism live there; on Fabric 26.3 Create only has unofficial
+  forks and there's no Aeronautics, Ad Astra or official Valkyrien Skies). Implied by the user's picks (Create: Metallurgy is
+  NeoForge 1.21.1); the move off Fabric 26.3 means a port, not a copy.
+- **Systems kept, built on existing mods where they exist:**
+  - *Procedural planets + galaxy:* keep (no existing mod generates a seeded galaxy; the space mods are fixed solar systems).
+    Ships, rockets and oxygen come from Aeronautics and a space mod instead of ours.
+  - *Metallurgy:* keep, **on top of Create + Create: Metallurgy** (Foundry Basin/Mixer, KubeJS). Depth: **alloys + ore assays**:
+    ores carry real mineral make-up and by-products through Create's crushing/washing/melting; alloys carry composition, are
+    recognised as real grades or off-spec, and have properties (feeding cannon, ship-part and gear stats). The separate chemical
+    plant (wet chemistry, electrolysis, SX, PGMs, nuclear) is dropped; our own furnaces/mills mostly go.
+  - *Economy + trade hubs:* keep the stations/outposts and simulated markets; currency and player shops from Create Numismatics
+    (+ CoinMarket / Trade Stations).
+  - *Ship combat + flight HUD:* weapons from Create Big Cannons (+ Stellar Cannons) on Aeronautics ships; our target lock, lead
+    pips and cockpit HUD may become an add-on for Aeronautics ships. Our own flight model, shipyard and guns go.
+- Not decided yet: the exact mod list, the space mod (Northstar Redux vs Create Cosmonautics vs Ad Astra), industry beyond Create
+  (Mekanism?), quests/recipes tooling (FTB Quests, KubeJS), and how the companion is split (one mod or several).
 
 ## How planets work (Milestone 2)
 
