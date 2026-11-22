@@ -1,0 +1,13 @@
+name = "Enigmatic Legacy+"
+filename = "enigmaticlegacyplus-1.21.1-1.1.2.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/oIjj1Fan/versions/ELK5gx91/enigmaticlegacyplus-1.21.1-1.1.2.jar"
+hash-format = "sha512"
+hash = "9f334bc1c22756d0d1d5e785223217409dcacf05a8ff3998f6d18281f45487df5f5a405d41204908e49591464f690d085724a7d8b00318ad2811448a2057b0f1"
+
+[update]
+[update.modrinth]
+mod-id = "oIjj1Fan"
+version = "ELK5gx91"

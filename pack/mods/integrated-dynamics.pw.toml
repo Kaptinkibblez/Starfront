@@ -1,0 +1,13 @@
+name = "Integrated Dynamics"
+filename = "integrateddynamics-1.21.1-neoforge-1.39.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/yYzdQHJI/versions/qimtbFIe/integrateddynamics-1.21.1-neoforge-1.39.1.jar"
+hash-format = "sha512"
+hash = "720b1d7593f7c40a0b5c68ccc9b65e43ee062554d2c17da813d2650929ce3a5af69f0efa554151f149e45f20af9860910e0b50311a48bbb9bf5cc9bfb8857738"
+
+[update]
+[update.modrinth]
+mod-id = "yYzdQHJI"
+version = "qimtbFIe"

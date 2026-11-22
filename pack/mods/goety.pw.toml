@@ -1,0 +1,13 @@
+name = "Goety - The Dark Arts"
+filename = "goety-3.2.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/4ZVIxU8x/versions/9DZs33ZX/goety-3.2.3.jar"
+hash-format = "sha512"
+hash = "372e59756123de38cc30a521f776f885a52f5317bbde1b95452a6be9dcc6efca8c9d717e4f534b19e21ffbc18d6d071775f3e30929de0b6f6f5e9cb6b520ae74"
+
+[update]
+[update.modrinth]
+mod-id = "4ZVIxU8x"
+version = "9DZs33ZX"

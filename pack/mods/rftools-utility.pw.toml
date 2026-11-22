@@ -1,0 +1,13 @@
+name = "RFTools Utility"
+filename = "rftoolsutility-1.21-7.0.13.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/7n3HbHSE/versions/aZePiBzc/rftoolsutility-1.21-7.0.13.jar"
+hash-format = "sha512"
+hash = "e2bc6f3ed90f9607f8acfc8f03e201cede2f8312935d8f442e934ed2063aa97ae7539c03c8651803c93f4e93898604241e42d2fd9cce515b20dbaffe0dc54516"
+
+[update]
+[update.modrinth]
+mod-id = "7n3HbHSE"
+version = "aZePiBzc"

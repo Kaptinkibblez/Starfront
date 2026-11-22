@@ -1,0 +1,13 @@
+name = "Mekanism: Weapons"
+filename = "MekanismWeapons-1.21.1-4.2.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/XpoGu4hu/versions/T8icFnPy/MekanismWeapons-1.21.1-4.2.1.jar"
+hash-format = "sha512"
+hash = "4c692d23700d815c3c8d09069a7bb1ffaad8989f2f940c13480b8a6e00c7d6f274e2a1f03d56f787acfe0dde73a24a18c2dbc7149197f09f14b7f7d56d63f984"
+
+[update]
+[update.modrinth]
+mod-id = "XpoGu4hu"
+version = "T8icFnPy"

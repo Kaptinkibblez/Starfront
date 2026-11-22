@@ -1,0 +1,13 @@
+name = "Ars Nouveau"
+filename = "ars_nouveau-1.21.1-5.13.5.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/TKB6INcv/versions/ALmdjtiq/ars_nouveau-1.21.1-5.13.5.jar"
+hash-format = "sha512"
+hash = "be9cc13c9bab1808605ef5bb2b8a32a8a3bba169094e364d8aad0c5fafeb8a83ecabbcb0a0dba2b3806e0d3090172c1cf1d89792d814ac2fe9d07018d4445c49"
+
+[update]
+[update.modrinth]
+mod-id = "TKB6INcv"
+version = "ALmdjtiq"

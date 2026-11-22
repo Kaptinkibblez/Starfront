@@ -1,0 +1,13 @@
+name = "Ars Ocultas"
+filename = "ars_ocultas-1.21.1-2.6.2.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/Tsw8vbks/versions/qLGJRyji/ars_ocultas-1.21.1-2.6.2.jar"
+hash-format = "sha512"
+hash = "4a673096a2d0b9a5a83aca2747a8a08211205ed40875b4c22061f774146d9d4fff9c872e2c1b6b59e5fef2d1bf3b3a08732f22743ade4e0a82ba08636dc701a5"
+
+[update]
+[update.modrinth]
+mod-id = "Tsw8vbks"
+version = "qLGJRyji"
