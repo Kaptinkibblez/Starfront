@@ -58,6 +58,7 @@ jobs:
   client-test:
     # Starts a real NeoForge client with every mod of the pack, joins a singleplayer world and quits.
     runs-on: ubuntu-24.04
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
 
