@@ -85,7 +85,8 @@ jobs:
           headlessmc-command: '--jvm "-Djava.awt.headless=true -Xmx6G"'
 
   release:
-    needs: [build, client-test]
+    # Published from the build alone; client-test runs alongside as a check (its result shows on the run).
+    needs: [build]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     steps:

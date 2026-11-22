@@ -727,7 +727,8 @@ system and a release on GitHub I can put into Prism Launcher". Built without the
 - **Server pack** (`tools/pack_server.py <out>`; `--client` = client mods + overrides only): server/both mods with hash checks,
   overrides, `start.sh`/`start.bat` that install NeoForge and set -Xmx6G. Verified: boots in ~12 s with 48 mods.
 - **CI** (`.github/workflows/pack.yml`): exports `Starwake-<ver>.mrpack`, builds `Starwake-<ver>-server.zip`, boots a real client
-  with every mod via `headlesshq/mc-runtime-test` (joins a world, quits), then publishes release `pack-v<ver>`. Running HeadlessMC
+  with every mod via `headlesshq/mc-runtime-test` (joins a world, quits) as a parallel check, and publishes release `pack-v<ver>`
+  right after the build (user, 2026-11-22: "publish it"; the release no longer waits for the client test). Running HeadlessMC
   in this container was refused by the permission system, so the client test only runs in CI.
 - Harmless log noise: Steam 'n' Rails loot tables for absent wood mods, a Sable physics tag for a Copycats+ block.
 
