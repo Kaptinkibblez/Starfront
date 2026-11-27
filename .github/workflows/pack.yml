@@ -83,12 +83,13 @@ jobs:
           regex: .*neoforge.*
           mc-runtime-test: neoforge
           java: 21
-          headlessmc-command: '--jvm "-Djava.awt.headless=true -Xmx6G"'
+          headlessmc-command: '--jvm "-Djava.awt.headless=true -Xmx8G -DMcRuntimeGameTest=false -DMcRuntimeGameTestCloseAnyScreen=true"'
 
   release:
     # Published from the build alone; client-test runs alongside as a check (its result shows on the run).
     needs: [build]
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    # Dev versions (x.y.z-dev) build and test but never replace a published release.
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && !endsWith(needs.build.outputs.version, '-dev')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
